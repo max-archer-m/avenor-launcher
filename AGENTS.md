@@ -10,7 +10,7 @@ Before proposing or editing project documentation or code:
 2. Follow the Toolkit routing and progressive-consumption guidance.
 3. Read this file and only the project documents relevant to the task.
 
-The approved Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusable methods; this repository remains authoritative for Avenor Launcher product facts, requirements, architecture, decisions, implementation, validation, and releases.
+The Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusable methods; this repository remains authoritative for Avenor Launcher product facts, requirements, architecture, decisions, implementation, validation, and releases.
 
 ## Project identity
 
@@ -42,6 +42,13 @@ Use English for commit messages, pull requests, issues, release notes, and other
 - Mark unknown product or technical facts as `To be decided`; do not turn assumptions into decisions.
 - Keep product decisions separate from technical architecture decisions.
 - Do not prescribe implementation details from product documentation.
+- Do not persist the conversation's current working phase as a project-document status. Continuation state may be kept outside this product repository; durable product contracts and project constraints remain in this repository.
+- Repository-visible authoritative documents describe the current project and product contract; do not infer a separate document lifecycle from their presence.
+- Before integrating implementation, compare the current documentation, code, tests, and validation evidence. Treat any material difference as a contract mismatch and resolve it explicitly.
+- Production implementation requires an applicable current product contract and explicit authorization from the project author.
+- When the Android project is created, use this repository root as its project root. Do not place the Android project inside another nested repository or wrapper project without an explicit author decision.
+- The project currently uses a single development line. Do not introduce multi-branch or multi-contributor workflows unless the project author changes this constraint.
+- By default, perform one task, report its result, and wait for the project author's confirmation before starting the next task. Do not automatically continue across separate mutation steps such as modify, commit, and push unless the project author explicitly authorizes that serial continuation.
 - Update authoritative documentation when its product contract or boundary changes.
 - This repository overrides Toolkit guidance only when an override is explicit, scoped, and recorded here or in an applicable decision record.
 - The project author is the first accountable person for all project matters. Obtain qualified specialist review when a security, privacy, legal, financial, or platform-policy conclusion requires expertise.

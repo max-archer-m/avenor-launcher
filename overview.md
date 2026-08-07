@@ -2,11 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [overview.zh-CN.md](overview.zh-CN.md).
 >
-> Status: Planning draft. This document records confirmed product intent and explicitly marks unresolved scope. It may be revised or replaced as product discovery progresses.
-
-## Status
-
-Planning. Development has not started, and no build or validation baseline has been selected.
+> This document records confirmed product intent and explicitly marks unresolved scope. It may be revised or replaced as product discovery progresses.
 
 ## Purpose
 
@@ -50,16 +46,14 @@ Major versions describe capability layers, not committed release dates or comple
 
 - **V1 — Fixed presentation:** User-controlled, deterministic presentation of applications and selected device information; no behavior-based automatic rearrangement.
 - **V2 — Basic adaptation:** Optional behavior-based presentation or ordering, subject to explicit privacy, user-control, and validation requirements.
-- **V3 — AI assistance:** A possible future direction with no approved scope.
-- **V4 — Agent integration:** A possible future direction with no approved scope.
+- **V3 — AI assistance:** A possible future direction outside the current product scope.
+- **V4 — Agent integration:** A possible future direction outside the current product scope.
 
 This direction does not authorize V2–V4 work. The detailed first vertical slice remains to be defined.
 
 ## Current scope status
 
 The first milestone is intended to validate the minimum daily-use utility loop: Home, Drawer, application launching, and the minimum necessary Settings. Home shows time, date, favorite applications, and a Drawer entry. Drawer initially uses a single-list presentation and includes every launchable entry exposed by Android, including cloned application entries when the platform exposes them. Its core tasks must remain fully local and offline. Widgets, folders, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development are not first-milestone requirements.
-
-The author will validate the milestone through seven consecutive days of daily use with Avenor Launcher selected as the default Launcher. Intentional comparison is allowed, but missing core functionality must not force a switch to another Launcher.
 
 The detailed boundary and evidence are recorded in the [product foundation requirements](docs/requirements/product-foundation.md). The following remain unresolved:
 
@@ -68,17 +62,17 @@ The detailed boundary and evidence are recorded in the [product foundation requi
 - Analytics, crash reporting, payment, or other third-party services beyond the first milestone
 - Commercial model, which is intentionally deferred
 
-In particular, use of `QUERY_ALL_PACKAGES` or any other sensitive capability is not approved by this overview. The product requires discovery of launchable entries, not unrestricted access to installed-package data. The implementation must use the smallest Android visibility scope that satisfies the approved user journey.
+In particular, this overview does not place `QUERY_ALL_PACKAGES` or any other sensitive capability in the product scope. The product requires discovery of launchable entries, not unrestricted access to installed-package data. The implementation must use the smallest Android visibility scope that satisfies the current user journey.
 
 ## Additive requirements
 
 An additive requirement is a capability that may be delivered when useful without defining or blocking the transition between V1, V2, and later capability layers. Landscape support, foldable and tablet adaptation, themes and colors, weather information, widgets, and folders are current examples.
 
-Additive requirements are not automatically approved scope. Each must still pass the Feature decision test, receive an explicit scope decision, and satisfy applicable privacy, security, validation, and maintenance constraints.
+Additive requirements are not automatically part of the current scope. Each must still pass the Feature decision test, be explicitly added to the current product contract, and satisfy applicable privacy, security, validation, and maintenance constraints.
 
 ## Feature decision test
 
-Before a feature enters an approved scope, answer:
+Before a feature enters the current scope, answer:
 
 1. Does it make finding the needed application or information faster, more accurate, or easier?
 2. Does the default experience remain calm and understandable?
@@ -90,9 +84,9 @@ Features that do not pass this test should be rejected, deferred, or redesigned.
 
 ## Engineering intent
 
-Engineering should prefer mature, maintainable choices, minimal dependencies, clear boundaries, safe defaults, and evidence-based validation. These are constraints on future technical evaluation, not advance approval of a specific architecture, framework, API, or abstraction.
+Engineering should prefer mature, maintainable choices, minimal dependencies, clear boundaries, safe defaults, and evidence-based validation. These are constraints on future technical evaluation, not a selection of a specific architecture, framework, API, or abstraction.
 
-AI is expected to perform a substantial share of project execution under human review. The project author remains accountable for product direction, technical decisions, quality, and release approval.
+AI is expected to perform a substantial share of project execution under human review. The project author remains accountable for product direction, technical decisions, quality, and release decisions.
 
 ## Governance and documentation
 

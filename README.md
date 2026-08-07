@@ -4,10 +4,6 @@
 
 A calm, intentional Android home-screen launcher designed to help users reach the applications and device information they need with minimal distraction.
 
-## Status
-
-Planning. The V1 product and platform baseline is defined for the author's daily use; the detailed vertical slice, architecture, and build and validation baseline are still being defined.
-
 ## Product direction
 
 Avenor Launcher is intended to act as an Android device's default home-screen application. It starts with the author's everyday needs and may later serve a broader global audience through English and Simplified Chinese experiences.

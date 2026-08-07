@@ -2,8 +2,6 @@
 
 > Public semantic source: English. Chinese authoring counterpart: [product-foundation.zh-CN.md](product-foundation.zh-CN.md). Keep both versions materially aligned.
 >
-> Status: Approved product-foundation baseline. The problem, primary context, platform boundary, V1 core scope, minimum Settings scope, daily-trial method, and quality guardrails are confirmed. Detailed interactions and technical implementation remain for later definition.
-
 ## Problem
 
 The author uses an Android phone as their primary device and commonly uses Samsung and Google phones. The Launcher is used whenever the author enters the home screen or needs to find an application or obtain information from it. There is no reliable usage-duration or frequency measurement yet.
@@ -73,7 +71,7 @@ The author ultimately wants personalization that fits their own needs and capabi
 - V1 device scope: ordinary Android phones in portrait orientation only.
 - V1 exclusions: landscape, foldable, tablet, desktop-mode, and external-display adaptation.
 - V1 delivery: maintain the GitHub project for the author's daily use, with no application-store submission, GitHub Release APK, website APK, or other public distribution.
-- Store target-API, review, and data-disclosure requirements are not initial V1 gates; review them again if public distribution is approved.
+- Store target-API, review, and data-disclosure requirements are not initial V1 gates; review them again if public distribution becomes part of the current scope.
 
 Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](https://developer.android.com/about/versions/17/setup-sdk). Starting August 31, 2026, Google Play requires new applications and updates to target at least Android 16 (API 36), according to the [Google Play target API requirement](https://developer.android.com/google/play/requirements/target-sdk); this constrains `targetSdk`, not the project's `minSdk`. Choosing Android 16 as the minimum is a product decision based on the author's physical devices and reduced early compatibility cost. Because this project does not currently publish to Google Play, its target-API requirement is a future compatibility reference rather than a current release gate. The actual `compileSdk`, `targetSdk`, and `minSdk` must still be implemented and verified in the build configuration during project initialization. Reviewed: 2026-08-07.
 
@@ -105,7 +103,7 @@ Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](h
 
 An additive requirement may be delivered when useful without defining or blocking transitions between V1, V2, and later capability layers. Current candidates include landscape support, foldable and tablet adaptation, themes and colors, weather information, widgets, and folders.
 
-An additive requirement is not automatically approved scope and does not bypass scope, privacy, security, validation, or maintenance review.
+An additive requirement does not become current scope merely because it can be added independently, and it does not bypass scope, privacy, security, validation, or maintenance review.
 
 ## Functional requirements
 
@@ -125,9 +123,9 @@ An additive requirement is not automatically approved scope and does not bypass 
 
 - **Local first:** First-milestone product state and core data remain on the device.
 - **Offline capable:** Home, Drawer, application launching, and core Settings remain available without a network connection.
-- **Least privilege:** Every permission maps to an approved core capability and records its purpose, trigger, denial behavior, and distribution-policy impact.
-- **Minimum visibility:** V1 requires only discovery and launching of application entries exposed to a Launcher by Android; it does not approve unrestricted access to all installed-package data. Determine concrete APIs, manifest declarations, and permissions through later technical and privacy review.
-- **Reliability:** The first milestone must support daily trials on the author's actual primary devices; measurable stability thresholds remain unresolved.
+- **Least privilege:** Every permission maps to a current core capability and records its purpose, trigger, denial behavior, and distribution-policy impact.
+- **Minimum visibility:** V1 requires only discovery and launching of application entries exposed to a Launcher by Android; unrestricted access to all installed-package data is outside the current scope. Determine concrete APIs, manifest declarations, and permissions through later technical and privacy review.
+- **Reliability:** The first milestone must support the author's ongoing daily use on their actual primary devices; measurable stability thresholds remain unresolved.
 - **Compatibility:** Support portrait use on ordinary phones from Android 16/API 36 through Android 17/API 37 and validate on at least the two recorded physical devices.
 
 ## Acceptance criteria
@@ -142,17 +140,15 @@ An additive requirement is not automatically approved scope and does not bypass 
 - Given the user opens Settings, when the user selects the default-home settings entry, then the system opens the corresponding Android settings page.
 - Given the device has no network connection, when the user accesses Home, Drawer, application launching, or core Settings, then the core task remains completable.
 - Given a non-core network capability is unavailable or unauthorized, when the user performs a core task, then that capability does not block Home, Drawer, application launching, or core Settings.
-- Given a system permission is proposed for the first milestone, when requirements and distribution review occur, then the permission is traceable to a necessary core capability and its denial behavior.
+- Given a system permission is considered for the first milestone, when requirements and distribution review occur, then the permission is traceable to a necessary core capability and its denial behavior.
 
 ## Success assessment and guardrails
 
 ### Confirmed direction
 
-- Core first-milestone success means that Home, Drawer, and Settings form a minimum utility loop suitable for the author's daily trial.
+- Core first-milestone success means that Home, Drawer, and Settings form a minimum utility loop suitable for the author's ongoing daily use.
 - Development completion alone is not sufficient evidence of success; results must be observed on the author's real primary devices.
 - Success is judged by the author's own daily experience; uncollected external-user opinions are not acceptance evidence.
-- The author conducts a seven-consecutive-day daily trial and keeps Avenor Launcher selected as the default Launcher throughout the trial.
-- The author may intentionally open another Launcher for comparison, but missing Avenor Launcher core functionality must not force a switch.
 - Core paths must not crash or become unresponsive because of Avenor Launcher.
 - The Drawer must not omit, duplicate, or incorrectly display applications that should be visible and launchable under Android platform rules.
 - Selecting an application must launch the intended application.
@@ -169,7 +165,7 @@ The first milestone lets users maintain Home favorites and edit configuration th
 ## Local data boundary
 
 - The only user-content data is the identifier of each launchable application entry saved as a Home favorite. Identifiers must distinguish cloned entries exposed by the platform and must not store or deduplicate solely by package name.
-- Language selection and other first-milestone-approved interface settings are local configuration, not behavioral analytics data.
+- Language selection and other interface settings in the first-milestone contract are local configuration, not behavioral analytics data.
 - Time and date come directly from the device system and are not retained as historical data.
 - V1 does not collect or store notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.
 - V1 has no account, cloud synchronization, server, or cross-device backup.
@@ -184,4 +180,4 @@ The first milestone lets users maintain Home favorites and edit configuration th
 
 ## Recommended next step
 
-Next, decompose the first milestone into a minimum observable vertical slice and add user journeys and interaction-level acceptance boundaries for Home, Drawer, application launching, and Settings. Evaluate architecture and permissions separately after that scope is approved.
+Next, decompose the first milestone into a minimum observable vertical slice and add user journeys and interaction-level acceptance boundaries for Home, Drawer, application launching, and Settings. Evaluate architecture and permissions separately after that scope is defined in the current product contract.
