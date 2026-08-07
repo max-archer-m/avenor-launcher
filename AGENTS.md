@@ -16,10 +16,7 @@ The approved Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusab
 
 - Product name: Avenor Launcher
 - Repository: `avenor-launcher`
-- Owner: Max
-- Product decision authority: Max
-- Technical decision authority: Max
-- Final release approval: Max
+- Project ownership and decision authority: The project author
 - Internal codename: To be decided
 
 ## Project entry documents
@@ -29,6 +26,7 @@ The approved Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusab
 - Product overview semantic source: [overview.md](overview.md)
 - Chinese product overview: [overview.zh-CN.md](overview.zh-CN.md)
 - Pre-development checklist and open questions: [todo.md](todo.md)
+- Documentation map and governance: [docs/documentation.md](docs/documentation.md)
 - License: [LICENSE](LICENSE)
 
 Architecture, requirements, development, validation, security, privacy, and release documents have not yet been established. Do not infer their contents or treat planned paths as current evidence.
@@ -47,6 +45,7 @@ Use English for commit messages, pull requests, issues, release notes, and other
 - Do not prescribe implementation details from product documentation.
 - Update authoritative documentation when its product contract or boundary changes.
 - This repository overrides Toolkit guidance only when an override is explicit, scoped, and recorded here or in an applicable decision record.
+- The project author is the first accountable person for all project matters. Obtain qualified specialist review when a security, privacy, legal, financial, or platform-policy conclusion requires expertise.
 
 ## Validation baseline
 

@@ -16,10 +16,7 @@
 
 - 产品名称：Avenor Launcher
 - 仓库：`avenor-launcher`
-- 项目所有者：Max
-- 产品决策权：Max
-- 技术决策权：Max
-- 最终发布批准权：Max
+- 项目所有权与决策权：项目作者
 - 内部代号：待确认
 
 ## 项目入口文档
@@ -29,6 +26,7 @@
 - 产品概览英文语义源：[overview.md](overview.md)
 - 中文产品概览：[overview.zh-CN.md](overview.zh-CN.md)
 - 开发前检查清单与开放问题：[todo.md](todo.md)
+- 文档地图与治理规则：[docs/documentation.zh-CN.md](docs/documentation.zh-CN.md)
 - 许可证：[LICENSE](LICENSE)
 
 架构、需求、开发、验证、安全、隐私和发布文档尚未建立。不得推断其内容，也不得将规划中的路径视为当前证据。
@@ -47,6 +45,7 @@ Commit message、Pull Request、Issue、发布说明及其他公开仓库输出�
 - 不在产品文档中规定实现细节。
 - 当产品契约或边界发生变化时，更新对应的权威文档。
 - 只有在覆盖规则明确、范围清晰，并记录在本文或适用决策记录中时，本仓库才覆盖 Toolkit 指导。
+- 项目作者是项目内所有事项的第一责任人。安全、隐私、法务、财税或平台政策结论需要专业能力时，应取得具备相应能力的人员复核。
 
 ## 验证基线
 

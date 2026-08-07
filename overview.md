@@ -84,14 +84,15 @@ Features that do not pass this test should be rejected, deferred, or redesigned.
 
 Engineering should prefer mature, maintainable choices, minimal dependencies, clear boundaries, safe defaults, and evidence-based validation. These are constraints on future technical evaluation, not advance approval of a specific architecture, framework, API, or abstraction.
 
-AI is expected to perform a substantial share of project execution under human review. Max remains responsible for product direction, technical decisions, quality review, and release approval.
+AI is expected to perform a substantial share of project execution under human review. The project author remains accountable for product direction, technical decisions, quality, and release approval.
 
 ## Governance and documentation
 
-- Owner and product, technical, and final release decision authority: Max
+- Project ownership and decision authority: the project author
 - Internal codename: To be decided
 - Pre-development checklist: [todo.md](todo.md)
 - Agent and Toolkit routing: [AGENTS.md](AGENTS.md)
+- Documentation map and governance: [docs/documentation.md](docs/documentation.md)
 - License: [LICENSE](LICENSE)
 
 Architecture, requirements, development, validation, security, privacy, and release documentation will be established as their inputs are confirmed. Planned document locations must not be treated as completed evidence.

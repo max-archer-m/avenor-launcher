@@ -21,11 +21,12 @@ See the [project overview](overview.md) for confirmed intent, boundaries, and un
 - [Project overview](overview.md)
 - [Simplified Chinese project overview](overview.zh-CN.md)
 - [Pre-development checklist](todo.md)
+- [Documentation map and governance](docs/documentation.md)
 - [Agent instructions](AGENTS.md)
 - [Simplified Chinese agent instructions](AGENTS.zh-CN.md)
 - [License](LICENSE)
 
-Architecture, requirements, development, validation, security, privacy, and release documentation have not yet been established.
+Architecture, requirements, development, validation, security, privacy, and release documentation have not yet been established. Their planned locations and creation conditions are recorded in the [documentation map](docs/documentation.md).
 
 ## License
 
