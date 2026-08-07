@@ -6,7 +6,7 @@ A calm, intentional Android home-screen launcher designed to help users reach th
 
 ## Status
 
-Planning. Product scope, platform support, distribution requirements, architecture, and the build and validation baseline are still being defined.
+Planning. The V1 product and platform baseline is defined for the author's daily use; the detailed vertical slice, architecture, and build and validation baseline are still being defined.
 
 ## Product direction
 
@@ -20,7 +20,6 @@ See the [project overview](overview.md) for confirmed intent, boundaries, and un
 
 - [Project overview](overview.md)
 - [Simplified Chinese project overview](overview.zh-CN.md)
-- [Pre-development checklist](todo.md)
 - [Documentation map and governance](docs/documentation.md)
 - [Product foundation requirements](docs/requirements/product-foundation.md)
 - [Agent instructions](AGENTS.md)

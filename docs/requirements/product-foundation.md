@@ -2,7 +2,7 @@
 
 > Public semantic source: English. Chinese authoring counterpart: [product-foundation.zh-CN.md](product-foundation.zh-CN.md). Keep both versions materially aligned.
 >
-> Status: Approved product-foundation baseline. The problem, primary context, V1 core boundary, minimum Settings scope, daily-trial method, and quality guardrails are confirmed. Platform details, interactions, and some user-control requirements remain for later definition.
+> Status: Approved product-foundation baseline. The problem, primary context, platform boundary, V1 core scope, minimum Settings scope, daily-trial method, and quality guardrails are confirmed. Detailed interactions and technical implementation remain for later definition.
 
 ## Problem
 
@@ -21,7 +21,7 @@ The author therefore wants an Android Launcher with deliberate design constraint
 ### Known facts and author experience
 
 - The author has long-term Android experience and uses Android as their primary phone platform.
-- The author has used Samsung and Google stock launchers, Niagara Launcher, and Microsoft Launcher as alternatives.
+- The author has used stock home-screen applications and multiple third-party Launchers as alternatives.
 - Current problem evidence consists of the author's sustained usage experience and understanding of their own needs.
 - No usage counts, task-duration data, interviews, external user feedback, or market research are currently available.
 
@@ -63,12 +63,27 @@ Provide the author with an Android Launcher suitable for long-term daily use tha
 
 The first milestone validates utility, not visual refinement, extensive customization, network information, or mass-market suitability.
 
+The author ultimately wants personalization that fits their own needs and capabilities that some existing alternatives either lack or place behind payment. This is an author expectation and hypothesis, not completed market evidence or a V1 acceptance criterion.
+
+## Platform and delivery boundary
+
+- Minimum version: Android 16 (API 36).
+- Target version: Android 17 (API 37).
+- Current physical validation devices: Samsung Galaxy S23 Ultra on Android 16 and Google Pixel 8 on Android 17.
+- V1 device scope: ordinary Android phones in portrait orientation only.
+- V1 exclusions: landscape, foldable, tablet, desktop-mode, and external-display adaptation.
+- V1 delivery: maintain the GitHub project for the author's daily use, with no application-store submission, GitHub Release APK, website APK, or other public distribution.
+- Store target-API, review, and data-disclosure requirements are not initial V1 gates; review them again if public distribution is approved.
+
+Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](https://developer.android.com/about/versions/17/setup-sdk). Starting August 31, 2026, Google Play requires new applications and updates to target at least Android 16 (API 36), according to the [Google Play target API requirement](https://developer.android.com/google/play/requirements/target-sdk); this constrains `targetSdk`, not the project's `minSdk`. Choosing Android 16 as the minimum is a product decision based on the author's physical devices and reduced early compatibility cost. Because this project does not currently publish to Google Play, its target-API requirement is a future compatibility reference rather than a current release gate. The actual `compileSdk`, `targetSdk`, and `minSdk` must still be implemented and verified in the build configuration during project initialization. Reviewed: 2026-08-07.
+
 ## First milestone scope
 
 ### In scope
 
-- Home: a basic entry point capable of acting as the Android default home screen.
-- Drawer: discovery and launching of applications installed on the device.
+- Home: the Android home entry displaying system time, date, favorite applications, and a Drawer entry.
+- Favorites: the author can maintain the application entries shown on Home; define the exact editing interaction in the vertical slice.
+- Drawer: initially a single-list presentation of every launchable entry exposed by Android, including cloned application entries when the platform exposes them.
 - Settings: language selection and an entry to Android system settings for the default home application.
 - Complete offline availability for core tasks.
 - Local storage of core product data without a self-hosted server, account, or cloud synchronization.
@@ -77,7 +92,7 @@ The first milestone validates utility, not visual refinement, extensive customiz
 ### Out of scope
 
 - Visual refinement whose primary goal is aesthetic quality.
-- Extensive or unrestricted layout and theme customization.
+- Widgets, folders, themes, and extensive or unrestricted layout and visual customization.
 - One-action clearing or restoration of all local configuration.
 - Network-backed information such as weather.
 - Accounts, cloud synchronization, or a self-hosted server.
@@ -86,11 +101,20 @@ The first milestone validates utility, not visual refinement, extensive customiz
 
 “Out of scope” means excluded from the first milestone, not permanently rejected. Advertising, recommendation feeds, and engagement-maximizing design remain constrained by the long-term boundaries in the project overview.
 
+## Additive requirements
+
+An additive requirement may be delivered when useful without defining or blocking transitions between V1, V2, and later capability layers. Current candidates include landscape support, foldable and tablet adaptation, themes and colors, weather information, widgets, and folders.
+
+An additive requirement is not automatically approved scope and does not bypass scope, privacy, security, validation, or maintenance review.
+
 ## Functional requirements
 
 - The user can launch Avenor Launcher as the Android home-screen entry point.
+- Home displays time and date supplied by the device system.
+- Home displays locally saved favorite application entries and allows the selected favorite to be launched.
 - The user can access the Drawer from Home.
-- Whether or not Avenor Launcher is selected as the default home application, the Drawer presents every installed application that should be visible and launchable under Android platform rules and allows the selected application to be launched.
+- Whether or not Avenor Launcher is selected as the default home application, the Drawer presents a single list of every application entry that should be visible and launchable under Android platform rules and allows the selected entry to be launched.
+- When Android exposes a cloned application entry to the Launcher, the Drawer presents it as an independent launchable entry and does not deduplicate solely by package name.
 - The user can select follow-system, English, or Simplified Chinese language behavior in Settings.
 - The user can open Android system settings for the default home application from Settings.
 - The first milestone does not provide one-action clearing or restoration of all local configuration; users edit configuration through individual settings.
@@ -102,15 +126,17 @@ The first milestone validates utility, not visual refinement, extensive customiz
 - **Local first:** First-milestone product state and core data remain on the device.
 - **Offline capable:** Home, Drawer, application launching, and core Settings remain available without a network connection.
 - **Least privilege:** Every permission maps to an approved core capability and records its purpose, trigger, denial behavior, and distribution-policy impact.
-- **Compliance readiness:** Permission and application-visibility design anticipates possible application-store review without presenting unverified store policy as product fact.
+- **Minimum visibility:** V1 requires only discovery and launching of application entries exposed to a Launcher by Android; it does not approve unrestricted access to all installed-package data. Determine concrete APIs, manifest declarations, and permissions through later technical and privacy review.
 - **Reliability:** The first milestone must support daily trials on the author's actual primary devices; measurable stability thresholds remain unresolved.
-- **Compatibility:** Samsung and Google devices are the author's current real-world environments; minimum and target Android versions and the device matrix remain unresolved.
+- **Compatibility:** Support portrait use on ordinary phones from Android 16/API 36 through Android 17/API 37 and validate on at least the two recorded physical devices.
 
 ## Acceptance criteria
 
 - Given Avenor Launcher is selected as the home application on a supported Android device, when the user performs the system action to return home, then the system displays Avenor Launcher Home.
-- Given the user is on Home, when the user performs the defined Drawer-entry action, then the Drawer displays installed applications that can be launched.
-- Given Avenor Launcher is not selected as the default home application, when the user launches Avenor Launcher directly and enters the Drawer, then the Drawer still displays every installed application that should be visible and launchable under Android platform rules.
+- Given the user enters Home, when core content finishes loading, then Home displays system time, date, saved favorite application entries, and a Drawer entry.
+- Given the user is on Home, when the user performs the defined Drawer-entry action, then the Drawer presents a single list of application entries exposed by Android.
+- Given Avenor Launcher is not selected as the default home application, when the user launches Avenor Launcher directly and enters the Drawer, then the Drawer still displays every application entry that should be visible and launchable under Android platform rules.
+- Given Android exposes cloned entries for an application, when the Drawer presents the application list, then every cloned entry appears independently and can be launched.
 - Given a launchable application appears in the Drawer, when the user selects it, then the system launches that application.
 - Given the user opens Settings, when the user selects follow-system, English, or Simplified Chinese, then the Launcher presents its interface according to that language behavior.
 - Given the user opens Settings, when the user selects the default-home settings entry, then the system opens the corresponding Android settings page.
@@ -138,20 +164,23 @@ Minimum acceptable performance, power, memory, and startup-response levels will 
 
 ## User control
 
-The first milestone lets users edit configuration through individual settings but does not provide one-action clearing or restoration of all configuration. Define any other reversal, export, deletion, or restoration capabilities alongside the local data inventory rather than inventing them at this stage.
+The first milestone lets users maintain Home favorites and edit configuration through individual settings, but it does not provide one-action clearing, export, cloud deletion, or restoration of all configuration. Users can clear application data through Android system settings. Favorite changes and language selection must result from explicit user actions and must not adapt automatically from behavior.
+
+## Local data boundary
+
+- The only user-content data is the identifier of each launchable application entry saved as a Home favorite. Identifiers must distinguish cloned entries exposed by the platform and must not store or deduplicate solely by package name.
+- Language selection and other first-milestone-approved interface settings are local configuration, not behavioral analytics data.
+- Time and date come directly from the device system and are not retained as historical data.
+- V1 does not collect or store notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.
+- V1 has no account, cloud synchronization, server, or cross-device backup.
 
 ## Dependencies and risks
 
-- The Android home role, application-enumeration approach, and relevant permission or application-visibility policies still require technical and distribution review.
+- The Android home role, application-enumeration approach, cloned-entry visibility, and related manifest declarations or permissions still require technical and privacy review.
 - Settings includes language selection and an entry to system default-home settings; define its detailed interface and state behavior in the vertical slice.
 - Current evidence represents only the author and cannot support a mass-market demand conclusion.
 - “Attractive, comfortable, and minimal” has not been converted into observable standards and is not a first-milestone acceptance target.
 - Using the project to learn agent systems may encourage process or technical complexity beyond product needs; control this through explicit scope changes.
-
-## Open questions
-
-- What are the minimum and target Android versions and the Samsung and Google device-validation scope?
-- How should concrete user-control requirements be defined after Settings and the local data inventory are known?
 
 ## Recommended next step
 

@@ -39,7 +39,8 @@ Provide a restrained Android home screen that helps users find and open what the
 - Product form: an Android launcher intended to act as the device's default home-screen application.
 - User-facing names: “Avenor Launcher” in English and “Avenor 启动器” in Simplified Chinese.
 - Initial languages: English and Simplified Chinese.
-- Intended availability: global, subject to regional, legal, platform, and store-policy review.
+- Initial use: maintained on GitHub for the author's daily use, with no V1 distribution or store-release requirement.
+- Platform baseline: ordinary Android phones in portrait orientation, with Android 16 (API 36) as the minimum and Android 17 (API 37) as the target.
 - License: Apache License 2.0.
 - Advertising and recommendation feeds are out of scope.
 
@@ -56,20 +57,24 @@ This direction does not authorize V2–V4 work. The detailed first vertical slic
 
 ## Current scope status
 
-The first milestone is intended to validate the minimum daily-use utility loop: Home, Drawer, application launching, and the minimum necessary Settings. Its core tasks must remain fully local and offline. Visual refinement, extensive customization, network-backed information, accounts, cloud synchronization, and server development are not first-milestone requirements.
+The first milestone is intended to validate the minimum daily-use utility loop: Home, Drawer, application launching, and the minimum necessary Settings. Home shows time, date, favorite applications, and a Drawer entry. Drawer initially uses a single-list presentation and includes every launchable entry exposed by Android, including cloned application entries when the platform exposes them. Its core tasks must remain fully local and offline. Widgets, folders, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development are not first-milestone requirements.
 
 The author will validate the milestone through seven consecutive days of daily use with Avenor Launcher selected as the default Launcher. Intentional comparison is allowed, but missing core functionality must not force a switch to another Launcher.
 
 The detailed boundary and evidence are recorded in the [product foundation requirements](docs/requirements/product-foundation.md). The following remain unresolved:
 
 - The first observable vertical slice and its acceptance criteria
-- Minimum and target Android versions and supported device form factors
 - Required Android roles, permissions, background capabilities, or package visibility
-- Exact distribution channels; Google Play and selected application stores in China are candidates
 - Analytics, crash reporting, payment, or other third-party services beyond the first milestone
 - Commercial model, which is intentionally deferred
 
-In particular, use of `QUERY_ALL_PACKAGES` or any other sensitive capability is not approved by this overview. Permissions must be justified against the selected user journey and applicable distribution policy before implementation.
+In particular, use of `QUERY_ALL_PACKAGES` or any other sensitive capability is not approved by this overview. The product requires discovery of launchable entries, not unrestricted access to installed-package data. The implementation must use the smallest Android visibility scope that satisfies the approved user journey.
+
+## Additive requirements
+
+An additive requirement is a capability that may be delivered when useful without defining or blocking the transition between V1, V2, and later capability layers. Landscape support, foldable and tablet adaptation, themes and colors, weather information, widgets, and folders are current examples.
+
+Additive requirements are not automatically approved scope. Each must still pass the Feature decision test, receive an explicit scope decision, and satisfy applicable privacy, security, validation, and maintenance constraints.
 
 ## Feature decision test
 
@@ -92,8 +97,6 @@ AI is expected to perform a substantial share of project execution under human r
 ## Governance and documentation
 
 - Project ownership and decision authority: the project author
-- Internal codename: To be decided
-- Pre-development checklist: [todo.md](todo.md)
 - Agent and Toolkit routing: [AGENTS.md](AGENTS.md)
 - Documentation map and governance: [docs/documentation.md](docs/documentation.md)
 - License: [LICENSE](LICENSE)

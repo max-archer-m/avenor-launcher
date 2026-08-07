@@ -17,7 +17,6 @@
 - 产品名称：Avenor Launcher
 - 仓库：`avenor-launcher`
 - 项目所有权与决策权：项目作者
-- 内部代号：待确认
 
 ## 项目入口文档
 
@@ -25,7 +24,6 @@
 - 中文公共项目入口：[README.zh-CN.md](README.zh-CN.md)
 - 产品概览英文语义源：[overview.md](overview.md)
 - 中文产品概览：[overview.zh-CN.md](overview.zh-CN.md)
-- 开发前检查清单与开放问题：[todo.md](todo.md)
 - 文档地图与治理规则：[docs/documentation.zh-CN.md](docs/documentation.zh-CN.md)
 - 产品基础需求：[docs/requirements/product-foundation.zh-CN.md](docs/requirements/product-foundation.zh-CN.md)
 - 许可证：[LICENSE](LICENSE)

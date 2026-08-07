@@ -6,7 +6,7 @@ Avenor Launcher 是一个克制且有明确意图的 Android 主屏幕启动器�
 
 ## 当前状态
 
-项目处于规划阶段。产品范围、平台支持、发行要求、架构以及构建与验证基线仍在定义中。
+项目处于规划阶段。面向作者日用的 V1 产品与平台基线已经明确；详细垂直切片、架构以及构建与验证基线仍在定义中。
 
 ## 产品方向
 
@@ -20,7 +20,6 @@ Avenor Launcher 的目标是作为 Android 设备的默认主屏幕应用。产�
 
 - [项目概览](overview.zh-CN.md)
 - [英文项目概览](overview.md)
-- [开发前检查清单](todo.md)
 - [文档地图与治理规则](docs/documentation.zh-CN.md)
 - [产品基础需求](docs/requirements/product-foundation.zh-CN.md)
 - [Agent 指令](AGENTS.zh-CN.md)

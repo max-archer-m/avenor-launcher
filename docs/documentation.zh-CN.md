@@ -15,7 +15,6 @@
 | 项目入口 | [`README.md`](../README.md) | [`README.zh-CN.md`](../README.zh-CN.md) | 已建立；提供项目摘要和深层文档链接 |
 | 产品概览 | [`overview.md`](../overview.md) | [`overview.zh-CN.md`](../overview.zh-CN.md) | 已建立；记录产品意图、原则、边界和待确认范围 |
 | Agent 路由 | [`AGENTS.md`](../AGENTS.md) | [`AGENTS.zh-CN.md`](../AGENTS.zh-CN.md) | 已建立；记录 Toolkit 入口和项目级工作规则 |
-| 开发前待办 | — | [`todo.md`](../todo.md) | 临时中文执行清单；完成开发前准备后删除，不作为长期历史记录 |
 | 文档治理 | [`docs/documentation.md`](documentation.md) | [`docs/documentation.zh-CN.md`](documentation.zh-CN.md) | 已建立；本文档的英文与中文版本 |
 | 产品基础需求 | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | 已批准基线；记录产品问题、作者场景、首个里程碑边界、验收意图和开放产品问题 |
 | 许可证 | [`LICENSE`](../LICENSE) | — | 已建立；Apache License 2.0 原文 |
@@ -37,7 +36,7 @@
 
 ## 语言与翻译
 
-- `todo.md` 是中文临时工作文档，不要求英文版本。
+- 临时工作笔记和检查清单不要求英文版本，也不得成为已提交权威文档的依赖。
 - README、产品概览和 Agent 指令当前维护中英文版本。
 - 其他文档按跨语言阅读和外部受众的实际需要决定是否翻译，不为形式对称创建对应文档。
 - 本次项目初始化先以中文整理作者意图，再提供英文公共版本；发布后的英文公共文档是对外语义源。
@@ -57,5 +56,6 @@
 - 普通指南和当前状态文档随相关变更在同一提交中更新，不保留失效内容作为正文历史。
 - ADR 使用 `0001-<decision>.md` 形式的四位递增编号，追加记录，不重编号、不复用编号、不改写历史决定；被替代时创建新 ADR 并互相链接。
 - Requirements Brief 应保持边界和验收标准可追踪。范围发生实质变化时，应显式记录变更，不静默覆盖已经批准的承诺。
+- 产品范围变更须由项目作者批准，并在适用时完成技术影响评估；未经批准的需求不得被视为当前承诺。
 - 安全、隐私和发布记录应保留适用范围、版本或日期，以及必要的专业复核证据。
 - 仅当旧文档仍具有决策、审计或迁移价值时归档；否则删除。归档材料必须说明替代文档，且不得作为当前规则加载。

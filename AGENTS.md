@@ -17,7 +17,6 @@ The approved Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusab
 - Product name: Avenor Launcher
 - Repository: `avenor-launcher`
 - Project ownership and decision authority: The project author
-- Internal codename: To be decided
 
 ## Project entry documents
 
@@ -25,7 +24,6 @@ The approved Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusab
 - Chinese public project entry: [README.zh-CN.md](README.zh-CN.md)
 - Product overview semantic source: [overview.md](overview.md)
 - Chinese product overview: [overview.zh-CN.md](overview.zh-CN.md)
-- Pre-development checklist and open questions: [todo.md](todo.md)
 - Documentation map and governance: [docs/documentation.md](docs/documentation.md)
 - Product foundation requirements: [docs/requirements/product-foundation.md](docs/requirements/product-foundation.md)
 - License: [LICENSE](LICENSE)

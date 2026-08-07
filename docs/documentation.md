@@ -15,7 +15,6 @@ The project author is the first accountable person for all project matters. Secu
 | Project entry | [`README.md`](../README.md) | [`README.zh-CN.md`](../README.zh-CN.md) | Established; provides the project summary and links to deeper documentation |
 | Product overview | [`overview.md`](../overview.md) | [`overview.zh-CN.md`](../overview.zh-CN.md) | Established; records product intent, principles, boundaries, and unresolved scope |
 | Agent routing | [`AGENTS.md`](../AGENTS.md) | [`AGENTS.zh-CN.md`](../AGENTS.zh-CN.md) | Established; records the Toolkit entry point and project-specific working rules |
-| Pre-development checklist | — | [`todo.md`](../todo.md) | Temporary Chinese execution checklist; delete after pre-development preparation and do not use as a permanent history |
 | Documentation governance | [`docs/documentation.md`](documentation.md) | [`docs/documentation.zh-CN.md`](documentation.zh-CN.md) | Established; English and Chinese versions of this document |
 | Product foundation requirements | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | Approved baseline; records the product problem, author context, first-milestone boundary, acceptance intent, and open product questions |
 | License | [`LICENSE`](../LICENSE) | — | Established; Apache License 2.0 text |
@@ -37,7 +36,7 @@ Create the following documents only when real inputs exist:
 
 ## Language and translation
 
-- `todo.md` is a temporary Chinese working document and does not require an English version.
+- Temporary working notes and checklists do not require English versions and must not become dependencies of committed authoritative documents.
 - README, the product overview, and agent instructions currently have English and Chinese versions.
 - Translate other documents only when cross-language reading or the external audience creates a real need; do not create counterparts for structural symmetry.
 - During this project initialization, organize the author's intent in Chinese first and then provide the public English version. After publication, the public English document is the external semantic source.
@@ -57,5 +56,6 @@ Create the following documents only when real inputs exist:
 - Update ordinary guides and current-state documents in the same change as the affected boundary; do not retain obsolete content as narrative history.
 - Use append-only, zero-padded ADR names in the form `0001-<decision>.md`. Never renumber, reuse identifiers, or rewrite historical decisions. Create and cross-link a new ADR when replacing one.
 - Keep Requirements Brief boundaries and acceptance criteria traceable. Record material scope changes explicitly rather than silently overwriting approved commitments.
+- Product scope changes require approval from the project author and, when applicable, a technical impact assessment. Unapproved requests are not current commitments.
 - Security, privacy, and release records must preserve their applicable scope, version or date, and required specialist-review evidence.
 - Archive an obsolete document only when it retains decision, audit, or migration value; otherwise delete it. Archived material must identify its replacement and must not be loaded as current guidance.
