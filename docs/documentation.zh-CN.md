@@ -17,6 +17,7 @@
 | Agent 路由 | [`AGENTS.md`](../AGENTS.md) | [`AGENTS.zh-CN.md`](../AGENTS.zh-CN.md) | 已建立；记录 Toolkit 入口和项目级工作规则 |
 | 开发前待办 | — | [`todo.md`](../todo.md) | 临时中文执行清单；完成开发前准备后删除，不作为长期历史记录 |
 | 文档治理 | [`docs/documentation.md`](documentation.md) | [`docs/documentation.zh-CN.md`](documentation.zh-CN.md) | 已建立；本文档的英文与中文版本 |
+| 产品基础需求 | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | 已批准基线；记录产品问题、作者场景、首个里程碑边界、验收意图和开放产品问题 |
 | 许可证 | [`LICENSE`](../LICENSE) | — | 已建立；Apache License 2.0 原文 |
 
 ## 规划中的权威位置
@@ -27,7 +28,6 @@
 | --- | --- | --- | --- |
 | `docs/architecture.md` | 系统边界、组件、依赖、数据流和技术方向 | 技术栈或首个垂直切片需要形成架构结论 | 默认英文；存在持续跨语言阅读需求时补充中文版本 |
 | `docs/decisions/` | 追加式架构决策记录 | 首个重大且实际发生的技术决策形成 | 默认英文；按需翻译 |
-| `docs/requirements/` | Requirements Brief、用户旅程和验收标准 | 产品范围或首个垂直切片获得批准 | 默认英文；按需翻译 |
 | `docs/development.md` | 开发环境、构建、运行和故障排查 | 实际技术栈和权威命令得到验证 | 默认英文；按需翻译 |
 | `docs/validation.md` | 测试、静态检查、人工验证和发布门禁 | 实际质量工具、命令或验证流程得到验证 | 默认英文；按需翻译 |
 | `docs/security.md` | 安全模型、威胁、控制措施和响应流程 | 架构、权限、数据流或发行方式足以支持安全分析 | 默认英文；专业结论须复核，按需翻译 |

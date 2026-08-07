@@ -27,9 +27,10 @@
 - 中文产品概览：[overview.zh-CN.md](overview.zh-CN.md)
 - 开发前检查清单与开放问题：[todo.md](todo.md)
 - 文档地图与治理规则：[docs/documentation.zh-CN.md](docs/documentation.zh-CN.md)
+- 产品基础需求：[docs/requirements/product-foundation.zh-CN.md](docs/requirements/product-foundation.zh-CN.md)
 - 许可证：[LICENSE](LICENSE)
 
-架构、需求、开发、验证、安全、隐私和发布文档尚未建立。不得推断其内容，也不得将规划中的路径视为当前证据。
+架构、开发、验证、安全、隐私和发布文档尚未建立。不得推断其内容，也不得将规划中的路径视为当前证据。
 
 ## 语言
 

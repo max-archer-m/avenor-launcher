@@ -52,18 +52,21 @@ Major versions describe capability layers, not committed release dates or comple
 - **V3 — AI assistance:** A possible future direction with no approved scope.
 - **V4 — Agent integration:** A possible future direction with no approved scope.
 
-This direction does not authorize V2–V4 work. The first releasable scope and first vertical slice remain to be defined.
+This direction does not authorize V2–V4 work. The detailed first vertical slice remains to be defined.
 
 ## Current scope status
 
-The following are not yet product commitments:
+The first milestone is intended to validate the minimum daily-use utility loop: Home, Drawer, application launching, and the minimum necessary Settings. Its core tasks must remain fully local and offline. Visual refinement, extensive customization, network-backed information, accounts, cloud synchronization, and server development are not first-milestone requirements.
 
-- The exact V1 capability set and information shown on the home screen
+The author will validate the milestone through seven consecutive days of daily use with Avenor Launcher selected as the default Launcher. Intentional comparison is allowed, but missing core functionality must not force a switch to another Launcher.
+
+The detailed boundary and evidence are recorded in the [product foundation requirements](docs/requirements/product-foundation.md). The following remain unresolved:
+
 - The first observable vertical slice and its acceptance criteria
 - Minimum and target Android versions and supported device form factors
 - Required Android roles, permissions, background capabilities, or package visibility
 - Exact distribution channels; Google Play and selected application stores in China are candidates
-- Account, networking, cloud synchronization, analytics, crash reporting, payment, or other third-party services
+- Analytics, crash reporting, payment, or other third-party services beyond the first milestone
 - Commercial model, which is intentionally deferred
 
 In particular, use of `QUERY_ALL_PACKAGES` or any other sensitive capability is not approved by this overview. Permissions must be justified against the selected user journey and applicable distribution policy before implementation.

@@ -17,6 +17,7 @@ The project author is the first accountable person for all project matters. Secu
 | Agent routing | [`AGENTS.md`](../AGENTS.md) | [`AGENTS.zh-CN.md`](../AGENTS.zh-CN.md) | Established; records the Toolkit entry point and project-specific working rules |
 | Pre-development checklist | — | [`todo.md`](../todo.md) | Temporary Chinese execution checklist; delete after pre-development preparation and do not use as a permanent history |
 | Documentation governance | [`docs/documentation.md`](documentation.md) | [`docs/documentation.zh-CN.md`](documentation.zh-CN.md) | Established; English and Chinese versions of this document |
+| Product foundation requirements | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | Approved baseline; records the product problem, author context, first-milestone boundary, acceptance intent, and open product questions |
 | License | [`LICENSE`](../LICENSE) | — | Established; Apache License 2.0 text |
 
 ## Planned authoritative locations
@@ -27,7 +28,6 @@ Create the following documents only when real inputs exist:
 | --- | --- | --- | --- |
 | `docs/architecture.md` | System boundaries, components, dependencies, data flows, and technical direction | The selected stack or first vertical slice requires architectural conclusions | English by default; add Chinese when a sustained cross-language need exists |
 | `docs/decisions/` | Append-only architecture decision records | The first consequential technical decision is actually made | English by default; translate when needed |
-| `docs/requirements/` | Requirements Briefs, user journeys, and acceptance criteria | Product scope or the first vertical slice is approved | English by default; translate when needed |
 | `docs/development.md` | Development environment, build, run, and troubleshooting guidance | The actual stack and authoritative commands are verified | English by default; translate when needed |
 | `docs/validation.md` | Tests, static checks, manual validation, and release gates | Actual quality tools, commands, or validation processes are verified | English by default; translate when needed |
 | `docs/security.md` | Security model, threats, controls, and response process | Architecture, permissions, data flows, or distribution provide enough input for security analysis | English by default; specialist conclusions require review; translate when needed |

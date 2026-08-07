@@ -27,9 +27,10 @@ The approved Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusab
 - Chinese product overview: [overview.zh-CN.md](overview.zh-CN.md)
 - Pre-development checklist and open questions: [todo.md](todo.md)
 - Documentation map and governance: [docs/documentation.md](docs/documentation.md)
+- Product foundation requirements: [docs/requirements/product-foundation.md](docs/requirements/product-foundation.md)
 - License: [LICENSE](LICENSE)
 
-Architecture, requirements, development, validation, security, privacy, and release documents have not yet been established. Do not infer their contents or treat planned paths as current evidence.
+Architecture, development, validation, security, privacy, and release documents have not yet been established. Do not infer their contents or treat planned paths as current evidence.
 
 ## Language
 
