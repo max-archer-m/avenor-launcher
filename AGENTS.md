@@ -26,9 +26,10 @@ The Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusable method
 - Chinese product overview: [overview.zh-CN.md](overview.zh-CN.md)
 - Documentation map and governance: [docs/documentation.md](docs/documentation.md)
 - Product foundation requirements: [docs/requirements/product-foundation.md](docs/requirements/product-foundation.md)
+- Version, artifact, and release governance: [docs/release.md](docs/release.md)
 - License: [LICENSE](LICENSE)
 
-Architecture, development, validation, security, privacy, and release documents have not yet been established. Do not infer their contents or treat planned paths as current evidence.
+Architecture, development, validation, security, and privacy documents have not yet been established. Do not infer their contents or treat planned paths as current evidence.
 
 ## Language
 

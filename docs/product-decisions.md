@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [product-decisions.zh-CN.md](product-decisions.zh-CN.md).
 >
-> This document defines how product decisions and scope changes are handled. It does not define the contents of the first milestone or authorize implementation.
+> This document defines how product decisions and scope changes are handled. It does not define the contents of any delivery milestone or authorize implementation.
 
 ## Purpose
 
@@ -49,11 +49,11 @@ A milestone should normally contain one primary product outcome. If it contains 
 
 ## Tags and releases
 
-A Git tag identifies an implementation snapshot. It is delivery evidence, not a product-scope level and not a substitute for a milestone record.
+A Git tag identifies an implementation snapshot. It is delivery evidence, not a product-scope level and not a substitute for a milestone record or version archive. The authoritative version, artifact, tag, and GitHub Release rules are defined in [`docs/release.md`](release.md).
 
-- A milestone may have no tag, one tag, or multiple candidate and validation tags.
-- A tag may represent a vertical-slice build, a milestone candidate, a validation baseline, a patch, or a public release.
-- Tag naming, versioning, signing, and release gates will be defined only after an actual build and release process exists.
+- A milestone and a formal application version may exist without a tag.
+- Tags are reserved for author-approved important and stable implementation baselines; they are not required for every formal version.
+- A tag does not require a GitHub Release. A GitHub Release requires an existing approved tag and separate author approval.
 - This document does not authorize creating tags or releases.
 
 ## Milestone records
@@ -75,7 +75,7 @@ A milestone record may contain:
 
 A milestone record must not become a second authoritative copy of detailed page behavior, acceptance criteria, architecture, or implementation rules. When a linked product contract changes, the milestone records the change and decision link instead of silently rewriting its history.
 
-The first milestone remains to be discussed and defined separately.
+Each milestone is defined separately through its own delivery contract when real delivery inputs exist.
 
 ## What is a product scope change?
 
@@ -215,21 +215,21 @@ Append records to this document using stable, never-reused identifiers:
 - Do not rewrite a historical decision to represent a later outcome. Add a later record explaining what changed and cross-link the records.
 - A milestone may link to multiple product decisions, and one product decision may affect multiple milestones or features.
 
-## Current authoring hold
+## Product-decision record authorization
 
 - Do not append any actual `PD-NNNN` record until the project author explicitly requests product decision recording to begin.
 - The template above is a format definition, not an existing decision record.
-- During this hold, an explicit author decision may update the applicable authoritative product documents directly. Do not create a product decision entry merely because a mandatory trigger would normally apply.
+- Until record creation is authorized, an explicit author decision may update the applicable authoritative product documents directly. Do not create a product decision entry merely because a mandatory trigger would normally apply.
 - When the author enables product decision recording, start with `PD-0001`; do not retroactively invent records unless the author explicitly requests historical reconstruction.
 
 ## Current boundary
 
 This governance establishes the decision process only. It does not:
 
-- Define the first milestone
+- Define any delivery milestone
 - Authorize a vertical slice or implementation task
 - Select a technical stack or architecture
-- Define a tag or release strategy
+- Authorize any tag or GitHub Release action
 - Authorize V2, V3, or V4 work
 - Authorize public distribution or commercialization
 - Authorize writing an actual product decision record before the project author explicitly requests it

@@ -8,7 +8,7 @@
 - Back returns to Drawer and preserves its prior list position during the same process.
 - Settings uses an opaque standard Material 3 dark color scheme. Unlike Home and Drawer, it paints its Material surface background rather than exposing the system background beneath the application.
 
-## Initial scope
+## Current contract
 
 ### Launcher settings
 
@@ -18,7 +18,7 @@
 
 ### Language behavior
 
-- The initial product provides English and Simplified Chinese resources for every user-visible string.
+- The current product provides English and Simplified Chinese resources for every user-visible string.
 - Avenor automatically resolves its resources from the current system locale. Simplified Chinese uses the Simplified Chinese resources; English uses the English resources; unsupported locales fall back to English.
 - Settings does not contain an application-language item or manual language selector.
 - A system-language change updates Avenor to the corresponding supported resource set without requiring an Avenor-specific selection.
@@ -34,7 +34,7 @@
 
 ### Support and diagnostics
 
-Complex logs, update checks, backup, cloud synchronization, diagnostic export, and copying version or device information are outside the current initial scope.
+Complex logs, update checks, backup, cloud synchronization, diagnostic export, and copying version or device information are outside the current product contract.
 
 ## Privacy presentation
 

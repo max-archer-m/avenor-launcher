@@ -8,24 +8,48 @@
 
 项目作者是所有项目事项的第一责任人。涉及安全、隐私、法务、财税或平台政策的专业结论时，应取得具备相应能力的人员复核。
 
+## 契约文档模型
+
+**契约文档**是仓库中的权威文档，其陈述要么约束明确范围和时期，要么权威记录该范围和时期已经完成的事实。“契约”不代表每份文档都定义当前产品行为。每份契约文档都有契约类型、适用范围和时间边界，必须据此解释。
+
+| 契约类型 | 回答的问题 | 适用范围 |
+| --- | --- | --- |
+| 项目治理契约 | 项目如何被指导、记录、授权和维护？ | 相关规则保留在当前治理文档期间，适用于项目工作 |
+| 当前产品契约 | 当前适用哪些产品行为、用户可见状态、范围、术语和验收意图？ | 适用于当前产品定义，直至授权变更更新对应文档 |
+| 交付契约 | 某项 roadmap 边界、里程碑或迭代必须交付、排除、验证和报告什么？ | 适用于具名交付范围；它从当前产品契约中选择工作，但不能独立重定义产品契约 |
+| 技术或运营契约 | 当前系统必须如何设计、构建、验证、保护、运营或发布？ | 适用于文档声明的技术或运营边界，并且必须兼容当前产品契约 |
+| 历史契约记录 | 某个已完成时期实际适用哪些范围、决定、实现变化、验证证据和结果？ | 对该历史时期持续具有权威性，但不约束当前产品行为 |
+| 法律文件 | 适用哪些法律许可、义务或限制？ | 按该文件自身条款和范围适用 |
+
+各类契约按以下关系共同工作：
+
+- 产品方向、Requirements Brief、交互规格、设计基础约束和产品字典分别构成其职责范围内的当前产品契约。
+- 交付契约可以承诺实现当前产品契约的全部或一部分，也可以补充交付顺序、受影响区域、非目标、风险和验证证据；但除非通过获得授权的产品决定同步更新适用的当前产品契约，否则交付契约不得引入或改变产品行为。
+- 一个里程碑可以聚合多个迭代。迭代是可独立评审的交付范围，不是产品定义的替代品。
+- 交付契约完成后，其最终结果继续作为权威交付历史。将其移入版本归档只改变其时间适用范围，不改变其权威性或事实含义。
+- 架构、开发、验证、安全、隐私和发布文档仅在具备真实输入并形成结论后，才成为技术或运营契约。
+- Git 历史用于支持来源追踪，但不能替代适用的契约文档。
+- 临时 prompt、草稿笔记、未核实的任务清单和对话记录属于工作材料，不是契约文档。它们不得作为权威项目文档提交，也不得覆盖任何契约。
+
 ## 当前权威文档
 
-| 信息类型 | 英文或公共入口 | 中文入口 | 职责 |
-| --- | --- | --- | --- |
-| 项目入口 | [`README.md`](../README.md) | [`README.zh-CN.md`](../README.zh-CN.md) | 提供项目摘要和深层文档链接 |
-| 产品概览 | [`overview.md`](../overview.md) | [`overview.zh-CN.md`](../overview.zh-CN.md) | 记录产品方向、原则、边界和待确认范围 |
-| Agent 路由 | [`AGENTS.md`](../AGENTS.md) | [`AGENTS.zh-CN.md`](../AGENTS.zh-CN.md) | 记录 Toolkit 入口和项目级工作规则 |
-| 文档治理 | [`docs/documentation.md`](documentation.md) | [`docs/documentation.zh-CN.md`](documentation.zh-CN.md) | 定义文档模型与维护规则 |
-| 产品基础需求 | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | 记录产品问题、作者场景、首个里程碑边界、验收意图和开放产品问题 |
-| 产品决策与范围变更 | [`docs/product-decisions.md`](product-decisions.md) | [`docs/product-decisions.zh-CN.md`](product-decisions.zh-CN.md) | 定义决策权、范围变更、契约不一致处理和未来决策记录格式 |
-| 产品导航 | [`docs/product/navigation.md`](product/navigation.md) | [`docs/product/navigation.zh-CN.md`](product/navigation.zh-CN.md) | 定义界面层级、进入、退出、Back、恢复和公共过渡 |
-| Home 交互 | [`docs/product/home.md`](product/home.md) | [`docs/product/home.zh-CN.md`](product/home.zh-CN.md) | 定义 Home 信息、收藏、启动行为和排序模式 |
-| Drawer 交互 | [`docs/product/drawer.md`](product/drawer.md) | [`docs/product/drawer.zh-CN.md`](product/drawer.zh-CN.md) | 定义应用清单、分组、排序、字母索引和实时更新 |
-| 应用操作面板 | [`docs/product/app-action-sheet.md`](product/app-action-sheet.md) | [`docs/product/app-action-sheet.zh-CN.md`](product/app-action-sheet.zh-CN.md) | 定义模态应用快捷操作和启动器操作 |
-| Settings 交互 | [`docs/product/settings.md`](product/settings.md) | [`docs/product/settings.zh-CN.md`](product/settings.zh-CN.md) | 定义第一版 Settings 信息与行为边界 |
-| 产品设计基础约束 | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | 定义当前主题、布局、字体、图标、无障碍和资源原则 |
-| 产品字典 | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | 定义规范产品术语 |
-| 许可证 | [`LICENSE`](../LICENSE) | — | 包含 Apache License 2.0 原文 |
+| 信息类型 | 英文或公共入口 | 中文入口 | 契约类型 | 职责 |
+| --- | --- | --- | --- | --- |
+| 项目入口 | [`README.md`](../README.md) | [`README.zh-CN.md`](../README.zh-CN.md) | 当前产品契约 | 提供当前项目与产品摘要和深层文档链接 |
+| 产品概览 | [`overview.md`](../overview.md) | [`overview.zh-CN.md`](../overview.zh-CN.md) | 当前产品契约 | 记录产品方向、原则、边界和待确认范围 |
+| Agent 路由 | [`AGENTS.md`](../AGENTS.md) | [`AGENTS.zh-CN.md`](../AGENTS.zh-CN.md) | 项目治理契约 | 记录 Toolkit 入口和项目级工作规则 |
+| 文档治理 | [`docs/documentation.md`](documentation.md) | [`docs/documentation.zh-CN.md`](documentation.zh-CN.md) | 项目治理契约 | 定义契约文档模型与维护规则 |
+| 产品基础需求 | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | 当前产品契约 | 记录产品问题、作者场景、当前范围、验收意图和开放产品问题 |
+| 产品决策与范围变更 | [`docs/product-decisions.md`](product-decisions.md) | [`docs/product-decisions.zh-CN.md`](product-decisions.zh-CN.md) | 项目治理契约；未来的决定记录属于历史契约记录 | 定义决策权、范围变更、契约不一致处理和未来决策记录格式 |
+| 产品导航 | [`docs/product/navigation.md`](product/navigation.md) | [`docs/product/navigation.zh-CN.md`](product/navigation.zh-CN.md) | 当前产品契约 | 定义界面层级、进入、退出、Back、恢复和公共过渡 |
+| Home 交互 | [`docs/product/home.md`](product/home.md) | [`docs/product/home.zh-CN.md`](product/home.zh-CN.md) | 当前产品契约 | 定义 Home 信息、收藏、启动行为和排序模式 |
+| Drawer 交互 | [`docs/product/drawer.md`](product/drawer.md) | [`docs/product/drawer.zh-CN.md`](product/drawer.zh-CN.md) | 当前产品契约 | 定义应用清单、分组、排序、字母索引和实时更新 |
+| 应用操作面板 | [`docs/product/app-action-sheet.md`](product/app-action-sheet.md) | [`docs/product/app-action-sheet.zh-CN.md`](product/app-action-sheet.zh-CN.md) | 当前产品契约 | 定义模态应用快捷操作和启动器操作 |
+| Settings 交互 | [`docs/product/settings.md`](product/settings.md) | [`docs/product/settings.zh-CN.md`](product/settings.zh-CN.md) | 当前产品契约 | 定义当前 Settings 信息与行为 |
+| 产品设计基础约束 | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | 当前产品契约 | 定义当前主题、布局、字体、图标、无障碍和资源原则 |
+| 产品字典 | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | 当前产品契约 | 定义规范产品术语 |
+| 版本、产物与发布治理 | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | 技术或运营契约 | 定义应用版本、归档、APK 产物、签名连续性、tag 与 GitHub Release |
+| 许可证 | [`LICENSE`](../LICENSE) | — | 法律文件 | 包含 Apache License 2.0 原文 |
 
 ## 规划中的权威位置
 
@@ -33,13 +57,12 @@
 
 | 路径 | 唯一职责 | 创建条件 | 语言策略 |
 | --- | --- | --- | --- |
-| `docs/architecture.md` | 系统边界、组件、依赖、数据流和技术方向 | 技术栈或首个垂直切片需要形成架构结论 | 默认英文；存在持续跨语言阅读需求时补充中文版本 |
+| `docs/architecture.md` | 系统边界、组件、依赖、数据流和技术方向 | 技术栈或当前产品契约需要形成架构结论 | 默认英文；存在持续跨语言阅读需求时补充中文版本 |
 | `docs/decisions/` | 追加式架构决策记录 | 首个重大且实际发生的技术决策形成 | 默认英文；按需翻译 |
 | `docs/development.md` | 开发环境、构建、运行和故障排查 | 实际技术栈和权威命令得到验证 | 默认英文；按需翻译 |
 | `docs/validation.md` | 测试、静态检查、人工验证和发布门禁 | 实际质量工具、命令或验证流程得到验证 | 默认英文；按需翻译 |
 | `docs/security.md` | 安全模型、威胁、控制措施和响应流程 | 架构、权限、数据流或发行方式足以支持安全分析 | 默认英文；专业结论须复核，按需翻译 |
 | `docs/privacy.md` | 数据清单、处理目的、保留方式和用户权利 | 数据、权限、地区或第三方处理行为得到确认 | 默认英文；专业结论须复核，面向用户的版本按发行要求提供翻译 |
-| `docs/release.md` | 版本、签名、渠道、回滚和发布审批 | 首个发布渠道和发布流程得到确认 | 默认英文；按需翻译 |
 | `CHANGELOG.md` | 用户可感知的版本变化 | 首个用户可感知版本或变更形成 | 英文公共语义源；按实际受众决定是否提供中文版本 |
 
 ## 产品文档模型
@@ -66,7 +89,7 @@
 
 ## Roadmap、里程碑、迭代与版本归档
 
-这些记录回答不同问题，不得互相替代。
+这些交付契约与历史契约记录回答不同问题，不得互相替代，也不得替代当前产品契约。
 
 ### Roadmap
 
@@ -74,7 +97,7 @@
 
 ### 里程碑记录
 
-里程碑记录描述重大项目结果、进展、偏差、证据与最终结论。它链接权威产品需求，不复制详细产品行为。首个里程碑仍待讨论，在此之前不建立其记录位置和具体内容。
+里程碑记录描述重大项目结果、进展、偏差、证据与最终结论。它链接权威产品需求，不复制详细产品行为。仅在存在真实里程碑契约时创建对应位置和内容。
 
 ### 迭代记录
 
@@ -87,13 +110,13 @@
 - 每份记录应包含目标、产品文档引用、适用时的变更前后行为、范围、非目标、依赖、风险、持久层级的受影响代码区域、验证计划与证据、相关决策与 ADR、commit 或 tag，以及最终结果。
 - 详细代码演进记录到行为、组件、接口、数据、架构、构建、迁移和验证影响层级。Git commit 和 diff 仍是逐行源码历史的权威来源。
 
-迭代记录是项目与交付记录，不是产品需求或架构的永久副本。
+迭代记录在其范围生效时属于交付契约，完成后属于权威历史契约记录；它不是产品需求或架构的永久副本。
 
 ### 版本归档
 
 当实际宣告软件版本边界且其包含的迭代已关闭后，创建如 `docs/archives/v1.1.0/` 的版本文件夹。
 
-- 文件夹名使用已宣告的软件版本。版本号、tag 命名、签名和发布规则在实际交付与发布基线建立前仍为待确认。
+- 文件夹名使用已宣告的软件版本，并遵循 [`docs/release.md`](release.md)。是否存在 tag 不影响正式版本归档是否成立。
 - 将纳入该版本的原始迭代记录移入版本文件夹；不得复制后在 `docs/iterations/` 下保留第二份权威副本。
 - 在版本文件夹内新增 `README.md`，作为归档总结和入口。
 - 总结使用 `<迭代标识> — <标题>` 列出每个纳入的迭代，并链接到现已位于同一归档文件夹中的原始迭代文件。
@@ -101,7 +124,7 @@
 - 归档不会重置全项目迭代序列。若 `docs/archives/v1.1.0/` 包含迭代 `0005` 至 `0010`，下一份位于 `docs/iterations/` 的活动迭代必须是 `0011`。
 - 不得改写已归档迭代记录来让后续历史显得更整洁。如需修正事实错误，应显式修正并保留其原始交付含义。
 - 将迭代移入归档文件夹时，必须更新所有引用该迭代的链接。
-- 从 `1.0.0` 到 `1.1.0` 可以包含多个迭代。
+- 每个正式版本包含一个或多个已完成迭代。
 
 在存在真实的计划或实现输入前，不创建空的 roadmap、里程碑、迭代或归档文件。
 
@@ -110,7 +133,7 @@
 - 临时工作笔记和检查清单不要求英文版本，也不得成为已提交权威文档的依赖。
 - README、产品概览和 Agent 指令当前维护中英文版本。
 - 其他文档按跨语言阅读和外部受众的实际需要决定是否翻译，不为形式对称创建对应文档。
-- 本次项目初始化先以中文整理作者意图，再提供英文公共版本；发布后的英文公共文档是对外语义源。
+- 当文档从中文开始起草时，应在将该双语文档视为完整前提供英文公共版本；发布后的英文文档是对外语义源。
 - 双语文档必须保持范围、约束和规范含义一致。发现实质差异时，应在同一变更中修正；无法同步时应显式记录差异及后续处理。
 - Commit message、Pull Request、Issue、发布说明及其他公共仓库输出使用英文。
 
@@ -138,7 +161,7 @@
 - 尚未准备成为当前项目状态的内容保留在对话或 `max-dev-context` 等外部续接工作区中，不作为有效文档进入本产品仓库。
 - 更新权威文档即改变当前契约。先前状态通过 Git 历史、迭代记录和版本归档保留，不在当前文档中使用状态标签。
 - 代码存在后，接入变更前对比文档、实现、测试和验证证据。差异属于需要解决的契约不一致，不代表任何一方静默替代另一方。
-- `docs/archives/<version>/` 中的历史文件通过存储位置排除在当前契约之外，而不是依靠文档内状态字段。
+- `docs/archives/<version>/` 中的历史文件仍是权威历史契约记录。其存储位置将它们排除在当前产品、治理、技术和交付契约之外，但不会取消它们对所述历史时期的权威性。
 
 ## Git 与任务工作流
 

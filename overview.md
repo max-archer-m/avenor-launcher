@@ -34,32 +34,31 @@ Provide a restrained Android home screen that helps users find and open what the
 
 - Product form: an Android launcher intended to act as the device's default home-screen application.
 - User-facing names: “Avenor Launcher” in English and “Avenor 启动器” in Simplified Chinese.
-- Initial languages: English and Simplified Chinese.
-- Initial use: maintained on GitHub for the author's daily use, with no V1 distribution or store-release requirement.
+- Supported languages: English and Simplified Chinese.
+- Distribution boundary: maintained on GitHub for the author's daily use, with no public distribution or store-release requirement.
 - Platform baseline: ordinary Android phones in portrait orientation, with Android 16 (API 36) as the minimum and Android 17 (API 37) as the target.
 - License: Apache License 2.0.
 - Advertising and recommendation feeds are out of scope.
 
 ## Version direction
 
-Major versions describe capability layers, not committed release dates or complete feature lists:
+The following capability layers are a non-binding directional outlook. They are not a committed product roadmap, release plan, delivery sequence, or guarantee that any later capability will be implemented:
 
 - **V1 — Fixed presentation:** User-controlled, deterministic presentation of applications and selected device information; no behavior-based automatic rearrangement.
 - **V2 — Basic adaptation:** Optional behavior-based presentation or ordering, subject to explicit privacy, user-control, and validation requirements.
 - **V3 — AI assistance:** A possible future direction outside the current product scope.
 - **V4 — Agent integration:** A possible future direction outside the current product scope.
 
-This direction does not authorize V2–V4 work. The detailed first vertical slice remains to be defined.
+These labels describe capability direction rather than semantic software versions. They do not authorize V2–V4 work.
 
-## Current scope status
+## Current product scope
 
-The first milestone is intended to validate the minimum daily-use utility loop: Home, Drawer, application launching, and the minimum necessary Settings. Home shows time, date, favorite applications, and a Drawer entry. Drawer initially uses a single-list presentation and includes every launchable entry exposed by Android, including cloned application entries when the platform exposes them. Its core tasks must remain fully local and offline. Widgets, folders, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development are not first-milestone requirements.
+The current product contract defines a minimum daily-use utility loop: Home, Drawer, application launching, and the necessary Settings. Home shows time, date, favorite applications, and a Drawer entry. Drawer uses a single-list presentation and includes every launchable entry exposed by Android, including cloned application entries when the platform exposes them. Its core tasks must remain fully local and offline. Widgets, folders, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development are outside the current product scope.
 
 The detailed boundary and evidence are recorded in the [product foundation requirements](docs/requirements/product-foundation.md). The following remain unresolved:
 
-- The first observable vertical slice and its acceptance criteria
 - Required Android roles, permissions, background capabilities, or package visibility
-- Analytics, crash reporting, payment, or other third-party services beyond the first milestone
+- Analytics, crash reporting, payment, or other third-party services
 - Commercial model, which is intentionally deferred
 
 In particular, this overview does not place `QUERY_ALL_PACKAGES` or any other sensitive capability in the product scope. The product requires discovery of launchable entries, not unrestricted access to installed-package data. The implementation must use the smallest Android visibility scope that satisfies the current user journey.
@@ -95,4 +94,4 @@ AI is expected to perform a substantial share of project execution under human r
 - Documentation map and governance: [docs/documentation.md](docs/documentation.md)
 - License: [LICENSE](LICENSE)
 
-Architecture, requirements, development, validation, security, privacy, and release documentation will be established as their inputs are confirmed. Planned document locations must not be treated as completed evidence.
+Architecture, development, validation, security, privacy, and release documentation will be established as their inputs are confirmed. Planned document locations must not be treated as completed evidence.

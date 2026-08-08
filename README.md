@@ -18,11 +18,12 @@ See the [project overview](overview.md) for confirmed intent, boundaries, and un
 - [Simplified Chinese project overview](overview.zh-CN.md)
 - [Documentation map and governance](docs/documentation.md)
 - [Product foundation requirements](docs/requirements/product-foundation.md)
+- [Version, artifact, and release governance](docs/release.md)
 - [Agent instructions](AGENTS.md)
 - [Simplified Chinese agent instructions](AGENTS.zh-CN.md)
 - [License](LICENSE)
 
-Architecture, development, validation, security, privacy, and release documentation have not yet been established. Their planned locations and creation conditions are recorded in the [documentation map](docs/documentation.md).
+Architecture, development, validation, security, and privacy documentation have not yet been established. Their planned locations and creation conditions are recorded in the [documentation map](docs/documentation.md).
 
 ## License
 
