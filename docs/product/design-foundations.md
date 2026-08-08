@@ -17,7 +17,7 @@
 
 - Product spacing values are semantic design tokens rather than arbitrary per-screen literals.
 - Home currently uses 16dp horizontal content padding and a provisional 32dp vertical content padding.
-- Application-action-sheet dividers currently use 12dp horizontal inset.
+- Application-action-sheet dividers use `16dp` horizontal inset.
 - Current application rows are single-column, top aligned, and not vertically distributed to fill unused space.
 
 ## Typography
@@ -30,12 +30,17 @@
 - At most one visible application name may animate at a time. Priority belongs to the actively pressed or focused overflowing entry; otherwise, after list motion stops, the overflowing entry nearest the visual center is eligible.
 - Marquee animation pauses while its list is scrolling, Home and Drawer are transitioning, an application action sheet is open, or a reorder drag is active. A newly eligible entry restarts from its initial `800ms` pause.
 - Font scaling beyond the current personal-use layout is not separately optimized. Text remains clipped to its one-line component boundary if extreme system scaling exceeds that boundary.
+- Settings primary titles use `titleMedium` (`16sp/24sp`) with `onSurface`; supporting text uses `bodySmall` (`12sp/16sp`) with `onSurfaceVariant`; centered secondary information items use `titleSmall` (`14sp/20sp`) with `onSurfaceVariant`.
 
 ## Icons and application identity
 
 - Application icons preserve the platform-provided adaptive shape, such as device-specific circular or squircle presentation.
 - Clone or profile badges use platform-provided data and remain consistent across Home, Drawer, and related application UI.
-- A provisional recommendation is a 40dp visible application icon inside a row at least 56dp high, with 16dp between icon and name. These values are not current requirements until confirmed by the author.
+- Home and Drawer use a `40dp × 40dp` visible application icon inside an application row at least `56dp` high.
+- The icon and application name are vertically centered in the row. The horizontal gap from the visible icon boundary to the application-name region is `16dp`.
+- The complete row remains the selection and long-press target; the 40dp icon is a visual size, not a restriction on the row touch target.
+- If an application's icon cannot be loaded, use Android's platform-default generic application icon in the same 40dp visual region. Do not leave the region empty or substitute an unrelated Avenor icon.
+- Current target devices are expected to provide clone or profile badges. Avenor does not add its own fallback badge or secondary identity label when the platform provides none. Such fallback identity treatment is an additive future capability.
 
 ## Interaction and accessibility
 

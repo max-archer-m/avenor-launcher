@@ -48,6 +48,7 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 ## Home to Drawer
 
 - An upward drag on Home is the only current entry into Drawer.
+- Home-to-Drawer dragging is disabled while favorite reorder mode is active; reorder dragging and its edge auto-scroll exclusively own vertical favorite-list gestures.
 - If the favorite list cannot scroll or has reached its bottom boundary, upward displacement transfers to the Home-to-Drawer transition.
 - If the favorite list can still consume upward displacement, it scrolls and the surface transition does not consume that displacement.
 - When the list reaches its bottom boundary during one continuous upward gesture, remaining displacement may transfer directly into the transition without requiring the user to lift and drag again.

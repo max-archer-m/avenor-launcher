@@ -82,7 +82,7 @@ Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](h
 - Home: the Android home entry displaying system time, date, favorite applications, and a Drawer entry.
 - Favorites: the author can maintain the application entries shown on Home; define the exact editing interaction in the vertical slice.
 - Drawer: initially a single-list presentation of every launchable entry exposed by Android, including cloned application entries when the platform exposes them.
-- Settings: language selection and an entry to Android system settings for the default home application.
+- Settings: current default-Launcher status, an entry to Android system settings for the default home application, and secondary product-information entries. Language follows supported system-locale resources automatically; manual language selection is outside the initial scope.
 - Complete offline availability for core tasks.
 - Local storage of core product data without a self-hosted server, account, or cloud synchronization.
 - Only system permissions that are necessary for, and traceable to, core functionality.
@@ -113,7 +113,7 @@ An additive requirement does not become current scope merely because it can be a
 - The user can access the Drawer from Home.
 - Whether or not Avenor Launcher is selected as the default home application, the Drawer presents a single list of every application entry that should be visible and launchable under Android platform rules and allows the selected entry to be launched.
 - When Android exposes a cloned application entry to the Launcher, the Drawer presents it as an independent launchable entry and does not deduplicate solely by package name.
-- The user can select follow-system, English, or Simplified Chinese language behavior in Settings.
+- The Launcher provides English and Simplified Chinese user-visible resources, selects them from the system locale automatically, and falls back to English for unsupported locales.
 - The user can open Android system settings for the default home application from Settings.
 - The first milestone does not provide one-action clearing or restoration of all local configuration; users edit configuration through individual settings.
 - The core Home, Drawer, and Settings paths do not depend on a network, account, cloud synchronization, or a self-hosted server.
@@ -136,7 +136,7 @@ An additive requirement does not become current scope merely because it can be a
 - Given Avenor Launcher is not selected as the default home application, when the user launches Avenor Launcher directly and enters the Drawer, then the Drawer still displays every application entry that should be visible and launchable under Android platform rules.
 - Given Android exposes cloned entries for an application, when the Drawer presents the application list, then every cloned entry appears independently and can be launched.
 - Given a launchable application appears in the Drawer, when the user selects it, then the system launches that application.
-- Given the user opens Settings, when the user selects follow-system, English, or Simplified Chinese, then the Launcher presents its interface according to that language behavior.
+- Given the system locale is English or Simplified Chinese, when Avenor presents or refreshes its interface, then it uses the corresponding resource set; given another locale, it uses the English fallback.
 - Given the user opens Settings, when the user selects the default-home settings entry, then the system opens the corresponding Android settings page.
 - Given the device has no network connection, when the user accesses Home, Drawer, application launching, or core Settings, then the core task remains completable.
 - Given a non-core network capability is unavailable or unauthorized, when the user performs a core task, then that capability does not block Home, Drawer, application launching, or core Settings.
@@ -160,12 +160,12 @@ Minimum acceptable performance, power, memory, and startup-response levels will 
 
 ## User control
 
-The first milestone lets users maintain Home favorites and edit configuration through individual settings, but it does not provide one-action clearing, export, cloud deletion, or restoration of all configuration. Users can clear application data through Android system settings. Favorite changes and language selection must result from explicit user actions and must not adapt automatically from behavior.
+The first milestone lets users maintain Home favorites and use individual Settings entries, but it does not provide one-action clearing, export, cloud deletion, or restoration of all configuration. Users can clear application data through Android system settings. Favorite changes must result from explicit user actions. Language presentation follows the system locale rather than adapting from observed behavior.
 
 ## Local data boundary
 
 - The only user-content data is the identifier of each launchable application entry saved as a Home favorite. Identifiers must distinguish cloned entries exposed by the platform and must not store or deduplicate solely by package name.
-- Language selection and other interface settings in the first-milestone contract are local configuration, not behavioral analytics data.
+- System-locale-derived language presentation and other interface settings in the first-milestone contract are local behavior, not behavioral analytics data.
 - Time and date come directly from the device system and are not retained as historical data.
 - V1 does not collect or store notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.
 - V1 has no account, cloud synchronization, server, or cross-device backup.
@@ -173,7 +173,7 @@ The first milestone lets users maintain Home favorites and edit configuration th
 ## Dependencies and risks
 
 - The Android home role, application-enumeration approach, cloned-entry visibility, and related manifest declarations or permissions still require technical and privacy review.
-- Settings includes language selection and an entry to system default-home settings; define its detailed interface and state behavior in the vertical slice.
+- Settings includes current default-Launcher status, an entry to system default-home settings, and the product-information entries defined in the Settings interaction specification. Manual application-language selection is not in the initial scope.
 - Current evidence represents only the author and cannot support a mass-market demand conclusion.
 - “Attractive, comfortable, and minimal” has not been converted into observable standards and is not a first-milestone acceptance target.
 - Using the project to learn agent systems may encourage process or technical complexity beyond product needs; control this through explicit scope changes.
