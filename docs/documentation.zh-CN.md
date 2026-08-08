@@ -18,6 +18,13 @@
 | 文档治理 | [`docs/documentation.md`](documentation.md) | [`docs/documentation.zh-CN.md`](documentation.zh-CN.md) | 定义文档模型与维护规则 |
 | 产品基础需求 | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | 记录产品问题、作者场景、首个里程碑边界、验收意图和开放产品问题 |
 | 产品决策与范围变更 | [`docs/product-decisions.md`](product-decisions.md) | [`docs/product-decisions.zh-CN.md`](product-decisions.zh-CN.md) | 定义决策权、范围变更、契约不一致处理和未来决策记录格式 |
+| 产品导航 | [`docs/product/navigation.md`](product/navigation.md) | [`docs/product/navigation.zh-CN.md`](product/navigation.zh-CN.md) | 定义界面层级、进入、退出、Back、恢复和公共过渡 |
+| Home 交互 | [`docs/product/home.md`](product/home.md) | [`docs/product/home.zh-CN.md`](product/home.zh-CN.md) | 定义 Home 信息、收藏、启动行为和排序模式 |
+| Drawer 交互 | [`docs/product/drawer.md`](product/drawer.md) | [`docs/product/drawer.zh-CN.md`](product/drawer.zh-CN.md) | 定义应用清单、分组、排序、字母索引和实时更新 |
+| 应用操作面板 | [`docs/product/app-action-sheet.md`](product/app-action-sheet.md) | [`docs/product/app-action-sheet.zh-CN.md`](product/app-action-sheet.zh-CN.md) | 定义模态应用快捷操作和启动器操作 |
+| Settings 交互 | [`docs/product/settings.md`](product/settings.md) | [`docs/product/settings.zh-CN.md`](product/settings.zh-CN.md) | 定义第一版 Settings 信息与行为边界 |
+| 产品设计基础约束 | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | 定义当前主题、布局、字体、图标、无障碍和资源原则 |
+| 产品字典 | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | 定义规范产品术语 |
 | 许可证 | [`LICENSE`](../LICENSE) | — | 包含 Apache License 2.0 原文 |
 
 ## 规划中的权威位置

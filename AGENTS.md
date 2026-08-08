@@ -47,6 +47,7 @@ Use English for commit messages, pull requests, issues, release notes, and other
 - Before integrating implementation, compare the current documentation, code, tests, and validation evidence. Treat any material difference as a contract mismatch and resolve it explicitly.
 - Production implementation requires an applicable current product contract and explicit authorization from the project author.
 - When the Android project is created, use this repository root as its project root. Do not place the Android project inside another nested repository or wrapper project without an explicit author decision.
+- In Android UI code, do not hard-code user-facing strings, colors, or reusable dimensions. Define them in the applicable `res/values` XML resources and access them through the project's resource or theme layer; keep all user-facing strings localizable.
 - The project currently uses a single development line. Do not introduce multi-branch or multi-contributor workflows unless the project author changes this constraint.
 - By default, perform one task, report its result, and wait for the project author's confirmation before starting the next task. Do not automatically continue across separate mutation steps such as modify, commit, and push unless the project author explicitly authorizes that serial continuation.
 - Update authoritative documentation when its product contract or boundary changes.

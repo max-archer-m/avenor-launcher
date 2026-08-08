@@ -18,6 +18,13 @@ The project author is the first accountable person for all project matters. Secu
 | Documentation governance | [`docs/documentation.md`](documentation.md) | [`docs/documentation.zh-CN.md`](documentation.zh-CN.md) | Defines the document model and maintenance rules |
 | Product foundation requirements | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | Records the product problem, author context, first-milestone boundary, acceptance intent, and open product questions |
 | Product decisions and scope changes | [`docs/product-decisions.md`](product-decisions.md) | [`docs/product-decisions.zh-CN.md`](product-decisions.zh-CN.md) | Defines decision authority, scope-change handling, contract-mismatch handling, and the future decision-record format |
+| Product navigation | [`docs/product/navigation.md`](product/navigation.md) | [`docs/product/navigation.zh-CN.md`](product/navigation.zh-CN.md) | Defines surface hierarchy, entry, exit, Back, restoration, and shared transitions |
+| Home interaction | [`docs/product/home.md`](product/home.md) | [`docs/product/home.zh-CN.md`](product/home.zh-CN.md) | Defines Home information, favorites, launch behavior, and reorder mode |
+| Drawer interaction | [`docs/product/drawer.md`](product/drawer.md) | [`docs/product/drawer.zh-CN.md`](product/drawer.zh-CN.md) | Defines the application inventory, grouping, sorting, alphabet index, and live updates |
+| Application action sheet | [`docs/product/app-action-sheet.md`](product/app-action-sheet.md) | [`docs/product/app-action-sheet.zh-CN.md`](product/app-action-sheet.zh-CN.md) | Defines modal application shortcuts and Launcher actions |
+| Settings interaction | [`docs/product/settings.md`](product/settings.md) | [`docs/product/settings.zh-CN.md`](product/settings.zh-CN.md) | Defines the first Settings information and behavior boundary |
+| Product design foundations | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | Defines current theme, layout, typography, icon, accessibility, and resource principles |
+| Product glossary | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | Defines canonical product terms |
 | License | [`LICENSE`](../LICENSE) | — | Contains the Apache License 2.0 text |
 
 ## Planned authoritative locations
