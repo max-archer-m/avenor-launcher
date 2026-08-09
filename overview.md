@@ -63,6 +63,8 @@ The detailed boundary and evidence are recorded in the [product foundation requi
 
 In particular, this overview does not place `QUERY_ALL_PACKAGES` or any other sensitive capability in the product scope. The product requires discovery of launchable entries, not unrestricted access to installed-package data. The implementation must use the smallest Android visibility scope that satisfies the current user journey.
 
+The current product does not support Android Private Space. Avenor does not declare `ACCESS_HIDDEN_PROFILES`, actively access or display Private Space entries, or provide a Private Space container or controls for visibility, locking, unlocking, favorites, or state restoration. “Every launchable entry” means only entries Android normally exposes within Avenor's current role and least-privilege boundary. Ordinary, work-profile, and cloned entries that the platform exposes without hidden-profile access remain governed by the current product contract. Future Private Space support is a separate product capability requiring a new author decision and renewed interaction, permission, privacy, compatibility, and validation review.
+
 ## Additive requirements
 
 An additive requirement is a capability that may be delivered when useful without defining or blocking the transition between V1, V2, and later capability layers. Landscape support, foldable and tablet adaptation, themes and colors, weather information, widgets, and folders are current examples.

@@ -6,12 +6,24 @@
 
 Drawer presents every launchable application entry exposed to the Launcher by the platform, including cloned entries. System and user-installed applications are treated alike.
 
+“Every launchable application entry” is bounded by Avenor's current Android role and least-privilege permissions. It does not mean every installed package, hidden profile, or entry that could become visible only after adding another sensitive permission.
+
 - The application inventory is a single-column list; a future grid is an additive capability and is outside the current contract.
 - Each section anchor occupies its own row and remains pinned while its section is current.
 - Each application row is at least `56dp` high and displays a `40dp` platform icon, platform-provided badge when present, and application name, with `16dp` between icon and name.
 - An application name occupies exactly one line. A name that fits remains static; an overflowing name uses the shared marquee behavior defined in [design-foundations.md](design-foundations.md).
 - Selecting an application immediately launches it and suppresses duplicate rapid activation.
 - Long-pressing an application produces long-press haptic feedback and opens the application action sheet.
+
+## Profile and Private Space boundary
+
+- Ordinary, work-profile, and cloned launchable entries follow the existing inventory, identity, sorting, launch, favorite, and refresh rules when Android normally exposes them to Avenor without hidden-profile access.
+- The current product does not support Android Private Space and does not declare `ACCESS_HIDDEN_PROFILES`.
+- Avenor does not actively query, access, display, deduplicate, sort, launch, favorite, or restore state for Private Space entries that require hidden-profile access.
+- Avenor does not provide a separate Private Space container or controls to show, hide, lock, unlock, favorite, or restore Private Space state.
+- Absence of Private Space entries under this boundary is expected product behavior, not an incomplete Drawer inventory or loading error.
+- Platform exposure of ordinary, work-profile, or cloned entries does not classify those entries as Private Space and does not remove them from the current contract.
+- Future Private Space support is a separate product capability. It requires a new project-author decision and renewed review of product interaction, permissions, privacy, compatibility, and validation before it can enter the current contract.
 
 ## Grouping and sorting
 
@@ -62,7 +74,7 @@ Drawer presents every launchable application entry exposed to the Launcher by th
 
 ## Acceptance intent
 
-- Every platform-exposed launchable entry appears once. Primary and cloned entries remain distinguishable when the platform supplies a badge; Avenor-specific fallback distinction is outside the current scope.
+- Every launchable entry normally exposed within Avenor's current role and least-privilege boundary appears once. Primary, work-profile, and cloned entries follow the applicable platform identity treatment; Private Space entries requiring `ACCESS_HIDDEN_PROFILES` are intentionally absent. Primary and cloned entries remain distinguishable when the platform supplies a badge; Avenor-specific fallback distinction is outside the current scope.
 - Index navigation lands on the intended pinned anchor.
 - Index gestures do not simultaneously scroll the list.
 - Live inventory updates do not leave a removed application launchable from stale UI.

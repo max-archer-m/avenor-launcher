@@ -95,6 +95,7 @@ Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://develope
 - 天气等需要网络的数据功能。
 - 账号、云同步或自建服务器。
 - 行为分析、自动排序、推荐、AI 助手或 Agent 集成。
+- Android Private Space 的访问、展示、管理、收藏和状态恢复，包括声明 `ACCESS_HIDDEN_PROFILES`。
 - 商业模式验证、应用商店正式发布或大众市场适配。
 
 “范围外”表示不属于当前产品契约，不代表永久拒绝。广告、推荐流及以延长停留时间为目标的设计仍受项目概览中的长期边界约束。
@@ -110,9 +111,11 @@ Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://develope
 - 用户能够把 Avenor Launcher 作为 Android 主屏幕入口启动。
 - Home 显示来自设备系统的时间和日期。
 - Home 显示作者保存在本地的收藏应用，并允许启动所选收藏应用。
+- 收藏持久化结果无法读取或已经损坏时，产品将其展示为可恢复的加载失败，而不是空收藏列表。Avenor 保留原始数据、禁用收藏变更，并在提供只读重试期间保持独立的 Drawer 与应用启动路径可用。
 - 用户能够从 Home 访问 Drawer。
-- 无论 Avenor Launcher 是否已设为默认主屏幕，Drawer 都采用单列表展示 Android 平台规则下应当对 Launcher 可见且可启动的全部应用入口，并允许用户启动所选入口。
+- 无论 Avenor Launcher 是否已设为默认主屏幕，Drawer 都采用单列表展示 Android 在 Avenor 当前角色与最小权限边界下正常暴露为可见且可启动的全部应用入口，并允许启动所选入口。
 - 当 Android 平台向 Launcher 暴露应用分身入口时，Drawer 将其作为独立的可启动入口展示，不得仅按包名去重。
+- Android 无需隐藏资料访问即可暴露的普通、工作资料和克隆可启动条目继续属于当前范围。需要 `ACCESS_HIDDEN_PROFILES` 的 Private Space 条目不属于当前产品范围。
 - Launcher 为所有用户可见文案提供英文和简体中文资源，根据系统语言区域自动选择，不支持的语言区域回退为英文。
 - 用户能够从 Settings 打开 Android 系统的默认主屏幕应用设置。
 - 当前产品不提供一键清除或恢复全部本地配置；用户通过具体设置项修改配置。
@@ -124,7 +127,7 @@ Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://develope
 - **本地优先：** 当前产品状态和核心数据保存在设备本地。
 - **离线可用：** 无网络时，Home、Drawer、应用启动和核心 Settings 仍可使用。
 - **最少权限：** 每项权限必须对应当前核心能力，并记录用途、触发时机、拒绝行为和渠道政策影响。
-- **可见性最小化：** 当前产品只需要发现和启动 Android 暴露给 Launcher 的应用入口，不把不受限制地读取全部已安装包数据纳入当前范围；具体 API、清单声明和权限由技术与隐私审查决定。
+- **可见性最小化：** 当前产品只要求发现并启动 Android 在 Avenor 当前角色与最小权限边界下正常暴露的应用入口；无限制访问全部已安装包数据不属于当前范围。Avenor 不声明 `ACCESS_HIDDEN_PROFILES`，也不把可见性扩展至 Android Private Space。具体 API 以及其他必要的清单声明或权限由技术与隐私审查决定。
 - **可靠性：** 当前产品必须支持作者在真实主力设备上持续日常使用；具体稳定性门槛待确认。
 - **兼容性：** 支持 Android 12/API 31 至 Android 17/API 37 的普通手机竖屏环境。在 API 31 模拟器上验证最低边界，并至少在已记录的 API 36 和 API 37 两台真实设备上验证主要日用行为。
 
@@ -132,9 +135,11 @@ Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://develope
 
 - Given Avenor Launcher 已在支持的 Android 设备上设为主屏幕应用，when 用户执行回到主屏幕的系统操作，then 系统显示 Avenor Launcher 的 Home。
 - Given 用户进入 Home，when 系统完成基础内容加载，then Home 显示系统时间、日期、已保存的收藏应用和 Drawer 入口。
+- Given 收藏持久化状态无法可靠读取，when Home 展示收藏区域，then 明确区分失败与空列表、保留原始数据、禁用收藏写入、提供只读重试，并保持 Drawer 应用发现和应用启动可用；when 重试失败，then 恢复相同的内联错误，不额外展示 Toast，也不覆盖数据。
 - Given 用户位于 Home，when 用户执行已定义的 Drawer 入口操作，then Drawer 以单列表显示 Android 暴露的可启动应用入口。
 - Given Avenor Launcher 未设为默认主屏幕，when 用户直接启动 Avenor Launcher 并进入 Drawer，then Drawer 仍显示 Android 平台规则下应当可见且可启动的全部应用入口。
 - Given Android 向 Launcher 暴露同一应用的分身入口，when Drawer 展示应用列表，then 每个分身入口均独立出现并可启动。
+- Given 某个条目需要通过 `ACCESS_HIDDEN_PROFILES` 访问 Android Private Space，when Avenor 构建 Drawer 应用清单，then Avenor 不申请该权限、不访问或展示该条目、不创建 Private Space 独立容器，也不提供 Private Space 显示、隐藏、锁定、解锁、收藏或状态恢复行为。
 - Given Drawer 中存在可启动应用，when 用户选择其中一个应用，then 系统启动所选应用。
 - Given 系统语言区域为英文或简体中文，when Avenor 展示或刷新界面，then 使用对应资源；given 其他语言区域，then 使用英文回退资源。
 - Given 用户进入 Settings，when 用户选择默认主屏幕应用设置入口，then 系统打开对应的 Android 设置页面。
@@ -173,6 +178,7 @@ Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://develope
 ## 依赖与风险
 
 - Android 默认主屏幕角色、应用枚举方式、应用分身可见性及相关清单声明/权限尚未完成技术与隐私核实。
+- 未来支持 Android Private Space 必须作为作者批准的独立产品能力，并重新审查交互、权限、隐私、兼容性和验证范围；技术实现中的发现不会使其进入当前范围。
 - Settings 包含当前默认 Launcher 状态、系统默认主屏幕设置入口，以及 Settings 交互规格定义的产品信息入口。手动选择应用语言不在当前范围内。
 - 当前证据只代表作者本人，不能支持大众市场需求结论。
 - “美观、舒适且极简”尚未转化为可观察标准，也不属于当前验收目标。

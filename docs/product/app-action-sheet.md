@@ -43,6 +43,7 @@ The current contract does not define a dedicated overflow interaction for unusua
 - At most five Launcher actions are defined; this limit does not apply to platform application shortcuts.
 - On Home the action order is remove favorite, reorder, then uninstall. Reorder is hidden when Home has fewer than two favorites; uninstall is hidden when unavailable; later visible actions shift left.
 - On Drawer the action order is add favorite or remove favorite according to current state, then uninstall when available. Uninstall shifts into the next left slot and is hidden when unavailable.
+- When favorite persistence cannot be reliably read, Avenor cannot determine whether the selected application is currently a favorite. Replace the add-favorite or remove-favorite action with one disabled favorite slot labeled `Favorites unavailable`, using the standard heart icon. The slot cannot receive input and does not produce a Toast. Application information and other non-favorite actions remain governed by their own availability. After a successful favorite-data read, restore the applicable add-favorite or remove-favorite action from the recovered state.
 - Adding a favorite appends it on Home while Drawer remains at its current position.
 - Removing a favorite closes the sheet and removes the Home entry. When invoked from Drawer, the application remains in Drawer and the current anchor and relative scroll position do not change.
 - Uninstall is hidden for applications the system does not allow the user to uninstall or only permits disabling.

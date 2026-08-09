@@ -17,5 +17,6 @@
 | Reorder mode | 排序模式 | The Home state in which favorites can be repositioned |
 | Badge | 标记 | Platform-provided visual identity for a clone or profile context |
 | Application information | 应用信息 | The system-owned information and management surface for an application |
+| Private Space | 私密空间 | Android hidden-profile capability outside the current product contract; Avenor does not request `ACCESS_HIDDEN_PROFILES` to access it |
 
 Use these terms consistently in product documents. Technical names may differ only when an implementation distinction is necessary and documented.

@@ -139,6 +139,7 @@ The following current-contract behavior is deferred from this version:
 - Platform-provided application shortcuts in the application action sheet
 - Uninstall, disable, and cloned-application removal actions
 - Manual application-language selection
+- Favorite-persistence corruption detection, source-data preservation, read-only recovery, and related disabled-action states
 
 The following capabilities remain outside the current product contract and are also excluded:
 

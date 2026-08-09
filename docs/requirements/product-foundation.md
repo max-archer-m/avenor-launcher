@@ -95,6 +95,7 @@ Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](h
 - Network-backed information such as weather.
 - Accounts, cloud synchronization, or a self-hosted server.
 - Behavioral analytics, automatic ordering, recommendations, AI assistance, or agent integration.
+- Android Private Space access, presentation, management, favorites, and state restoration, including declaration of `ACCESS_HIDDEN_PROFILES`.
 - Business-model validation, formal store release, or mass-market adaptation.
 
 “Out of scope” means excluded from the current product contract, not permanently rejected. Advertising, recommendation feeds, and engagement-maximizing design remain constrained by the long-term boundaries in the project overview.
@@ -110,9 +111,11 @@ An additive requirement does not become current scope merely because it can be a
 - The user can launch Avenor Launcher as the Android home-screen entry point.
 - Home displays time and date supplied by the device system.
 - Home displays locally saved favorite application entries and allows the selected favorite to be launched.
+- An unreadable or damaged favorite persistence result is presented as a recoverable loading failure rather than an empty favorite list. Avenor preserves the original data, disables favorite mutations, and keeps independent Drawer and application-launch paths available while a read-only Retry is offered.
 - The user can access the Drawer from Home.
-- Whether or not Avenor Launcher is selected as the default home application, the Drawer presents a single list of every application entry that should be visible and launchable under Android platform rules and allows the selected entry to be launched.
+- Whether or not Avenor Launcher is selected as the default home application, the Drawer presents a single list of every application entry that Android normally exposes as visible and launchable within Avenor's current role and least-privilege boundary and allows the selected entry to be launched.
 - When Android exposes a cloned application entry to the Launcher, the Drawer presents it as an independent launchable entry and does not deduplicate solely by package name.
+- Ordinary, work-profile, and cloned launchable entries remain in scope when Android exposes them without hidden-profile access. Private Space entries that require `ACCESS_HIDDEN_PROFILES` are outside the current product scope.
 - The Launcher provides English and Simplified Chinese user-visible resources, selects them from the system locale automatically, and falls back to English for unsupported locales.
 - The user can open Android system settings for the default home application from Settings.
 - The current product does not provide one-action clearing or restoration of all local configuration; users edit configuration through individual settings.
@@ -124,7 +127,7 @@ An additive requirement does not become current scope merely because it can be a
 - **Local first:** Current product state and core data remain on the device.
 - **Offline capable:** Home, Drawer, application launching, and core Settings remain available without a network connection.
 - **Least privilege:** Every permission maps to a current core capability and records its purpose, trigger, denial behavior, and distribution-policy impact.
-- **Minimum visibility:** The current product requires only discovery and launching of application entries exposed to a Launcher by Android; unrestricted access to all installed-package data is outside the current scope. Determine concrete APIs, manifest declarations, and permissions through technical and privacy review.
+- **Minimum visibility:** The current product requires only discovery and launching of application entries normally exposed to Avenor under its current role and least-privilege boundary; unrestricted access to all installed-package data is outside the current scope. Avenor does not declare `ACCESS_HIDDEN_PROFILES` or expand visibility to Android Private Space. Determine concrete APIs and other necessary manifest declarations or permissions through technical and privacy review.
 - **Reliability:** The current product must support the author's ongoing daily use on their actual primary devices; measurable stability thresholds remain unresolved.
 - **Compatibility:** Support portrait use on ordinary phones from Android 12/API 31 through Android 17/API 37. Validate the minimum boundary on an API 31 emulator and validate primary daily-use behavior on at least the two recorded physical devices running API 36 and API 37.
 
@@ -132,9 +135,11 @@ An additive requirement does not become current scope merely because it can be a
 
 - Given Avenor Launcher is selected as the home application on a supported Android device, when the user performs the system action to return home, then the system displays Avenor Launcher Home.
 - Given the user enters Home, when core content finishes loading, then Home displays system time, date, saved favorite application entries, and a Drawer entry.
+- Given favorite persistence cannot be reliably read, when Home presents the favorite region, then it distinguishes the failure from an empty list, preserves the original data, disables favorite writes, offers a read-only Retry, and keeps Drawer discovery and application launching available; when Retry fails, then the same inline error returns without an additional Toast or data overwrite.
 - Given the user is on Home, when the user performs the defined Drawer-entry action, then the Drawer presents a single list of application entries exposed by Android.
 - Given Avenor Launcher is not selected as the default home application, when the user launches Avenor Launcher directly and enters the Drawer, then the Drawer still displays every application entry that should be visible and launchable under Android platform rules.
 - Given Android exposes cloned entries for an application, when the Drawer presents the application list, then every cloned entry appears independently and can be launched.
+- Given an entry requires Android Private Space access through `ACCESS_HIDDEN_PROFILES`, when Avenor builds the Drawer inventory, then Avenor does not request that permission, access or display the entry, create a Private Space container, or provide Private Space visibility, lock, unlock, favorite, or restoration behavior.
 - Given a launchable application appears in the Drawer, when the user selects it, then the system launches that application.
 - Given the system locale is English or Simplified Chinese, when Avenor presents or refreshes its interface, then it uses the corresponding resource set; given another locale, it uses the English fallback.
 - Given the user opens Settings, when the user selects the default-home settings entry, then the system opens the corresponding Android settings page.
@@ -173,6 +178,7 @@ The current product lets users maintain Home favorites and use individual Settin
 ## Dependencies and risks
 
 - The Android home role, application-enumeration approach, cloned-entry visibility, and related manifest declarations or permissions still require technical and privacy review.
+- Future support for Android Private Space requires a separate author-approved product capability and renewed interaction, permission, privacy, compatibility, and validation review; implementation discovery does not place it into the current scope.
 - Settings includes current default-Launcher status, an entry to system default-home settings, and the product-information entries defined in the Settings interaction specification. Manual application-language selection is outside the current scope.
 - Current evidence represents only the author and cannot support a mass-market demand conclusion.
 - “Attractive, comfortable, and minimal” has not been converted into observable standards and is not a current acceptance target.

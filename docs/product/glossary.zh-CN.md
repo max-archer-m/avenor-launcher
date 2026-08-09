@@ -17,5 +17,6 @@
 | Reorder mode | 排序模式 | Home 中允许重新排列收藏应用的状态 |
 | Badge | 标记 | 平台提供的分身或资料身份视觉标记 |
 | Application information | 应用信息 | 系统负责的应用信息与管理界面 |
+| Private Space | 私密空间 | 当前产品契约之外的 Android 隐藏资料能力；Avenor 不申请 `ACCESS_HIDDEN_PROFILES` 访问该能力 |
 
 产品文档统一使用上述术语。只有实现确实需要额外区分且形成文档时，技术命名才可以不同。

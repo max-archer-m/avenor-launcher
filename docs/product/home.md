@@ -39,6 +39,19 @@ Home content uses 16dp horizontal inset and a provisional 32dp vertical inset. T
 - A transient launch failure retains the favorite, provides a short localized error Toast, and refreshes that entry's state.
 - A later successful refresh restores an available entry in place without changing its favorite order.
 
+### Favorite persistence loading and failure
+
+- A favorite persistence read is successful only when Avenor can reliably interpret the complete stored favorite state. An unreadable or damaged result is not an empty favorite list and must not show the new-installation empty state.
+- While the initial read or a user-requested retry is in progress, the favorite region shows a progress indicator and the localized message `Loading favorites…`. It does not show favorite rows, the empty-state invitation, an error icon, or a Retry action concurrently.
+- If the state cannot be reliably read, the favorite region hides the progress indicator, shows an error icon, displays the localized message `Unable to load favorites`, and provides a `Retry` action.
+- The failure state preserves the original unreadable data and must not initialize, migrate, repair, clear, replace, or otherwise overwrite it. Process recreation and device restart do not reinterpret the failure as an empty list.
+- While the failure or retry state remains active, all add-favorite, remove-favorite, and reorder mutations are disabled. Home time and date, Home-to-Drawer navigation, Drawer inventory, and application launching remain available.
+- Selecting Retry starts one read-only reload, changes the favorite region to the loading presentation, and disables repeated Retry activation until that attempt completes. Retry does not write, repair, migrate, clear, or replace stored favorite data.
+- A successful retry restores the exact readable favorite state and its order without an additional write. A reliably read empty state shows the normal empty-state invitation and restores favorite mutations.
+- A failed retry returns to the same persistent failure presentation, restores the Retry action, preserves the original unreadable data, and keeps favorite mutations disabled. It does not add a Toast because the visible favorite-region error already communicates the result. The user may retry again.
+- A normal initial read occurs on a new process start. Avenor does not continuously retry, poll, or use network-state changes as a retry trigger. Any additional safe read trigger requires technical validation and must preserve the same no-write boundary.
+- If a favorite mutation surface is already open when the failure is detected, close it without applying a favorite change. Repair, export, reset, backup, and restore behavior require a later product decision and technical assessment.
+
 ## Reorder mode
 
 - Reorder mode is available only when Home contains at least two favorites and is entered from the selected favorite's Launcher actions. With zero or one favorite, the reorder action is hidden.
@@ -81,3 +94,4 @@ Home content uses 16dp horizontal inset and a provisional 32dp vertical inset. T
 - Empty, short, and scrollable favorite lists preserve the same top-aligned structure.
 - Primary and cloned entries remain visibly distinguishable when the platform supplies a badge; Avenor-specific fallback distinction is outside the current scope.
 - Returning to Home during the same process preserves its meaningful list state; process recreation follows [navigation.md](navigation.md).
+- An unreadable favorite state remains distinguishable from a valid empty list, cannot be overwritten through favorite actions, and can recover through a successful read-only Retry without blocking independent application discovery and launch paths.
