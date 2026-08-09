@@ -16,7 +16,7 @@ A **contract document** is a repository-authoritative document whose statements 
 | --- | --- | --- |
 | Project-governance contract | How is this project directed, documented, authorized, and maintained? | Applies to project work while the rule remains in the current governance documents |
 | Current product contract | What product behavior, user-visible state, scope, terminology, and acceptance intent apply now? | Applies to the current product definition until an authorized change updates the applicable document |
-| Delivery contract | What must a roadmap boundary, milestone, or iteration deliver, exclude, validate, and report? | Applies to the named delivery scope; it selects work from the current product contract but does not independently redefine that contract |
+| Delivery contract | What must a roadmap boundary, formal version, or iteration deliver, exclude, validate, and report? | Applies to the named delivery scope; it selects work from the current product contract but does not independently redefine that contract |
 | Technical or operational contract | How must the current system be designed, built, validated, secured, operated, or released? | Applies to the documented technical or operational boundary and must remain compatible with the current product contract |
 | Historical contract record | What scope, decisions, implementation changes, validation evidence, and outcome actually applied in a completed period? | Remains authoritative for that historical period but does not govern current product behavior |
 | Legal instrument | What legal permissions, obligations, or restrictions apply? | Applies according to the instrument's own terms and scope |
@@ -25,7 +25,7 @@ Contract classes interact as follows:
 
 - Product direction, Requirements Briefs, interaction specifications, design foundations, and the product glossary form the current product contract for their respective responsibilities.
 - A delivery contract may commit to implementing all or part of the current product contract. It may add delivery sequencing, affected areas, exclusions, risks, and validation evidence, but it must not introduce or change product behavior unless the applicable current product contract is updated through an authorized product decision.
-- A milestone may aggregate multiple iterations. An iteration is independently reviewable delivery scope, not a substitute for the product definition.
+- A formal version contains one or more iterations. An iteration is independently reviewable delivery scope, not a substitute for the product definition. A milestone is reserved for an exceptional author-declared baseline with an approved Git tag; a GitHub Release is optional.
 - When a delivery contract completes, its final result remains authoritative delivery history. Moving it into a version archive changes its temporal applicability, not its authority or factual meaning.
 - Architecture, development, validation, security, privacy, and release documents become technical or operational contracts only after their real inputs and conclusions exist.
 - Git history supports provenance but does not replace the applicable contract document.
@@ -49,6 +49,8 @@ Contract classes interact as follows:
 | Product design foundations | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | Current product contract | Defines current theme, layout, typography, icon, accessibility, and resource principles |
 | Product glossary | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | Current product contract | Defines canonical product terms |
 | Version, artifact, and release governance | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | Technical or operational contract | Defines application versions, archives, APK artifacts, signing continuity, tags, and GitHub Releases |
+| Active version-delivery format | [`docs/versions/README.md`](versions/README.md) | [`docs/versions/README.zh-CN.md`](versions/README.zh-CN.md) | Project-governance contract | Defines active version directories, required inputs, formats, and the project milestone boundary |
+| Iteration-record format | [`docs/iterations/README.md`](iterations/README.md) | [`docs/iterations/README.zh-CN.md`](iterations/README.zh-CN.md) | Project-governance contract | Defines iteration naming, required sections, evidence, and archival handling |
 | License | [`LICENSE`](../LICENSE) | — | Legal instrument | Contains the Apache License 2.0 text |
 
 ## Planned authoritative locations
@@ -69,7 +71,7 @@ Create the following documents only when real inputs exist:
 
 Maintain product documentation in three distinct layers:
 
-1. **Product direction:** `overview.md` records durable purpose, principles, capability layers, and long-term boundaries. A future `docs/roadmap.md` may record capability-layer movement from V1 to V2 to V3 to V4 and the major milestones between those layers. It must remain more macroscopic than release or iteration planning.
+1. **Product direction:** `overview.md` records durable purpose, principles, capability layers, and long-term boundaries. A future `docs/roadmap.md` may record capability-layer movement from V1 to V2 to V3 to V4 and major project outcomes between those layers. It must remain more macroscopic than version or iteration planning.
 2. **Current product contract:** Requirements Briefs and interaction specifications record the current user behavior, state, constraints, and acceptance intent. They describe the current product rather than preserving version-by-version narrative history.
 3. **Change rationale and delivery history:** Product decision records explain consequential scope choices. Iteration records and version archives describe project progress and implementation evolution without becoming a second copy of the current product contract.
 
@@ -87,21 +89,25 @@ Each specification is the authoritative current contract for its own responsibil
 
 When an iteration changes current behavior, record the before-and-after delivery scope in the iteration record, follow `docs/product-decisions.md` when the author has enabled decision records, and update the affected current product specification in the same change or before integrating the implementation.
 
-## Roadmap, milestones, iterations, and version archives
+## Roadmap, versions, iterations, milestones, and archives
 
 These delivery contracts and historical contract records answer different questions and must not replace one another or the current product contract.
 
 ### Roadmap
 
-A future `docs/roadmap.md` records long-term capability-layer direction and major milestones. It may describe movement between V1, V2, V3, and V4, but it does not authorize later capability layers, prescribe detailed page behavior, or track ordinary implementation tasks.
+A future `docs/roadmap.md` records long-term capability-layer direction and major project outcomes. It may describe movement between V1, V2, V3, and V4, but it does not authorize later capability layers, prescribe detailed page behavior, or track ordinary implementation tasks.
 
-### Milestone records
+### Active version-delivery records
 
-Milestone records describe a major project outcome, progress, deviations, evidence, and final conclusion. They link to authoritative product requirements and do not duplicate detailed product behavior. Create their location and contents only when a real milestone contract exists.
+Use `docs/versions/<version>/` for the active delivery inputs and integrated contract of a formal application version. Follow [`docs/versions/README.md`](versions/README.md). The version directory uses the exact `versionName` without a `v` prefix. It may contain product scope, technical assessment, and an integrated version `README.md` when their real inputs exist.
+
+### Milestones
+
+For this project, a milestone is an exceptional baseline explicitly declared by the project author and represented by an approved Git tag. A GitHub Release is optional and exists only when the author also chooses an outward-facing publication. A formal version, iteration, unapproved tag, or approved tag not declared as a milestone does not become a milestone automatically. Milestones do not organize ordinary version delivery, and no `docs/milestones/` directory is used.
 
 ### Iteration records
 
-Use `docs/iterations/NNNN-<title>.md` when implementation planning begins and an actual delivery iteration exists.
+Use `docs/iterations/NNNN-<title>.md` when implementation planning begins and an actual delivery iteration exists. Follow [`docs/iterations/README.md`](iterations/README.md).
 
 - Iteration identifiers use one project-wide, zero-padded, monotonically increasing sequence starting with `0001`.
 - Never renumber, reuse, or restart the sequence after a version archive.
@@ -117,7 +123,7 @@ Iteration records are delivery contracts while their scope is active and authori
 After a software version boundary is actually declared and its included iterations are closed, create a version folder such as `docs/archives/v1.1.0/`.
 
 - The folder name uses the declared software version and follows [`docs/release.md`](release.md). Tag presence is optional and does not determine whether a formal version archive exists.
-- Move the original included iteration records into the version folder; do not copy them while leaving a second canonical version under `docs/iterations/`.
+- Move the active version contract, its supporting inputs, and the original included iteration records into the archive folder; do not leave second canonical copies under `docs/versions/` or `docs/iterations/`.
 - Add `README.md` inside the version folder as its summary and entry point.
 - The summary lists each included iteration as `<iteration identifier> — <title>` and links to the original iteration file now stored in the same archive folder.
 - The summary records the version outcome, included iteration range or explicit set, important product changes, implementation evolution, decisions, migrations, validation evidence, known limitations, related tag or release when one exists, and the reason the version boundary was declared.
@@ -126,7 +132,7 @@ After a software version boundary is actually declared and its included iteratio
 - Update every link that referenced an iteration when moving it into an archive folder.
 - Every formal version contains one or more completed iterations.
 
-Do not create roadmap, milestone, iteration, or archive files before their real planning or implementation inputs exist.
+Do not create roadmap, version, iteration, milestone, or archive files before their real planning or implementation inputs exist. Format documents may exist before individual delivery records because they govern how later records are created.
 
 ## Language and translation
 
@@ -140,7 +146,7 @@ Do not create roadmap, milestone, iteration, or archive files before their real 
 ## Updates and review
 
 - Update affected authoritative documents immediately when product scope, architecture, data processing, platform, distribution channel, validation process, or another documented boundary changes.
-- At the end of each milestone, review documentation entry points, links, status, and cross-document consistency.
+- At the end of each formal version and milestone, review documentation entry points, links, status, and cross-document consistency.
 - Review security, privacy, license, and release documentation again before the applicable release gate.
 - Do not present plans, assumptions, or unresolved items as completed facts.
 - For documentation-only changes, at minimum validate local Markdown links and inspect the Git diff and bilingual semantic alignment.

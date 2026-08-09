@@ -19,6 +19,8 @@ Avenor Launcher 的目标是作为 Android 设备的默认主屏幕应用。产�
 - [文档地图与治理规则](docs/documentation.zh-CN.md)
 - [产品基础需求](docs/requirements/product-foundation.zh-CN.md)
 - [版本、产物与发布治理](docs/release.zh-CN.md)
+- [版本交付文档](docs/versions/README.zh-CN.md)
+- [迭代记录格式](docs/iterations/README.zh-CN.md)
 - [Agent 指令](AGENTS.zh-CN.md)
 - [英文 Agent 指令](AGENTS.md)
 - [许可证](LICENSE)

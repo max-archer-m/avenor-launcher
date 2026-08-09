@@ -12,8 +12,8 @@ Avenor Launcher uses a project-defined versioning profile with the numeric form 
 - The project has no prerelease-version concept. Identifiers such as `alpha`, `beta`, and `rc`, and SemVer prerelease or build-metadata suffixes, are not part of the version format.
 - Repository commits, pushed source states, local builds, and other work before `1.0.0` are development evidence, not formal application versions.
 - A formal version identifies an installable and verified Android APK. It is not created by documentation work alone.
-- Every formal version contains one or more completed iterations. The applicable milestone or version delivery contract selects the subset of the current product contract delivered by that version.
-- `1.0.0` is the first minimum usable version. It is not required to implement every behavior described by the current product contract; its exact delivery scope must be established through iteration and milestone contracts.
+- Every formal version contains one or more completed iterations. The applicable version delivery contract selects the subset of the current product contract delivered by that version.
+- `1.0.0` is the first minimum usable version. It is not required to implement every behavior described by the current product contract; its exact delivery scope must be established through the version and iteration contracts.
 
 ## Numeric progression
 
@@ -46,11 +46,11 @@ Pure documentation changes never change the application version. A source, resou
 - Two different formal `versionName` values may not share a `versionCode`.
 - Downgrade is not supported.
 
-Within one `MAJOR` family, any older formal version must have a supported direct upgrade path to any newer formal version. For a cross-major upgrade, the applicable major-version milestone contract must define supported source versions, migrations, validation, and limitations before release.
+Within one `MAJOR` family, any older formal version must have a supported direct upgrade path to any newer formal version. For a cross-major upgrade, the applicable major-version delivery contract must define supported source versions, migrations, validation, and limitations before release.
 
 ## Iterations and version archives
 
-Each formal version must be represented by `docs/archives/v<version>/README.md` after all included iterations are completed. The archive contains or links the original records for one or more included iterations and must record:
+Each formal version is planned under `docs/versions/<version>/` and must be represented by `docs/archives/v<version>/README.md` after all included iterations are completed. The archive contains the completed version contract, its supporting inputs, and the original records for one or more included iterations, and must record:
 
 - `versionName` and `versionCode`
 - The exact Git commit represented by the APK
@@ -104,6 +104,8 @@ Application versions, Git tags, and GitHub Releases are separate records:
 - No GitHub Release is required while the project has no public distribution line. A future release may attach the verified APK only when the author explicitly approves that distribution action and its security and validation gates are satisfied.
 - Neither this document nor a version archive authorizes a tag, remote push, GitHub Release, or APK upload.
 
+For this project, a milestone exists only when the project author explicitly declares an important baseline and its approved Git tag exists. A GitHub Release is optional and requires separate approval when the author chooses outward-facing publication. A version or an approved tag not declared as a milestone is not a milestone automatically.
+
 ## Migration-cost discipline
 
 Product definition, technical research, architecture, and implementation must consider likely future capability-layer migration cost. Where evidence supports it, preserve replaceable boundaries, data migration paths, and appropriate extension or API seams so later capability layers do not require avoidable rewrites. This requirement does not authorize speculative frameworks, unused abstractions, or implementation details in product documentation; the chosen preparation must remain proportional to current evidence and must not silently expand current scope.
@@ -117,4 +119,3 @@ The following operational details must be decided from the actual Android projec
 - Authoritative build, signing, digest, install, upgrade, and validation commands
 - The exact tag naming convention
 - Any future distribution channel and its publication gates
-

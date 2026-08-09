@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [product-decisions.zh-CN.md](product-decisions.zh-CN.md).
 >
-> This document defines how product decisions and scope changes are handled. It does not define the contents of any delivery milestone or authorize implementation.
+> This document defines how product decisions and scope changes are handled. It does not define the contents of any formal version or authorize implementation.
 
 ## Purpose
 
@@ -26,7 +26,7 @@ Use each source for its own responsibility:
 | Why the product exists and which long-term boundaries apply | Product overview |
 | What users should be able to observe and accomplish | Current requirements and interaction specifications |
 | Why an important product direction or scope changed | Product decision records in this document |
-| Where the project is in its delivery lifecycle | Milestone or project-progress records |
+| Where the project is in its delivery lifecycle | Version-delivery or project-progress records |
 | How the system is designed and implemented | Architecture documentation and technical decision records |
 | What the current implementation actually does | Code, tests, builds, and validation evidence |
 | Whether the current product contract has been satisfied | Traceable acceptance and validation evidence |
@@ -38,29 +38,30 @@ When documentation, implementation, and observed platform behavior disagree, rec
 Use the following planning hierarchy:
 
 1. **Capability layer:** A long-term product capability boundary such as V1 fixed presentation or V2 basic adaptation. A capability layer is not automatically a semantic software version.
-2. **Milestone:** A project unit organized around one primary product outcome and explicit exit evidence.
-3. **Vertical slice or feature:** An independently understandable, demonstrable, and verifiable user outcome represented in the current product contract.
-4. **Implementation task:** Engineering work needed to deliver a current slice or feature; it is not itself a product outcome.
-5. **Patch or bug fix:** Work that restores current documented behavior without expanding the product contract.
+2. **Formal version:** A version delivery contract selecting one coherent, verifiable subset of the current product contract and containing one or more iterations.
+3. **Iteration:** An independently reviewable delivery unit contributing to one formal version.
+4. **Vertical slice or feature:** An independently understandable, demonstrable, and verifiable user outcome represented in the current product contract.
+5. **Implementation task:** Engineering work needed to deliver a current slice or feature; it is not itself a product outcome.
+6. **Patch or bug fix:** Work that restores current documented behavior without expanding the product contract.
 
-Do not define a milestone or tag by a fixed number of features. Feature counts may be used as a planning warning, but coherence, user outcome, dependency, risk, and evidence determine the boundary.
+Do not define a version, iteration, or tag by a fixed number of features. Feature counts may be used as a planning warning, but coherence, user outcome, dependency, risk, and evidence determine the boundary.
 
-A milestone should normally contain one primary product outcome. If it contains more than three independent primary user journeys, review whether it should be divided. This is a review trigger, not an automatic rule.
+A version delivery contract should normally identify one primary product outcome. If it contains more than three independent primary user journeys, review whether its delivery should be divided. This is a review trigger, not an automatic rule.
 
 ## Tags and releases
 
-A Git tag identifies an implementation snapshot. It is delivery evidence, not a product-scope level and not a substitute for a milestone record or version archive. The authoritative version, artifact, tag, and GitHub Release rules are defined in [`docs/release.md`](release.md).
+A Git tag identifies an implementation snapshot. It is delivery evidence, not a product-scope level and not a substitute for a version-delivery record or version archive. The authoritative version, artifact, tag, GitHub Release, and milestone rules are defined in [`docs/release.md`](release.md).
 
-- A milestone and a formal application version may exist without a tag.
+- A formal application version may exist without a tag.
 - Tags are reserved for author-approved important and stable implementation baselines; they are not required for every formal version.
 - A tag does not require a GitHub Release. A GitHub Release requires an existing approved tag and separate author approval.
 - This document does not authorize creating tags or releases.
 
-## Milestone records
+## Version-delivery records
 
-Milestone records describe project intent, progress, evidence, and outcome. They do not replace product requirements.
+Version-delivery records describe project intent, selected product scope, technical feasibility, iteration composition, evidence, and outcome. They do not replace product requirements. Their location and format are defined in [`docs/versions/README.md`](versions/README.md).
 
-A milestone record may contain:
+A version-delivery record may contain:
 
 - The primary product outcome being pursued
 - Status and accountable owner
@@ -73,9 +74,9 @@ A milestone record may contain:
 - The final completion, partial-completion, cancellation, pause, or replacement conclusion
 - Related builds, tags, or validation records when they exist
 
-A milestone record must not become a second authoritative copy of detailed page behavior, acceptance criteria, architecture, or implementation rules. When a linked product contract changes, the milestone records the change and decision link instead of silently rewriting its history.
+A version-delivery record must not become a second authoritative copy of detailed page behavior, acceptance criteria, architecture, or implementation rules. When a linked product contract changes, the version record records the change and decision link instead of silently rewriting its history.
 
-Each milestone is defined separately through its own delivery contract when real delivery inputs exist.
+Each formal version is defined separately through its own delivery contract when real delivery inputs exist.
 
 ## What is a product scope change?
 
@@ -85,7 +86,7 @@ Treat a change as a scope change when it affects any of the following:
 
 - Target users or supported scenarios
 - Capability-layer boundaries or long-term non-goals
-- A milestone's primary product outcome or exit gate
+- A formal version's primary product outcome or exit gate
 - Included or excluded pages, dialogs, user journeys, or independently useful feature modules
 - Supported operating systems, devices, screen forms, languages, regions, or distribution channels
 - User-visible behavior, state, recovery, or acceptance criteria
@@ -114,17 +115,17 @@ Requirements:
 
 - Record a product decision.
 - Update the overview and every affected authoritative requirement.
-- Re-evaluate affected milestones and professional-review needs.
+- Re-evaluate affected versions and professional-review needs.
 
 ### D2: Scope decision
 
-A D2 decision changes a current milestone, vertical slice, feature, user journey, non-goal, or acceptance criterion without redefining the product's long-term direction.
+A D2 decision changes a current formal version, vertical slice, feature, user journey, non-goal, or acceptance criterion without redefining the product's long-term direction.
 
 Requirements:
 
 - Record a product decision.
 - Update the affected Requirements Brief or interaction specification.
-- Record the milestone impact when a milestone exists.
+- Record the version-delivery impact when an applicable version contract exists.
 
 ### D3: Local product decision
 
@@ -146,7 +147,7 @@ Create a product decision record when any of the following applies:
 - The decision affects multiple authoritative documents or multiple features.
 - The change adds data, permissions, networking, accounts, external services, supported platforms, or distribution obligations.
 - A current requirement is deferred, removed, or replaced because of technical evidence.
-- A milestone is materially re-scoped, paused, cancelled, or replaced.
+- A formal version is materially re-scoped, cancelled, or replaced.
 
 Do not create a record for ordinary wording edits, routine defect fixes, or implementation details with no product-contract impact.
 
@@ -185,7 +186,7 @@ Use the lightest process proportional to impact:
 5. Reflect the author's direction in the current authoritative documents; add a decision record only after the author explicitly enables decision records.
 6. Update every affected authoritative product document.
 7. Update implementation and tests only within the resulting current contract.
-8. Update milestone progress and validation evidence without duplicating the product contract.
+8. Update version-delivery progress and validation evidence without duplicating the product contract.
 
 For a local clarification or small product adjustment, documentation, code, and tests may be updated in the same focused commit. For D1 or D2 changes, the resulting current product contract must be reviewable before or together with implementation. Existing code does not silently change the contract.
 
@@ -203,17 +204,17 @@ Append records to this document using stable, never-reused identifiers:
 - Decision: <The direction established by the project author>
 - Alternatives: <Meaningful alternatives considered>
 - Rationale: <Why this direction was selected>
-- Scope impact: <Affected capability layer, milestone, slice, feature, or non-goal>
+- Scope impact: <Affected capability layer, formal version, slice, feature, or non-goal>
 - Documentation impact: <Authoritative documents to update>
 - Technical or professional review: <Required evidence or review, if any>
 - Revisit when: <Conditions that trigger reassessment>
-- Related records: <Requirements, milestone records, ADRs, validation, or replacement decision>
+- Related records: <Requirements, version-delivery records, ADRs, validation, or replacement decision>
 ```
 
 - Keep each record focused on one decision that can be reconsidered independently.
 - Do not duplicate full requirements or technical designs in a decision record; link to their authoritative locations.
 - Do not rewrite a historical decision to represent a later outcome. Add a later record explaining what changed and cross-link the records.
-- A milestone may link to multiple product decisions, and one product decision may affect multiple milestones or features.
+- A version may link to multiple product decisions, and one product decision may affect multiple versions or features.
 
 ## Product-decision record authorization
 
@@ -226,7 +227,7 @@ Append records to this document using stable, never-reused identifiers:
 
 This governance establishes the decision process only. It does not:
 
-- Define any delivery milestone
+- Define any formal-version delivery scope
 - Authorize a vertical slice or implementation task
 - Select a technical stack or architecture
 - Authorize any tag or GitHub Release action
