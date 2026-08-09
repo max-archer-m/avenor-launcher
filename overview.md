@@ -36,7 +36,7 @@ Provide a restrained Android home screen that helps users find and open what the
 - User-facing names: “Avenor Launcher” in English and “Avenor 启动器” in Simplified Chinese.
 - Supported languages: English and Simplified Chinese.
 - Distribution boundary: maintained on GitHub for the author's daily use, with no public distribution or store-release requirement.
-- Platform baseline: ordinary Android phones in portrait orientation, with Android 16 (API 36) as the minimum and Android 17 (API 37) as the target.
+- Platform baseline: ordinary Android phones in portrait orientation, with Android 12 (API 31) as the minimum supported version and Android 16–17 (API 36–37) as the primary physical-validation range.
 - License: Apache License 2.0.
 - Advertising and recommendation feeds are out of scope.
 

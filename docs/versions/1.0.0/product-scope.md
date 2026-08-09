@@ -151,7 +151,7 @@ The following capabilities remain outside the current product contract and are a
 
 ## Product acceptance intent
 
-The product scope is satisfied only when all of the following are observable on the supported validation devices:
+The product scope is satisfied only when all of the following are observable across the Android 12/API 31 minimum-version emulator and the recorded Android 16/API 36 and Android 17/API 37 physical devices, according to the applicable validation plan:
 
 - Android can recognize Avenor as a Home application and the author can complete a system-owned selection path.
 - Returning Home while Avenor is the default opens Avenor Home without blocking or crashing.
@@ -172,6 +172,7 @@ Detailed measurable performance, power, memory, startup-response, and stability 
 The version technical assessment must determine whether and how the selected scope can be delivered, including at least:
 
 - Android Home-role declarations and the system-owned default-Home selection path
+- `minSdk` 31, `targetSdk` 36, and the latest stable compatible `compileSdk`; evaluate API 37 first and retain API 36 if API 37 still requires preview or release-candidate tooling
 - The minimum application-query, launch, package-visibility, and permission surface
 - Platform behavior for primary, cloned, and profile launchable entries on the two target devices
 - A stable launchable-entry identity suitable for favorite persistence and reconciliation
@@ -181,7 +182,7 @@ The version technical assessment must determine whether and how the selected sco
 - Resource, locale, theme, system-bar, icon, badge, and haptic implementation constraints
 - Safe handling of unavailable Clock, Calendar, application-information, and application-launch destinations
 - Required third-party dependencies and any license-notice obligations that would require product-scope reconsideration
-- Validation methods and measurable quality gates for both recorded physical devices
+- Validation methods and measurable quality gates for the API 31 minimum-version emulator and both recorded physical devices
 - Likely migration cost for later Settings, reorder, shortcut, uninstall, and broader current-contract delivery
 
 A technical constraint may produce a documented product-scope proposal, but it does not silently change this version or the current product contract. Material changes require project-author direction and updates to the applicable authoritative documents.

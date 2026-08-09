@@ -36,7 +36,7 @@ Avenor Launcher 首先源于作者的日常需求：用更安静、更直接的�
 - 面向用户名称：英文为“Avenor Launcher”，简体中文为“Avenor 启动器”。
 - 支持语言：英文和简体中文。
 - 发行边界：在 GitHub 维护，供作者本人日用；当前不包含公开分发或应用商店发布要求。
-- 平台基线：普通 Android 手机、仅竖屏，最低 Android 16（API 36），目标 Android 17（API 37）。
+- 平台基线：普通 Android 手机、仅竖屏，最低支持 Android 12（API 31），主要真实设备验证范围为 Android 16–17（API 36–37）。
 - 许可证：Apache License 2.0。
 - 不做广告和推荐流。
 

@@ -65,14 +65,15 @@ The author ultimately wants personalization that fits their own needs and capabi
 
 ## Platform and delivery boundary
 
-- Target version: Android 16 (API 36).
+- Minimum supported version: Android 12 (API 31).
 - Current physical validation devices: Samsung Galaxy S23 Ultra on Android 16 and Google Pixel 8 on Android 17.
+- Minimum-version validation environment: an Android 12/API 31 emulator unless a representative physical device becomes available.
 - Device scope: ordinary Android phones in portrait orientation only.
 - Device exclusions: landscape, foldable, tablet, desktop-mode, and external-display adaptation.
 - Distribution boundary: maintain the GitHub project for the author's daily use, with no application-store submission, GitHub Release APK, website APK, or other public distribution.
 - Store target-API, review, and data-disclosure requirements do not apply to the current distribution boundary; review them if public distribution becomes part of the current scope.
 
-Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](https://developer.android.com/about/versions/17/setup-sdk). Starting August 31, 2026, Google Play requires new applications and updates to target at least Android 16 (API 36), according to the [Google Play target API requirement](https://developer.android.com/google/play/requirements/target-sdk); this constrains `targetSdk`, not the project's `minSdk`. Because this project does not currently publish to Google Play, its target-API requirement is a future compatibility reference rather than a current release gate. The actual `compileSdk`, `targetSdk`, and `minSdk` must be implemented and verified in the build configuration when the Android project is created. Reviewed: 2026-08-07.
+Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](https://developer.android.com/about/versions/17/setup-sdk). Starting August 31, 2026, Google Play requires new applications and updates to target at least Android 16 (API 36), according to the [Google Play target API requirement](https://developer.android.com/google/play/requirements/target-sdk); this constrains `targetSdk`, not the project's `minSdk`. Because this project does not currently publish to Google Play, its target-API requirement is a future compatibility reference rather than a current release gate. The product compatibility boundary requires `minSdk` 31. For `1.0.0`, the technical assessment must validate `targetSdk` 36 and use the latest stable compatible `compileSdk`; API 37 is the current candidate, with API 36 retained if API 37 still requires preview or release-candidate tooling. The selected values must be implemented and verified in the build configuration when the Android project is created. Reviewed: 2026-08-09.
 
 ## Current product scope
 
@@ -125,7 +126,7 @@ An additive requirement does not become current scope merely because it can be a
 - **Least privilege:** Every permission maps to a current core capability and records its purpose, trigger, denial behavior, and distribution-policy impact.
 - **Minimum visibility:** The current product requires only discovery and launching of application entries exposed to a Launcher by Android; unrestricted access to all installed-package data is outside the current scope. Determine concrete APIs, manifest declarations, and permissions through technical and privacy review.
 - **Reliability:** The current product must support the author's ongoing daily use on their actual primary devices; measurable stability thresholds remain unresolved.
-- **Compatibility:** Support portrait use on ordinary phones from Android 16/API 36 through Android 17/API 37 and validate on at least the two recorded physical devices.
+- **Compatibility:** Support portrait use on ordinary phones from Android 12/API 31 through Android 17/API 37. Validate the minimum boundary on an API 31 emulator and validate primary daily-use behavior on at least the two recorded physical devices running API 36 and API 37.
 
 ## Acceptance criteria
 

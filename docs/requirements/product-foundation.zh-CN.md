@@ -65,14 +65,15 @@
 
 ## 平台与交付边界
 
-- 目标版本：Android 16（API 36）。
+- 最低支持版本：Android 12（API 31）。
 - 当前真实验证设备：Samsung Galaxy S23 Ultra（Android 16）和 Google Pixel 8（Android 17）。
+- 最低版本验证环境：在取得有代表性的真实设备前，使用 Android 12/API 31 模拟器。
 - 设备范围：普通 Android 手机，仅支持竖屏。
 - 设备范围外：横屏、折叠屏、平板、桌面模式和外接显示器适配。
 - 发行边界：维护 GitHub 项目供作者本人日用，不安排应用商店、GitHub Release APK、官网 APK 或其他公开分发。
 - 应用商店目标 API、审核和数据披露要求不适用于当前发行边界；公开分发进入当前范围时必须重新审查。
 
-Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://developer.android.com/about/versions/17/setup-sdk)。Google Play 自 2026-08-31 起要求新应用和更新至少面向 Android 16（API 36），依据 [Google Play 目标 API 要求](https://developer.android.com/google/play/requirements/target-sdk)；该要求约束 `targetSdk`，不规定项目的 `minSdk`。本项目当前不发布到 Google Play，因此其目标 API 要求仅作为未来兼容参考。实际 `compileSdk`、`targetSdk` 和 `minSdk` 必须在创建 Android 工程时由构建配置落实并验证。审查日期：2026-08-07。
+Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://developer.android.com/about/versions/17/setup-sdk)。Google Play 自 2026-08-31 起要求新应用和更新至少面向 Android 16（API 36），依据 [Google Play 目标 API 要求](https://developer.android.com/google/play/requirements/target-sdk)；该要求约束 `targetSdk`，不规定项目的 `minSdk`。本项目当前不发布到 Google Play，因此其目标 API 要求仅作为未来兼容参考。产品兼容边界要求 `minSdk` 为 31。对于 `1.0.0`，技术评估必须验证 `targetSdk` 36，并使用最新且兼容的稳定版 `compileSdk`；当前候选为 API 37，如果 API 37 仍要求预览版或候选发布版工具链，则保留 API 36。创建 Android 工程时，必须在构建配置中落实并验证最终选值。审查日期：2026-08-09。
 
 ## 当前产品范围
 
@@ -125,7 +126,7 @@ Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://develope
 - **最少权限：** 每项权限必须对应当前核心能力，并记录用途、触发时机、拒绝行为和渠道政策影响。
 - **可见性最小化：** 当前产品只需要发现和启动 Android 暴露给 Launcher 的应用入口，不把不受限制地读取全部已安装包数据纳入当前范围；具体 API、清单声明和权限由技术与隐私审查决定。
 - **可靠性：** 当前产品必须支持作者在真实主力设备上持续日常使用；具体稳定性门槛待确认。
-- **兼容性：** 支持 Android 16/API 36 至 Android 17/API 37 的普通手机竖屏环境，并至少在已记录的两台真实设备上验证。
+- **兼容性：** 支持 Android 12/API 31 至 Android 17/API 37 的普通手机竖屏环境。在 API 31 模拟器上验证最低边界，并至少在已记录的 API 36 和 API 37 两台真实设备上验证主要日用行为。
 
 ## 验收标准
 
