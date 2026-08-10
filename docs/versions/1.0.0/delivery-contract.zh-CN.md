@@ -14,6 +14,7 @@
 
 - Android `versionName`：`1.0.0`
 - Android `versionCode`：`1`
+- Android `applicationId`：`com.avenor.launcher`
 
 仅有文档、中间迭代或本地构建都不会形成正式版本。只有全部纳入的产品增量和版本级证据要求完成后，正式版本才存在。
 
@@ -32,6 +33,7 @@
 已确认版本约束包括：
 
 - `minSdk` 31 和 `targetSdk` 36，除非获授权的产品契约更新改变它们。
+- 当前获批的 Android 应用身份是 `com.avenor.launcher`。后续只有经项目作者明确决定，并记录其对安装、升级、签名、数据连续性、分发和迁移的影响后，才允许修改。
 - 实现获授权后，在产品仓库根目录创建 Android 项目。
 - 核心行为保持本地和离线，不使用账号、服务器、云同步、分析或网络依赖。
 - 已批准基线排除 `QUERY_ALL_PACKAGES`、`ACCESS_HIDDEN_PROFILES`、`INTERNET`、云备份和设备间迁移。
@@ -109,7 +111,8 @@ Iteration 6 记录可重复真机的冷启动、完整显示时间、关键交�
 
 ## 产物、签名和归档要求
 
-- 正式产物是一个可安装、经验证、`versionName` 为 `1.0.0` 且 `versionCode` 为 `1` 的 release APK。
+- 正式产物是一个可安装、经验证、`applicationId` 为 `com.avenor.launcher`、`versionName` 为 `1.0.0` 且 `versionCode` 为 `1` 的 release APK。
+- 正式产物获验收前修改 `applicationId`，只在作者批准后替换计划身份；正式产物存在后修改它会形成不同的 Android 应用身份，不得表述为普通的原位升级。
 - 准确 APK 文件名从最终构建记录，不在构建配置存在前编造。
 - APK 准确对应记录的源码 commit 和最终验证构建身份。
 - 外部归档 APK 具有经过计算和复验的 SHA-256 摘要。

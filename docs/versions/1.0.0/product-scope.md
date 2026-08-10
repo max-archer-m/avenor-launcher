@@ -57,7 +57,7 @@ Where this version excludes behavior defined by those documents, the exclusion a
 
 - Home displays system time without seconds and follows the system 12-hour or 24-hour preference.
 - Home displays the locale-formatted system date and weekday.
-- Selecting the time invokes an implicit system Clock destination; selecting the date and weekday invokes an implicit system Calendar destination.
+- Selecting the time opens the main surface of the system Clock application resolved through the platform alarm destination rather than opening only its alarms page. Avenor does not hard-code a vendor Clock package. If the resolved application exposes no main launchable surface, Avenor may fall back to its alarms page; if neither destination is available, it reports localized failure without crashing. Selecting the date and weekday invokes an implicit system Calendar destination.
 - Home displays saved favorites in persistent user-defined order.
 - A new installation begins with no favorites and shows the defined invitation to add applications from Drawer.
 - Selecting an available favorite launches the intended application and suppresses duplicate rapid activation.

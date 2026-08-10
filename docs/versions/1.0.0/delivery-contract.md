@@ -14,6 +14,7 @@ The complete version outcome is the offline journey selected by the [product sco
 
 - Android `versionName`: `1.0.0`
 - Android `versionCode`: `1`
+- Android `applicationId`: `com.avenor.launcher`
 
 Documentation, an intermediate iteration, or a local build does not create the formal version. The formal version exists only after all included product increments and version-level evidence requirements are complete.
 
@@ -32,6 +33,7 @@ The [technical assessment](technical-assessment.md) concludes that the selected 
 Confirmed version constraints include:
 
 - `minSdk` 31 and `targetSdk` 36, unless an authorized product-contract update changes them.
+- The current approved Android application identity is `com.avenor.launcher`. A later change is allowed only by explicit project-author decision and after recording its installation, upgrade, signing, data-continuity, distribution, and migration consequences.
 - The Android project is created at the product-repository root when implementation is authorized.
 - Core behavior remains local and offline, without account, server, cloud synchronization, analytics, or network dependency.
 - The approved baseline excludes `QUERY_ALL_PACKAGES`, `ACCESS_HIDDEN_PROFILES`, `INTERNET`, cloud backup, and device-to-device transfer.
@@ -109,7 +111,8 @@ A baseline profile is included only when reproducible release-build evidence sho
 
 ## Artifact, signing, and archive requirements
 
-- The formal artifact is one installable, verified release APK with `versionName` `1.0.0` and `versionCode` `1`.
+- The formal artifact is one installable, verified release APK with `applicationId` `com.avenor.launcher`, `versionName` `1.0.0`, and `versionCode` `1`.
+- Changing `applicationId` before the formal artifact is accepted replaces the planned identity only after author approval. Changing it after a formal artifact exists creates a distinct Android application identity and must not be represented as an ordinary in-place upgrade.
 - The exact APK filename is recorded from the final build rather than invented before build configuration exists.
 - The APK corresponds exactly to the recorded source commit and final validation build identity.
 - The externally archived APK has a computed and reverified SHA-256 digest.

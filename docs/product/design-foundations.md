@@ -45,7 +45,7 @@
 ## Interaction and accessibility
 
 - Interactive controls should provide a focusable touch target of at least 48dp by 48dp, following Android accessibility guidance, even when their visible content is smaller.
-- The Home time row is at least 64dp high. The date row remains visually 40dp high while permitting the input layer to expand its focusable target to at least 48dp.
+- The Home time row is at least 64dp high. The date row is 48dp high and directly provides its focusable touch target.
 - Pressed, focused, selected, and disabled states must not rely on color alone.
 - Haptic feedback respects system availability and user settings. Current semantic feedback types are long-press confirmation and short index or reorder steps; exact platform constants require implementation validation.
 - Small-screen-specific layout and TalkBack-specific alphabet-index behavior are outside the current personal-use scope. The index instead uses fixed 20dp slots and becomes scrollable when its maximum 28-slot model does not fit within 560dp of available height.

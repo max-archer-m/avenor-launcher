@@ -31,6 +31,7 @@
 
 - Android Home 角色和 [`RoleManager`](https://developer.android.com/reference/android/app/role/RoleManager)
 - [`LauncherApps`](https://developer.android.com/reference/android/content/pm/LauncherApps) 中的 Launcher 清单与启动操作
+- 通过 [`AlarmClock.ACTION_SHOW_ALARMS`](https://developer.android.com/reference/android/provider/AlarmClock#ACTION_SHOW_ALARMS) 发现闹钟目标，并通过 [`PackageManager`](https://developer.android.com/reference/android/content/pm/PackageManager#getLaunchIntentForPackage(java.lang.String)) 启动软件包常规入口
 - [软件包可见性](https://developer.android.com/training/package-visibility)
 - [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) 及其[发布记录](https://developer.android.com/jetpack/androidx/releases/datastore)
 - [Android 备份规则](https://developer.android.com/identity/data/autobackup)
@@ -83,7 +84,7 @@ Home 选择由系统拥有。实现只能在选定产品旅程确有需要时调
 
 时钟、日历、应用信息和应用启动都是外部平台操作。每项操作都必须防御性解析或尝试，并在失败时给出产品定义的本地化反馈而不崩溃。
 
-时钟和日历使用隐式 intent，不得指定厂商软件包。应用信息面向选定包，同时保留选定可启动身份，供返回后刷新。应用启动应在可用时使用能够面向指定用户/profile 的 Launcher 平台操作。
+时钟软件包发现仅使用 `AlarmClock.ACTION_SHOW_ALARMS` 在运行时解析处理应用。随后，Avenor 获取并启动该软件包的常规入口 Activity，而不是直接把用户送入闹钟页面；不得硬编码厂商软件包。若解析到的软件包未公开常规入口 Activity，时钟可以回退到原始隐式闹钟 action；若两种操作均不可用，则给出产品定义的本地化失败反馈。日历继续使用隐式 intent。应用信息面向选定包，同时保留选定可启动身份，供返回后刷新。应用启动应在可用时使用能够面向指定用户/profile 的 Launcher 平台操作。
 
 ## 建议的系统边界
 
@@ -176,7 +177,7 @@ Proto DataStore 是首选持久化候选，因为它提供显式类型 schema、
 预期基线包含：
 
 - 平台入口所需的已导出 Home/Launcher Activity 声明；
-- 仅在平台解析需要时，为已包含的隐式时钟和日历目标添加软件包可见性 query；
+- 仅在平台解析需要时，为通过闹钟 intent 发现时钟应用以及已纳入的隐式日历目标添加软件包可见性 query；
 - 不声明 `INTERNET`；
 - 不声明 `QUERY_ALL_PACKAGES`；
 - 不声明 `ACCESS_HIDDEN_PROFILES`；
@@ -217,6 +218,15 @@ Proto DataStore 是首选持久化候选，因为它提供显式类型 schema、
 
 工程建立时必须在 version catalog 和 Gradle wrapper 中锁定版本。“最新”是调研策略，不是可复现构建声明。
 
+### 仓库来源配置档
+
+插件与依赖解析的仓库声明必须统一放在 `settings.gradle.kts`，并拒绝项目级仓库声明。公开仓库记录两个明确配置档：
+
+- **中国大陆配置档：** 优先使用 `https://maven.aliyun.com/repository/` 下的阿里云镜像代理，并将 `https://mirrors.cloud.tencent.com/nexus/repository/maven-public/` 下的腾讯云 HTTPS Maven 镜像作为获批替代来源。迭代 1 必须验证准确的 Google、Maven Central 和 Gradle Plugin Portal 覆盖范围及最终端点顺序，之后才能将此配置档视为可复现。
+- **官方配置档：** 当镜像不可用、同步延迟、内容不完整或在当前网络更慢时，使用 `google()`、`mavenCentral()` 和 `gradlePluginPortal()`。
+
+镜像用于改善中国大陆的实际访问条件，不是产品依赖，也不要求所有公开贡献者使用。开发者可以切换配置档，或将不可用端点替换为经作者批准、使用 HTTPS 且来源可解释的等效来源；不得任意扩展仓库地址或顺序。任何提交到仓库的变更都需要重新审查依赖解析、来源、许可证和最终解析图。默认构建不得加入 JCenter、`mavenLocal()`、需要凭据的仓库或未经审查的第三方镜像。
+
 ### 保留的替代方案
 
 - **手工依赖注入替代 Hilt：** 如果 Hilt/KSP 对小型初始运行时依赖图造成不相称的工具链风险，则优先采用手工方案。构造器注入和单一应用 composition root 保留未来迁移 Hilt 的路径。
@@ -240,9 +250,12 @@ Proto DataStore 是首选持久化候选，因为它提供显式类型 schema、
 - 英文默认资源和简体中文资源；
 - 单元测试和插桩测试基础；
 - 依赖锁定或等效的解析版本证据；以及
+- 集中、可切换的中国大陆和官方仓库配置档及其成功解析证据；
 - 只有在实际工程中成功执行后才记录的命令。
 
-本地工作站目前没有项目 wrapper 或权威构建命令。因此工具可用性与 Android SDK 包必须由构建基础迭代建立，不能由本文假设。
+迭代 1 已引入仓库 wrapper 和初始构建配置，所选工具链也已有初步本地构建证据。权威命令、所需 Android SDK 包和完整验证基线仍必须根据有记录的成功执行来建立，不能由本评估推断。
+
+在部分 Windows 环境中，包含非 ASCII 字符的 checkout 路径可能触发 Android Gradle Plugin 路径错误，或暴露其他 Android 工具的限制。由于项目作者当前的 checkout 需要该解决方法，仓库目前启用了 `android.overridePathCheck=true`。这是面向具体环境的兼容设置，不是项目必须执行的验证分支，也不能证明下游路径兼容性。若出现其他路径相关错误，应查看实际错误信息；受影响的环境可以改用仅含 ASCII 字符的 checkout，或采用其他有证据支持的本机解决方法。
 
 ### 测试层级
 
@@ -295,6 +308,7 @@ Macrobenchmark 结果必须包含多次迭代，并保留生成的 JSON 与 trac
 - Samsung 暴露克隆条目、badge 或用户/profile 身份的方式可能不同于 AOSP 假设。
 - 平台回调本身可能无法区分暂时不可用和永久消失；协调可能需要一次成功的完整快照。
 - 本仓库尚未构建准确的 AGP 9.2、内置 Kotlin、Compose、KSP、Hilt 和 protobuf plugin 组合。
+- 镜像内容完整性和同步状态可能与官方上游不同，当前包含非 ASCII 字符的 Windows checkout 路径也可能暴露工具特有的路径失败。
 - 即使 Settings 被排除，Proto DataStore 的许可义务仍可能要求告知机制。
 - 手势仲裁是最高的自定义 UI 风险，需要在真实触摸硬件上尽早验证垂直切片。
 - 绝对性能、内存和功耗阈值需要实现实测和作者批准。

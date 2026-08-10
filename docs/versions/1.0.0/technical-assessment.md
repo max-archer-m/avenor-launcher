@@ -31,6 +31,7 @@ The recommendations are based on current Android platform and AndroidX documenta
 
 - Android Home role and [`RoleManager`](https://developer.android.com/reference/android/app/role/RoleManager)
 - Launcher inventory and launch operations in [`LauncherApps`](https://developer.android.com/reference/android/content/pm/LauncherApps)
+- Alarm destination discovery through [`AlarmClock.ACTION_SHOW_ALARMS`](https://developer.android.com/reference/android/provider/AlarmClock#ACTION_SHOW_ALARMS) and package front-door launch through [`PackageManager`](https://developer.android.com/reference/android/content/pm/PackageManager#getLaunchIntentForPackage(java.lang.String))
 - [Package visibility](https://developer.android.com/training/package-visibility)
 - [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) and its [release history](https://developer.android.com/jetpack/androidx/releases/datastore)
 - [Android backup rules](https://developer.android.com/identity/data/autobackup)
@@ -83,7 +84,7 @@ Inventory reads and platform callbacks must feed one repository-owned snapshot. 
 
 Clock, Calendar, application information, and application launch are external platform operations. Each must be resolved or attempted defensively and report the product-defined localized failure without crashing.
 
-Clock and Calendar use implicit intents and must not target a vendor package. Application information must address the selected package while retaining the selected launchable identity for the refresh performed after return. Application launch should use the launcher-aware platform operation for the selected user/profile where available.
+Clock package discovery uses `AlarmClock.ACTION_SHOW_ALARMS` only to resolve the handling application at runtime. Avenor then obtains and launches that package's front-door activity rather than sending the user directly to the alarms page, and it must never hard-code a vendor package. If the resolved package exposes no front-door activity, Clock may fall back to the original implicit alarm action; if neither operation is available, it reports the product-defined localized failure. Calendar remains implicit. Application information must address the selected package while retaining the selected launchable identity for the refresh performed after return. Application launch should use the launcher-aware platform operation for the selected user/profile where available.
 
 ## Proposed system boundaries
 
@@ -176,7 +177,7 @@ No migration from a pre-1.0 production schema exists. Schema evolution support i
 The expected baseline contains:
 
 - exported Home/launcher activity declarations required for platform entry;
-- package-visibility queries only for the included implicit Clock and Calendar destinations if platform resolution requires them;
+- package-visibility queries only for Clock application discovery through the alarm intent and for the included implicit Calendar destination if platform resolution requires them;
 - no `INTERNET` permission;
 - no `QUERY_ALL_PACKAGES` permission;
 - no `ACCESS_HIDDEN_PROFILES` permission;
@@ -217,6 +218,15 @@ The technical role cannot decide that legal question alone. A resolved dependenc
 
 Versions must be locked in a version catalog and Gradle wrapper when the project is created. “Latest” is a research policy, not a reproducible build declaration.
 
+### Repository-source profiles
+
+Repository declarations must be centralized in `settings.gradle.kts` for both plugin and dependency resolution, with project-level repository declarations rejected. The public repository records two explicit profiles:
+
+- **Mainland China profile:** use Alibaba Cloud mirrors under `https://maven.aliyun.com/repository/` as the preferred proxy source and Tencent Cloud's HTTPS Maven mirror under `https://mirrors.cloud.tencent.com/nexus/repository/maven-public/` as the approved alternative. Iteration 1 must verify the exact Google, Maven Central, and Gradle Plugin Portal coverage and final endpoint order before treating this profile as reproducible.
+- **Official profile:** use `google()`, `mavenCentral()`, and `gradlePluginPortal()` when the mirrors are unavailable, stale, incomplete, or slower on the current network.
+
+The mirrors exist for practical access from mainland China; they are not product dependencies and do not imply that every public contributor should use them. A developer may switch profiles or replace an unavailable endpoint with an author-approved, HTTPS, source-explainable equivalent. Repository URLs or order must not be expanded arbitrarily. Any committed change requires dependency-resolution, provenance, license, and resolved-graph review. Do not add JCenter, `mavenLocal()`, credentialed repositories, or an unreviewed third-party mirror to the default build.
+
 ### Alternatives retained
 
 - **Manual dependency injection instead of Hilt:** preferred if Hilt/KSP adds disproportionate toolchain risk for the small initial runtime graph. Constructor injection and one application composition root preserve a later Hilt migration path.
@@ -240,9 +250,12 @@ The first implementation iteration must establish a reproducible project at the 
 - English default resources and Simplified Chinese resources;
 - unit-test and instrumented-test foundations;
 - dependency locking or equivalent resolved-version evidence; and
+- centralized, selectable Mainland China and official repository profiles with their successful resolution evidence;
 - commands documented only after they run successfully in the actual project.
 
-The local workstation currently has no project wrapper or authoritative build command. Tool availability and Android SDK packages must therefore be established by the build-foundation iteration rather than assumed by this document.
+Iteration 1 has introduced the repository wrapper and initial build configuration, and the selected toolchain has preliminary local build evidence. Authoritative commands, required Android SDK packages, and the complete validation baseline must still be established from recorded successful runs rather than inferred from this assessment.
+
+On some Windows environments, a checkout path containing non-ASCII characters may trigger an Android Gradle Plugin path error or expose a limitation in another Android tool. The repository currently enables `android.overridePathCheck=true` because the project author's checkout requires that workaround. This is an environment-specific compatibility setting, not a mandatory validation branch or evidence of downstream path compatibility. If another path-related failure occurs, inspect its actual message; an affected environment may instead use an ASCII-only checkout or another evidence-backed local resolution.
 
 ### Test layers
 
@@ -295,6 +308,7 @@ A baseline profile is added only if measured release-build evidence shows a mate
 - Samsung may expose cloned entries, badges, or user/profile identities differently from AOSP assumptions.
 - A platform callback may not by itself distinguish temporary unavailability from permanent disappearance; reconciliation may require a successful full snapshot.
 - The exact AGP 9.2, built-in Kotlin, Compose, KSP, Hilt, and protobuf-plugin combination has not yet been built in this repository.
+- Mirror completeness and synchronization may differ from official upstream repositories, and the current non-ASCII Windows checkout path may expose tool-specific path failures.
 - Proto DataStore license obligations may require a notice mechanism even though Settings is excluded from `1.0.0`.
 - Gesture arbitration is the highest custom-UI risk and needs an early vertical slice on real touch hardware.
 - Absolute performance, memory, and power thresholds require implementation measurements and author approval.
