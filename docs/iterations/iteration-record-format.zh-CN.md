@@ -1,6 +1,6 @@
 # 迭代记录格式
 
-> 英文语义源：[README.md](README.md)。
+> 英文语义源：[iteration-record-format.md](iteration-record-format.md)。
 
 ## 目的与命名
 
@@ -41,7 +41,7 @@
 ## 字段规则
 
 - `Objective` 描述一个内聚交付结果，不是互不相关的任务清单。
-- `Product and version references` 链接当前产品契约以及适用的 `docs/versions/<version>/README.md` 或支撑输入，不复制这些文档。
+- `Product and version references` 链接当前产品契约以及适用的 `docs/versions/<version>/delivery-contract.md` 或支撑输入，不复制这些文档。
 - `Observable outcome` 描述迭代成功后可演示或验证的结果。
 - `Included work` 与 `Excluded work` 明确迭代边界。
 - `Technical change areas` 在持久层级标识受影响行为、组件、接口、数据、构建与验证表面；逐行变更仍以 Git 为准。

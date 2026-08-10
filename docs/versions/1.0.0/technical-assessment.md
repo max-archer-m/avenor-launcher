@@ -8,7 +8,7 @@
 
 Can the selected `1.0.0` journey be delivered as a maintainable Android Home application on the documented API 31 through API 37 device range, using a least-privilege, local-first architecture that can evolve for the next three to five years without importing deferred product behavior into the first version?
 
-The assessment concludes that the scope is technically feasible. Feasibility depends on validating the platform-specific launcher inventory and identity behavior on the two recorded physical devices, proving the selected build-tool combination in a minimal project, and establishing measured performance gates before the integrated version contract is approved.
+The assessment concludes that the scope is technically feasible. Feasibility remains evidence-limited until the platform-specific launcher inventory and identity behavior is validated on the two recorded physical devices, the selected build-tool combination is proven in the repository, and measured performance gates are established before version closure.
 
 ## Inputs and evidence
 
@@ -200,7 +200,7 @@ The product currently excludes the Settings surface and its Third-party License 
 1. all required notices may legally be included in repository and packaged artifact metadata without a user-visible in-app entry; or
 2. the project author approves a product-scope change that introduces a suitable notice surface.
 
-The technical role cannot decide that legal question alone. A resolved dependency inventory and qualified license review are required before the integrated delivery contract is finalized.
+The technical role cannot decide that legal question alone. A resolved dependency inventory and qualified license review are required before accepting the affected implementation and closing the version.
 
 ## Dependencies and alternatives
 
@@ -284,7 +284,7 @@ Absolute performance numbers cannot be responsibly fixed before an installable i
 - memory after cold Home start and after completing the full journey; and
 - idle power behavior sufficient to demonstrate that Avenor performs no polling or background network work.
 
-Macrobenchmark results must include multiple iterations and retain the generated JSON and trace evidence. The project author must approve the resulting absolute exit thresholds before the integrated `1.0.0` delivery contract is finalized. Until then, performance feasibility is provisional rather than failed.
+Macrobenchmark results must include multiple iterations and retain the generated JSON and trace evidence. The project author must approve the resulting absolute exit thresholds before `1.0.0` can close. Until then, performance feasibility is provisional rather than failed.
 
 A baseline profile is added only if measured release-build evidence shows a material improvement to the critical journey and its generation can be reproduced. It is not a substitute for fixing avoidable startup work or recomposition/jank problems.
 
@@ -312,12 +312,12 @@ Hilt versus manual dependency injection is an implementation decision unless it 
 
 ## Iteration recommendations
 
-1. **Build and platform spike** — create the reproducible project; prove SDK/tool versions, Home qualification, direct launch, `LauncherApps` inventory, identity fields, merged manifest, and dependency graph.
-2. **Inventory and persistence foundation** — implement project-owned models, repository boundaries, ordering, Proto DataStore candidate, failure distinction, and reconciliation unit tests.
-3. **Home vertical slice** — establish edge-to-edge Home, time/date, empty/loading/failure states, favorites, lifecycle behavior, and safe platform destinations.
-4. **Drawer and transition vertical slice** — implement inventory presentation, grouping/index, custom transition controller, gesture transfer, refresh, and launch behavior.
-5. **Application action sheet and favorite loop** — complete add/remove, information action, modal behavior, localized failures, and end-to-end persistence.
-6. **Compatibility and quality closure** — execute the full matrix, measure physical-device performance, resolve licenses, decide whether a baseline profile is justified, and prepare version-exit evidence.
+1. **Home minimum usable surface** — create the reproducible project, prove SDK/tool versions and Home qualification, and deliver the localized Home information surface and safe platform destinations.
+2. **Drawer application discovery and launch** — prove the launcher inventory and identity boundary, deliver the core Drawer list and Retry states, and launch exact platform-exposed entries.
+3. **Drawer navigation and live-state completeness** — complete grouping, alphabet-index behavior, live updates, position preservation, and real-touch Home/Drawer gesture arbitration.
+4. **Application action sheet and favorite creation** — deliver the modal application actions and prove ordered, non-duplicated favorite creation and persistence.
+5. **Favorite lifecycle and resilience** — complete favorite launch, removal, restart persistence, reconciliation, transient-failure handling, and non-destructive read-failure behavior.
+6. **Compatibility, quality, and formal APK closure** — execute the full matrix, measure physical-device performance, resolve licenses, decide whether a baseline profile is justified, and prepare the signed formal APK and version-exit evidence under separate authorization.
 
 Each iteration requires its own current contract and explicit implementation authorization. The sequence minimizes the chance that OEM identity behavior or gesture feasibility is discovered only after the entire UI is built.
 
@@ -340,4 +340,4 @@ Avenor Launcher `1.0.0` is technically feasible with a modern, maintainable Andr
 
 The recommended direction is a single-activity Compose application, a project-owned `LauncherApps` inventory repository, stable profile-plus-component identity, ordered local DataStore persistence, explicit backup exclusion, and layered automated plus physical-device validation.
 
-This conclusion authorizes neither implementation nor integration. Before the complete version delivery contract can be approved, the project still needs evidence from the build/platform spike, the resolved dependency and license inventory, physical-device clone/profile validation, and author-approved measured performance gates.
+This conclusion authorizes neither implementation nor integration. The current delivery contract and iteration sequence remain prospective: version closure still requires repository build evidence, the resolved dependency and license inventory, physical-device clone/profile validation, and author-approved measured performance gates.

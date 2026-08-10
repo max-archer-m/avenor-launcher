@@ -2,7 +2,7 @@
 
 > 英文语义源：[iteration-1-home-minimum-usable-surface.md](iteration-1-home-minimum-usable-surface.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/README.zh-CN.md)，定义一个产品增量及其必需证据。本文不授权实现、不批准候选架构，也不声明迭代完成。项目作者必须明确授权实现。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其必需证据。本文不授权实现、不批准候选架构，也不声明迭代完成。项目作者必须明确授权实现。
 
 ## 目标
 
@@ -10,7 +10,7 @@
 
 ## 产品和版本引用
 
-- [1.0.0 交付契约](../versions/1.0.0/README.zh-CN.md)
+- [1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)
 - [1.0.0 产品范围](../versions/1.0.0/product-scope.zh-CN.md)
 - [1.0.0 技术评估](../versions/1.0.0/technical-assessment.zh-CN.md)
 - [产品导航](../product/navigation.zh-CN.md)

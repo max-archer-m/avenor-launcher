@@ -1,6 +1,6 @@
 # Avenor Launcher 1.0.0 交付契约
 
-> 英文语义源：[README.md](README.md)。
+> 英文语义源：[delivery-contract.md](delivery-contract.md)。
 >
 > 本版本级契约依据项目的[版本、产物与发布治理](../../release.zh-CN.md)，整合已批准的 [1.0.0 产品范围](product-scope.zh-CN.md)和受证据限制的[技术评估](technical-assessment.zh-CN.md)。本文通过链接引用纳入的迭代契约，而不复制其交付细节。
 >

@@ -27,8 +27,8 @@ The Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusable method
 - Documentation map and governance: [docs/documentation.md](docs/documentation.md)
 - Product foundation requirements: [docs/requirements/product-foundation.md](docs/requirements/product-foundation.md)
 - Version, artifact, and release governance: [docs/release.md](docs/release.md)
-- Version delivery format and active versions: [docs/versions/README.md](docs/versions/README.md)
-- Iteration record format: [docs/iterations/README.md](docs/iterations/README.md)
+- Version delivery format and active versions: [docs/versions/version-delivery-format.md](docs/versions/version-delivery-format.md)
+- Iteration record format: [docs/iterations/iteration-record-format.md](docs/iterations/iteration-record-format.md)
 - License: [LICENSE](LICENSE)
 
 Architecture, development, validation, security, and privacy documents have not yet been established. Do not infer their contents or treat planned paths as current evidence.

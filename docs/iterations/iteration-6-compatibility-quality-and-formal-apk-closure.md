@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-6-compatibility-quality-and-formal-apk-closure.zh-CN.md](iteration-6-compatibility-quality-and-formal-apk-closure.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/README.md). This iteration contract defines version-closing product and evidence outcomes. It does not authorize signing, artifact movement, a tag, a release, or public distribution. Each mutation requires the applicable explicit project-author authorization.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines version-closing product and evidence outcomes. It does not authorize signing, artifact movement, a tag, a release, or public distribution. Each mutation requires the applicable explicit project-author authorization.
 
 ## Objective
 
@@ -10,11 +10,11 @@ Demonstrate that the complete `1.0.0` product journey is compatible, reliable, m
 
 ## Product and version references
 
-- [1.0.0 delivery contract](../versions/1.0.0/README.md)
+- [1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md)
 - [1.0.0 product scope](../versions/1.0.0/product-scope.md)
 - [1.0.0 technical assessment](../versions/1.0.0/technical-assessment.md)
 - [Version, artifact, and release governance](../release.md)
-- [Iteration record format](README.md)
+- [Iteration record format](iteration-record-format.md)
 
 ## Observable outcome
 

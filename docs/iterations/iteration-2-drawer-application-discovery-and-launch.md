@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-2-drawer-application-discovery-and-launch.zh-CN.md](iteration-2-drawer-application-discovery-and-launch.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/README.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
 
 ## Objective
 
@@ -10,7 +10,7 @@ Extend the accepted Home increment so the author can enter Drawer, see every lau
 
 ## Product and version references
 
-- [1.0.0 delivery contract](../versions/1.0.0/README.md)
+- [1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md)
 - [1.0.0 product scope](../versions/1.0.0/product-scope.md)
 - [1.0.0 technical assessment](../versions/1.0.0/technical-assessment.md)
 - [Product navigation](../product/navigation.md)
@@ -31,14 +31,14 @@ Starting from the accepted Home build, the author can use the approved upward in
 - Present platform labels, icons, and badges when available, with safe generic-icon fallback.
 - Present a stable, locale-aware single-column application list sufficient for core discovery.
 - Implement Drawer loading, empty-or-failed, Retry, successful recovery, and localized failure behavior.
-- Implement the core reversible Home/Drawer entry and Back path without accidental application activation.
+- Implement a basic state transition that enters Drawer through the approved upward interaction and returns through Back without accidental application activation.
 - Launch the selected entry defensively and suppress duplicate rapid activation.
 - Validate primary, cloned, and normally exposed profile candidates on the recorded physical devices.
 - Keep Private Space and hidden-profile access outside the inventory boundary.
 
 ## Excluded work
 
-- Final alphabet index interaction, complete section-anchor behavior, live-update position preservation, and every advanced gesture edge case assigned to Iteration 3.
+- Continuous drag progress, release thresholds, fling targeting, rebound, list-boundary transfer, pointer arbitration, final alphabet-index interaction, complete section-anchor behavior, and live-update position preservation assigned to Iteration 3.
 - Application action sheet, application information, favorites, persistence, reconciliation, and Home favorite presentation.
 - Settings, reorder, shortcuts, uninstall, clone removal, or any other excluded `1.0.0` action.
 - Full-version performance, signing, formal APK, archive, tag, or distribution actions.
@@ -48,7 +48,7 @@ Starting from the accepted Home build, the author can use the approved upward in
 - Project-owned inventory models, identity candidates, repository boundary, callbacks, and immutable UI state.
 - `LauncherApps` or another evidence-supported launcher-aware platform adapter.
 - Core Drawer list rendering, loading/error state, Retry, exact-entry launch, and duplicate-activation suppression.
-- Core Home/Drawer transition state and Back behavior needed for the observable path.
+- Extensible Home/Drawer route state and Back behavior needed for the observable path; this is not acceptance of the complete product gesture contract.
 
 The device evidence must determine whether the candidate profile-plus-`ComponentName` identity is viable. The iteration does not approve identity or architecture by assertion; consequential proven choices are documented separately.
 

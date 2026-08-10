@@ -1,6 +1,6 @@
 # Avenor Launcher 1.0.0 Delivery Contract
 
-> Semantic source: English. Chinese counterpart: [README.zh-CN.md](README.zh-CN.md).
+> Semantic source: English. Chinese counterpart: [delivery-contract.zh-CN.md](delivery-contract.zh-CN.md).
 >
 > This version-level contract integrates the approved [1.0.0 product scope](product-scope.md) and the evidence-limited [technical assessment](technical-assessment.md) under the project's [version, artifact, and release governance](../../release.md). It links the included iteration contracts rather than duplicating their delivery details.
 >

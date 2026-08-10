@@ -49,8 +49,8 @@ Contract classes interact as follows:
 | Product design foundations | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | Current product contract | Defines current theme, layout, typography, icon, accessibility, and resource principles |
 | Product glossary | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | Current product contract | Defines canonical product terms |
 | Version, artifact, and release governance | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | Technical or operational contract | Defines application versions, archives, APK artifacts, signing continuity, tags, and GitHub Releases |
-| Active version-delivery format | [`docs/versions/README.md`](versions/README.md) | [`docs/versions/README.zh-CN.md`](versions/README.zh-CN.md) | Project-governance contract | Defines active version directories, required inputs, formats, and the project milestone boundary |
-| Iteration-record format | [`docs/iterations/README.md`](iterations/README.md) | [`docs/iterations/README.zh-CN.md`](iterations/README.zh-CN.md) | Project-governance contract | Defines iteration naming, required sections, evidence, and archival handling |
+| Active version-delivery format | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | Project-governance contract | Defines active version directories, required inputs, formats, and the project milestone boundary |
+| Iteration-record format | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | Project-governance contract | Defines iteration naming, required sections, evidence, and archival handling |
 | License | [`LICENSE`](../LICENSE) | - | Legal instrument | Contains the Apache License 2.0 text |
 
 ## Planned authoritative locations
@@ -99,7 +99,7 @@ A future `docs/roadmap.md` records long-term capability-layer direction and majo
 
 ### Active version-delivery records
 
-Use `docs/versions/<version>/` for the active delivery inputs and integrated contract of a formal application version. Follow [`docs/versions/README.md`](versions/README.md). The version directory uses the exact `versionName` without a `v` prefix. It may contain product scope, technical assessment, and an integrated version `README.md` when their real inputs exist.
+Use `docs/versions/<version>/` for the active delivery inputs and integrated contract of a formal application version. Follow [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md). The version directory uses the exact `versionName` without a `v` prefix. It may contain product scope, technical assessment, and an integrated `delivery-contract.md` when their real inputs exist.
 
 ### Milestones
 
@@ -107,7 +107,7 @@ For this project, a milestone is an exceptional baseline explicitly declared by 
 
 ### Iteration records
 
-Use `docs/iterations/iteration-<number>-<title>.md` when implementation planning begins and an actual delivery iteration exists. Follow [`docs/iterations/README.md`](iterations/README.md).
+Use `docs/iterations/iteration-<number>-<title>.md` when implementation planning begins and an actual delivery iteration exists. Follow [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md).
 
 - Iteration identifiers use one project-wide, monotonically increasing positive-integer sequence starting with `1`, without leading zeroes.
 - Never renumber, reuse, or restart the sequence after a version archive.
@@ -124,7 +124,7 @@ After a software version boundary is actually declared and its included iteratio
 
 - The folder name uses the declared software version and follows [`docs/release.md`](release.md). Tag presence is optional and does not determine whether a formal version archive exists.
 - Move the active version contract, its supporting inputs, and the original included iteration records into the archive folder; do not leave second canonical copies under `docs/versions/` or `docs/iterations/`.
-- Add `README.md` inside the version folder as its summary and entry point.
+- Retain `delivery-contract.md` inside the version folder as its summary and entry point.
 - The summary lists each included iteration as `<iteration identifier> - <title>` and links to the original iteration file now stored in the same archive folder.
 - The summary records the version outcome, included iteration range or explicit set, important product changes, implementation evolution, decisions, migrations, validation evidence, known limitations, related tag or release when one exists, and the reason the version boundary was declared.
 - Archiving does not reset the project-wide iteration sequence. If `docs/archives/v1.1.0/` contains iterations `iteration-5-...` through `iteration-10-...`, the next active iteration under `docs/iterations/` is `iteration-11-...`.

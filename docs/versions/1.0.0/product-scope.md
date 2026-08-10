@@ -199,4 +199,4 @@ A technical constraint may produce a documented product-scope proposal, but it d
 
 ## Completion handoff
 
-This document supplies product input to the version technical assessment. After technical assessment is complete, the version `README.md` may integrate the confirmed product scope, technical feasibility, iteration plan, risks, and exit evidence into the complete `1.0.0` delivery contract without duplicating the detailed current product specifications.
+This document supplies product input to the version technical assessment. After technical assessment is complete, the version `delivery-contract.md` may integrate the confirmed product scope, technical feasibility, iteration plan, risks, and exit evidence into the complete `1.0.0` delivery contract without duplicating the detailed current product specifications.

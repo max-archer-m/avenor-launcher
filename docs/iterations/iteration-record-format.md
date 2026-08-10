@@ -1,6 +1,6 @@
 # Iteration Record Format
 
-> Semantic source: English. Chinese counterpart: [README.zh-CN.md](README.zh-CN.md).
+> Semantic source: English. Chinese counterpart: [iteration-record-format.zh-CN.md](iteration-record-format.zh-CN.md).
 
 ## Purpose and naming
 
@@ -41,7 +41,7 @@ A Chinese counterpart may translate the title and section headings, but it prese
 ## Field rules
 
 - `Objective` states one coherent delivery result rather than a list of unrelated tasks.
-- `Product and version references` links the current product contract and the applicable `docs/versions/<version>/README.md` or supporting input. It does not duplicate those documents.
+- `Product and version references` links the current product contract and the applicable `docs/versions/<version>/delivery-contract.md` or supporting input. It does not duplicate those documents.
 - `Observable outcome` describes what can be demonstrated or verified when the iteration succeeds.
 - `Included work` and `Excluded work` make the iteration boundary explicit.
 - `Technical change areas` identifies affected behavior, components, interfaces, data, build, and validation surfaces at a durable level; Git remains authoritative for line-level changes.

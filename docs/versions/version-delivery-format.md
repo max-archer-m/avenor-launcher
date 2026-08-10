@@ -1,6 +1,6 @@
-# Version Delivery Documents
+# Version Delivery Document Format
 
-> Semantic source: English. Chinese counterpart: [README.zh-CN.md](README.zh-CN.md).
+> Semantic source: English. Chinese counterpart: [version-delivery-format.zh-CN.md](version-delivery-format.zh-CN.md).
 
 ## Purpose
 
@@ -17,12 +17,12 @@ docs/versions/<version>/
 ├── product-scope.md
 ├── product-scope.zh-CN.md       # when a maintained Chinese counterpart is needed
 ├── technical-assessment.md
-└── README.md
+└── delivery-contract.md
 ```
 
 - `product-scope.md` is the English semantic source for the user value, selected current-product scope, exclusions, and product acceptance intent.
 - `technical-assessment.md` records feasibility evidence, constraints, alternatives, dependencies, migration cost, risks, and proposed validation. It must not silently change product scope.
-- `README.md` becomes the integrated version delivery contract after the product scope and technical assessment provide enough evidence. It defines the approved iteration set, dependencies, risks, version exit gates, and required handoffs without duplicating detailed product or technical sources.
+- `delivery-contract.md` becomes the integrated version delivery contract after the product scope and technical assessment provide enough evidence. It defines the approved iteration set, dependencies, risks, version exit gates, and required handoffs without duplicating detailed product or technical sources.
 - Iteration records remain under [`docs/iterations/`](../iterations/) while active and link back to the applicable version contract.
 
 ## Product-scope format

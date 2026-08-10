@@ -1,6 +1,6 @@
-# 版本交付文档
+# 版本交付文档格式
 
-> 英文语义源：[README.md](README.md)。
+> 英文语义源：[version-delivery-format.md](version-delivery-format.md)。
 
 ## 目的
 
@@ -17,12 +17,12 @@ docs/versions/<version>/
 ├── product-scope.md
 ├── product-scope.zh-CN.md       # 需要持续维护中文对应文档时
 ├── technical-assessment.md
-└── README.md
+└── delivery-contract.md
 ```
 
 - `product-scope.md` 是用户价值、所选当前产品范围、排除项和产品验收意图的英文语义源。
 - `technical-assessment.md` 记录可行性证据、约束、备选方案、依赖、迁移成本、风险和验证建议，不得静默更改产品范围。
-- 当产品范围和技术评估提供足够证据后，`README.md` 成为整合后的版本交付契约。它定义获批迭代集合、依赖、风险、版本退出门禁和必要交接，但不复制详细产品或技术来源。
+- 当产品范围和技术评估提供足够证据后，`delivery-contract.md` 成为整合后的版本交付契约。它定义获批迭代集合、依赖、风险、版本退出门禁和必要交接，但不复制详细产品或技术来源。
 - 活动迭代记录仍位于 [`docs/iterations/`](../iterations/)，并链接适用的版本契约。
 
 ## 产品范围格式

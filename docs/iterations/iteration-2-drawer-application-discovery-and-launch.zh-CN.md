@@ -2,7 +2,7 @@
 
 > 英文语义源：[iteration-2-drawer-application-discovery-and-launch.md](iteration-2-drawer-application-discovery-and-launch.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/README.zh-CN.md)，定义一个产品增量及其必需证据。本文不授权实现、不批准候选架构，也不声明迭代完成。项目作者必须明确授权实现。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其必需证据。本文不授权实现、不批准候选架构，也不声明迭代完成。项目作者必须明确授权实现。
 
 ## 目标
 
@@ -10,7 +10,7 @@
 
 ## 产品和版本引用
 
-- [1.0.0 交付契约](../versions/1.0.0/README.zh-CN.md)
+- [1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)
 - [1.0.0 产品范围](../versions/1.0.0/product-scope.zh-CN.md)
 - [1.0.0 技术评估](../versions/1.0.0/technical-assessment.zh-CN.md)
 - [产品导航](../product/navigation.zh-CN.md)
@@ -31,14 +31,14 @@
 - 在可用时呈现平台标签、图标和 badge，并提供安全的通用图标回退。
 - 呈现稳定、locale 感知、足以支持核心发现的单列应用列表。
 - 实现 Drawer 加载、空或失败、Retry、成功恢复和本地化失败行为。
-- 实现核心可逆 Home/Drawer 进入与 Back 路径，避免意外激活应用。
+- 实现基础状态切换，通过已批准的向上交互进入 Drawer，并通过 Back 返回，且不会意外激活应用。
 - 防御性地启动所选条目，并抑制快速重复激活。
 - 在已记录真机上验证主条目、分身和正常暴露的资料候选。
 - 将 Private Space 和隐藏资料访问保持在清单边界之外。
 
 ## 排除工作
 
-- 最终字母索引交互、完整章节锚点行为、实时更新位置保留，以及分配给迭代 3 的全部高级手势边界情况。
+- 分配给迭代 3 的连续拖动进度、释放阈值、甩动目标判定、回弹、列表边界移交、指针仲裁、最终字母索引交互、完整章节锚点行为及实时更新位置保留。
 - 应用操作面板、应用信息、收藏、持久化、调和和 Home 收藏呈现。
 - Settings、排序、快捷操作、卸载、移除分身或其他任何排除在 `1.0.0` 外的操作。
 - 完整版本性能、签名、正式 APK、归档、tag 或分发操作。
@@ -48,7 +48,7 @@
 - 项目所有的清单模型、身份候选、仓库边界、回调和不可变 UI 状态。
 - `LauncherApps` 或另一种有证据支持的 Launcher 感知平台适配器。
 - 核心 Drawer 列表渲染、加载/错误状态、Retry、准确条目启动和重复激活抑制。
-- 可观察路径所需的核心 Home/Drawer 过渡状态和 Back 行为。
+- 可观察路径所需、可继续扩展的 Home/Drawer 路由状态和 Back 行为；这不代表完整产品手势契约已经验收。
 
 设备证据必须确定候选资料加 `ComponentName` 身份是否可行。本迭代不通过陈述批准身份或架构；已证明的重大选择单独记录。
 

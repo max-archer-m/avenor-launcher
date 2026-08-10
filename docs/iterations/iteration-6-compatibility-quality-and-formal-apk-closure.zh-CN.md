@@ -2,7 +2,7 @@
 
 > 英文语义源：[iteration-6-compatibility-quality-and-formal-apk-closure.md](iteration-6-compatibility-quality-and-formal-apk-closure.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/README.zh-CN.md)，定义版本收尾产品和证据结果。本文不授权签名、产物移动、tag、发布或公开分发。每项变更都需要项目作者适用的明确授权。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义版本收尾产品和证据结果。本文不授权签名、产物移动、tag、发布或公开分发。每项变更都需要项目作者适用的明确授权。
 
 ## 目标
 
@@ -10,11 +10,11 @@
 
 ## 产品和版本引用
 
-- [1.0.0 交付契约](../versions/1.0.0/README.zh-CN.md)
+- [1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)
 - [1.0.0 产品范围](../versions/1.0.0/product-scope.zh-CN.md)
 - [1.0.0 技术评估](../versions/1.0.0/technical-assessment.zh-CN.md)
 - [版本、产物与发布治理](../release.zh-CN.md)
-- [迭代记录格式](README.zh-CN.md)
+- [迭代记录格式](iteration-record-format.zh-CN.md)
 
 ## 可观察结果
 

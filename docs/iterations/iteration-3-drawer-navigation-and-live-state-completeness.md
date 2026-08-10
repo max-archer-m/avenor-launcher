@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-3-drawer-navigation-and-live-state-completeness.zh-CN.md](iteration-3-drawer-navigation-and-live-state-completeness.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/README.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
 
 ## Objective
 
@@ -10,7 +10,7 @@ Complete the `1.0.0` Drawer product behavior so application discovery remains fa
 
 ## Product and version references
 
-- [1.0.0 delivery contract](../versions/1.0.0/README.md)
+- [1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md)
 - [1.0.0 product scope](../versions/1.0.0/product-scope.md)
 - [Product navigation](../product/navigation.md)
 - [Drawer interaction](../product/drawer.md)

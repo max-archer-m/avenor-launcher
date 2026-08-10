@@ -50,7 +50,7 @@ Avenor Launcher 使用项目自定义的 `MAJOR.MINOR.PATCH` 数字版本格式�
 
 ## 迭代与版本归档
 
-每个正式版本在 `docs/versions/<version>/` 下规划。所有纳入迭代完成后，必须由 `docs/archives/v<version>/README.md` 表示。归档包含已完成版本契约、支撑输入及一个或多个纳入迭代的原始记录，并必须记录：
+每个正式版本在 `docs/versions/<version>/` 下规划。所有纳入迭代完成后，必须由 `docs/archives/v<version>/delivery-contract.md` 表示。归档包含已完成版本契约、支撑输入及一个或多个纳入迭代的原始记录，并必须记录：
 
 - `versionName` 与 `versionCode`
 - APK 对应的准确 Git commit

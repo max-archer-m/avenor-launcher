@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-1-home-minimum-usable-surface.zh-CN.md](iteration-1-home-minimum-usable-surface.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/README.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
 
 ## Objective
 
@@ -10,7 +10,7 @@ Deliver an installable Avenor build that Android can recognize as a Home applica
 
 ## Product and version references
 
-- [1.0.0 delivery contract](../versions/1.0.0/README.md)
+- [1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md)
 - [1.0.0 product scope](../versions/1.0.0/product-scope.md)
 - [1.0.0 technical assessment](../versions/1.0.0/technical-assessment.md)
 - [Product navigation](../product/navigation.md)

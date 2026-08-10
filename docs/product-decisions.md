@@ -59,7 +59,7 @@ A Git tag identifies an implementation snapshot. It is delivery evidence, not a 
 
 ## Version-delivery records
 
-Version-delivery records describe project intent, selected product scope, technical feasibility, iteration composition, evidence, and outcome. They do not replace product requirements. Their location and format are defined in [`docs/versions/README.md`](versions/README.md).
+Version-delivery records describe project intent, selected product scope, technical feasibility, iteration composition, evidence, and outcome. They do not replace product requirements. Their location and format are defined in [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md).
 
 A version-delivery record may contain:
 

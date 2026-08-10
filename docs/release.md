@@ -50,7 +50,7 @@ Within one `MAJOR` family, any older formal version must have a supported direct
 
 ## Iterations and version archives
 
-Each formal version is planned under `docs/versions/<version>/` and must be represented by `docs/archives/v<version>/README.md` after all included iterations are completed. The archive contains the completed version contract, its supporting inputs, and the original records for one or more included iterations, and must record:
+Each formal version is planned under `docs/versions/<version>/` and must be represented by `docs/archives/v<version>/delivery-contract.md` after all included iterations are completed. The archive contains the completed version contract, its supporting inputs, and the original records for one or more included iterations, and must record:
 
 - `versionName` and `versionCode`
 - The exact Git commit represented by the APK

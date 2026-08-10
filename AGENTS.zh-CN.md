@@ -27,8 +27,8 @@ Toolkit locator 为 `../max-ai-toolkit`。Toolkit 提供可复用的方法；本
 - 文档地图与治理规则：[docs/documentation.zh-CN.md](docs/documentation.zh-CN.md)
 - 产品基础需求：[docs/requirements/product-foundation.zh-CN.md](docs/requirements/product-foundation.zh-CN.md)
 - 版本、产物与发布治理：[docs/release.zh-CN.md](docs/release.zh-CN.md)
-- 版本交付格式与活动版本：[docs/versions/README.zh-CN.md](docs/versions/README.zh-CN.md)
-- 迭代记录格式：[docs/iterations/README.zh-CN.md](docs/iterations/README.zh-CN.md)
+- 版本交付格式与活动版本：[docs/versions/version-delivery-format.zh-CN.md](docs/versions/version-delivery-format.zh-CN.md)
+- 迭代记录格式：[docs/iterations/iteration-record-format.zh-CN.md](docs/iterations/iteration-record-format.zh-CN.md)
 - 许可证：[LICENSE](LICENSE)
 
 架构、开发、验证、安全和隐私文档尚未建立。不得推断其内容，也不得将规划中的路径视为当前证据。

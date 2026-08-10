@@ -59,7 +59,7 @@ Git tag 标识一个实现快照。它是交付证据，不是产品范围层级
 
 ## 版本交付记录
 
-版本交付记录描述项目意图、所选产品范围、技术可行性、迭代组成、证据和结果，不替代产品需求。其位置与格式由 [`docs/versions/README.md`](versions/README.md) 定义。
+版本交付记录描述项目意图、所选产品范围、技术可行性、迭代组成、证据和结果，不替代产品需求。其位置与格式由 [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) 定义。
 
 版本交付记录可以包含：
 

@@ -49,8 +49,8 @@
 | 产品设计基础约束 | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | 当前产品契约 | 定义当前主题、布局、字体、图标、无障碍和资源原则 |
 | 产品字典 | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | 当前产品契约 | 定义规范产品术语 |
 | 版本、产物与发布治理 | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | 技术或运营契约 | 定义应用版本、归档、APK 产物、签名连续性、tag 与 GitHub Release |
-| 活动版本交付格式 | [`docs/versions/README.md`](versions/README.md) | [`docs/versions/README.zh-CN.md`](versions/README.zh-CN.md) | 项目治理契约 | 定义活动版本目录、必要输入、格式与项目里程碑边界 |
-| 迭代记录格式 | [`docs/iterations/README.md`](iterations/README.md) | [`docs/iterations/README.zh-CN.md`](iterations/README.zh-CN.md) | 项目治理契约 | 定义迭代命名、必需章节、证据与归档处理 |
+| 活动版本交付格式 | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | 项目治理契约 | 定义活动版本目录、必要输入、格式与项目里程碑边界 |
+| 迭代记录格式 | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | 项目治理契约 | 定义迭代命名、必需章节、证据与归档处理 |
 | 许可证 | [`LICENSE`](../LICENSE) | - | 法律文件 | 包含 Apache License 2.0 原文 |
 
 ## 规划中的权威位置
@@ -99,7 +99,7 @@
 
 ### 活动版本交付记录
 
-正式应用版本的活动交付输入与整合契约使用 `docs/versions/<version>/`，并遵循 [`docs/versions/README.md`](versions/README.md)。版本目录使用不带 `v` 前缀的准确 `versionName`。真实输入存在时，其中可包含产品范围、技术评估和整合版本 `README.md`。
+正式应用版本的活动交付输入与整合契约使用 `docs/versions/<version>/`，并遵循 [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md)。版本目录使用不带 `v` 前缀的准确 `versionName`。真实输入存在时，其中可包含产品范围、技术评估和整合版本 `delivery-contract.md`。
 
 ### 里程碑
 
@@ -107,7 +107,7 @@
 
 ### 迭代记录
 
-当实现计划开始且存在真实交付迭代时，使用 `docs/iterations/iteration-<number>-<title>.md`，并遵循 [`docs/iterations/README.md`](iterations/README.md)。
+当实现计划开始且存在真实交付迭代时，使用 `docs/iterations/iteration-<number>-<title>.md`，并遵循 [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md)。
 
 - 迭代标识在全项目范围内使用一组从 `1` 开始、不带前导零且单调递增的正整数序列。
 - 版本归档后也不得重编号、复用或重新计数。
@@ -124,7 +124,7 @@
 
 - 文件夹名使用已宣告的软件版本，并遵循 [`docs/release.md`](release.md)。是否存在 tag 不影响正式版本归档是否成立。
 - 将活动版本契约、支撑输入和纳入该版本的原始迭代记录移入归档文件夹；不得在 `docs/versions/` 或 `docs/iterations/` 下保留第二份权威副本。
-- 在版本文件夹内新增 `README.md`，作为归档总结和入口。
+- 在版本文件夹内保留 `delivery-contract.md`，作为归档总结和入口。
 - 总结使用 `<迭代标识> - <标题>` 列出每个纳入的迭代，并链接到现已位于同一归档文件夹中的原始迭代文件。
 - 总结记录版本结果、所含迭代范围或明确集合、重要产品变化、实现演进、决策、迁移、验证证据、已知限制、存在时的相关 tag 或 release，以及宣告该版本边界的理由。
 - 归档不会重置全项目迭代序列。若 `docs/archives/v1.1.0/` 包含迭代 `iteration-5-...` 至 `iteration-10-...`，下一份位于 `docs/iterations/` 的活动迭代必须是 `iteration-11-...`。
