@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Avenor Launcher</string>
+    <string name="clock_unavailable">Unable to open Clock</string>
+    <string name="calendar_unavailable">Unable to open Calendar</string>
+</resources>

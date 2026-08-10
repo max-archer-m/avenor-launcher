@@ -1,0 +1,10 @@
+<resources>
+    <dimen name="home_horizontal_padding">16dp</dimen>
+    <dimen name="home_vertical_padding">32dp</dimen>
+    <dimen name="home_time_min_height">64dp</dimen>
+    <dimen name="home_date_height">48dp</dimen>
+    <dimen name="home_time_text_size">57sp</dimen>
+    <dimen name="home_time_line_height">64sp</dimen>
+    <dimen name="home_date_text_size">16sp</dimen>
+    <dimen name="home_date_line_height">24sp</dimen>
+</resources>
