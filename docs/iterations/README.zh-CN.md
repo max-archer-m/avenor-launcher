@@ -6,32 +6,36 @@
 
 `docs/iterations/` 保存活动迭代交付契约。每个迭代是边界明确、可独立评审并服务于一个正式版本的交付单元。
 
-文件名使用 `NNNN-<title>.md`，全项目采用从 `0001` 开始、四位补零且单调递增的唯一序列。不得重编号、复用或重启序列。`<title>` 使用简短的小写英文 slug。
+文件名使用 `iteration-<number>-<title>.md`，全项目采用从 `1` 开始、单调递增的正整数唯一序列，例如 `iteration-1-home-minimum-usable-surface.md`。不得重编号、复用或重启序列，也不添加前导零。`<title>` 使用简短的小写英文 slug。
+
+维护中文对应文档时，在 `.md` 前追加 `.zh-CN`，例如 `iteration-1-home-minimum-usable-surface.zh-CN.md`。中文文档使用相同迭代编号和英文 slug。
 
 ## 必需格式
 
 新迭代记录使用以下结构。获得授权后可通过修改本文调整格式；已有历史记录不因后来格式变化而重写。
 
+中文对应文档可以翻译标题和章节标题，但必须与英文语义源保持相同的章节顺序、范围和规范含义。
+
 ```markdown
-# NNNN — <迭代标题>
+# 迭代 <number>：<迭代标题>
 
 > 适用版本契约与非授权边界
 
-## Objective
-## Product and version references
-## Observable outcome
-## Included work
-## Excluded work
-## Technical change areas
-## Dependencies and sequence
-## Migration and compatibility impact
-## Security, privacy, permission, and licensing impact
-## Risks and unresolved decisions
-## Validation plan
-## Acceptance evidence
-## Related decisions, commits, and tags
-## Final result
-## Remaining issues and handoff
+## 目标
+## 产品和版本引用
+## 可观察结果
+## 纳入工作
+## 排除工作
+## 技术影响面
+## 依赖和序列
+## 迁移和兼容性影响
+## 安全、隐私、权限和许可证影响
+## 风险和未解决决定
+## 验证计划
+## 验收证据
+## 相关决定、commit 和 tag
+## 最终结果
+## 剩余问题和交接
 ```
 
 ## 字段规则
@@ -46,5 +50,4 @@
 - 迭代关闭时，根据证据填写 `Final result` 与 `Remaining issues and handoff`。关闭前只能描述所需关闭与交接证据，不得声称已完成。
 - 迭代可以建议产品或技术决定，但不授权该决定。
 
-正式版本完成后，将其纳入的原始迭代记录移入 `docs/archives/v<version>/` 并更新所有入站链接；下一迭代标识继续使用全项目序列。
-
+正式版本完成后，将其纳入的原始迭代记录移入 `docs/archives/v<version>/` 并更新所有入站链接；下一迭代标识继续使用全项目序列。例如归档 `iteration-1-...` 至 `iteration-6-...` 后，下一个可用标识为 `7`。

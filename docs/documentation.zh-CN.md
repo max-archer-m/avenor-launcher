@@ -51,7 +51,7 @@
 | 版本、产物与发布治理 | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | 技术或运营契约 | 定义应用版本、归档、APK 产物、签名连续性、tag 与 GitHub Release |
 | 活动版本交付格式 | [`docs/versions/README.md`](versions/README.md) | [`docs/versions/README.zh-CN.md`](versions/README.zh-CN.md) | 项目治理契约 | 定义活动版本目录、必要输入、格式与项目里程碑边界 |
 | 迭代记录格式 | [`docs/iterations/README.md`](iterations/README.md) | [`docs/iterations/README.zh-CN.md`](iterations/README.zh-CN.md) | 项目治理契约 | 定义迭代命名、必需章节、证据与归档处理 |
-| 许可证 | [`LICENSE`](../LICENSE) | — | 法律文件 | 包含 Apache License 2.0 原文 |
+| 许可证 | [`LICENSE`](../LICENSE) | - | 法律文件 | 包含 Apache License 2.0 原文 |
 
 ## 规划中的权威位置
 
@@ -107,9 +107,9 @@
 
 ### 迭代记录
 
-当实现计划开始且存在真实交付迭代时，使用 `docs/iterations/NNNN-<title>.md`，并遵循 [`docs/iterations/README.md`](iterations/README.md)。
+当实现计划开始且存在真实交付迭代时，使用 `docs/iterations/iteration-<number>-<title>.md`，并遵循 [`docs/iterations/README.md`](iterations/README.md)。
 
-- 迭代标识在全项目范围内使用一组从 `0001` 开始、四位补零、单调递增的序列。
+- 迭代标识在全项目范围内使用一组从 `1` 开始、不带前导零且单调递增的正整数序列。
 - 版本归档后也不得重编号、复用或重新计数。
 - 迭代是可评审的交付单元。其边界由实现难度、预计时间、变更广度、依赖、技术风险和验证成本共同决定，不单纯依据产品层级或固定功能数量。
 - 一个迭代可实现当前产品契约中 Feature 的全部或一部分，也可合并产生一个可验证结果所必需的紧密耦合工作；但不得静默引入当前产品文档中不存在的范围。
@@ -125,9 +125,9 @@
 - 文件夹名使用已宣告的软件版本，并遵循 [`docs/release.md`](release.md)。是否存在 tag 不影响正式版本归档是否成立。
 - 将活动版本契约、支撑输入和纳入该版本的原始迭代记录移入归档文件夹；不得在 `docs/versions/` 或 `docs/iterations/` 下保留第二份权威副本。
 - 在版本文件夹内新增 `README.md`，作为归档总结和入口。
-- 总结使用 `<迭代标识> — <标题>` 列出每个纳入的迭代，并链接到现已位于同一归档文件夹中的原始迭代文件。
+- 总结使用 `<迭代标识> - <标题>` 列出每个纳入的迭代，并链接到现已位于同一归档文件夹中的原始迭代文件。
 - 总结记录版本结果、所含迭代范围或明确集合、重要产品变化、实现演进、决策、迁移、验证证据、已知限制、存在时的相关 tag 或 release，以及宣告该版本边界的理由。
-- 归档不会重置全项目迭代序列。若 `docs/archives/v1.1.0/` 包含迭代 `0005` 至 `0010`，下一份位于 `docs/iterations/` 的活动迭代必须是 `0011`。
+- 归档不会重置全项目迭代序列。若 `docs/archives/v1.1.0/` 包含迭代 `iteration-5-...` 至 `iteration-10-...`，下一份位于 `docs/iterations/` 的活动迭代必须是 `iteration-11-...`。
 - 不得改写已归档迭代记录来让后续历史显得更整洁。如需修正事实错误，应显式修正并保留其原始交付含义。
 - 将迭代移入归档文件夹时，必须更新所有引用该迭代的链接。
 - 每个正式版本包含一个或多个已完成迭代。

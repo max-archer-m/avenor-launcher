@@ -6,14 +6,18 @@
 
 `docs/iterations/` contains active iteration delivery contracts. Each iteration is a bounded, independently reviewable unit that contributes to one formal version.
 
-Use `NNNN-<title>.md`, with one project-wide, zero-padded, monotonically increasing sequence beginning at `0001`. Never renumber, reuse, or restart identifiers. Use a concise lowercase English slug for `<title>`.
+Use `iteration-<number>-<title>.md`, with one project-wide, monotonically increasing positive-integer sequence beginning at `1`, for example `iteration-1-home-minimum-usable-surface.md`. Never renumber, reuse, or restart identifiers. Do not add leading zeroes. Use a concise lowercase English slug for `<title>`.
+
+When a Chinese counterpart is maintained, append `.zh-CN` before `.md`, for example `iteration-1-home-minimum-usable-surface.zh-CN.md`. It keeps the same iteration identifier and English slug.
 
 ## Required format
 
 New iteration records use this structure. The format may be changed through an authorized update to this document; existing historical records are not rewritten only to adopt a later format.
 
+A Chinese counterpart may translate the title and section headings, but it preserves the same section order, scope, and normative meaning as the English semantic source.
+
 ```markdown
-# NNNN — <Iteration title>
+# Iteration <number>: <Iteration title>
 
 > Applicable version contract and non-authorization boundary
 
@@ -46,5 +50,4 @@ New iteration records use this structure. The format may be changed through an a
 - `Final result` and `Remaining issues and handoff` are completed from evidence when the iteration closes. Before then, they state the required closure and handoff evidence without claiming completion.
 - An iteration may recommend a product or technical decision but does not authorize one.
 
-When a formal version completes, move its original included iteration records into `docs/archives/v<version>/` and update all inbound links. The next identifier continues the project-wide sequence.
-
+When a formal version completes, move its original included iteration records into `docs/archives/v<version>/` and update all inbound links. The next identifier continues the project-wide sequence. Archiving `iteration-1-...` through `iteration-6-...`, for example, makes `7` the next available identifier.
