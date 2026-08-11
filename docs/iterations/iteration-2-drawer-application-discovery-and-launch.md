@@ -54,8 +54,9 @@ The device evidence must determine whether the candidate profile-plus-`Component
 
 ## Dependencies and sequence
 
-- Iteration 1 is closed with reproducible commands and accepted Home behavior.
-- The project author approves this iteration and any required technical decision arising from the platform spike.
+- The project author has accepted the Iteration 1 implementation and observed Home behavior as sufficient to continue delivery on the existing single-activity Compose foundation. This continuation decision does not claim that Iteration 1 is formally closed.
+- Remaining Iteration 1 CLI, automated-test, release-lint, dependency, merged-manifest, emulator, physical-device, and focused Home validation gaps are explicitly recorded in its handoff. They remain required closure evidence and must be completed in the next applicable validation boundary and no later than Iteration 6 and the final `1.0.0` gates.
+- The project author separately authorizes this iteration and any required technical decision arising from the platform spike.
 - Completion unlocks Iteration 3 only when the core list and launch path are correct enough that advanced navigation can be added without replacing the inventory boundary.
 
 ## Migration and compatibility impact

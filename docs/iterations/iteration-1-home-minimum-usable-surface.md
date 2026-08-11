@@ -60,7 +60,7 @@ The iteration validates the candidate JDK, Gradle, Android Gradle Plugin, Kotlin
 
 - The project author approves the `1.0.0` prospective delivery boundary and explicitly authorizes this iteration.
 - API 37 is evaluated first as stable `compileSdk`; using the documented API 36 fallback requires the reserved project-author decision.
-- Completion unlocks Iteration 2 only when the resulting project, commands, Home qualification, and manifest evidence are stable enough to extend without replacement.
+- Iteration 2 may begin after the project author accepts the delivered implementation and observed Home behavior as sufficient to continue, the existing project foundation is suitable for extension without replacement, and every incomplete Iteration 1 validation item is explicitly recorded and assigned. This continuation gate does not declare Iteration 1 formally closed or waive any version-level exit gate.
 
 ## Migration and compatibility impact
 
@@ -72,13 +72,15 @@ The iteration validates the candidate JDK, Gradle, Android Gradle Plugin, Kotlin
 ## Security, privacy, permission, and licensing impact
 
 - No network, account, analytics, broad package visibility, hidden-profile access, cloud backup, or device-to-device transfer is introduced.
+- The source manifest declares `com.android.alarm.permission.SET_ALARM` for the confirmed Clock main-surface and alarm-fallback behavior. The project author has accepted that declaration as part of the current requirement; it is not a pending-removal item.
 - The merged manifest is inspected for dependency-contributed permissions, components, and backup behavior.
 - Direct and transitive dependencies, versions, maturity, licenses, and manifest contributions are recorded from the resolved graph.
 - No signing secret is created or stored without separate project-author authorization.
 
 ## Risks and unresolved decisions
 
-- The selected toolchain has preliminary local build evidence, but the complete build, test, lint, dependency-resolution, emulator, and device validation set remains outstanding.
+- The project author reports successful editor build, installation, execution, and visible Home output for the implementation represented by commit `2e492109482a185f33670e87e86ce562b0279ebf`. The report does not identify the editor and version, host environment, build variant, device model, Android/API version, exact procedure, or retained output, so those evidence fields remain unverified.
+- Reproducible CLI build, automated tests, release lint, dependency resolution, merged-manifest inspection, emulator validation, and required physical-device validation remain outstanding.
 - The approved mirrors may be stale or incomplete relative to official upstream sources; exact endpoints, ordering, and resolved artifacts require evidence.
 - Some Windows environments may report an Android Gradle Plugin path error when a checkout path contains non-ASCII characters. The repository currently enables `android.overridePathCheck=true` because the project author's checkout requires that workaround. This is an environment-specific accommodation rather than a validation result or a requirement that every contributor reproduce the same path; it only bypasses the AGP guard and does not guarantee that every downstream tool supports the path.
 - API 37 `compileSdk` reproducibility remains evidence-dependent; API 36 fallback is author-reserved.
@@ -102,26 +104,37 @@ The iteration validates the candidate JDK, Gradle, Android Gradle Plugin, Kotlin
 
 ## Acceptance evidence
 
-Before closure, replace this prospective statement with links or records for:
+Evidence available as of 2026-08-11:
 
-- the exact successful build, test, lint, install, and focused validation commands;
-- the resolved toolchain, dependency, and merged-manifest evidence;
-- Home qualification and behavior on the API 31 emulator, Samsung API 36 device, and Pixel API 37 device;
-- localized resource and platform-destination results; and
-- every failure, unavailable check, limitation, or author decision.
+- Commit `75dfdfd221a981db1677a9e5f2873a6e84fab398` aligned the approved application identity, Clock launch behavior, repository profiles, path workaround, transparency boundary, and `48dp` Home date-row contract before implementation.
+- Commit `2e492109482a185f33670e87e86ce562b0279ebf` added the root Android project, single-activity Compose Home implementation, Home/Launcher manifest entry, API and application identifiers, time/date resources, default English and Simplified Chinese resources, transparent theme, platform-destination handling, and initial test sources.
+- Repository inspection confirms that the source manifest contains the Home and direct-launch entry points and the accepted `com.android.alarm.permission.SET_ALARM` declaration. This is source evidence only; the merged manifest has not been recorded or accepted.
+- Repository inspection confirms that the date-and-weekday row uses the contract-defined `48dp` resource and vertically centered content. No `40dp`/`48dp` contract mismatch is identified in the current source.
+- The project author reports that the current project was successfully built, installed, and run from an editor and that Home displayed normally. The author accepts that observed implementation result as sufficient to continue delivery toward Iteration 2.
+- The supplied evidence does not identify the editor and version, host environment, build variant, device model, Android/API version, exact procedure, build output, APK identity, or retained evidence location. These fields are unverified and must not be inferred.
 
-No acceptance evidence exists merely because this contract is present.
+Outstanding before formal Iteration 1 and `1.0.0` closure:
+
+- reproducible CLI build commands and results, selected automated-test execution, release lint, dependency and repository-profile resolution, and merged-manifest evidence;
+- API 31 emulator, Samsung API 36, and Pixel API 37 validation with exact environment and build identities;
+- focused evidence for Home qualification, direct launch, repeated Home invocation, Back, process recreation, transparency, localization, 12/24-hour behavior, and Clock/Calendar success and failure paths; and
+- exact records for every failure, unavailable check, limitation, and author disposition.
+
+The available evidence supports continuation, not formal iteration closure or final-version acceptance.
 
 ## Related decisions, commits, and tags
 
-- Architecture and ADR links: required only after consequential choices are proven and recorded.
-- Implementation commits: to be recorded from actual work.
+- Delivery-alignment commit: `75dfdfd221a981db1677a9e5f2873a6e84fab398` (`docs: align initial Home delivery contracts`).
+- Implementation commit: `2e492109482a185f33670e87e86ce562b0279ebf` (`feat(home): implement minimum launcher surface`).
+- Architecture and ADR links: none recorded for this iteration. Add one only if a consequential proven choice requires it.
 - Tags: none authorized or required by this iteration.
 
 ## Final result
 
-The iteration closes only when the observable outcome, included behavior, focused environment checks, reproducible commands, manifest review, and required evidence are accepted by the project author. Before then, no completion is claimed.
+The project author has accepted the delivered implementation and observed Home display as sufficient to continue product delivery on the existing foundation. Iteration 1 is not formally closed because the reproducible CLI, automated, lint, merged-manifest, emulator, physical-device, and focused behavior evidence listed above remains incomplete. Continuation acceptance does not mark any missing check as passed and does not reduce the final `1.0.0` gates.
 
 ## Remaining issues and handoff
 
-The closure handoff records the proven toolchain and commands, Home behavior, unresolved limitations, relevant architecture decisions, and the exact inputs available to [Iteration 2](iteration-2-drawer-application-discovery-and-launch.md). It must not transfer a known Home contract failure as ordinary Drawer work.
+The reusable foundation for [Iteration 2](iteration-2-drawer-application-discovery-and-launch.md) is the root single-activity Compose project, `compileSdk` 37 / `minSdk` 31 / `targetSdk` 36 configuration, `com.avenor.launcher` application identity, Home and direct-launch manifest entries, localized Home time/date implementation, default English and Simplified Chinese resources, transparent theme, and defensive Clock/Calendar destination foundation. The project author has confirmed that this structure does not need replacement before Drawer work.
+
+The missing CLI, automated-test, release-lint, dependency-resolution, merged-manifest, API 31 emulator, Samsung API 36, Pixel API 37, and focused Home behavior evidence remains an explicit Iteration 1 closure obligation. Execute it in the next applicable validation run and close it no later than Iteration 6 and the `1.0.0` version gate. Iteration 2 must not represent this carried evidence as completed or use it to hide a discovered Home contract failure. Iteration 2 implementation still requires separate explicit project-author authorization.
