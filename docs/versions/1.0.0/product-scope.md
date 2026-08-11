@@ -77,7 +77,7 @@ Where this version excludes behavior defined by those documents, the exclusion a
 
 ### Drawer inventory and application launch
 
-- Drawer presents every launchable entry exposed to Avenor by Android, without distinguishing system-installed and user-installed applications as separate product categories.
+- Drawer presents every launchable entry successfully read from the sources exposed to Avenor by Android, without distinguishing system-installed and user-installed applications as separate product categories. An isolated non-current-profile read failure does not block entries already available from other profiles, and `1.0.0` does not require a partial-read warning.
 - When Android exposes primary, cloned, or profile launchable entries, Avenor treats each exposed identity as an independent entry and does not deduplicate solely by package name.
 - Entries use the platform-provided application name, icon, and badge when available.
 - Drawer uses the locale-aware grouping, stable ordering, section-anchor, and tie-breaking behavior defined by the Drawer specification.
@@ -158,7 +158,7 @@ The product scope is satisfied only when all of the following are observable acr
 - Returning Home while Avenor is the default opens Avenor Home without blocking or crashing.
 - Home displays the correct system time, date, weekday, empty state, and saved favorites in the applicable locale.
 - The defined gesture reliably opens Drawer and the defined reverse paths return to Home without accidental application activation.
-- Drawer presents the launchable entries Android exposes to Avenor, including distinct cloned or profile entries when exposed, without product-caused omission, duplication, or unstable ordering.
+- Drawer presents every launchable entry returned by successfully read Android sources without product-caused omission, duplication, or unstable ordering. An isolated failed non-current profile may be absent without blocking available entries.
 - List scrolling and the alphabet index allow the author to locate an intended entry, and selecting it launches that exact entry.
 - Loading failure is distinguishable from loading, Retry can start another read, and a failed read does not corrupt favorites.
 - The author can add a Drawer entry to Home, launch it from Home, remove it, and observe the expected Drawer and Home state after each operation.

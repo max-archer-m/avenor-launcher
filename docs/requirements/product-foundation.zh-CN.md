@@ -81,7 +81,7 @@ Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://develope
 
 - Home：作为 Android 默认主屏幕入口，展示系统时间、日期、收藏应用和进入 Drawer 的入口。
 - Favorites：作者能够按照 Home 与应用操作面板规格维护 Home 展示的收藏应用。
-- Drawer：采用单列表展示 Android 平台暴露的全部可启动应用入口；平台能够暴露时必须包含应用分身入口。
+- Drawer：采用单列表展示从 Android 暴露来源中成功读取的全部可启动应用入口；平台能够暴露且 Avenor 成功读取时包含应用分身入口。非当前资料的局部读取失败不得阻断其他资料中已经可用的条目。
 - Settings：展示当前默认 Launcher 状态，提供进入 Android 系统默认主屏幕应用设置的入口及次要产品信息入口。语言根据系统语言区域自动选择受支持资源；手动语言选择不在当前范围内。
 - 核心任务在无网络时完整可用。
 - 核心产品数据保存在本地，不依赖自建服务器、账号或云同步。
@@ -113,7 +113,8 @@ Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://develope
 - Home 显示作者保存在本地的收藏应用，并允许启动所选收藏应用。
 - 收藏持久化结果无法读取或已经损坏时，产品将其展示为可恢复的加载失败，而不是空收藏列表。Avenor 保留原始数据、禁用收藏变更，并在提供只读重试期间保持独立的 Drawer 与应用启动路径可用。
 - 用户能够从 Home 访问 Drawer。
-- 无论 Avenor Launcher 是否已设为默认主屏幕，Drawer 都采用单列表展示 Android 在 Avenor 当前角色与最小权限边界下正常暴露为可见且可启动的全部应用入口，并允许启动所选入口。
+- 无论 Avenor Launcher 是否已设为默认主屏幕，Drawer 都采用单列表展示从 Android 在 Avenor 当前角色与最小权限边界下正常暴露的可见且可启动来源中成功读取的全部应用入口，并允许启动所选入口。
+- 非当前资料无法读取、但其他资料仍提供可用条目时，Drawer 继续展示并允许启动已有条目，不崩溃，也不以全界面 Error 替换可用内容。当前产品不要求提供部分读取失败提示。
 - 当 Android 平台向 Launcher 暴露应用分身入口时，Drawer 将其作为独立的可启动入口展示，不得仅按包名去重。
 - Android 无需隐藏资料访问即可暴露的普通、工作资料和克隆可启动条目继续属于当前范围。需要 `ACCESS_HIDDEN_PROFILES` 的 Private Space 条目不属于当前产品范围。
 - Launcher 为所有用户可见文案提供英文和简体中文资源，根据系统语言区域自动选择，不支持的语言区域回退为英文。
@@ -136,8 +137,9 @@ Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://develope
 - Given Avenor Launcher 已在支持的 Android 设备上设为主屏幕应用，when 用户执行回到主屏幕的系统操作，then 系统显示 Avenor Launcher 的 Home。
 - Given 用户进入 Home，when 系统完成基础内容加载，then Home 显示系统时间、日期、已保存的收藏应用和 Drawer 入口。
 - Given 收藏持久化状态无法可靠读取，when Home 展示收藏区域，then 明确区分失败与空列表、保留原始数据、禁用收藏写入、提供只读重试，并保持 Drawer 应用发现和应用启动可用；when 重试失败，then 恢复相同的内联错误，不额外展示 Toast，也不覆盖数据。
-- Given 用户位于 Home，when 用户执行已定义的 Drawer 入口操作，then Drawer 以单列表显示 Android 暴露的可启动应用入口。
-- Given Avenor Launcher 未设为默认主屏幕，when 用户直接启动 Avenor Launcher 并进入 Drawer，then Drawer 仍显示 Android 平台规则下应当可见且可启动的全部应用入口。
+- Given 用户位于 Home，when 用户执行已定义的 Drawer 入口操作，then Drawer 以单列表显示从 Android 暴露来源中成功读取的可启动应用入口。
+- Given Avenor Launcher 未设为默认主屏幕，when 用户直接启动 Avenor Launcher 并进入 Drawer，then Drawer 仍显示从 Android 平台规则下应当可见且可启动的来源中成功读取的全部应用入口。
+- Given 非当前资料读取失败、但其他资料提供可用条目，when Drawer 展示应用清单，then 可用条目保持可见且可启动，不发生崩溃或全界面 Error；失败资料中的条目可以缺失，且不要求提供部分读取失败提示。
 - Given Android 向 Launcher 暴露同一应用的分身入口，when Drawer 展示应用列表，then 每个分身入口均独立出现并可启动。
 - Given 某个条目需要通过 `ACCESS_HIDDEN_PROFILES` 访问 Android Private Space，when Avenor 构建 Drawer 应用清单，then Avenor 不申请该权限、不访问或展示该条目、不创建 Private Space 独立容器，也不提供 Private Space 显示、隐藏、锁定、解锁、收藏或状态恢复行为。
 - Given Drawer 中存在可启动应用，when 用户选择其中一个应用，then 系统启动所选应用。
@@ -155,7 +157,7 @@ Android 17 对应 API 37，依据 [Android 17 SDK 设置指南](https://develope
 - 完成开发本身不能作为唯一成功证明，必须在作者的真实主力设备上观察使用结果。
 - 成功判断以作者本人的日用体验为依据，不把未收集的外部用户意见当作验收证据。
 - 核心路径不得发生由 Avenor Launcher 引起的崩溃或无响应。
-- Drawer 不得遗漏、重复或错误展示 Android 平台规则下应当可见且可启动的应用。
+- Drawer 不得遗漏、重复或错误展示从 Android 来源中成功读取的条目。非当前资料发生局部读取失败时，其中的条目可以缺失，但不得阻断其他可用条目。
 - 用户选择应用后必须正确启动目标应用。
 - 本地配置不得意外丢失或损坏。
 - 权限被拒绝时，只能降级依赖该权限的能力，不得阻断其他核心任务。

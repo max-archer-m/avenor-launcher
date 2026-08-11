@@ -4,7 +4,7 @@
 
 ## Purpose and layout
 
-Drawer presents every launchable application entry exposed to the Launcher by the platform, including cloned entries. System and user-installed applications are treated alike.
+Drawer presents every launchable application entry successfully read from the sources exposed to the Launcher by the platform, including cloned entries. System and user-installed applications are treated alike.
 
 “Every launchable application entry” is bounded by Avenor's current Android role and least-privilege permissions. It does not mean every installed package, hidden profile, or entry that could become visible only after adding another sensitive permission.
 
@@ -27,10 +27,11 @@ Drawer presents every launchable application entry exposed to the Launcher by th
 
 ## Grouping and sorting
 
-- Sorting uses Android's locale-aware collation for the current system locale, compares the complete displayed application name, and ignores case. It does not use ASCII ordering or a Launcher-defined character-priority table.
-- In a Chinese locale, system locale collation determines pinyin, polyphonic-character, and mixed-script ordering. Avenor does not embed a separate pronunciation dictionary or pinyin library as a product requirement.
-- Section assignment follows the complete-name result produced by the same locale-aware ordering rather than inspecting only the first raw Unicode character.
-- Entries that the locale-aware sectioning cannot place under Latin A–Z are grouped under `#`; their internal order uses the same complete-name locale-aware comparator. Avenor does not separately rank numbers, punctuation, Emoji, or other scripts inside `#`.
+- Sorting derives a normalized sort form from the complete displayed application name before applying Android's locale-aware collation for the current system locale. The displayed name itself is not changed.
+- The normalized sort form uses platform-provided Han-to-Latin transliteration, removes Latin diacritic differences, and ignores case. Han names and names already written with Latin characters therefore participate in one mixed ordering rather than separate script blocks.
+- Platform transliteration determines pinyin and polyphonic-character results. Avenor does not ship or maintain an independent pronunciation dictionary, pinyin library, or Launcher-defined character-priority table.
+- Section assignment follows the same normalized complete-name sort form rather than inspecting only the first raw Unicode character of the displayed name.
+- Entries that the normalized locale-aware sectioning cannot place under Latin A-Z are grouped under `#`; their internal order uses the same complete-name comparator. Avenor does not separately rank numbers, punctuation, Emoji, or other scripts inside `#`.
 - Every application participates in the same ordering regardless of whether it is a system, downloaded, primary, or cloned application.
 - When displayed names collate equally, identity precedence is primary application, cloned application, then work-profile application.
 - When both displayed-name collation and identity category are equal, use a stable launchable-entry identity as the final tie-breaker. The observable order must remain stable across refreshes; the product contract does not prescribe the implementation field or API.
@@ -53,6 +54,9 @@ Drawer presents every launchable application entry exposed to the Launcher by th
 ## Inventory changes and states
 
 - The inventory updates while Drawer is active when applications or cloned entries are added, removed, enabled, disabled, or renamed.
+- If a non-current ordinary, work-profile, or cloned profile read fails while another profile provides usable entries, Drawer presents those available entries as Content rather than blocking the entire surface. Entries from the failed profile may be absent, and the current product does not require a partial-read warning.
+- A partial profile failure must not crash Avenor, prevent available entries from launching, or be treated as confirmation that an unavailable entry was permanently removed. A failure that leaves no usable inventory follows the Error state below.
+- The intentional absence of Private Space entries under the current product boundary is not an inventory failure.
 - A routine live update preserves the current section anchor and the relative scroll position within that anchor whenever the anchor still exists.
 - If the current anchor disappears, move to the next existing application anchor in sort order and pin its heading at the top.
 - If no later application anchor exists, remain at the bottom of the application list. The fixed Settings gear is not an application anchor and is never opened automatically by an inventory update.
@@ -66,15 +70,16 @@ Drawer presents every launchable application entry exposed to the Launcher by th
 ### Empty or failed result
 
 - A successful read that returns no launchable entries is treated as an error rather than a valid empty Drawer.
-- A failed inventory read uses the same error state.
+- A failed inventory read that leaves no usable launchable entries uses the same error state.
 - The application region hides the progress indicator, shows an error icon, displays the localized message `Unable to load applications`, and provides a `Retry` action.
 - The error state does not instruct the user to restart Avenor.
 - Selecting Retry clears the visible error state, returns to the Loading state, and starts a new inventory read.
+- While the user remains on the same Error presentation, activity resume, network changes, package callbacks, and other ordinary lifecycle events do not automatically retry or clear the error. Leaving Drawer and later entering it again starts a new initial read.
 - A successful retry displays the application list. An empty or failed retry returns to the same error state.
 
 ## Acceptance intent
 
-- Every launchable entry normally exposed within Avenor's current role and least-privilege boundary appears once. Primary, work-profile, and cloned entries follow the applicable platform identity treatment; Private Space entries requiring `ACCESS_HIDDEN_PROFILES` are intentionally absent. Primary and cloned entries remain distinguishable when the platform supplies a badge; Avenor-specific fallback distinction is outside the current scope.
+- Every launchable entry returned by a successfully read source within Avenor's current role and least-privilege boundary appears once. Entries from an isolated failed non-current profile may be absent without blocking available Content. Primary, work-profile, and cloned entries follow the applicable platform identity treatment; Private Space entries requiring `ACCESS_HIDDEN_PROFILES` are intentionally absent. Primary and cloned entries remain distinguishable when the platform supplies a badge; Avenor-specific fallback distinction is outside the current scope.
 - Index navigation lands on the intended pinned anchor.
 - Index gestures do not simultaneously scroll the list.
 - Live inventory updates do not leave a removed application launchable from stale UI.

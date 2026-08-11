@@ -53,7 +53,7 @@ These labels describe capability direction rather than semantic software version
 
 ## Current product scope
 
-The current product contract defines a minimum daily-use utility loop: Home, Drawer, application launching, and the necessary Settings. Home shows time, date, favorite applications, and a Drawer entry. Drawer uses a single-list presentation and includes every launchable entry exposed by Android, including cloned application entries when the platform exposes them. Its core tasks must remain fully local and offline. Widgets, folders, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development are outside the current product scope.
+The current product contract defines a minimum daily-use utility loop: Home, Drawer, application launching, and the necessary Settings. Home shows time, date, favorite applications, and a Drawer entry. Drawer uses a single-list presentation and includes every launchable entry successfully read from the sources Android exposes, including cloned application entries when the platform exposes and Avenor successfully reads them. An isolated non-current-profile read failure does not block entries already available from other profiles. Its core tasks must remain fully local and offline. Widgets, folders, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development are outside the current product scope.
 
 The detailed boundary and evidence are recorded in the [product foundation requirements](docs/requirements/product-foundation.md). The following remain unresolved:
 

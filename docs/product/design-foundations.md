@@ -34,13 +34,15 @@
 
 ## Icons and application identity
 
-- Application icons preserve the platform-provided adaptive shape, such as device-specific circular or squircle presentation.
-- Clone or profile badges use platform-provided data and remain consistent across Home, Drawer, and related application UI.
+- Native adaptive application icons follow the current device mask, such as a device-specific circular or squircle presentation.
+- A legacy icon without adaptive layers is normalized inside the current device mask while keeping its complete identifying artwork recognizable within a safe region.
+- Clone or profile badges use platform-provided data, are applied after shape normalization so the mask does not crop them, and remain consistent across Home, Drawer, and related application UI.
 - Home and Drawer use a `40dp × 40dp` visible application icon inside an application row at least `56dp` high.
 - The icon and application name are vertically centered in the row. The horizontal gap from the visible icon boundary to the application-name region is `16dp`.
 - The complete row remains the selection and long-press target; the 40dp icon is a visual size, not a restriction on the row touch target.
-- If an application's icon cannot be loaded, use Android's platform-default generic application icon in the same 40dp visual region. Do not leave the region empty or substitute an unrelated Avenor icon.
+- If an application's icon cannot be loaded, use Android's platform-default generic application icon in the same 40dp visual region and apply the same shape-normalization and badge rules. Do not leave the region empty or substitute an unrelated Avenor icon.
 - Current target devices are expected to provide clone or profile badges. Avenor does not add its own fallback badge or secondary identity label when the platform provides none. Such fallback identity treatment is an additive future capability.
+- Exact parity with proprietary OEM shadows, icon packs, theme services, or other Launcher-specific effects is not required by the current product contract.
 
 ## Interaction and accessibility
 

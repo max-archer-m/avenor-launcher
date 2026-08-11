@@ -81,7 +81,7 @@ Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](h
 
 - Home: the Android home entry displaying system time, date, favorite applications, and a Drawer entry.
 - Favorites: the author can maintain the application entries shown on Home according to the Home and application-action-sheet specifications.
-- Drawer: a single-list presentation of every launchable entry exposed by Android, including cloned application entries when the platform exposes them.
+- Drawer: a single-list presentation of every launchable entry successfully read from the sources Android exposes, including cloned application entries when the platform exposes and Avenor successfully reads them. An isolated non-current-profile read failure does not block entries already available from other profiles.
 - Settings: current default-Launcher status, an entry to Android system settings for the default home application, and secondary product-information entries. Language follows supported system-locale resources automatically; manual language selection is outside the current scope.
 - Complete offline availability for core tasks.
 - Local storage of core product data without a self-hosted server, account, or cloud synchronization.
@@ -113,7 +113,8 @@ An additive requirement does not become current scope merely because it can be a
 - Home displays locally saved favorite application entries and allows the selected favorite to be launched.
 - An unreadable or damaged favorite persistence result is presented as a recoverable loading failure rather than an empty favorite list. Avenor preserves the original data, disables favorite mutations, and keeps independent Drawer and application-launch paths available while a read-only Retry is offered.
 - The user can access the Drawer from Home.
-- Whether or not Avenor Launcher is selected as the default home application, the Drawer presents a single list of every application entry that Android normally exposes as visible and launchable within Avenor's current role and least-privilege boundary and allows the selected entry to be launched.
+- Whether or not Avenor Launcher is selected as the default home application, the Drawer presents a single list of every application entry successfully read from the visible and launchable sources Android normally exposes within Avenor's current role and least-privilege boundary and allows the selected entry to be launched.
+- If a non-current profile cannot be read while another profile produces usable entries, Drawer continues to present and launch the available entries without crashing or replacing the whole surface with Error. The current product does not require a partial-read warning.
 - When Android exposes a cloned application entry to the Launcher, the Drawer presents it as an independent launchable entry and does not deduplicate solely by package name.
 - Ordinary, work-profile, and cloned launchable entries remain in scope when Android exposes them without hidden-profile access. Private Space entries that require `ACCESS_HIDDEN_PROFILES` are outside the current product scope.
 - The Launcher provides English and Simplified Chinese user-visible resources, selects them from the system locale automatically, and falls back to English for unsupported locales.
@@ -136,8 +137,9 @@ An additive requirement does not become current scope merely because it can be a
 - Given Avenor Launcher is selected as the home application on a supported Android device, when the user performs the system action to return home, then the system displays Avenor Launcher Home.
 - Given the user enters Home, when core content finishes loading, then Home displays system time, date, saved favorite application entries, and a Drawer entry.
 - Given favorite persistence cannot be reliably read, when Home presents the favorite region, then it distinguishes the failure from an empty list, preserves the original data, disables favorite writes, offers a read-only Retry, and keeps Drawer discovery and application launching available; when Retry fails, then the same inline error returns without an additional Toast or data overwrite.
-- Given the user is on Home, when the user performs the defined Drawer-entry action, then the Drawer presents a single list of application entries exposed by Android.
-- Given Avenor Launcher is not selected as the default home application, when the user launches Avenor Launcher directly and enters the Drawer, then the Drawer still displays every application entry that should be visible and launchable under Android platform rules.
+- Given the user is on Home, when the user performs the defined Drawer-entry action, then the Drawer presents a single list of application entries successfully read from the sources Android exposes.
+- Given Avenor Launcher is not selected as the default home application, when the user launches Avenor Launcher directly and enters the Drawer, then the Drawer still displays every application entry successfully read from the sources that should be visible and launchable under Android platform rules.
+- Given a non-current profile read fails while another profile provides usable entries, when Drawer presents the inventory, then the available entries remain visible and launchable without a crash or full-surface Error; entries from the failed profile may be absent and no partial-read warning is required.
 - Given Android exposes cloned entries for an application, when the Drawer presents the application list, then every cloned entry appears independently and can be launched.
 - Given an entry requires Android Private Space access through `ACCESS_HIDDEN_PROFILES`, when Avenor builds the Drawer inventory, then Avenor does not request that permission, access or display the entry, create a Private Space container, or provide Private Space visibility, lock, unlock, favorite, or restoration behavior.
 - Given a launchable application appears in the Drawer, when the user selects it, then the system launches that application.
@@ -155,7 +157,7 @@ An additive requirement does not become current scope merely because it can be a
 - Development completion alone is not sufficient evidence of success; results must be observed on the author's real primary devices.
 - Success is judged by the author's own daily experience; uncollected external-user opinions are not acceptance evidence.
 - Core paths must not crash or become unresponsive because of Avenor Launcher.
-- The Drawer must not omit, duplicate, or incorrectly display applications that should be visible and launchable under Android platform rules.
+- The Drawer must not omit, duplicate, or incorrectly display entries returned by successfully read Android sources. Entries from an isolated failed non-current profile may be absent without blocking available entries.
 - Selecting an application must launch the intended application.
 - Local configuration must not be unexpectedly lost or corrupted.
 - Permission denial may degrade only the dependent capability and must not block other core tasks.
