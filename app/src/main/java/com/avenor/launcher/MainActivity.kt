@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         installHomeBackBehavior()
         setContent {
             AvenorTheme {
-                HomeScreen()
+                AvenorApp()
             }
         }
     }

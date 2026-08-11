@@ -7,4 +7,10 @@
     <dimen name="home_time_line_height">64sp</dimen>
     <dimen name="home_date_text_size">16sp</dimen>
     <dimen name="home_date_line_height">24sp</dimen>
+    <dimen name="drawer_entry_drag_threshold">120dp</dimen>
+    <dimen name="drawer_horizontal_padding">16dp</dimen>
+    <dimen name="drawer_application_row_min_height">56dp</dimen>
+    <dimen name="drawer_application_icon_size">40dp</dimen>
+    <dimen name="drawer_application_icon_label_gap">16dp</dimen>
+    <dimen name="drawer_error_icon_size">48dp</dimen>
 </resources>

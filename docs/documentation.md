@@ -51,6 +51,7 @@ Contract classes interact as follows:
 | Version, artifact, and release governance | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | Technical or operational contract | Defines application versions, archives, APK artifacts, signing continuity, tags, and GitHub Releases |
 | Active version-delivery format | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | Project-governance contract | Defines active version directories, required inputs, formats, and the project milestone boundary |
 | Iteration-record format | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | Project-governance contract | Defines iteration naming, required sections, evidence, and archival handling |
+| Architecture decisions | [`docs/decisions/`](decisions/) | - | Technical contract and historical decision records | Records accepted consequential technical decisions without replacing system architecture documentation |
 | License | [`LICENSE`](../LICENSE) | - | Legal instrument | Contains the Apache License 2.0 text |
 
 ## Planned authoritative locations
@@ -60,7 +61,6 @@ Create the following documents only when real inputs exist:
 | Path | Single responsibility | Creation condition | Language strategy |
 | --- | --- | --- | --- |
 | `docs/architecture.md` | System boundaries, components, dependencies, data flows, and technical direction | The selected stack or current product contract requires architectural conclusions | English by default; add Chinese when a sustained cross-language need exists |
-| `docs/decisions/` | Append-only architecture decision records | The first consequential technical decision is actually made | English by default; translate when needed |
 | `docs/development.md` | Development environment, build, run, and troubleshooting guidance | The actual stack and authoritative commands are verified | English by default; translate when needed |
 | `docs/validation.md` | Tests, static checks, manual validation, and release gates | Actual quality tools, commands, or validation processes are verified | English by default; translate when needed |
 | `docs/security.md` | Security model, threats, controls, and response process | Architecture, permissions, data flows, or distribution provide enough input for security analysis | English by default; specialist conclusions require review; translate when needed |

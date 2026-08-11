@@ -2,4 +2,8 @@
     <string name="app_name">Avenor Launcher</string>
     <string name="clock_unavailable">无法打开时钟</string>
     <string name="calendar_unavailable">无法打开日历</string>
+    <string name="drawer_loading_applications">正在加载应用…</string>
+    <string name="drawer_unable_to_load_applications">无法加载应用</string>
+    <string name="retry">重试</string>
+    <string name="application_unable_to_open">无法打开应用</string>
 </resources>

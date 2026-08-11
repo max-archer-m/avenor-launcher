@@ -51,6 +51,7 @@
 | 版本、产物与发布治理 | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | 技术或运营契约 | 定义应用版本、归档、APK 产物、签名连续性、tag 与 GitHub Release |
 | 活动版本交付格式 | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | 项目治理契约 | 定义活动版本目录、必要输入、格式与项目里程碑边界 |
 | 迭代记录格式 | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | 项目治理契约 | 定义迭代命名、必需章节、证据与归档处理 |
+| 架构决定 | [`docs/decisions/`](decisions/) | - | 技术契约与历史决定记录 | 记录已接受的重大技术决定，但不替代系统架构文档 |
 | 许可证 | [`LICENSE`](../LICENSE) | - | 法律文件 | 包含 Apache License 2.0 原文 |
 
 ## 规划中的权威位置
@@ -60,7 +61,6 @@
 | 路径 | 唯一职责 | 创建条件 | 语言策略 |
 | --- | --- | --- | --- |
 | `docs/architecture.md` | 系统边界、组件、依赖、数据流和技术方向 | 技术栈或当前产品契约需要形成架构结论 | 默认英文；存在持续跨语言阅读需求时补充中文版本 |
-| `docs/decisions/` | 追加式架构决策记录 | 首个重大且实际发生的技术决策形成 | 默认英文；按需翻译 |
 | `docs/development.md` | 开发环境、构建、运行和故障排查 | 实际技术栈和权威命令得到验证 | 默认英文；按需翻译 |
 | `docs/validation.md` | 测试、静态检查、人工验证和发布门禁 | 实际质量工具、命令或验证流程得到验证 | 默认英文；按需翻译 |
 | `docs/security.md` | 安全模型、威胁、控制措施和响应流程 | 架构、权限、数据流或发行方式足以支持安全分析 | 默认英文；专业结论须复核，按需翻译 |

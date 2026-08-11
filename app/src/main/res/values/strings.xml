@@ -2,4 +2,8 @@
     <string name="app_name">Avenor Launcher</string>
     <string name="clock_unavailable">Unable to open Clock</string>
     <string name="calendar_unavailable">Unable to open Calendar</string>
+    <string name="drawer_loading_applications">Loading applications…</string>
+    <string name="drawer_unable_to_load_applications">Unable to load applications</string>
+    <string name="retry">Retry</string>
+    <string name="application_unable_to_open">Unable to open application</string>
 </resources>
