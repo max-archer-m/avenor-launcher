@@ -1,0 +1,4 @@
+<resources>
+    <integer name="marquee_endpoint_delay_millis">800</integer>
+    <integer name="marquee_velocity_dp_per_second">30</integer>
+</resources>

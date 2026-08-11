@@ -8,9 +8,19 @@
     <dimen name="home_date_text_size">16sp</dimen>
     <dimen name="home_date_line_height">24sp</dimen>
     <dimen name="drawer_entry_drag_threshold">120dp</dimen>
+    <dimen name="drawer_transition_full_gesture_distance">200dp</dimen>
     <dimen name="drawer_horizontal_padding">16dp</dimen>
     <dimen name="drawer_application_row_min_height">56dp</dimen>
     <dimen name="drawer_application_icon_size">40dp</dimen>
     <dimen name="drawer_application_icon_label_gap">16dp</dimen>
+    <dimen name="drawer_section_header_min_height">32dp</dimen>
+    <dimen name="drawer_section_header_vertical_padding">4dp</dimen>
+    <dimen name="drawer_index_width">32dp</dimen>
+    <dimen name="drawer_index_slot_height">20dp</dimen>
+    <dimen name="drawer_index_text_size">11sp</dimen>
+    <dimen name="drawer_index_complete_height">540dp</dimen>
+    <dimen name="drawer_index_bubble_size">64dp</dimen>
+    <dimen name="drawer_index_bubble_text_size">32sp</dimen>
+    <dimen name="drawer_index_bubble_index_gap">16dp</dimen>
     <dimen name="drawer_error_icon_size">48dp</dimen>
 </resources>

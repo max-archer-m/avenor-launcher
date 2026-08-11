@@ -2,14 +2,14 @@ package com.avenor.launcher
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.LauncherApps
 import android.graphics.drawable.Drawable
-import android.icu.text.Transliterator
+import android.os.Handler
+import android.os.Looper
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import androidx.core.content.getSystemService
-import java.text.Collator
-import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -29,18 +29,24 @@ internal fun interface LaunchableInventoryLoader {
     suspend fun load(): List<LaunchableEntry>
 }
 
+internal fun interface LaunchableInventoryObservation {
+    fun stop()
+}
+
+internal fun interface LaunchableInventoryMonitor {
+    fun observe(onInventoryChanged: () -> Unit): LaunchableInventoryObservation
+}
+
 internal class AndroidLaunchableInventoryLoader(
     context: Context,
     private val iconRenderer: LauncherIconRenderer = SystemLauncherIconRenderer(context),
     private val iconAppearance: LauncherIconAppearance = LauncherIconAppearance(),
-) : LaunchableInventoryLoader {
+) : LaunchableInventoryLoader, LaunchableInventoryMonitor {
     private val applicationContext = context.applicationContext
+    private val launcherApps = checkNotNull(applicationContext.getSystemService<LauncherApps>())
+    private val userManager = checkNotNull(applicationContext.getSystemService<UserManager>())
 
     override suspend fun load(): List<LaunchableEntry> = withContext(Dispatchers.IO) {
-        val launcherApps = checkNotNull(
-            applicationContext.getSystemService<android.content.pm.LauncherApps>(),
-        )
-        val userManager = checkNotNull(applicationContext.getSystemService<UserManager>())
         val density = applicationContext.resources.displayMetrics.densityDpi
         val locale = applicationContext.resources.configuration.locales[0]
         val entryComparator = LaunchableEntryComparator(locale)
@@ -83,26 +89,51 @@ internal class AndroidLaunchableInventoryLoader(
             .distinctBy(LaunchableEntry::identity)
             .sortedWith(entryComparator)
     }
-}
 
-internal class LaunchableEntryComparator(locale: Locale) : Comparator<LaunchableEntry> {
-    private val transliterator = Transliterator.getInstance("Han-Latin; Latin-ASCII; Lower")
-    private val collator = Collator.getInstance(locale).apply {
-        strength = Collator.PRIMARY
-    }
+    override fun observe(
+        onInventoryChanged: () -> Unit,
+    ): LaunchableInventoryObservation {
+        val callback = object : LauncherApps.Callback() {
+            override fun onPackageAdded(packageName: String, user: UserHandle) {
+                onInventoryChanged()
+            }
 
-    override fun compare(left: LaunchableEntry, right: LaunchableEntry): Int {
-        val labelOrder = collator.compare(
-            transliterator.transliterate(left.label),
-            transliterator.transliterate(right.label),
-        )
-        if (labelOrder != 0) return labelOrder
+            override fun onPackageChanged(packageName: String, user: UserHandle) {
+                onInventoryChanged()
+            }
 
-        return compareValuesBy(
-            left,
-            right,
-            { it.identity.profileSerialNumber },
-            { it.identity.componentName.flattenToString() },
-        )
+            override fun onPackageRemoved(packageName: String, user: UserHandle) {
+                onInventoryChanged()
+            }
+
+            override fun onPackagesAvailable(
+                packageNames: Array<out String>,
+                user: UserHandle,
+                replacing: Boolean,
+            ) {
+                onInventoryChanged()
+            }
+
+            override fun onPackagesUnavailable(
+                packageNames: Array<out String>,
+                user: UserHandle,
+                replacing: Boolean,
+            ) {
+                onInventoryChanged()
+            }
+
+            override fun onPackagesSuspended(packageNames: Array<out String>, user: UserHandle) {
+                onInventoryChanged()
+            }
+
+            override fun onPackagesUnsuspended(packageNames: Array<out String>, user: UserHandle) {
+                onInventoryChanged()
+            }
+        }
+
+        launcherApps.registerCallback(callback, Handler(Looper.getMainLooper()))
+        return LaunchableInventoryObservation {
+            launcherApps.unregisterCallback(callback)
+        }
     }
 }

@@ -137,6 +137,46 @@ class HomeScreenTest {
     }
 
     @Test
+    fun activeDrawerRefreshesAfterPlatformInventoryChange() {
+        fun entry(label: String) = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.live", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = label,
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+
+        var entries = listOf(entry("Before update"))
+        var inventoryChanged: () -> Unit = {}
+        val inventory = object : LaunchableInventoryLoader, LaunchableInventoryMonitor {
+            override suspend fun load(): List<LaunchableEntry> = entries
+
+            override fun observe(
+                onInventoryChanged: () -> Unit,
+            ): LaunchableInventoryObservation {
+                inventoryChanged = onInventoryChanged
+                return LaunchableInventoryObservation { inventoryChanged = {} }
+            }
+        }
+
+        composeRule.setContent {
+            AvenorTheme {
+                DrawerScreen(inventoryLoader = inventory)
+            }
+        }
+        composeRule.onNodeWithText("Before update").assertIsDisplayed()
+
+        composeRule.runOnIdle {
+            entries = listOf(entry("After update"))
+            inventoryChanged()
+        }
+
+        composeRule.onNodeWithText("After update").assertIsDisplayed()
+    }
+
+    @Test
     fun chineseLabelsAreSortedByPinyinAlongsideLatinLabels() {
         val labels = listOf("微信", "Chrome", "百度", "Amazon", "爱奇艺")
         val entries = labels.mapIndexed { index, label ->
@@ -156,6 +196,64 @@ class HomeScreenTest {
             .map(LaunchableEntry::label)
 
         assertEquals(listOf("爱奇艺", "Amazon", "百度", "Chrome", "微信"), sortedLabels)
+    }
+
+    @Test
+    fun drawerSectionsUseTheNormalizedCompleteLabel() {
+        val labels = listOf("微信", "2FAS", "Éclair", "百度", "Amazon")
+        val entries = labels.mapIndexed { index, label ->
+            LaunchableEntry(
+                identity = LaunchableIdentity(
+                    profileSerialNumber = 0,
+                    componentName = ComponentName("com.example.section.$index", "MainActivity"),
+                ),
+                user = Process.myUserHandle(),
+                label = label,
+                icon = ColorDrawable(Color.TRANSPARENT),
+            )
+        }
+
+        val sections = buildDrawerSections(entries, Locale.SIMPLIFIED_CHINESE)
+
+        assertEquals(listOf("#", "A", "B", "E", "W"), sections.map(DrawerSection::label))
+        assertEquals(listOf("2FAS"), sections.first().entries.map(LaunchableEntry::label))
+    }
+
+    @Test
+    fun liveUpdatePreservesAnchorRelativePosition() {
+        val sections = listOf(
+            DrawerSection(label = "#", entries = emptyList()),
+            DrawerSection(label = "A", entries = emptyList()),
+            DrawerSection(label = "B", entries = emptyList()),
+        )
+        val position = captureDrawerListPosition(
+            sections = sections,
+            firstVisibleItemIndex = 1,
+            firstVisibleItemScrollOffset = 12,
+        )
+
+        assertEquals(
+            DrawerRestorationTarget(itemIndex = 1, scrollOffset = 12),
+            resolveDrawerRestorationTarget(checkNotNull(position), sections),
+        )
+    }
+
+    @Test
+    fun removedAnchorMovesToNextAvailableAnchor() {
+        val position = DrawerListPosition(
+            sectionLabel = "B",
+            relativeItemIndex = 0,
+            scrollOffset = 20,
+        )
+        val updatedSections = listOf(
+            DrawerSection(label = "#", entries = emptyList()),
+            DrawerSection(label = "C", entries = emptyList()),
+        )
+
+        assertEquals(
+            DrawerRestorationTarget(itemIndex = 1, scrollOffset = 0),
+            resolveDrawerRestorationTarget(position, updatedSections),
+        )
     }
 
     @Test
