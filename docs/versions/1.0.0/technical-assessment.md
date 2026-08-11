@@ -216,7 +216,7 @@ The technical role cannot decide that legal question alone. A resolved dependenc
 - Proto DataStore with protobuf-lite, subject to persistence-invariant and license review.
 - Hilt with KSP only if the exact stable combination builds and tests cleanly.
 
-Versions must be locked in a version catalog and Gradle wrapper when the project is created. “Latest” is a research policy, not a reproducible build declaration.
+Versions must be locked in a version catalog and Gradle wrapper when the project is created. “Latest” is a research policy, not a reproducible build declaration. Discovery of a newer stable tool or dependency version is advisory maintenance information rather than an automatic update requirement or acceptance failure. The project may group upgrades into a later authorized optimization or iteration when compatibility, migration cost, and validation can be handled coherently.
 
 ### Repository-source profiles
 
@@ -280,7 +280,7 @@ Validation evidence must record device identifier, OS/API level, build identity,
 The following are required and do not depend on a future performance baseline:
 
 - the project builds reproducibly with the documented wrapper and JDK;
-- release lint and all selected automated tests pass;
+- release lint and all selected automated tests pass under the approved correctness baseline; findings that only report the availability of a newer tool or dependency version remain advisory and do not fail this gate;
 - the merged release manifest contains no unapproved permission or component;
 - the complete included journey passes offline in every required environment;
 - no observed crash, application-not-responding event, accidental application activation, duplicate favorite, silent favorite deletion, or data overwrite occurs in the recorded acceptance runs;

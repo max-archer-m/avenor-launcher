@@ -16,6 +16,17 @@ New iteration records use this structure. The format may be changed through an a
 
 A Chinese counterpart may translate the title and section headings, but it preserves the same section order, scope, and normative meaning as the English semantic source.
 
+## Iteration progression and validation policy
+
+Avenor Launcher is currently maintained by its project author as a personal project. Validation scenarios in an iteration record are therefore recommendations for reducing risk and improving evidence by default; they are not automatic entry or exit gates for that iteration or the next one.
+
+- The project author may authorize an iteration, accept its observable result, close it, or continue to the next iteration while recommended validation remains incomplete or unavailable.
+- Record known gaps, failures, skipped scenarios, affected behavior, and follow-up ownership accurately. An unperformed or unavailable check is not a passing result.
+- An accurately attributed author report of a build, installation, or device-use result is valid iteration evidence for the observations it contains. It does not establish omitted commands, environment identities, reproducibility, or broader validation results.
+- Routine agent implementation does not require an automatic Gradle run. Agent-executed Gradle validation occurs only when the author requests it or an authorized higher-level validation task requires it.
+- A specific check becomes mandatory only when the project author explicitly makes it an iteration gate or when an applicable higher-level contract requires it for a formal version, artifact, signing, archive, or release result.
+- Iteration progression does not imply formal-version completion. The applicable version contract retains its own completion and release gates.
+
 ```markdown
 # Iteration <number>: <Iteration title>
 
@@ -46,8 +57,8 @@ A Chinese counterpart may translate the title and section headings, but it prese
 - `Included work` and `Excluded work` make the iteration boundary explicit.
 - `Technical change areas` identifies affected behavior, components, interfaces, data, build, and validation surfaces at a durable level; Git remains authoritative for line-level changes.
 - Impact sections must say `None identified` only after the area was considered; omit no material impact silently.
-- `Validation plan` is prospective. `Acceptance evidence` records commands, environments, devices, results, and unavailable checks actually observed.
-- `Final result` and `Remaining issues and handoff` are completed from evidence when the iteration closes. Before then, they state the required closure and handoff evidence without claiming completion.
+- `Validation plan` lists recommended scenarios and identifies any explicitly promoted mandatory check. `Acceptance evidence` records commands, environments, devices, results, and unavailable checks actually observed without treating missing evidence as a pass.
+- `Final result` and `Remaining issues and handoff` record the author's progression decision, the observable result, and all known evidence gaps. Recommended validation does not block iteration closure by default, but the document must not claim that an unperformed check passed.
 - An iteration may recommend a product or technical decision but does not authorize one.
 
 When a formal version completes, move its original included iteration records into `docs/archives/v<version>/` and update all inbound links. The next identifier continues the project-wide sequence. Archiving `iteration-1-...` through `iteration-6-...`, for example, makes `7` the next available identifier.

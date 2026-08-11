@@ -60,7 +60,7 @@ The iteration validates the candidate JDK, Gradle, Android Gradle Plugin, Kotlin
 
 - The project author approves the `1.0.0` prospective delivery boundary and explicitly authorizes this iteration.
 - API 37 is evaluated first as stable `compileSdk`; using the documented API 36 fallback requires the reserved project-author decision.
-- Iteration 2 may begin after the project author accepts the delivered implementation and observed Home behavior as sufficient to continue, the existing project foundation is suitable for extension without replacement, and every incomplete Iteration 1 validation item is explicitly recorded and assigned. This continuation gate does not declare Iteration 1 formally closed or waive any version-level exit gate.
+- Iteration 2 may begin when the project author accepts the delivered implementation and observed Home behavior as sufficient to continue and the existing project foundation is suitable for extension without replacement. Known validation gaps are recorded for recommended follow-up but do not block progression. This decision does not waive any version-level exit gate.
 
 ## Migration and compatibility impact
 
@@ -90,6 +90,8 @@ The iteration validates the candidate JDK, Gradle, Android Gradle Plugin, Kotlin
 
 ## Validation plan
 
+The following scenarios are recommended for risk reduction and evidence quality. They are not mandatory Iteration 1 exit or Iteration 2 entry gates unless the project author explicitly promotes one; applicable `1.0.0` completion gates remain separate.
+
 - Build from the repository wrapper with the selected JDK on a cleanly described environment.
 - Resolve the same locked dependency graph through the Mainland China and official profiles where available, recording mirror gaps, fallback behavior, repository order, and artifact provenance.
 - If a path-related build failure still occurs on Windows, inspect and record the actual message. An affected environment may use an ASCII-only checkout path or another evidence-backed local resolution; do not turn the author's current workaround into a universal pass/fail procedure.
@@ -113,14 +115,14 @@ Evidence available as of 2026-08-11:
 - The project author reports that the current project was successfully built, installed, and run from an editor and that Home displayed normally. The author accepts that observed implementation result as sufficient to continue delivery toward Iteration 2.
 - The supplied evidence does not identify the editor and version, host environment, build variant, device model, Android/API version, exact procedure, build output, APK identity, or retained evidence location. These fields are unverified and must not be inferred.
 
-Outstanding before formal Iteration 1 and `1.0.0` closure:
+Recommended outstanding evidence, with any item required by the version contract still due before formal `1.0.0` closure:
 
 - reproducible CLI build commands and results, selected automated-test execution, release lint, dependency and repository-profile resolution, and merged-manifest evidence;
 - API 31 emulator, Samsung API 36, and Pixel API 37 validation with exact environment and build identities;
 - focused evidence for Home qualification, direct launch, repeated Home invocation, Back, process recreation, transparency, localization, 12/24-hour behavior, and Clock/Calendar success and failure paths; and
 - exact records for every failure, unavailable check, limitation, and author disposition.
 
-The available evidence supports continuation, not formal iteration closure or final-version acceptance.
+The available evidence supports continuation. Missing recommended evidence does not by itself block Iteration 1 closure, but it does not support a claim that the corresponding check passed or that the final version is accepted.
 
 ## Related decisions, commits, and tags
 
@@ -131,10 +133,10 @@ The available evidence supports continuation, not formal iteration closure or fi
 
 ## Final result
 
-The project author has accepted the delivered implementation and observed Home display as sufficient to continue product delivery on the existing foundation. Iteration 1 is not formally closed because the reproducible CLI, automated, lint, merged-manifest, emulator, physical-device, and focused behavior evidence listed above remains incomplete. Continuation acceptance does not mark any missing check as passed and does not reduce the final `1.0.0` gates.
+The project author has accepted the delivered implementation and observed Home display as sufficient to continue product delivery on the existing foundation. The remaining CLI, automated, lint, merged-manifest, emulator, physical-device, and focused behavior scenarios are recommended iteration evidence and do not by themselves prevent the author from closing Iteration 1. No missing check is marked as passed, and the final `1.0.0` gates remain unchanged.
 
 ## Remaining issues and handoff
 
 The reusable foundation for [Iteration 2](iteration-2-drawer-application-discovery-and-launch.md) is the root single-activity Compose project, `compileSdk` 37 / `minSdk` 31 / `targetSdk` 36 configuration, `com.avenor.launcher` application identity, Home and direct-launch manifest entries, localized Home time/date implementation, default English and Simplified Chinese resources, transparent theme, and defensive Clock/Calendar destination foundation. The project author has confirmed that this structure does not need replacement before Drawer work.
 
-The missing CLI, automated-test, release-lint, dependency-resolution, merged-manifest, API 31 emulator, Samsung API 36, Pixel API 37, and focused Home behavior evidence remains an explicit Iteration 1 closure obligation. Execute it in the next applicable validation run and close it no later than Iteration 6 and the `1.0.0` version gate. Iteration 2 must not represent this carried evidence as completed or use it to hide a discovered Home contract failure. Iteration 2 implementation still requires separate explicit project-author authorization.
+The missing CLI, automated-test, release-lint, dependency-resolution, merged-manifest, API 31 emulator, Samsung API 36, Pixel API 37, and focused Home behavior evidence remains recommended follow-up and must be revisited wherever the `1.0.0` version contract requires it. It does not block Iteration 2 entry or Iteration 1 exit by default. Iteration 2 must not represent this carried evidence as completed or use it to hide a discovered Home contract failure. Iteration 2 implementation still requires separate explicit project-author authorization.

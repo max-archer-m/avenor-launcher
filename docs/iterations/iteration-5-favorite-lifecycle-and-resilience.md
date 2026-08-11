@@ -53,10 +53,10 @@ Implementation details remain in code and tests. A newly consequential state-own
 
 ## Dependencies and sequence
 
-- Iteration 4 is closed with accepted favorite identity, schema, creation, Home presentation, and action-sheet input behavior.
+- The project author accepts the Iteration 4 favorite identity, schema, creation, Home presentation, and action-sheet input foundation as sufficient to extend; formal closure and completion of every recommended validation scenario are not required for entry.
 - Inventory and live-update behavior from Iterations 2 and 3 remains stable under favorite reconciliation.
 - The project author explicitly authorizes this iteration.
-- Completion unlocks Iteration 6 only when no unfinished core favorite behavior is being deferred as generic quality work.
+- The project author may authorize Iteration 6 when the observable favorite lifecycle foundation is acceptable for compatibility and quality work and known gaps are recorded; unresolved core behavior must remain explicit rather than being relabeled as generic quality work.
 
 ## Migration and compatibility impact
 
@@ -82,6 +82,8 @@ Implementation details remain in code and tests. A newly consequential state-own
 
 ## Validation plan
 
+The following scenarios are recommended to reduce delivery risk and improve evidence. Unless the project author explicitly promotes a scenario to a gate, incomplete or unavailable results do not block this iteration's entry, exit, or progression. Missing results remain unknown and must be recorded rather than treated as passed.
+
 - Unit-test add/remove/deduplication, launch throttling, reconciliation, permanent disappearance, transient failures, serialization, and migration.
 - UI-test Home and Drawer action-sheet states, Home launch, removal from both contexts, position preservation, localized feedback, and mutation disabling.
 - Instrument process recreation, persistence reload, failed reads, and successful retry foundations where applicable to the selected scope.
@@ -91,7 +93,7 @@ Implementation details remain in code and tests. A newly consequential state-own
 
 ## Acceptance evidence
 
-Before closure, record:
+When performed, record the following recommended evidence. Missing recommended evidence does not by itself block author acceptance or progression:
 
 - the complete find, launch, add, Home launch, restart, remove, and resulting-state journey;
 - primary and applicable clone/profile identity persistence results;
@@ -111,7 +113,7 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Final result
 
-The iteration closes only when the complete selected favorite lifecycle is demonstrable, durable, offline, non-destructive, and supported by focused required-environment evidence. Before then, no completion is claimed.
+The project author may close this iteration or continue when the observable favorite-lifecycle foundation is acceptable and known gaps are recorded. Completing every recommended scenario is not required. Unperformed checks are not passed, unresolved core behavior remains explicit, and the formal `1.0.0` gates are unchanged.
 
 ## Remaining issues and handoff
 

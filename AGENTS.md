@@ -31,7 +31,7 @@ The Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusable method
 - Iteration record format: [docs/iterations/iteration-record-format.md](docs/iterations/iteration-record-format.md)
 - License: [LICENSE](LICENSE)
 
-Architecture, development, validation, security, and privacy documents have not yet been established. Do not infer their contents or treat planned paths as current evidence.
+System architecture, development, validation, security, and privacy documents have not yet been established. Architecture decisions exist only where an accepted ADR records their exact scope; do not infer broader architecture from an ADR or treat other planned paths as current evidence.
 
 ## Language
 
@@ -50,7 +50,8 @@ Use English for commit messages, pull requests, issues, release notes, and other
 - Before integrating implementation, compare the current documentation, code, tests, and validation evidence. Treat any material difference as a contract mismatch and resolve it explicitly.
 - Production implementation requires an applicable current product contract and explicit authorization from the project author.
 - When the Android project is created, use this repository root as its project root. Do not place the Android project inside another nested repository or wrapper project without an explicit author decision.
-- In Android UI code, do not hard-code user-facing strings, colors, or reusable dimensions. Define them in the applicable `res/values` XML resources and access them through the project's resource or theme layer; keep all user-facing strings localizable.
+- In Android UI code, do not hard-code user-facing strings, semantic colors, or reusable dimensions. Define them in the applicable `res/values` XML resources and access them through the project's resource or theme layer; keep all user-facing strings localizable. A drawable or vector XML asset may retain an intrinsic fallback color or size when it belongs to the asset itself and the consuming UI explicitly controls the applicable semantic tint or rendered size. Do not use this asset exception to bypass reusable design tokens.
+- Do not automatically run Gradle for routine code authoring or review. The project author normally performs the build, installation, and device-use check and may report the observed result as iteration evidence. Run Gradle through an agent only when the project author explicitly requests it or an authorized formal-version or focused-validation task requires it. Absence of an agent-run Gradle command is not by itself an iteration entry or exit blocker.
 - The project currently uses a single development line. Do not introduce multi-branch or multi-contributor workflows unless the project author changes this constraint.
 - By default, perform one task, report its result, and wait for the project author's confirmation before starting the next task. Do not automatically continue across separate mutation steps such as modify, commit, and push unless the project author explicitly authorizes that serial continuation.
 - Update authoritative documentation when its product contract or boundary changes.
@@ -59,4 +60,4 @@ Use English for commit messages, pull requests, issues, release notes, and other
 
 ## Validation baseline
 
-No build, test, lint, static-analysis, emulator, or device command is authoritative yet because the technical stack has not been selected. For documentation-only changes, inspect the Git diff and verify local Markdown links. Do not report product build or test results until corresponding commands are documented and executed.
+An Android implementation and initial technical stack now exist, but no build, test, lint, static-analysis, emulator, or device command is authoritative yet because the development and validation baselines have not been established. For documentation-only changes, inspect the Git diff and verify local Markdown links. Record author-reported build, installation, and device observations as such without inferring missing commands, environments, or results. Do not report an agent-run product build or test result unless the corresponding command was actually executed. A notice that a newer tool or dependency version exists is advisory maintenance information, not a failing iteration result or an obligation to update immediately.

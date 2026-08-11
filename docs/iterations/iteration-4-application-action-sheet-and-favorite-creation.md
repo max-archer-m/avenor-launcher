@@ -52,10 +52,10 @@ Proto DataStore is a candidate, not a preapproved result. The iteration selects 
 
 ## Dependencies and sequence
 
-- Iteration 3 is closed with stable selected-entry identity, Drawer position, and long-press input boundaries.
+- The project author accepts the Iteration 3 selected-entry identity, Drawer position, and long-press input foundation as sufficient to extend; formal closure and completion of every recommended validation scenario are not required for entry.
 - Qualified dependency/license review is sufficient to determine whether the selected persistence stack can remain within `1.0.0` scope.
 - The project author explicitly authorizes this iteration and any product change if a required notice surface conflicts with the approved exclusion.
-- Completion unlocks Iteration 5 only when persisted creation is stable enough to add removal and reconciliation without replacing the schema.
+- The project author may authorize Iteration 5 when the observable favorite-creation and persistence foundation is acceptable for adding removal and reconciliation and known gaps are recorded.
 
 ## Migration and compatibility impact
 
@@ -82,6 +82,8 @@ Proto DataStore is a candidate, not a preapproved result. The iteration selects 
 
 ## Validation plan
 
+The following scenarios are recommended to reduce delivery risk and improve evidence. Unless the project author explicitly promotes a scenario to a gate, incomplete or unavailable results do not block this iteration's entry, exit, or progression. Missing results remain unknown and must be recorded rather than treated as passed.
+
 - Unit-test schema encoding, identity equality, append order, duplicate prevention, atomic mutation, read failure, and process restoration.
 - UI-test long-press, modal blocking, dismissal, application information, add favorite, localized failures, and Home presentation.
 - Instrument persistence recreation and backup/data-extraction configuration where practical.
@@ -91,7 +93,7 @@ Proto DataStore is a candidate, not a preapproved result. The iteration selects 
 
 ## Acceptance evidence
 
-Before closure, record:
+When performed, record the following recommended evidence. Missing recommended evidence does not by itself block author acceptance or progression:
 
 - action-sheet interaction and platform-information results;
 - exact add, deduplication, append-order, Home presentation, and process-recreation results;
@@ -111,7 +113,7 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Final result
 
-The iteration closes only when the author can add one exact Drawer entry as a durable, non-duplicated Home favorite through the included action sheet, and persistence and license evidence satisfy the contract. Before then, no completion is claimed.
+The project author may close this iteration or continue when the observable action-sheet and favorite-creation foundation is acceptable and known gaps are recorded. Completing every recommended scenario is not required. Unperformed checks are not passed; any unresolved persistence, licensing, or product issue remains explicit, and the formal `1.0.0` gates are unchanged.
 
 ## Remaining issues and handoff
 

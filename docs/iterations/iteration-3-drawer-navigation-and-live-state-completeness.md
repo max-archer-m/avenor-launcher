@@ -50,10 +50,10 @@ The product contract defines observable gesture and ordering behavior. Exact ani
 
 ## Dependencies and sequence
 
-- Iteration 2 is closed with accepted inventory, identity, list, Retry, and exact-entry launch behavior.
+- The project author accepts the Iteration 2 inventory, identity, list, Retry, and exact-entry launch foundation as sufficient to extend; formal closure and completion of every recommended validation scenario are not required for entry.
 - The selected transition state model can be extended without replacing accepted Home or inventory boundaries.
 - The project author explicitly authorizes this iteration.
-- Completion unlocks Iteration 4 only when long-press can be added without conflicting with transition, list, or index pointer ownership.
+- The project author may authorize Iteration 4 when the observable navigation and pointer-ownership foundation is acceptable for adding long-press and known gaps are recorded.
 
 ## Migration and compatibility impact
 
@@ -107,7 +107,7 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Final result
 
-The iteration closes only when Drawer discovery, navigation, live-state behavior, and Home/Drawer interaction satisfy the selected product contract on required focused environments with traceable evidence. Before then, no completion is claimed.
+The project author may close this iteration or continue when the observable Drawer navigation, live-state, and Home/Drawer interaction foundation is acceptable and known gaps are recorded. Completing every recommended scenario is not required. Unperformed checks are not passed, product mismatches remain explicit, and the formal `1.0.0` gates are unchanged.
 
 ## Remaining issues and handoff
 

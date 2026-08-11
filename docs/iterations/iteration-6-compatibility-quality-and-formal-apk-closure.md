@@ -51,8 +51,8 @@ This iteration does not introduce speculative architecture. A defect fix that re
 
 ## Dependencies and sequence
 
-- Iterations 1 through 5 are closed with no unfinished core product behavior.
-- Authoritative build, test, lint, install, and focused validation commands exist from observed successful execution.
+- The project author accepts the observable foundations from Iterations 1 through 5 as sufficient to begin compatibility and quality closure. Formal closure of those iterations and completion of all recommended scenarios are not required for entry.
+- Authoritative build, test, lint, install, and focused validation commands are established as formal-version closing evidence; their absence does not block entry into this iteration.
 - The project author separately authorizes signing identity creation, signing, external artifact movement, and archive mutation when each action becomes ready.
 - Version completion follows only after every gate in the version contract is satisfied.
 
@@ -81,6 +81,8 @@ This iteration does not introduce speculative architecture. A defect fix that re
 - A failure in accepted core behavior is not quality debt that can be waived silently.
 
 ## Validation plan
+
+Iteration 6 may begin before the following work is complete. These validations are required for formal `1.0.0` completion where the version contract says so; they are not gates for entering Iteration 6.
 
 - Run all documented build, unit, UI, instrumented, lint, manifest, dependency, install, and focused validation commands.
 - Complete the full offline user journey in every required environment.

@@ -60,11 +60,13 @@ Each linked record defines one observable product increment, its exclusions, tec
 
 Before an iteration begins mutation work:
 
-1. the preceding iteration gate must be satisfied or an explicit author decision must record why a dependency is changed;
+1. the project author must accept the preceding implementation foundation as sufficient to continue or explicitly change the dependency sequence; completion of every preceding recommended validation scenario is not required for entry;
 2. the iteration contract must be reviewed against the current product scope and implementation evidence;
 3. unresolved product mismatches must be transferred to the product manager and project author;
 4. consequential technical decisions must identify whether an ADR is required; and
 5. the project author must explicitly authorize that iteration's implementation.
+
+Because this is currently an author-maintained personal project, iteration validation scenarios are recommended evidence rather than default iteration entry or exit gates. The author may continue or close an iteration with incomplete validation when the observable result is acceptable and known gaps are recorded. Missing checks remain unknown, not passed. This flexibility does not relax the formal `1.0.0` validation, artifact, signing, archive, or completion gates below.
 
 Project-author decisions reserved across the version include:
 
