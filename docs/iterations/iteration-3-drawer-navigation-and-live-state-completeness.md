@@ -22,7 +22,8 @@ The author can find an intended launchable entry through stable locale-aware gro
 
 ## Included work
 
-- Complete locale-aware grouping, stable ordering, section anchors, and tie-breaking defined by the Drawer contract.
+- Complete the Drawer contract's platform-transliteration-based, locale-aware grouping and mixed ordering, including section anchors and tie-breaking.
+- Complete the shared one-line application-name marquee behavior, including eligibility, timing, single-active-entry priority, and pause or restart behavior during list motion and Home/Drawer transitions.
 - Complete the `#` and non-empty A-Z alphabet index, active-character bubble, direct selection, continuous sliding, haptic steps, and independent index scrolling when required.
 - Preserve or deterministically adjust the current anchor and relative position during live inventory updates.
 - Handle application add, remove, enable, disable, rename, icon, badge, and exposed clone/profile changes.
@@ -41,7 +42,7 @@ The author can find an intended launchable entry through stable locale-aware gro
 
 ## Technical change areas
 
-- Locale collation, section assignment, tie-breaking, stable identity, and list-position mapping.
+- Platform transliteration, locale collation, normalized section assignment, tie-breaking, stable identity, list-position mapping, and shared marquee coordination.
 - Alphabet-index input ownership, scrolling, haptics, and accessibility semantics within the selected scope.
 - Project-owned transition controller and arbitration among Home scrolling, Drawer scrolling, surface transition, and index input.
 - Inventory callback serialization, state updates, stale-entry prevention, and position preservation.
@@ -72,15 +73,17 @@ The product contract defines observable gesture and ordering behavior. Exact ani
 ## Risks and unresolved decisions
 
 - Gesture arbitration is the highest custom-UI risk and may expose a product/implementation mismatch on real hardware.
-- Locale behavior can differ across API levels and language configurations.
+- Platform transliteration and locale collation can differ across API levels, locale data revisions, and language configurations.
 - OEM inventory callbacks can arrive in bursts or incomplete transient states.
 - A platform-provided clone/profile badge may be absent even when identity remains distinct; Avenor-specific fallback treatment is outside scope.
 - Any OEM limitation that prevents included behavior requires project-author disposition rather than silent acceptance.
 
 ## Validation plan
 
-- Unit-test collation, section assignment, tie-breaking, anchor fallback, and state reduction.
-- UI-test index selection/sliding, loading/error recovery, Back, transition thresholds, fling decisions, cancellation, and accidental-activation prevention.
+The following scenarios are recommended to reduce delivery risk and improve evidence. Unless the project author explicitly promotes a scenario to a gate, incomplete or unavailable results do not block this iteration's entry, exit, or progression. Missing results remain unknown and must be recorded rather than treated as passed.
+
+- Unit-test platform transliteration, mixed Han and Latin ordering, case and Latin-diacritic handling, normalized section assignment, tie-breaking, anchor fallback, state reduction, and deterministic marquee eligibility and priority rules.
+- UI-test index selection/sliding, loading/error recovery, application-name marquee timing and pause/restart behavior, Back, transition thresholds, fling decisions, cancellation, and accidental-activation prevention.
 - Exercise live add/remove/disable/rename and unchanged-refresh behavior where automation is practical.
 - Validate real-touch transitions, list-boundary transfer, index ownership, haptics, and position continuity on both physical devices.
 - Run API 31 functional compatibility checks for grouping, navigation, list/index layout, and Back.
@@ -88,9 +91,9 @@ The product contract defines observable gesture and ordering behavior. Exact ani
 
 ## Acceptance evidence
 
-Before closure, record:
+When performed, record the following recommended evidence. Missing recommended evidence does not by itself block author acceptance or progression:
 
-- stable grouping, ordering, index, anchor, and live-update results;
+- stable normalized grouping, mixed ordering, index, anchor, marquee, and live-update results across the required locales and API levels;
 - gesture displacement, threshold, fling, rebound, cancellation, and pointer-safety evidence;
 - physical-device observations for Samsung and Pixel;
 - API 31 compatibility results;
