@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
@@ -101,6 +102,8 @@ internal fun DrawerScreen(
     listState: LazyListState = rememberLazyListState(),
     active: Boolean = true,
     marqueePaused: Boolean = false,
+    onInventoryLoaded: (List<LaunchableEntry>) -> Unit = {},
+    onLongPress: (LaunchableEntry) -> Unit = {},
 ) {
     var loadRequest by remember { mutableIntStateOf(0) }
     var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
@@ -133,6 +136,7 @@ internal fun DrawerScreen(
             val entries = loadMutex.withLock {
                 inventoryLoader.load()
             }
+            onInventoryLoaded(entries)
             if (entries.isEmpty()) DrawerUiState.Error else DrawerUiState.Content(entries)
         } catch (cancellation: CancellationException) {
             throw cancellation
@@ -217,6 +221,7 @@ internal fun DrawerScreen(
                     Toast.makeText(context, launchFailureMessage, Toast.LENGTH_SHORT).show()
                 }
             },
+            onLongPress = onLongPress,
         )
     }
 }
@@ -274,6 +279,7 @@ private fun DrawerApplicationList(
     entries: List<LaunchableEntry>,
     marqueePaused: Boolean,
     onLaunch: (LaunchableEntry) -> Unit,
+    onLongPress: (LaunchableEntry) -> Unit,
 ) {
     val locale = LocalConfiguration.current.locales[0]
     val sections = remember(entries, locale) {
@@ -385,6 +391,7 @@ private fun DrawerApplicationList(
                             }
                         },
                         onLaunch = onLaunch,
+                        onLongPress = onLongPress,
                     )
                 }
             }
@@ -563,11 +570,13 @@ private fun DrawerApplicationRow(
     onPressedChanged: (Boolean) -> Unit,
     onFocusedChanged: (Boolean) -> Unit,
     onLaunch: (LaunchableEntry) -> Unit,
+    onLongPress: (LaunchableEntry) -> Unit,
 ) {
     val iconSize = dimensionResource(R.dimen.drawer_application_icon_size)
     val iconSizePixels = with(LocalDensity.current) { iconSize.roundToPx() }
     val interactionSource = remember(entry.identity) { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
+    val hapticFeedback = LocalHapticFeedback.current
 
     LaunchedEffect(pressed) {
         onPressedChanged(pressed)
@@ -584,11 +593,15 @@ private fun DrawerApplicationRow(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = dimensionResource(R.dimen.drawer_application_row_min_height))
-            .clickable(
+            .combinedClickable(
                 interactionSource = interactionSource,
                 indication = LocalIndication.current,
                 role = Role.Button,
                 onClick = { onLaunch(entry) },
+                onLongClick = {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onLongPress(entry)
+                },
             )
             .onFocusChanged { focusState -> onFocusedChanged(focusState.isFocused) }
             .testTag("drawer_application_row"),

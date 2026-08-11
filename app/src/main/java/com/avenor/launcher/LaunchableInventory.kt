@@ -3,6 +3,8 @@ package com.avenor.launcher
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
@@ -10,6 +12,8 @@ import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import androidx.core.content.getSystemService
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -23,6 +27,7 @@ internal data class LaunchableEntry(
     val user: UserHandle,
     val label: String,
     val icon: Drawable,
+    val profileBadge: Drawable? = null,
 )
 
 internal fun interface LaunchableInventoryLoader {
@@ -83,6 +88,24 @@ internal class AndroidLaunchableInventoryLoader(
                         user = user,
                         label = activity.label.toString(),
                         icon = icon,
+                        profileBadge = if (user == currentUser) {
+                            null
+                        } else {
+                            runCatching {
+                                val size = (12 * applicationContext.resources.displayMetrics.density)
+                                    .toInt()
+                                    .coerceAtLeast(1)
+                                val transparent = createBitmap(size, size).apply {
+                                    eraseColor(Color.TRANSPARENT)
+                                }.toDrawable(applicationContext.resources)
+                                applicationContext.packageManager.getUserBadgedDrawableForDensity(
+                                    transparent,
+                                    user,
+                                    Rect(0, 0, size, size),
+                                    density,
+                                )
+                            }.getOrNull()
+                        },
                     )
                 }
             }

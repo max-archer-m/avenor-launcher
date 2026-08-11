@@ -1,4 +1,6 @@
 <resources>
     <color name="avenor_transparent">#00000000</color>
     <color name="avenor_foreground">#FFFFFFFF</color>
+    <color name="avenor_sheet_surface">#FF202124</color>
+    <color name="avenor_sheet_scrim">#99000000</color>
 </resources>

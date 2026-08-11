@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +39,9 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlin.math.roundToInt
 
 internal enum class AvenorSurface {
@@ -55,15 +61,20 @@ internal fun AvenorApp() {
     val entryLauncher = remember(context) {
         AndroidLaunchableEntryLauncher(context)
     }
-    AvenorApp(inventoryLoader, entryLauncher)
+    val favoriteStore = remember(context) { AtomicFileFavoriteStore(context) }
+    val informationLauncher = remember(context) { AndroidApplicationInformationLauncher(context) }
+    AvenorApp(inventoryLoader, entryLauncher, favoriteStore, informationLauncher)
 }
 
 @Composable
 internal fun AvenorApp(
     inventoryLoader: LaunchableInventoryLoader,
     entryLauncher: LaunchableEntryLauncher = LaunchableEntryLauncher { false },
+    favoriteStore: FavoriteStore? = null,
+    informationLauncher: ApplicationInformationLauncher = ApplicationInformationLauncher { false },
 ) {
     val density = LocalDensity.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
     val drawerListState = rememberLazyListState()
     val fullGestureDistancePx = with(density) {
@@ -83,6 +94,32 @@ internal fun AvenorApp(
     var gestureDisplacementPx by remember { mutableFloatStateOf(0f) }
     var drawerTransitionOwnsGesture by remember { mutableStateOf(false) }
     var settleJob by remember { mutableStateOf<Job?>(null) }
+    val effectiveFavoriteStore = favoriteStore ?: remember { InMemoryFavoriteStore() }
+    val favoriteState by effectiveFavoriteStore.state.collectAsState()
+    var inventoryEntries by remember { mutableStateOf<List<LaunchableEntry>>(emptyList()) }
+    var selectedEntry by remember { mutableStateOf<LaunchableEntry?>(null) }
+
+    LaunchedEffect(effectiveFavoriteStore) {
+        effectiveFavoriteStore.load()
+    }
+
+    LaunchedEffect(inventoryLoader) {
+        runCatching { inventoryLoader.load() }
+            .onSuccess { inventoryEntries = it }
+    }
+
+    DisposableEffect(lifecycleOwner, inventoryLoader) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                scope.launch {
+                    runCatching { inventoryLoader.load() }
+                        .onSuccess { inventoryEntries = it }
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     fun settleTo(target: AvenorSurface) {
         drawerTransitionOwnsGesture = false
@@ -273,7 +310,11 @@ internal fun AvenorApp(
                 .then(gestureModifier)
                 .testTag("home_surface"),
         ) {
-            HomeScreen()
+            HomeScreen(
+                favoriteState = favoriteState,
+                inventoryEntries = inventoryEntries,
+                onRetryFavorites = { scope.launch { effectiveFavoriteStore.load() } },
+            )
         }
 
         if (drawerActivated) {
@@ -292,8 +333,38 @@ internal fun AvenorApp(
                     listState = drawerListState,
                     active = settledSurface == AvenorSurface.Drawer || progress > 0f,
                     marqueePaused = progress > 0f && progress < 1f,
+                    onInventoryLoaded = { inventoryEntries = it },
+                    onLongPress = { entry -> selectedEntry = entry },
                 )
             }
         }
+
+        selectedEntry?.let { entry ->
+            ApplicationActionSheet(
+                entry = entry,
+                favoriteState = favoriteState,
+                onDismiss = { selectedEntry = null },
+                onAddFavorite = {
+                    scope.launch { effectiveFavoriteStore.add(entry.identity) }
+                    selectedEntry = null
+                },
+                informationLauncher = informationLauncher,
+            )
+        }
+    }
+}
+
+private class InMemoryFavoriteStore : FavoriteStore {
+    private val mutableState = kotlinx.coroutines.flow.MutableStateFlow<FavoriteReadState>(
+        FavoriteReadState.Readable(emptyList()),
+    )
+    override val state: kotlinx.coroutines.flow.StateFlow<FavoriteReadState> = mutableState
+    override suspend fun load() = Unit
+    override suspend fun add(identity: LaunchableIdentity): Boolean {
+        val current = mutableState.value as FavoriteReadState.Readable
+        if (identity !in current.identities) {
+            mutableState.value = FavoriteReadState.Readable(current.identities + identity)
+        }
+        return true
     }
 }

@@ -6,4 +6,11 @@
     <string name="drawer_unable_to_load_applications">无法加载应用</string>
     <string name="retry">重试</string>
     <string name="application_unable_to_open">无法打开应用</string>
+    <string name="application_information">应用信息</string>
+    <string name="application_information_unavailable">无法打开应用信息</string>
+    <string name="add_favorite">添加收藏</string>
+    <string name="favorites_unavailable">收藏不可用</string>
+    <string name="loading_favorites">正在加载收藏…</string>
+    <string name="unable_to_load_favorites">无法加载收藏</string>
+    <string name="home_empty_favorites">从抽屉添加应用</string>
 </resources>
