@@ -106,9 +106,11 @@ Proto DataStore 是候选方向，不是预先批准的结果。本迭代选择�
 
 ## 相关决定、commit 和 tag
 
-- 持久化或身份 ADR：仅在已证明决定重大且持久时添加。
+- 实现 commit：`1afb30c feat(favorites): add persistent favorite creation` 交付模态操作面板、准确有序身份 schema、原子添加与去重、读取状态、Home 呈现和进程重新加载基础。
+- [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) 记录已实现的版本化 `AtomicFile` 持久化方向。在项目作者明确接受其技术取舍前，其架构状态仍为 Proposed。
+- 分身/profile badge 契约现使用对齐面板右下角的 `12dp × 12dp` 区域，不设置向外偏移，也不主动裁切。
+- 项目作者报告 Gradle 构建成功、已测试日常场景中的持久化正确、三星分身呈现正确且长按交互正确。准确的 Gradle 命令、构建变体、环境、保留输出、损坏文件注入、API 31、Pixel、合并 Manifest 和完整依赖/许可证证据仍为未知。
 - 产品决定：添加面向用户的 notice 界面或改变已批准行为前必须作出。
-- 实现 commit：根据实际工作记录。
 - Tag：本迭代未授权也不要求 tag。
 
 ## 最终结果
@@ -117,4 +119,4 @@ Proto DataStore 是候选方向，不是预先批准的结果。本迭代选择�
 
 ## 剩余问题和交接
 
-向[迭代 5](iteration-5-favorite-lifecycle-and-resilience.zh-CN.md)的交接记录已验收 schema、身份、添加行为、读取状态、Home 渲染、平台操作行为和所有未解决生命周期情况。不得把破坏性持久化行为或重复创建作为普通后续工作移交。
+作者已认可 schema、身份、添加行为、读取状态、Home 呈现、平台信息操作、三星分身呈现、持久化观察和长按边界足以推进到[迭代 5](iteration-5-favorite-lifecycle-and-resilience.zh-CN.md)。这一推进不代表迭代 4 已正式关闭，也不把尚未执行的检查视为通过。

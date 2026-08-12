@@ -106,9 +106,11 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Related decisions, commits, and tags
 
-- Persistence or identity ADR: add only if the proven decision is consequential and durable.
+- Implementation commit: `1afb30c feat(favorites): add persistent favorite creation` delivered the modal action sheet, exact ordered identity schema, atomic add and deduplication, read states, Home presentation, and process reload foundation.
+- [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) documents the implemented versioned `AtomicFile` persistence direction. Its architecture status remains Proposed pending the project author's explicit acceptance of the technical trade-offs.
+- The clone/profile badge contract now uses a `12dp × 12dp` region aligned to the sheet bottom-right without an outward offset or active clipping.
+- The project author reported a successful Gradle build, correct persistence in tested daily scenarios, correct Samsung clone presentation, and correct long-press interaction. The exact Gradle command, build variant, environment, retained output, damaged-file injection, API 31, Pixel, merged-manifest, and full dependency/license evidence remain unknown.
 - Product decision: required before adding a user-visible notice surface or changing approved behavior.
-- Implementation commits: to be recorded from actual work.
 - Tags: none authorized or required by this iteration.
 
 ## Final result
@@ -117,4 +119,4 @@ The project author may close this iteration or continue when the observable acti
 
 ## Remaining issues and handoff
 
-The handoff to [Iteration 5](iteration-5-favorite-lifecycle-and-resilience.md) records the accepted schema, identity, add behavior, read states, Home rendering, platform action behavior, and all unresolved lifecycle cases. It must not transfer destructive persistence behavior or duplicate creation as normal follow-up.
+The author accepted the schema, identity, add behavior, read states, Home rendering, platform information action, Samsung clone presentation, persistence observations, and long-press boundary as sufficient to proceed to [Iteration 5](iteration-5-favorite-lifecycle-and-resilience.md). This progression does not formally close Iteration 4 or mark its unexecuted checks as passed.

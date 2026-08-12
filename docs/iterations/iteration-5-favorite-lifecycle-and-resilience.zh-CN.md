@@ -106,9 +106,12 @@
 
 ## 相关决定、commit 和 tag
 
-- 调和或迁移 ADR：仅在形成重大持久决定时添加。
+- 实现 commit：`00bdb98 feat(favorites): complete lifecycle and resilient reconciliation` 交付 Home 准确条目启动与快速重复抑制、Home 和 Drawer 取消收藏、变更门控、共享清单状态、明确收藏可用性、profile 完整的准确身份调和、禁用或未知收藏保留、本地化反馈以及 Home/Drawer 公共跑马灯协调。
+- [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) 记录从迭代 4 延续的已实现持久化边界；在项目作者明确接受前，其架构状态仍为 Proposed。
+- [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) 记录已实现的 profile 级快照完整性与保守准确身份调和方向。在项目作者明确接受其技术取舍前，其架构状态仍为 Proposed。
+- 聚焦测试源码覆盖可用性呈现、准确身份/profile 独立性、非破坏性局部读取、收藏存储变更与损坏文件保护、操作面板变更状态和跑马灯优先级。本次变更中 agent 未运行这些测试。
+- 项目作者报告当前受审实现的 Gradle 构建成功，并认为其功能结果可接受、可以继续交付。准确的 Gradle 命令、构建变体、环境、步骤和保留输出未报告。
 - 产品决定：任何行为或验收变更都必须作出。
-- 实现 commit：根据实际工作记录。
 - Tag：本迭代未授权也不要求 tag。
 
 ## 最终结果
@@ -117,4 +120,4 @@
 
 ## 剩余问题和交接
 
-向[迭代 6](iteration-6-compatibility-quality-and-formal-apk-closure.zh-CN.md)的交接记录完整功能基线、命令、未解决跨环境缺陷、测量工作、许可证结论和仍需作出的作者决定。不得使用迭代 6 隐藏未完成的核心收藏路径。
+项目作者报告的 Gradle 构建成功和功能验收足以继续向[迭代 6](iteration-6-compatibility-quality-and-formal-apk-closure.zh-CN.md)推进。准确的 Gradle 命令与环境详情、API 31 与 Pixel 行为、锁定/禁用 profile 行为、进程/设备重启、损坏文件注入和写入失败行为仍是未知的建议证据。不得使用迭代 6 隐藏后续识别出的未完成核心收藏路径。

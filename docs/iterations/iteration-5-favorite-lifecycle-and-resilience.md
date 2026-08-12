@@ -106,9 +106,12 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Related decisions, commits, and tags
 
-- Reconciliation or migration ADR: add only if a consequential durable decision arises.
+- Implementation commit: `00bdb98 feat(favorites): complete lifecycle and resilient reconciliation` delivered Home exact-entry launch with rapid-activation suppression, Home and Drawer remove-favorite actions, mutation gating, shared inventory state, explicit favorite availability, profile-complete exact-identity reconciliation, retained disabled or unknown favorites, localized feedback, and shared Home/Drawer marquee coordination.
+- [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) documents the implemented persistence boundary inherited from Iteration 4; its architecture status remains Proposed pending explicit author acceptance.
+- [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) documents the implemented profile-level snapshot completeness and conservative exact-identity reconciliation direction. Its architecture status remains Proposed pending the project author's explicit acceptance of the technical trade-offs.
+- Focused test source covers availability presentation, exact identity/profile independence, non-destructive partial reads, favorite-store mutations and damaged-file protection, action-sheet mutation states, and marquee priority. These tests have not been run by an agent in this change.
+- The project author reported a successful Gradle build for the implementation under review and considers its functional result acceptable for continuing delivery. The exact Gradle command, build variant, environment, procedure, and retained output were not reported.
 - Product decision: required for any behavior or acceptance change.
-- Implementation commits: to be recorded from actual work.
 - Tags: none authorized or required by this iteration.
 
 ## Final result
@@ -117,4 +120,4 @@ The project author may close this iteration or continue when the observable favo
 
 ## Remaining issues and handoff
 
-The handoff to [Iteration 6](iteration-6-compatibility-quality-and-formal-apk-closure.md) records the complete functional baseline, commands, outstanding cross-environment defects, measurement work, license conclusions, and author decisions still required. Iteration 6 must not be used to hide an unfinished core favorite path.
+The project author's reported successful Gradle build and functional acceptance are sufficient to continue delivery toward [Iteration 6](iteration-6-compatibility-quality-and-formal-apk-closure.md). Exact Gradle command and environment details, API 31 and Pixel behavior, locked/disabled profile behavior, process/device restart, damaged-file injection, and write-failure behavior remain unknown recommended evidence. Iteration 6 must not be used to hide a subsequently identified unfinished core favorite path.

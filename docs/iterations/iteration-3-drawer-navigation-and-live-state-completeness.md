@@ -104,8 +104,9 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Related decisions, commits, and tags
 
-- Gesture or state-ownership ADR: add only if the proven decision is consequential and durable.
-- Implementation commits: to be recorded from actual work.
+- Implementation commit: `e589653 feat(drawer): implement navigation and live updates` delivered the reversible transition, list-boundary arbitration, locale grouping, alphabet index, live inventory updates, position preservation, and shared Drawer marquee foundation.
+- [ADR-0001](../decisions/0001-establish-replaceable-launcher-icon-rendering.md) records the icon-rendering boundary used by Drawer and later Home favorites.
+- Author validation reported the staged Iteration 3 gesture, index, grouping, and Drawer interaction slices as accepted during implementation. Exact commands, API 31 evidence, Pixel evidence, and the complete recommended matrix remain unknown.
 - Tags: none authorized or required by this iteration.
 
 ## Final result
@@ -114,4 +115,4 @@ The project author may close this iteration or continue when the observable Draw
 
 ## Remaining issues and handoff
 
-The handoff to [Iteration 4](iteration-4-application-action-sheet-and-favorite-creation.md) records accepted pointer ownership, position preservation, selected-entry identity, application launch behavior, and the safe long-press integration boundary. It must not transfer unfinished core Drawer behavior as action-sheet work.
+The author accepted the pointer-ownership, position-preservation, selected-entry identity, launch, and long-press integration foundation as sufficient to proceed to [Iteration 4](iteration-4-application-action-sheet-and-favorite-creation.md). This progression does not formally close Iteration 3 or convert its unexecuted compatibility and complete-matrix checks into passed evidence.

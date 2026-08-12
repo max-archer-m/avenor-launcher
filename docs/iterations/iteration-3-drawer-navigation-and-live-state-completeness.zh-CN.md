@@ -104,8 +104,9 @@
 
 ## 相关决定、commit 和 tag
 
-- 手势或状态所有权 ADR：仅在已证明决定重大且持久时添加。
-- 实现 commit：根据实际工作记录。
+- 实现 commit：`e589653 feat(drawer): implement navigation and live updates` 交付可逆过渡、列表边界仲裁、本地化分组、字母索引、实时清单更新、位置保持和 Drawer 公共跑马灯基础。
+- [ADR-0001](../decisions/0001-establish-replaceable-launcher-icon-rendering.md) 记录 Drawer 与后续 Home 收藏共同采用的图标渲染边界。
+- 作者在实现过程中报告已接受分阶段交付的迭代 3 手势、索引、分组与 Drawer 交互。准确命令、API 31 证据、Pixel 证据和完整建议矩阵仍为未知。
 - Tag：本迭代未授权也不要求 tag。
 
 ## 最终结果
@@ -114,4 +115,4 @@
 
 ## 剩余问题和交接
 
-向[迭代 4](iteration-4-application-action-sheet-and-favorite-creation.zh-CN.md)的交接记录已验收 pointer 所有权、位置保留、所选条目身份、应用启动行为和安全长按集成边界。不得把未完成的核心 Drawer 行为作为操作面板工作移交。
+作者已认可 pointer 所有权、位置保持、所选条目身份、启动和长按集成基础足以推进到[迭代 4](iteration-4-application-action-sheet-and-favorite-creation.zh-CN.md)。这一推进不代表迭代 3 已正式关闭，也不把尚未执行的兼容性和完整矩阵检查视为通过。
