@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -6,6 +8,15 @@ plugins {
 android {
     namespace = "com.avenor.launcher"
     compileSdk = 37
+
+    // Load local signing configuration without committing credentials.
+    val keystoreFile = rootProject.file("keystore.properties")
+    val signingProp = Properties()
+    if (keystoreFile.exists()) {
+        keystoreFile.inputStream().use {
+            signingProp.load(it)
+        }
+    }
 
     defaultConfig {
         applicationId = "com.avenor.launcher"
@@ -17,8 +28,21 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            // Keep debug builds available when local release credentials are absent.
+            if (keystoreFile.exists()) {
+                storeFile = rootProject.file(signingProp.getProperty("storeFile"))
+                storePassword = signingProp.getProperty("storePassword")
+                keyAlias = signingProp.getProperty("keyAlias")
+                keyPassword = signingProp.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
