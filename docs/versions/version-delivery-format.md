@@ -4,96 +4,58 @@
 
 ## Purpose
 
-`docs/versions/` contains the active delivery contract and supporting inputs for each formal application version. A version directory selects work from the current product contract; it does not redefine the product or imply that every current product behavior will be delivered in that version.
+For versions created after `1.0.0`, `docs/delivery/active/<version>/` contains one version delivery document and all of its iteration records. The directory selects work from the current product definition; it does not redefine the product or imply that every current product behavior will be delivered in that version.
 
-Use `docs/versions/<version>/`, where `<version>` is the exact `versionName` without a `v` prefix, for example `docs/versions/1.0.0/`.
+Use the exact `versionName` without a `v` prefix, for example `docs/delivery/active/1.1.0/`.
 
 ## Required structure
 
-Create only files whose real inputs exist:
+Create the version document when real delivery inputs exist. Create iteration records only when their real planning inputs exist:
 
 ```text
-docs/versions/<version>/
-├── product-scope.md
-├── product-scope.zh-CN.md       # when a maintained Chinese counterpart is needed
-├── technical-assessment.md
-└── delivery-contract.md
+docs/delivery/active/<version>/
+- delivery.md
+- delivery.zh-CN.md
+- iteration-<number>-<title>.md
+- iteration-<number>-<title>.zh-CN.md
 ```
 
-- `product-scope.md` is the English semantic source for the user value, selected current-product scope, exclusions, and product acceptance intent.
-- `technical-assessment.md` records feasibility evidence, constraints, alternatives, dependencies, migration cost, risks, and proposed validation. It must not silently change product scope.
-- `delivery-contract.md` becomes the integrated version delivery contract after the product scope and technical assessment provide enough evidence. It defines the approved iteration set, dependencies, risks, version exit gates, and required handoffs without duplicating detailed product or technical sources.
-- Iteration records remain under [`docs/iterations/`](../iterations/) while active and link back to the applicable version contract.
+- `delivery.md` is the English semantic source for the version's user value, selected scope, exclusions, necessary technical conclusions, included iterations, validation, known limitations, completion criteria, and result.
+- Every `delivery.md` declares exactly one delivery level from [release governance](../release.md): `Development build`, `Author daily-use baseline`, or `Formal release artifact`. It applies only that level's gates plus any explicitly promoted version-specific gate. `Development build` cannot complete a formal application version.
+- Iteration records remain beside `delivery.md`, use the project-wide identifier sequence, and link to it without duplicating version-wide rules.
+- Create a separate technical assessment only when an independent technical review is genuinely needed. It is supporting analysis, not a mandatory layer. After the issue is resolved, place durable conclusions in the applicable product, architecture, development, validation, release, decision, or delivery source; do not maintain duplicate conclusions indefinitely.
 
-## Product-scope format
-
-A version product-scope document uses the following section order, removing only sections that are genuinely inapplicable:
+## Version document format
 
 ```markdown
-# <Product> <version> Product Scope
+# <Product> <version> Delivery
 
-> Semantic-source and counterpart notice
-> Responsibility and non-authorization boundary
+> Semantic-source notice and authorization boundary
 
 ## Version intent
-## Authoritative product references
-## Included user journey
-## Included product scope
-## Explicitly excluded from <version>
-## Product acceptance intent
-## Technical assessment inputs
-## Version and release boundary
-## Completion handoff
-```
-
-## Technical-assessment format
-
-```markdown
-# <Product> <version> Technical Assessment
-
-> Relationship to product scope and decision authority
-
-## Assessment question
-## Inputs and evidence
-## Platform and compatibility findings
-## Proposed system boundaries
-## Data, identity, persistence, and migration
-## Permissions, security, privacy, and licensing impact
-## Dependencies and alternatives
-## Build and validation approach
-## Quality-gate proposals
-## Delivery risks and unresolved decisions
-## Iteration recommendations
-## Product-scope impact proposals
-## Assessment conclusion
-```
-
-Separate consequential, durable architecture choices into ADRs when architecture decision recording exists. The assessment may recommend decisions but does not authorize implementation or change the product contract.
-
-## Integrated version-contract format
-
-```markdown
-# <Product> <version> Delivery Contract
-
-> Applicable product scope, technical assessment, and authorization boundary
-
-## Version outcome
-## Included and excluded scope
-## Technical feasibility conclusion
+## Delivery level
+## Product references
+## Included scope and user journey
+## Exclusions
+## Technical approach and risks
 ## Included iterations
 ## Dependencies and sequence
-## Risks and required decisions
-## Validation and exit gates
-## Artifact, signing, and archive requirements
+## Validation
+## Artifact and release requirements
 ## Known limitations and legacy issues
+## Completion criteria
 ## Completion result
 ```
 
-Before completion, `Completion result` defines the evidence required to close the version; after completion, it records the factual result. Do not use lifecycle labels as a substitute for evidence.
+Remove a section only when it is genuinely inapplicable. Link detailed product behavior, validation methods, architecture, and release rules instead of copying them. `Delivery level` names one exact level and any explicitly promoted gate. Before completion, `Completion criteria` states the required evidence and `Completion result` states that no final result exists; after completion, `Completion result` records the factual outcome.
 
 ## Version completion and archive
 
-After the version is formally completed, move its integrated contract, supporting inputs, and original included iteration records into `docs/archives/v<version>/` in accordance with [release governance](../release.md). Update links during the move. A tag or GitHub Release is not required for version completion.
+After the version is completed, update `delivery.md` and move the whole directory from `docs/delivery/active/<version>/` to `docs/delivery/archives/<version>/`. Update inbound links during the move. A tag or GitHub Release is not required for version completion.
+
+## Legacy `1.0.0` exception
+
+The active `1.0.0` version predates this format. Its `product-scope.md`, `technical-assessment.md`, and `delivery-contract.md` remain under `docs/versions/1.0.0/`, and its iteration records remain under `docs/iterations/`. Do not migrate or rewrite them solely to adopt this format. When `1.0.0` completes, archive it under `docs/archives/v1.0.0/` according to its existing delivery document. All later versions use the unified structure above.
 
 ## Milestone boundary
 

@@ -25,13 +25,14 @@ The Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusable method
 - Product overview semantic source: [overview.md](overview.md)
 - Chinese product overview: [overview.zh-CN.md](overview.zh-CN.md)
 - Documentation map and governance: [docs/documentation.md](docs/documentation.md)
+- Development guide: [docs/development.md](docs/development.md)
+- Validation guide: [docs/validation.md](docs/validation.md)
 - Product foundation requirements: [docs/requirements/product-foundation.md](docs/requirements/product-foundation.md)
 - Version, artifact, and release governance: [docs/release.md](docs/release.md)
-- Version delivery format and active versions: [docs/versions/version-delivery-format.md](docs/versions/version-delivery-format.md)
-- Iteration record format: [docs/iterations/iteration-record-format.md](docs/iterations/iteration-record-format.md)
+- Version and iteration delivery formats: [docs/versions/version-delivery-format.md](docs/versions/version-delivery-format.md) and [docs/iterations/iteration-record-format.md](docs/iterations/iteration-record-format.md)
 - License: [LICENSE](LICENSE)
 
-System architecture, development, validation, security, and privacy documents have not yet been established. Architecture decisions exist only where an accepted ADR records their exact scope; do not infer broader architecture from an ADR or treat other planned paths as current evidence.
+System architecture, security, and privacy documents have not yet been established. The development and validation guides record the current minimum project baseline without claiming unperformed commands or results. Architecture decisions exist only where an active ADR records their exact scope; do not infer broader architecture from an ADR or treat implementation assessments and other planned paths as current architecture evidence.
 
 ## Language
 
@@ -48,16 +49,17 @@ Use English for commit messages, pull requests, issues, release notes, and other
 - Do not persist the conversation's current working phase as a project-document status. Continuation state may be kept outside this product repository; durable product contracts and project constraints remain in this repository.
 - Repository-visible authoritative documents describe the current project and product contract; do not infer a separate document lifecycle from their presence.
 - Before integrating implementation, compare the current documentation, code, tests, and validation evidence. Treat any material difference as a contract mismatch and resolve it explicitly.
-- Production implementation requires an applicable current product contract and explicit authorization from the project author.
+- Production implementation requires an applicable current product definition and explicit authorization from the project author. When the author authorizes a defined task or iteration, that authorization covers the documentation, code, tests, and local validation needed to complete its approved scope; do not stop for separate confirmation between those in-scope steps.
+- Stop and obtain separate author direction when new evidence would materially change product scope or acceptance intent, require a consequential architecture or technical decision, introduce a specialist-review need, or otherwise exceed the authorized task or iteration. Signing credentials, commits, pushes, tags, uploads, publication, and other remote or difficult-to-reverse actions remain separately authorized unless the author explicitly includes the exact action in the current authorization.
 - When the Android project is created, use this repository root as its project root. Do not place the Android project inside another nested repository or wrapper project without an explicit author decision.
 - In Android UI code, do not hard-code user-facing strings, semantic colors, or reusable dimensions. Define them in the applicable `res/values` XML resources and access them through the project's resource or theme layer; keep all user-facing strings localizable. A drawable or vector XML asset may retain an intrinsic fallback color or size when it belongs to the asset itself and the consuming UI explicitly controls the applicable semantic tint or rendered size. Do not use this asset exception to bypass reusable design tokens.
 - Do not automatically run Gradle for routine code authoring or review. The project author normally performs the build, installation, and device-use check and may report the observed result as iteration evidence. Run Gradle through an agent only when the project author explicitly requests it or an authorized formal-version or focused-validation task requires it. Absence of an agent-run Gradle command is not by itself an iteration entry or exit blocker.
 - The project currently uses a single development line. Do not introduce multi-branch or multi-contributor workflows unless the project author changes this constraint.
-- By default, perform one task, report its result, and wait for the project author's confirmation before starting the next task. Do not automatically continue across separate mutation steps such as modify, commit, and push unless the project author explicitly authorizes that serial continuation.
+- By default, complete one authorized task or iteration through its in-scope local work, report its result, and wait for the project author's confirmation before starting a separate task or iteration. Do not treat modify, commit, and push as one automatically authorized sequence.
 - Update authoritative documentation when its product contract or boundary changes.
 - This repository overrides Toolkit guidance only when an override is explicit, scoped, and recorded here or in an applicable decision record.
 - The project author is the first accountable person for all project matters. Obtain qualified specialist review when a security, privacy, legal, financial, or platform-policy conclusion requires expertise.
 
-## Validation baseline
+## Development and validation baseline
 
-An Android implementation and initial technical stack now exist, but no build, test, lint, static-analysis, emulator, or device command is authoritative yet because the development and validation baselines have not been established. For documentation-only changes, inspect the Git diff and verify local Markdown links. Record author-reported build, installation, and device observations as such without inferring missing commands, environments, or results. Do not report an agent-run product build or test result unless the corresponding command was actually executed. A notice that a newer tool or dependency version exists is advisory maintenance information, not a failing iteration result or an obligation to update immediately.
+Follow [docs/development.md](docs/development.md) for the current project configuration and development entry points, and [docs/validation.md](docs/validation.md) for applicable checks, execution authority, device evidence, and result reporting. A documented command is an available entry point, not evidence that it has run successfully. For documentation-only changes, inspect the Git diff and verify local Markdown links. Record author-reported build, installation, and device observations as such without inferring missing commands, environments, or results. Do not report an agent-run product build or test result unless the corresponding command was actually executed. A notice that a newer tool or dependency version exists is advisory maintenance information, not a failing iteration result or an obligation to update immediately.

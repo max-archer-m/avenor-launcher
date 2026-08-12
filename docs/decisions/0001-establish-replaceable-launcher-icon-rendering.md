@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted
+- Value: `Active`
+- Updated: 2026-08-11
+- Basis: The author accepted the implemented boundary and Samsung device result; implementation and this ADR were committed together in `2aca840` and synchronized to the shared `origin/main` history.
 
 ## Date
 
@@ -28,7 +30,7 @@ Avenor owns a replaceable launcher-icon rendering boundary with the following re
 - Profile or clone badging is applied after shape normalization so the badge is not cropped into the icon mask.
 - A platform-default generic application icon goes through the same rendering boundary when the application icon cannot be loaded or rendered.
 - Rendered icons are derived inventory presentation. They are not favorite identity and must not be persisted as favorite truth or as a historical icon archive.
-- Future theme work may add an appearance policy or renderer implementation, but it must preserve the inventory and identity boundaries unless a later decision explicitly supersedes this ADR.
+- Future theme work may add an appearance policy or renderer implementation, but it must preserve the inventory and identity boundaries unless a later active ADR replaces this decision after the replacement is implemented and accepted.
 
 ## Rationale
 
@@ -71,7 +73,7 @@ Using Android's device mask avoids hard-coded Samsung or Pixel shapes and follow
 
 - Samsung physical-device validation accepted the current device-mask shape, normalized legacy-icon recognizability, and profile/clone badge presentation after the Iteration 2 icon spike.
 - Debug Kotlin and Android-test Kotlin compilation succeeded for the implemented boundary and regression coverage.
-- Pixel physical-device behavior remains required compatibility evidence before the applicable `1.0.0` exit gate. That evidence may tune the renderer without superseding this boundary; a conflicting architectural requirement requires a new ADR.
+- Pixel physical-device behavior remains recommended compatibility evidence and is required before any future formal release artifact whose contract includes that environment. That evidence may tune the renderer without making this decision inactive; a conflicting implemented architectural requirement requires a new active ADR.
 
 ## Implementation Notes
 
@@ -79,6 +81,19 @@ Using Android's device mask avoids hard-coded Samsung or Pixel shapes and follow
 - Preserve raw platform metadata only for the lifetime needed to derive the current immutable inventory presentation.
 - If a future theme changes icon shape at runtime, publish a new derived inventory presentation and invalidate process-local rendered-icon entries; do not rewrite favorites.
 
-## Supersedes
+## Implementation and Validation Evidence
+
+- Implementation and ADR commit: `2aca840e916ac6071e0b131095691353acf91f64`
+- Shared history: `origin/main`
+- Accepted evidence and remaining gaps: recorded in `Validation Evidence and Gaps` above
+
+## Replaces
 
 None
+
+## Inactivation
+
+- Date: Not applicable while `Active`
+- Reason: Not applicable while `Active`
+- Replaced by: None
+- Consequences: None

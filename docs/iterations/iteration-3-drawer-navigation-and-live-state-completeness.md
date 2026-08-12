@@ -2,7 +2,13 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-3-drawer-navigation-and-live-state-completeness.zh-CN.md](iteration-3-drawer-navigation-and-live-state-completeness.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
+
+## Status
+
+- Value: `Completed`
+- Updated: 2026-08-11
+- Basis: The author accepted the Drawer navigation and live-state foundation, and implementation commit `e589653` and its iteration documentation are committed in the shared `origin/main` history. Outstanding validation remains recorded below and is not treated as passed.
 
 ## Objective
 
@@ -51,7 +57,7 @@ The product contract defines observable gesture and ordering behavior. Exact ani
 
 ## Dependencies and sequence
 
-- The project author accepts the Iteration 2 inventory, identity, list, Retry, and exact-entry launch foundation as sufficient to extend; formal closure and completion of every recommended validation scenario are not required for entry.
+- Iteration 2 is `Completed`; its inventory, identity, list, Retry, and exact-entry launch behavior form the accepted foundation for this iteration.
 - The selected transition state model can be extended without replacing accepted Home or inventory boundaries.
 - The project author explicitly authorizes this iteration.
 - The project author may authorize Iteration 4 when the observable navigation and pointer-ownership foundation is acceptable for adding long-press and known gaps are recorded.
@@ -111,8 +117,8 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Final result
 
-The project author may close this iteration or continue when the observable Drawer navigation, live-state, and Home/Drawer interaction foundation is acceptable and known gaps are recorded. Completing every recommended scenario is not required. Unperformed checks are not passed, product mismatches remain explicit, and the formal `1.0.0` gates are unchanged.
+The project author accepted the observable Drawer navigation, live-state, and Home/Drawer interaction foundation, and the implementation and iteration documentation were committed and synchronized; Iteration 3 is `Completed`. Unperformed checks are not passed, product mismatches remain explicit, and the formal `1.0.0` gates are unchanged.
 
 ## Remaining issues and handoff
 
-The author accepted the pointer-ownership, position-preservation, selected-entry identity, launch, and long-press integration foundation as sufficient to proceed to [Iteration 4](iteration-4-application-action-sheet-and-favorite-creation.md). This progression does not formally close Iteration 3 or convert its unexecuted compatibility and complete-matrix checks into passed evidence.
+The completed pointer-ownership, position-preservation, selected-entry identity, launch, and long-press integration foundation supports [Iteration 4](iteration-4-application-action-sheet-and-favorite-creation.md). Its unexecuted compatibility and complete-matrix checks remain explicit version-level evidence gaps and are not treated as passed.

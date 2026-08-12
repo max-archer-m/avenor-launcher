@@ -18,6 +18,12 @@ The complete version outcome is the offline journey selected by the [product sco
 
 Documentation, an intermediate iteration, or a local build does not create the formal version. The formal version exists only after all included product increments and version-level evidence requirements are complete.
 
+## Delivery level
+
+`1.0.0` uses the `Author daily-use baseline` level defined by [release governance](../../release.md). It is not a `Formal release artifact`.
+
+The version therefore closes on accepted daily-use evidence from the author's designated primary physical device and accurate source/APK traceability. API 31 and Pixel validation, the complete automated matrix, performance distributions and absolute thresholds, formal release signing and keystore backups, release-wide specialist license conclusions, release-level digest evidence, tags, publication, and public distribution remain recommended or deferred work rather than `1.0.0` completion gates.
+
 ## Included and excluded scope
 
 The [1.0.0 product scope](product-scope.md) is authoritative for included behavior, exclusions, product acceptance intent, and detailed current-product references. This contract selects that scope without redefining it.
@@ -52,7 +58,7 @@ The preliminary delivery sequence contains six cumulative product increments:
 | [Iteration 3](../../iterations/iteration-3-drawer-navigation-and-live-state-completeness.md) | Drawer navigation and live-state completeness | Product-complete grouping, index, transition gestures, updates, and stable state |
 | [Iteration 4](../../iterations/iteration-4-application-action-sheet-and-favorite-creation.md) | Application action sheet and favorite creation | Modal application information and persistent add-to-Home behavior |
 | [Iteration 5](../../iterations/iteration-5-favorite-lifecycle-and-resilience.md) | Favorite lifecycle and resilience | Complete add, launch, restart, remove, reconciliation, and offline favorite loop |
-| [Iteration 6](../../iterations/iteration-6-compatibility-quality-and-formal-apk-closure.md) | Compatibility, quality, and formal APK closure | Full environment matrix, measured quality, signed APK, traceability, and archive evidence |
+| [Iteration 6](../../iterations/iteration-6-compatibility-quality-and-formal-apk-closure.md) | Daily-use baseline closure | Primary-device core-journey acceptance, source/APK traceability, known-gap recording, and version archive evidence |
 
 Each linked record defines one observable product increment, its exclusions, technical change areas, dependencies, and validation plan. The sequence is cumulative: a later iteration preserves all accepted behavior from earlier iterations unless an authorized contract change says otherwise.
 
@@ -66,7 +72,7 @@ Before an iteration begins mutation work:
 4. consequential technical decisions must identify whether an ADR is required; and
 5. the project author must explicitly authorize that iteration's implementation.
 
-Because this is currently an author-maintained personal project, iteration validation scenarios are recommended evidence rather than default iteration entry or exit gates. The author may continue or close an iteration with incomplete validation when the observable result is acceptable and known gaps are recorded. Missing checks remain unknown, not passed. This flexibility does not relax the formal `1.0.0` validation, artifact, signing, archive, or completion gates below.
+Because this is currently an author-maintained personal project, iteration validation scenarios are recommended evidence rather than default iteration entry or completion gates. An iteration may become `Completed` with incomplete recommended validation when it satisfies the iteration status rules and records every known gap. Missing checks remain unknown, not passed. This flexibility does not relax the `1.0.0` author daily-use baseline gates below.
 
 Project-author decisions reserved across the version include:
 
@@ -74,57 +80,47 @@ Project-author decisions reserved across the version include:
 - authorization and acceptance of each iteration;
 - any `minSdk`, product-scope, or acceptance-intent change;
 - API 36 `compileSdk` fallback after evidence that the stable API 37 candidate is not reproducible;
-- any product-visible license surface required by qualified review;
 - acceptance of an OEM limitation;
-- absolute measured performance, memory, power, and stability thresholds;
-- release-keystore creation, custody, backup, and signing;
-- external APK storage and retention policy; and
+- the author-designated primary physical device and accepted daily-use result;
+- optional release-keystore creation, custody, backup, and signing when separately pursued;
+- external APK retention when the author chooses to retain the baseline artifact; and
 - any tag, milestone declaration, GitHub Release, artifact upload, or public distribution.
 
 Approval of this prospective delivery plan does not approve candidate architecture or declare evidence-dependent gates satisfied.
 
 ## Validation and exit gates
 
-### Required environments
+### Required environment
 
 | Environment | Required purpose |
 | --- | --- |
-| Android 12/API 31 emulator | Minimum-SDK functional compatibility; not OEM or authoritative performance evidence |
-| Samsung Galaxy S23 Ultra on Android 16/API 36 | Samsung Home, clone/profile, badge, launch, gesture, persistence, and complete-journey evidence |
-| Google Pixel 8 on Android 17/API 37 | Current platform Home, profile, launch, gesture, persistence, performance, and complete-journey evidence |
+| Author-designated primary physical device; currently Samsung Galaxy S23 Ultra on Android 16/API 36 | Installation and the complete selected offline Home, Drawer, launch, action-sheet, and favorite journey for daily use |
 
-An emulator does not substitute for either physical device. Validation records identify the environment, OS/API, build identity, source commit, APK SHA-256, procedure, result, and retained evidence location.
+Record the device, OS/API, application identifiers, source commit, APK or build identity when available, procedure, result, and known limitations. Android 12/API 31 emulator and Google Pixel 8/API 37 evidence remain recommended compatibility work and do not block this delivery level.
 
 ### Deterministic gates
 
-- The project builds reproducibly through documented commands that have succeeded in the repository.
-- Release lint and all selected automated tests pass.
-- The merged release manifest contains no unapproved permission, component, backup behavior, or dependency-contributed declaration.
-- The complete selected journey passes offline in every required environment.
-- No acceptance run contains an Avenor-caused crash, ANR, accidental launch, duplicate favorite, silent favorite deletion, or data overwrite.
-- Inventory, identity, launch, persistence, restoration, localization, accessibility, navigation, gesture, and failure behavior match the linked product contract.
-- The resolved release dependency graph and license obligations are recorded and resolved without an unapproved product-scope change.
+- One installable APK has `applicationId` `com.avenor.launcher`, `versionName` `1.0.0`, and `versionCode` `1`, and is traceable to the recorded source commit.
+- The complete selected journey passes offline on the author-designated primary physical device.
+- No accepted primary-device run contains an Avenor-caused crash, ANR, accidental launch, duplicate favorite, silent favorite deletion, or data overwrite in the included journey.
+- Inventory, identity, launch, persistence, restoration, localization, navigation, gesture, and failure behavior needed by the selected daily-use journey match the linked product contract on that device.
+- Every known unperformed check, limitation, unresolved defect, permission or dependency concern, and compatibility gap is recorded without being represented as passed.
+- The implementation and delivery documentation are committed and synchronized to the author-designated shared Git history.
 
-### Evidence-dependent gates
+### Recommended evidence that does not block `1.0.0`
 
-Iteration 6 records repeatable physical-device distributions for cold start, time to full display, frame behavior on critical interactions, memory, idle power, and stability. It retains the measurement procedure and generated evidence. The project author approves absolute exit thresholds only after those measurements exist.
-
-A baseline profile is included only when reproducible release-build evidence shows material benefit. It is not an automatic version requirement.
+API 31 and Pixel compatibility, complete automated tests and release lint, merged-manifest and resolved-dependency review, repeatable performance/memory/power distributions, absolute quality thresholds, baseline-profile evaluation, and qualified license conclusions remain valuable follow-up evidence. Missing results remain unknown. A discovered included-path failure on the designated primary device must still be resolved or explicitly change the product contract before completion.
 
 ## Artifact, signing, and archive requirements
 
-- The formal artifact is one installable, verified release APK with `applicationId` `com.avenor.launcher`, `versionName` `1.0.0`, and `versionCode` `1`.
-- Changing `applicationId` before the formal artifact is accepted replaces the planned identity only after author approval. Changing it after a formal artifact exists creates a distinct Android application identity and must not be represented as an ordinary in-place upgrade.
-- The exact APK filename is recorded from the final build rather than invented before build configuration exists.
-- The APK corresponds exactly to the recorded source commit and final validation build identity.
-- The externally archived APK has a computed and reverified SHA-256 digest.
-- The formal APK uses the stable release-signing identity established for `1.0.0`; signing actions require separate author authorization.
-- The archive records only the release certificate SHA-256 fingerprint, never a keystore, key, password, signing-property file, or other secret.
-- Before formal completion, the author controls secure signing storage and at least two independent encrypted backups of the keystore and recovery information.
-- The APK remains outside the product repository beneath `../max-dev-context` using an author-approved logical directory and retention policy.
+- The daily-use baseline is one installable APK with `applicationId` `com.avenor.launcher`, `versionName` `1.0.0`, and `versionCode` `1`.
+- Changing `applicationId` before the daily-use baseline is accepted replaces the planned identity only after author approval. Changing it after the baseline exists creates a distinct Android application identity and must not be represented as an ordinary in-place upgrade.
+- Record the exact APK or build identity available from the accepted installation and the corresponding source commit; do not invent unavailable evidence.
+- Development signing or another author-controlled signing identity is acceptable for this level. Record any resulting update or reinstall limitation. Stable release signing, certificate fingerprinting, secure custody, and two encrypted backups are deferred until a formal release artifact is pursued.
+- If the author retains the APK, keep it outside the product repository and record its logical location. External retention, SHA-256 calculation, and copying remain separately authorized actions rather than completion requirements.
 - This contract does not authorize copying, committing, uploading, or distributing the APK.
 
-After completion, move the integrated contract, supporting version inputs, and original iteration records into `docs/archives/v1.0.0/`, update affected links, and record the identifiers, source commit, included iterations, important changes, migrations, environment evidence, limitations, APK filename and logical location, APK SHA-256, release-certificate fingerprint, and any separately approved tag or GitHub Release.
+After completion, move the integrated contract, supporting version inputs, and original iteration records into `docs/archives/v1.0.0/`, update affected links, and record the delivery level, identifiers, source commit, included iterations, important changes, migrations, primary-device evidence, limitations, available APK/build identity, retained logical location when one exists, and any separately approved tag or GitHub Release. Do not require or invent a release digest or certificate fingerprint for this level.
 
 `1.0.0` does not require a tag, milestone declaration, GitHub Release, remote upload, store action, or public distribution.
 
@@ -140,13 +136,12 @@ Each remaining item records its affected environment and behavior, user impact, 
 
 `1.0.0` may be declared complete only when:
 
-1. all six included iteration contracts are closed with traceable acceptance evidence;
-2. the complete selected product journey and deterministic gates pass in every required environment;
-3. measured quality distributions satisfy author-approved thresholds;
-4. dependency, license, manifest, security, privacy, compatibility, and OEM findings are resolved or explicitly dispositioned without an unapproved product change;
-5. the signed release APK, version identifiers, source commit, APK SHA-256, signing-certificate fingerprint, build identity, external location, and validation evidence refer to the same artifact;
-6. limitations and legacy issues do not conceal a failed included requirement;
-7. the project author accepts the factual completion evidence; and
-8. the completed version and iteration records are moved into `docs/archives/v1.0.0/` with links updated.
+1. all six included iteration contracts have status `Completed` with traceable acceptance evidence;
+2. one installable APK with the required identifiers is traceable to the recorded source commit;
+3. the complete selected offline journey passes on the author-designated primary physical device without a known included-path blocker;
+4. all known limitations, skipped checks, compatibility gaps, and follow-up ownership are recorded without concealing a failed included requirement;
+5. the project author accepts the APK and observed result for ongoing daily use;
+6. the implementation and delivery documentation are committed and synchronized to the author-designated shared Git history; and
+7. the completed version and iteration records are moved into `docs/archives/v1.0.0/` with links updated.
 
-Until those facts exist, this section defines closure evidence and does not claim that `1.0.0` has been built, validated, signed, archived, or completed.
+Until those facts exist, this section defines closure evidence and does not claim that `1.0.0` has been installed, accepted as an author daily-use baseline, archived, or completed.

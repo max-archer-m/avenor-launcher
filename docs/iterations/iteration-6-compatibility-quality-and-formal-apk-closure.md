@@ -1,12 +1,18 @@
-# Iteration 6: Compatibility, Quality, and Formal APK Closure
+# Iteration 6: Author Daily-Use Baseline Closure
 
 > Semantic source: English. Chinese counterpart: [iteration-6-compatibility-quality-and-formal-apk-closure.zh-CN.md](iteration-6-compatibility-quality-and-formal-apk-closure.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines version-closing product and evidence outcomes. It does not authorize signing, artifact movement, a tag, a release, or public distribution. Each mutation requires the applicable explicit project-author authorization.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration closes the `Author daily-use baseline`; it does not create a `Formal release artifact` or authorize signing, artifact movement, a tag, a release, or public distribution.
+
+## Status
+
+- Value: `Planned`
+- Updated: 2026-08-10
+- Basis: The primary-device daily-use closure scope is defined, but its implementation, validation, and version-closing execution have not been authorized by this record.
 
 ## Objective
 
-Demonstrate that the complete `1.0.0` product journey is compatible, reliable, measurable, traceable, and represented by one formally identified and signed APK without adding unfinished product scope.
+Establish one installable and traceable `1.0.0` APK that the project author accepts for ongoing daily use after completing the selected offline journey on the author-designated primary physical device.
 
 ## Product and version references
 
@@ -18,20 +24,17 @@ Demonstrate that the complete `1.0.0` product journey is compatible, reliable, m
 
 ## Observable outcome
 
-The same release-signed `1.0.0` APK completes the selected offline Home, Drawer, application launch, action-sheet, and favorite journey on the API 31 emulator, Samsung API 36 device, and Pixel API 37 device. Its source, identifiers, signing certificate, digest, validation, limitations, and external location are traceable.
+One `1.0.0` APK installs on the author-designated primary physical device, completes the selected offline Home, Drawer, application launch, action-sheet, and favorite journey, and is traceable to its application identifiers and source commit. Known gaps and signing or reinstall limitations are recorded.
 
 ## Included work
 
-- Resolve defects required for the accepted Iterations 1 through 5 behavior to pass the complete environment matrix.
-- Execute the complete deterministic automated and manual validation plan in every required environment.
-- Measure repeatable cold start, time to full display, critical interaction frame behavior, memory, idle power, and stability on physical devices.
-- Retain measurement procedures, iterations, build mode, device state, JSON, traces, and observed distributions.
-- Obtain project-author approval for absolute evidence-based exit thresholds.
-- Complete release dependency, license, merged-manifest, permission, backup, security, and privacy reviews applicable to the actual implementation.
-- Decide from evidence whether a baseline profile materially improves the critical journey.
+- Resolve defects that block the selected daily-use journey on the author-designated primary physical device.
+- Install the `1.0.0` APK and execute the complete selected offline journey on that device.
+- Record the device, OS/API, application identifiers, source commit, available APK/build identity, procedure, result, and known limitations.
+- Record every unperformed automated, API 31, Pixel, performance, manifest, dependency, license, security, privacy, and release-artifact check as an explicit gap rather than a pass.
 - Record and disposition OEM limitations and contract mismatches through the applicable authority.
-- Under separate authorization, establish release-signing custody and backups, build and verify the formal APK, calculate and reverify SHA-256, and place it in the approved external location.
-- Prepare factual version archive records and update links only after all completion evidence exists.
+- Record development-signing or author-controlled signing implications for update and reinstall behavior.
+- Prepare factual version archive records for the selected delivery level and update links only after all completion evidence exists.
 
 ## Excluded work
 
@@ -39,68 +42,63 @@ The same release-signed `1.0.0` APK completes the selected offline Home, Drawer,
 - Silent relaxation of an included acceptance requirement.
 - Creation of a tag, milestone declaration, GitHub Release, remote upload, store action, or public distribution without separate explicit authorization.
 - Storage of an APK or signing secret in the product repository.
+- Formal release signing and backup, release-level digest evidence, a complete compatibility matrix, performance thresholds, and specialist release conclusions unless separately authorized as additional work.
 
 ## Technical change areas
 
-- Cross-environment defect correction and regression coverage for the complete accepted journey.
-- Release build, lint, tests, benchmarks, traces, manifest/dependency evidence, and reproducible commands.
-- Signing integration, certificate verification, APK identity/digest, source traceability, and external artifact record.
+- Primary-device defect correction and focused regression evidence for the selected journey.
+- APK identifiers, source traceability, installation evidence, and signing/reinstall limitations.
 - Version archive preparation and link migration.
 
 This iteration does not introduce speculative architecture. A defect fix that reveals a consequential architecture choice follows the ADR process; a product behavior change returns to the product manager and project author.
 
 ## Dependencies and sequence
 
-- The project author accepts the observable foundations from Iterations 1 through 5 as sufficient to begin compatibility and quality closure. Formal closure of those iterations and completion of all recommended scenarios are not required for entry.
-- Authoritative build, test, lint, install, and focused validation commands are established as formal-version closing evidence; their absence does not block entry into this iteration.
-- The project author separately authorizes signing identity creation, signing, external artifact movement, and archive mutation when each action becomes ready.
+- Iterations 1 through 5 must be `Completed`, or the project author must explicitly change the dependency sequence, before this iteration changes from `Planned` to `In Progress`. Completion of their recommended scenarios is not required unless the version contract makes a scenario a formal-version gate.
+- Available build and install identity, the source commit, and the primary-device validation procedure are recorded as daily-use closing evidence. Missing recommended commands remain explicit gaps.
+- The project author separately authorizes optional signing identity creation, external artifact movement, and archive mutation when an action becomes ready.
 - Version completion follows only after every gate in the version contract is satisfied.
 
 ## Migration and compatibility impact
 
-- Validate Android 12/API 31 through Android 17/API 37 within the approved portrait-phone boundary.
-- Validate the exact `versionName` `1.0.0` and `versionCode` `1` in the final artifact.
+- Validate the selected journey on the author-designated primary physical device. API 31 and Pixel validation remain recommended follow-up.
+- Validate the exact `versionName` `1.0.0` and `versionCode` `1` in the installed baseline APK.
 - Verify process/device restoration and the final persisted schema produced by Iteration 5.
 - No downgrade, public distribution, store migration, or pre-1.0 production-data migration is included.
 
 ## Security, privacy, permission, and licensing impact
 
-- Inspect the final merged release manifest for every permission, exported component, query, backup rule, and dependency contribution.
-- Confirm the absence of unapproved network, broad visibility, hidden-profile, analytics, data collection, cloud backup, and device-transfer behavior.
-- Record the resolved runtime dependency graph and qualified license conclusion.
-- Store only the release-certificate SHA-256 fingerprint in project records; never store a keystore, key, password, signing-property file, or other secret.
-- Require author-controlled secure storage and at least two independent encrypted signing backups before formal completion.
+- Record any known permission, manifest, dependency, backup, security, privacy, or license concern affecting the selected daily-use journey. Missing release-wide review remains an explicit follow-up gap.
+- Do not store a keystore, key, password, signing-property file, or other secret in project records.
+- Record the signing identity category and resulting update or reinstall limitation without requiring release-certificate fingerprinting or release-keystore backups at this level.
 
 ## Risks and unresolved decisions
 
-- Absolute performance, memory, power, and stability thresholds remain undecided until repeatable measurements exist.
 - OEM limitations may require author acceptance or a product-contract decision.
-- Qualified license review may expose a conflict with the excluded user-visible notice surface.
-- Exact external APK directory, retention, synchronization, backup, and Git-tracking policy remain author-reserved.
-- Signing parameters and executable commands do not exist before the actual environment is established.
+- API 31, Pixel, complete automated checks, performance measurement, merged-manifest/dependency review, and qualified license conclusions remain recommended follow-up evidence.
+- External APK retention and formal signing remain author-reserved optional actions.
 - A failure in accepted core behavior is not quality debt that can be waived silently.
 
 ## Validation plan
 
-Iteration 6 may begin before the following work is complete. These validations are required for formal `1.0.0` completion where the version contract says so; they are not gates for entering Iteration 6.
+The following primary-device validation is required for the `1.0.0` author daily-use baseline. Higher-level evidence is recommended and recorded when available but does not block completion.
 
-- Run all documented build, unit, UI, instrumented, lint, manifest, dependency, install, and focused validation commands.
-- Complete the full offline user journey in every required environment.
+- Record the build or APK identity and source commit used for installation.
+- Complete the full offline user journey on the author-designated primary physical device.
 - Exercise Home qualification, direct launch, time/date, Drawer, grouping/index, transitions, live updates, exact-entry launch, action sheet, favorite creation/lifecycle, process recreation, and device restart.
 - Record crashes, ANRs, accidental activation, duplicates, data loss, overwrite, and unavailable behavior.
-- Run repeatable physical-device benchmarks and retain generated evidence.
-- Build the final authorized release variant, verify identifiers and signature, calculate SHA-256, copy only under authorization, and reverify the external file.
+- Verify the application identifiers and record signing/update/reinstall limitations that can be established from the accepted installation.
 - Compare documentation, implementation, tests, and validation evidence; resolve every material contract mismatch explicitly.
 
 ## Acceptance evidence
 
-Before closure, record:
+Before completion, record:
 
-- exact successful build, test, lint, install, benchmark, signing, digest, and validation commands;
-- complete environment identities, procedures, results, build identity, source commit, and APK digest;
-- measured distributions and author-approved thresholds;
-- dependency, license, manifest, permission, backup, security, and privacy conclusions;
-- signed APK filename, `versionName`, `versionCode`, source commit, SHA-256, signing-certificate fingerprint, build time/environment, and external logical location;
+- available build/install procedure, primary-device identity, result, APK/build identity, and source commit;
+- `applicationId`, `versionName`, and `versionCode` from the accepted installation;
+- the complete selected journey result and any observed blocker;
+- signing identity category and known update or reinstall limitation;
+- every missing compatibility, automated, performance, dependency, license, manifest, permission, backup, security, privacy, digest, and external-retention result;
 - every known limitation, unresolved defect, technical debt, migration issue, workaround, and author disposition; and
 - links to accepted Iterations 1 through 5 and their evidence.
 
@@ -115,7 +113,7 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Final result
 
-The iteration and formal version close only when the project author accepts the complete factual evidence set and the same signed APK is traceable across identifiers, source commit, signature, digest, required environments, external storage, limitations, and archive records. Before then, no completion is claimed.
+No final result exists while this iteration is `Planned`. It becomes `Completed` when the project author accepts one traceable APK and its observed primary-device journey for ongoing daily use, known gaps are recorded, and the implementation and documentation are committed and synchronized. Formal-release-artifact evidence remains outside this iteration unless separately authorized.
 
 ## Remaining issues and handoff
 

@@ -8,7 +8,7 @@
 
 Can the selected `1.0.0` journey be delivered as a maintainable Android Home application on the documented API 31 through API 37 device range, using a least-privilege, local-first architecture that can evolve for the next three to five years without importing deferred product behavior into the first version?
 
-The assessment concludes that the scope is technically feasible. Feasibility remains evidence-limited until the platform-specific launcher inventory and identity behavior is validated on the two recorded physical devices, the selected build-tool combination is proven in the repository, and measured performance gates are established before version closure.
+The assessment concludes that the scope is technically feasible. Cross-device, reproducibility, and measured-performance confidence remains evidence-limited until the proposed validation is performed. The later delivery contract selects which evidence is required for `1.0.0` completion and which remains recommended for a future formal release artifact.
 
 ## Inputs and evidence
 
@@ -144,7 +144,7 @@ The device spike must verify that the candidate distinguishes primary, cloned, a
 
 Proto DataStore was the preferred persistence candidate before Iteration 4 implementation because it offered an explicit typed schema, ordered repeated entries, atomic updates, and a migration path. Stable DataStore releases were preferred and alpha dependencies were excluded from the candidate production baseline.
 
-[ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md) documents the implemented direction of a project-owned versioned `AtomicFile` serializer after evaluating that candidate against the required failure invariants and the iteration's minimal dependency boundary. The ADR remains Proposed until the project author explicitly accepts its technical trade-offs.
+Active [ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md) records the implemented project-owned versioned `AtomicFile` serializer after evaluating that candidate against the required failure invariants and the iteration's minimal dependency boundary. The project author has accepted its material technical trade-offs.
 
 The initial schema should contain only data needed to restore identity and order. It must not store application usage, timestamps, cached icons, labels, analytics, or historical inventory.
 
@@ -164,7 +164,7 @@ A favorite remains stored during loading, inventory failure, and transient launc
 
 Reconciliation must be deterministic and independently unit-tested. It must not infer permanent disappearance from a single failed launch, missing icon, missing label, callback ordering, locked profile, or failed inventory read.
 
-[ADR-0003](../../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) documents the implemented profile-completeness and exact-identity evidence direction. The ADR remains Proposed until the project author explicitly accepts its technical trade-offs.
+Active [ADR-0003](../../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) records the implemented profile-completeness and exact-identity evidence direction. The project author has accepted its material technical trade-offs.
 
 ### Storage and backup
 
@@ -200,12 +200,12 @@ Favorites are local user-content data even though they contain no message or fil
 
 The implemented dependency inventory contains AndroidX/Compose and Kotlin without adding DataStore, protocol buffers, Hilt/Dagger, or KSP for favorite persistence. Exact artifacts and transitive runtime contents must still be generated from the resolved release dependency graph.
 
-The product currently excludes the Settings surface and its Third-party License entry. Therefore dependency selection must satisfy one of these conditions before `1.0.0` integration:
+The product currently excludes the Settings surface and its Third-party License entry. Before a formal release artifact, dependency selection must satisfy one of these conditions:
 
 1. all required notices may legally be included in repository and packaged artifact metadata without a user-visible in-app entry; or
 2. the project author approves a product-scope change that introduces a suitable notice surface.
 
-The technical role cannot decide that legal question alone. A resolved dependency inventory and qualified license review are required before accepting the affected implementation and closing the version.
+The technical role cannot decide that legal question alone. For the `1.0.0` author daily-use baseline, record unresolved dependency and license evidence accurately; a resolved inventory and qualified review are required before a formal release artifact or any separately promoted license gate.
 
 ## Dependencies and alternatives
 
@@ -217,7 +217,7 @@ The technical role cannot decide that legal question alone. A resolved dependenc
 - Stable Jetpack Compose libraries managed through the stable Compose BOM.
 - Stable Activity Compose, Lifecycle, and Core releases compatible with the selected SDK/toolchain.
 - Kotlin coroutines.
-- The implemented project-owned versioned `AtomicFile` serializer proposed by ADR-0002.
+- The implemented project-owned versioned `AtomicFile` serializer recorded by Active ADR-0002.
 - Hilt with KSP only if the exact stable combination builds and tests cleanly.
 
 Versions must be locked in a version catalog and Gradle wrapper when the project is created. “Latest” is a research policy, not a reproducible build declaration. Discovery of a newer stable tool or dependency version is advisory maintenance information rather than an automatic update requirement or acceptance failure. The project may group upgrades into a later authorized optimization or iteration when compatibility, migration cost, and validation can be handled coherently.
@@ -269,19 +269,19 @@ On some Windows environments, a checkout path containing non-ASCII characters ma
 4. **Manual device validation:** Home selection, actual Home behavior, cloned/profile identities, platform badge treatment, Clock/Calendar/application information, system bars, haptics, restart behavior, and OEM-specific failure cases.
 5. **Macrobenchmark on physical devices:** cold startup, time to full display, Drawer transition, Drawer scrolling, alphabet-index movement, and return to Home. Emulator benchmark numbers are diagnostic only.
 
-### Required environments
+### Proposed formal-artifact environments
 
 - Android 12/API 31 emulator for minimum-SDK functional compatibility.
 - Samsung Galaxy S23 Ultra on Android 16/API 36 for the recorded Samsung and clone behavior.
 - Google Pixel 8 on Android 17/API 37 for current platform behavior.
 
-Validation evidence must record device identifier, OS/API level, build identity, source commit, APK digest, test procedure, and result. A passing emulator does not substitute for either physical device.
+These environments are the assessment's recommended matrix for a future formal release artifact. The later delivery contract selects the author-designated primary device as the only required `1.0.0` environment; results from the other environments remain recommended evidence. Where formal-artifact validation is performed, evidence should record device identifier, OS/API level, build identity, source commit, APK digest, test procedure, and result. A passing emulator does not substitute for either physical device in that matrix.
 
 ## Quality-gate proposals
 
 ### Deterministic gates
 
-The following are required and do not depend on a future performance baseline:
+The following are proposed deterministic gates for a future formal release artifact. They become `1.0.0` requirements only where the later delivery contract explicitly selects or narrows them:
 
 - the project builds reproducibly with the documented wrapper and JDK;
 - release lint and all selected automated tests pass under the approved correctness baseline; findings that only report the availability of a newer tool or dependency version remain advisory and do not fail this gate;
@@ -294,28 +294,28 @@ The following are required and do not depend on a future performance baseline:
 
 ### Measured performance gates
 
-Absolute performance numbers cannot be responsibly fixed before an installable implementation is measured on the target physical devices. The validation iteration must produce repeatable distributions for:
+Absolute performance numbers cannot be responsibly fixed before an installable implementation is measured on the target physical devices. A future formal-release-artifact validation effort should produce repeatable distributions for:
 
 - cold-start time to initial display and time to full display;
 - frame-overrun percentiles for Home-to-Drawer, Drawer scrolling, index sliding, and Drawer-to-Home;
 - memory after cold Home start and after completing the full journey; and
 - idle power behavior sufficient to demonstrate that Avenor performs no polling or background network work.
 
-Macrobenchmark results must include multiple iterations and retain the generated JSON and trace evidence. The project author must approve the resulting absolute exit thresholds before `1.0.0` can close. Until then, performance feasibility is provisional rather than failed.
+For a future formal release artifact, Macrobenchmark results should include multiple iterations and retain generated JSON and trace evidence, and the project author should approve any resulting absolute exit thresholds. These measurements are recommended evidence rather than gates for the `1.0.0` author daily-use baseline selected by the later delivery contract.
 
 A baseline profile is added only if measured release-build evidence shows a material improvement to the critical journey and its generation can be reproduced. It is not a substitute for fixing avoidable startup work or recomposition/jank problems.
 
 ## Delivery risks and unresolved decisions
 
-### Blocking validation risks
+### Validation risks
 
 - Samsung may expose cloned entries, badges, or user/profile identities differently from AOSP assumptions.
 - A platform callback may not by itself distinguish temporary unavailability from permanent disappearance; reconciliation may require a successful full snapshot.
 - The exact implemented toolchain and resolved dependency graph still require recorded formal-version evidence.
 - Mirror completeness and synchronization may differ from official upstream repositories, and the current non-ASCII Windows checkout path may expose tool-specific path failures.
-- The resolved release dependency graph still requires qualified license review even though the selected favorite persistence adds no new library.
+- The resolved release dependency graph still requires qualified license review before a formal release artifact even though the selected favorite persistence adds no new library.
 - Gesture arbitration is the highest custom-UI risk and needs an early vertical slice on real touch hardware.
-- Absolute performance, memory, and power thresholds require implementation measurements and author approval.
+- Absolute performance, memory, and power thresholds require implementation measurements and author approval if promoted to a future formal-release-artifact gate.
 
 ### Decisions reserved for the project author
 
@@ -323,7 +323,7 @@ A baseline profile is added only if measured release-build evidence shows a mate
 - any change to the approved `1.0.0` product scope;
 - acceptance of API 36 fallback if the API 37 candidate fails the toolchain spike;
 - introduction of a user-visible license surface if qualified review requires it;
-- final measured performance thresholds; and
+- any future formal-release-artifact performance thresholds; and
 - acceptance of known OEM limitations discovered by physical-device validation.
 
 Hilt versus manual dependency injection is an implementation decision unless it materially changes delivery risk, dependency/license obligations, or the approved schedule. The technical role should select the smaller proven option after the build spike and record the result.
@@ -335,7 +335,7 @@ Hilt versus manual dependency injection is an implementation decision unless it 
 3. **Drawer navigation and live-state completeness** — complete grouping, alphabet-index behavior, live updates, position preservation, and real-touch Home/Drawer gesture arbitration.
 4. **Application action sheet and favorite creation** — deliver the modal application actions and prove ordered, non-duplicated favorite creation and persistence.
 5. **Favorite lifecycle and resilience** — complete favorite launch, removal, restart persistence, reconciliation, transient-failure handling, and non-destructive read-failure behavior.
-6. **Compatibility, quality, and formal APK closure** — execute the full matrix, measure physical-device performance, resolve licenses, decide whether a baseline profile is justified, and prepare the signed formal APK and version-exit evidence under separate authorization.
+6. **Author daily-use baseline closure** — validate the complete selected journey on the author-designated primary physical device, record source/APK identity and known gaps, and prepare the `1.0.0` daily-use completion evidence. Full-matrix, performance, license, and formal release-artifact work remains recommended or separately authorized.
 
 Each iteration requires its own current contract and explicit implementation authorization. The sequence minimizes the chance that OEM identity behavior or gesture feasibility is discovered only after the entire UI is built.
 
@@ -356,6 +356,6 @@ Private Space remains outside the current product contract. Corruption detection
 
 Avenor Launcher `1.0.0` is technically feasible with a modern, maintainable Android architecture and without broad package visibility, hidden-profile access, network capability, or premature modularization.
 
-The implemented direction under review is a single-activity Compose application, a project-owned `LauncherApps` inventory repository, stable profile-plus-component identity, ordered versioned `AtomicFile` persistence proposed by ADR-0002, explicit backup exclusion, and layered automated plus physical-device validation.
+The implemented direction under review is a single-activity Compose application, a project-owned `LauncherApps` inventory repository, stable profile-plus-component identity, ordered versioned `AtomicFile` persistence recorded by Active ADR-0002, explicit backup exclusion, and layered automated plus physical-device validation.
 
-This assessment did not itself authorize implementation or integration. Implemented iterations were separately authorized by the project author. The author has reported a successful Gradle build for the implementation under review, while formal version closure still requires the applicable recorded build identity and evidence, the resolved dependency and license inventory, physical-device clone/profile validation, and author-approved measured performance gates.
+This assessment did not itself authorize implementation or integration. Implemented iterations were separately authorized by the project author. The later delivery contract selects an author daily-use baseline for `1.0.0`; completion therefore requires the applicable source/APK identity, accepted primary-device journey, known-gap record, and synchronized implementation and documentation rather than every formal-release-artifact proposal in this assessment.

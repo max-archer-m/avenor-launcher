@@ -2,7 +2,13 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-4-application-action-sheet-and-favorite-creation.zh-CN.md](iteration-4-application-action-sheet-and-favorite-creation.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
+
+## Status
+
+- Value: `Completed`
+- Updated: 2026-08-12
+- Basis: The author accepted the action-sheet and favorite-creation result, and implementation commit `1afb30c` and the corresponding iteration documentation are committed in the shared `origin/main` history. Outstanding validation remains recorded below and is not treated as passed.
 
 ## Objective
 
@@ -52,8 +58,8 @@ Proto DataStore is a candidate, not a preapproved result. The iteration selects 
 
 ## Dependencies and sequence
 
-- The project author accepts the Iteration 3 selected-entry identity, Drawer position, and long-press input foundation as sufficient to extend; formal closure and completion of every recommended validation scenario are not required for entry.
-- Qualified dependency/license review is sufficient to determine whether the selected persistence stack can remain within `1.0.0` scope.
+- Iteration 3 is `Completed`; its selected-entry identity, Drawer position, and long-press input behavior form the accepted foundation for this iteration.
+- The selected persistence stack must have enough known dependency and license information to avoid a known blocker on the included daily-use path; unresolved formal-review evidence is recorded for follow-up.
 - The project author explicitly authorizes this iteration and any product change if a required notice surface conflicts with the approved exclusion.
 - The project author may authorize Iteration 5 when the observable favorite-creation and persistence foundation is acceptable for adding removal and reconciliation and known gaps are recorded.
 
@@ -70,13 +76,13 @@ Proto DataStore is a candidate, not a preapproved result. The iteration selects 
 - Favorite identities are not logged in full in release builds and are not used for analytics or usage history.
 - No network, account, cloud, broad package visibility, or hidden-profile capability is introduced.
 - External application-information actions handle absence and `SecurityException` without exposing raw exception text.
-- The resolved persistence dependency graph and notice obligations require documented review before closure.
+- Any unresolved persistence dependency graph or notice obligation is recorded before iteration completion and requires qualified review before a future formal release artifact.
 
 ## Risks and unresolved decisions
 
 - Candidate identity may not remain durable for a device-specific clone.
 - Persistence integration may not preserve failure invariants without an alternative serializer or DataStore form.
-- Qualified license review may require a product-visible notice surface currently excluded from `1.0.0`.
+- Future qualified license review may require a product-visible notice surface currently excluded from `1.0.0`; that impact must remain recorded until resolved.
 - Sheet gestures may conflict with underlying transition or list input.
 - Showing a newly added favorite requires correct reconciliation with current inventory without persisting labels, icons, or availability as favorite truth.
 
@@ -107,7 +113,7 @@ No acceptance evidence exists merely because this contract is present.
 ## Related decisions, commits, and tags
 
 - Implementation commit: `1afb30c feat(favorites): add persistent favorite creation` delivered the modal action sheet, exact ordered identity schema, atomic add and deduplication, read states, Home presentation, and process reload foundation.
-- [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) documents the implemented versioned `AtomicFile` persistence direction. Its architecture status remains Proposed pending the project author's explicit acceptance of the technical trade-offs.
+- Active [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) records the implemented versioned `AtomicFile` persistence direction and the author's acceptance of its material technical trade-offs.
 - The clone/profile badge contract now uses a `12dp × 12dp` region aligned to the sheet bottom-right without an outward offset or active clipping.
 - The project author reported a successful Gradle build, correct persistence in tested daily scenarios, correct Samsung clone presentation, and correct long-press interaction. The exact Gradle command, build variant, environment, retained output, damaged-file injection, API 31, Pixel, merged-manifest, and full dependency/license evidence remain unknown.
 - Product decision: required before adding a user-visible notice surface or changing approved behavior.
@@ -115,8 +121,8 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Final result
 
-The project author may close this iteration or continue when the observable action-sheet and favorite-creation foundation is acceptable and known gaps are recorded. Completing every recommended scenario is not required. Unperformed checks are not passed; any unresolved persistence, licensing, or product issue remains explicit, and the formal `1.0.0` gates are unchanged.
+The project author accepted the observable action-sheet and favorite-creation result, and the implementation and iteration documentation were committed and synchronized; Iteration 4 is `Completed`. Unperformed checks are not passed; any unresolved persistence, licensing, or product issue remains explicit, and the formal `1.0.0` gates are unchanged.
 
 ## Remaining issues and handoff
 
-The author accepted the schema, identity, add behavior, read states, Home rendering, platform information action, Samsung clone presentation, persistence observations, and long-press boundary as sufficient to proceed to [Iteration 5](iteration-5-favorite-lifecycle-and-resilience.md). This progression does not formally close Iteration 4 or mark its unexecuted checks as passed.
+The completed schema, identity, add behavior, read states, Home rendering, platform information action, Samsung clone presentation, persistence observations, and long-press boundary support [Iteration 5](iteration-5-favorite-lifecycle-and-resilience.md). Unexecuted checks remain explicit evidence gaps and are not treated as passed.

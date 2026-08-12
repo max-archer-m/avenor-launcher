@@ -2,7 +2,13 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-2-drawer-application-discovery-and-launch.zh-CN.md](iteration-2-drawer-application-discovery-and-launch.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
+
+## Status
+
+- Value: `Completed`
+- Updated: 2026-08-11
+- Basis: The author accepted the discovery and exact-entry launch foundation for subsequent work, and implementation commit `2aca840` plus the iteration handoff are committed in the shared `origin/main` history. Outstanding validation remains recorded below and is not treated as passed.
 
 ## Objective
 
@@ -55,7 +61,7 @@ The device evidence must determine whether the candidate profile-plus-`Component
 
 ## Dependencies and sequence
 
-- The project author has accepted the Iteration 1 implementation and observed Home behavior as sufficient to continue delivery on the existing single-activity Compose foundation. This continuation decision does not claim that Iteration 1 is formally closed.
+- Iteration 1 is `Completed`; its recorded Home implementation and observed behavior form the accepted single-activity Compose foundation for this iteration.
 - Remaining Iteration 1 CLI, automated-test, release-lint, dependency, merged-manifest, emulator, physical-device, and focused Home validation gaps are explicitly recorded in its handoff. They are recommended follow-up evidence and do not block this iteration's entry or exit; any item required by the final `1.0.0` contract remains due before formal version completion.
 - The project author separately authorizes this iteration and any required technical decision arising from the platform spike.
 - The project author may authorize Iteration 3 when the observable core list and launch foundation are acceptable for extension and known gaps are recorded; completing every recommended validation scenario is not required for progression.
@@ -104,7 +110,7 @@ The following scenarios are recommended to reduce delivery risk and improve evid
 
 Current narrow evidence:
 
-- Accepted ADR-0001 records Samsung physical-device acceptance of the current device-mask shape, normalized legacy-icon recognizability, and profile/clone badge presentation, plus successful debug Kotlin and Android-test Kotlin compilation for that boundary.
+- Active ADR-0001 records Samsung physical-device acceptance of the current device-mask shape, normalized legacy-icon recognizability, and profile/clone badge presentation, plus successful debug Kotlin and Android-test Kotlin compilation for that boundary.
 - Current repository source contains Loading/Content/Error reduction, localized error presentation, manual Retry, exact-entry launch, platform-transliteration-based comparison, icon normalization, the interim `120dp` entry gate, and regression test sources including a mixed Han and Latin ordering case. Their presence is source evidence, not proof that every test or required environment has passed.
 
 When performed, record the following recommended evidence. Missing recommended evidence does not by itself block author acceptance or progression:
@@ -132,7 +138,7 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Final result
 
-The project author may close this iteration or continue when the observable Home-to-Drawer discovery and exact-entry launch foundation is acceptable and known gaps are recorded. Completing every recommended scenario is not required. Unperformed checks are not passed, unresolved core mismatches remain explicit, and the formal `1.0.0` gates are unchanged.
+The project author accepted the observable Home-to-Drawer discovery and exact-entry launch foundation, and the implementation and iteration handoff were committed and synchronized; Iteration 2 is `Completed`. Unperformed checks are not passed, unresolved core mismatches remain explicit, and the formal `1.0.0` gates are unchanged.
 
 ## Remaining issues and handoff
 

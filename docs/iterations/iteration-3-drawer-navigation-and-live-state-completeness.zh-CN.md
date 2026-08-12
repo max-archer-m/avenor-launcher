@@ -2,7 +2,13 @@
 
 > 英文语义源：[iteration-3-drawer-navigation-and-live-state-completeness.md](iteration-3-drawer-navigation-and-live-state-completeness.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其必需证据。本文不授权实现、不批准候选架构，也不声明迭代完成。项目作者必须明确授权实现。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
+
+## 状态
+
+- Value: `Completed`
+- Updated: 2026-08-11
+- Basis: 作者已接受 Drawer 导航与实时状态基础，实现 commit `e589653` 及其迭代文档均已 commit 到共享的 `origin/main` 历史。尚未完成的验证继续记录在下文中，不视为通过。
 
 ## 目标
 
@@ -51,7 +57,7 @@
 
 ## 依赖和序列
 
-- 项目作者接受迭代 2 的清单、身份、列表、Retry 和准确条目启动基础足以继续扩展；准入不要求其正式关闭或完成每个建议验证场景。
+- 迭代 2 为 `Completed`；其清单、身份、列表、Retry 和准确条目启动行为构成本迭代已接受的基础。
 - 所选过渡状态模型可以扩展，而无需替换已验收 Home 或清单边界。
 - 项目作者明确授权本迭代。
 - 当可观察的导航和 pointer 所有权基础可接受、适合增加长按且已知缺口得到记录时，项目作者可以授权迭代 4。
@@ -111,8 +117,8 @@
 
 ## 最终结果
 
-当可观察的 Drawer 导航、实时状态和 Home/Drawer 交互基础可接受且已知缺口得到记录时，项目作者可以关闭本迭代或继续推进。不要求完成每个建议场景。未执行检查不得标记为通过，产品不匹配必须保持明确，正式 `1.0.0` 门禁保持不变。
+项目作者已接受可观察的 Drawer 导航、实时状态和 Home/Drawer 交互基础，实现及迭代文档也已 commit 并同步；迭代 3 为 `Completed`。未执行检查不得标记为通过，产品不匹配必须保持明确，正式 `1.0.0` 门禁保持不变。
 
 ## 剩余问题和交接
 
-作者已认可 pointer 所有权、位置保持、所选条目身份、启动和长按集成基础足以推进到[迭代 4](iteration-4-application-action-sheet-and-favorite-creation.zh-CN.md)。这一推进不代表迭代 3 已正式关闭，也不把尚未执行的兼容性和完整矩阵检查视为通过。
+已完成的 pointer 所有权、位置保持、所选条目身份、启动和长按集成基础支持[迭代 4](iteration-4-application-action-sheet-and-favorite-creation.zh-CN.md)。尚未执行的兼容性和完整矩阵检查继续作为明确的版本级证据缺口，不视为通过。

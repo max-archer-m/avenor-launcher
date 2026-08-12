@@ -2,7 +2,13 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-1-home-minimum-usable-surface.zh-CN.md](iteration-1-home-minimum-usable-surface.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
+
+## Status
+
+- Value: `Completed`
+- Updated: 2026-08-11
+- Basis: The author accepted the observable Home result, and the implementation and iteration documentation are committed in the shared `origin/main` history. Outstanding validation remains recorded below and is not treated as passed.
 
 ## Objective
 
@@ -122,7 +128,7 @@ Recommended outstanding evidence, with any item required by the version contract
 - focused evidence for Home qualification, direct launch, repeated Home invocation, Back, process recreation, transparency, localization, 12/24-hour behavior, and Clock/Calendar success and failure paths; and
 - exact records for every failure, unavailable check, limitation, and author disposition.
 
-The available evidence supports continuation. Missing recommended evidence does not by itself block Iteration 1 closure, but it does not support a claim that the corresponding check passed or that the final version is accepted.
+The available evidence supports the recorded `Completed` status. Missing recommended evidence does not support a claim that the corresponding check passed or that the formal version is accepted.
 
 ## Related decisions, commits, and tags
 
@@ -133,7 +139,7 @@ The available evidence supports continuation. Missing recommended evidence does 
 
 ## Final result
 
-The project author has accepted the delivered implementation and observed Home display as sufficient to continue product delivery on the existing foundation. The remaining CLI, automated, lint, merged-manifest, emulator, physical-device, and focused behavior scenarios are recommended iteration evidence and do not by themselves prevent the author from closing Iteration 1. No missing check is marked as passed, and the final `1.0.0` gates remain unchanged.
+The project author accepted the delivered implementation and observed Home display, and the implementation and documentation were committed and synchronized; Iteration 1 is `Completed`. The remaining CLI, automated, lint, merged-manifest, emulator, physical-device, and focused behavior scenarios remain recorded evidence gaps. No missing check is marked as passed, and the final `1.0.0` gates remain unchanged.
 
 ## Remaining issues and handoff
 

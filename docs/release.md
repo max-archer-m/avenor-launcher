@@ -15,6 +15,33 @@ Avenor Launcher uses a project-defined versioning profile with the numeric form 
 - Every formal version contains one or more completed iterations. The applicable version delivery contract selects the subset of the current product contract delivered by that version.
 - `1.0.0` is the first minimum usable version. It is not required to implement every behavior described by the current product contract; its exact delivery scope must be established through the version and iteration contracts.
 
+## Delivery levels
+
+Every version delivery contract must select exactly one of the following delivery levels. The levels increase evidence and operational obligations; they are not separate version-number systems and do not imply public distribution.
+
+### Development build
+
+A development build supports implementation, investigation, or focused validation before a version boundary is accepted. It may be local, temporary, incompletely validated, and signed by a development identity. Record only the evidence needed by the active task or iteration. A development build is not a completed application version, daily-use baseline, formal release artifact, milestone, or release.
+
+### Author daily-use baseline
+
+An author daily-use baseline is an installable version intended for the project author's ongoing use. Completion requires:
+
+- the selected product journey is implemented and accepted;
+- the exact application identifiers and source commit represented by the installed APK are recorded;
+- the APK installs and the selected core journey succeeds on at least one author-designated primary physical device;
+- no known included-path failure makes that validated daily use unsafe or unusable;
+- known validation gaps, limitations, recovery implications, and follow-up ownership are recorded; and
+- the implementation and delivery documentation are committed and synchronized to the author-designated shared Git history.
+
+Recommended automated checks, the complete compatibility matrix, performance distributions, formal release signing and backup, release-wide artifact digest and archive evidence, specialist license conclusions, tags, publication, and distribution do not block this level unless the applicable version contract explicitly promotes one to a gate. Missing evidence remains unknown, not passed. Retain sufficient source and APK identity information to reinstall the accepted baseline; this does not promise Android data rollback or downgrade support.
+
+### Formal release artifact
+
+A formal release artifact is the highest-evidence delivery level. In addition to the author daily-use baseline requirements, its version contract defines and satisfies the required compatibility environments, automated and manual validation, performance or reliability thresholds, dependency and license disposition, merged-manifest and security/privacy review, stable release-signing custody and recovery, artifact digest, external retention, and complete source-to-artifact traceability. Tagging, GitHub Release creation, store action, upload, and public distribution remain separately authorized even when this level is complete.
+
+The author may promote a completed lower-level version through a later, separately authorized delivery contract or version. Do not retroactively claim evidence that did not exist at the original completion boundary.
+
 ## Numeric progression
 
 Every changed numeric component increments by exactly one. Skipping numbers is prohibited unless the project author explicitly replaces this contract.
@@ -50,7 +77,7 @@ Within one `MAJOR` family, any older formal version must have a supported direct
 
 ## Iterations and version archives
 
-Each formal version is planned under `docs/versions/<version>/` and must be represented by `docs/archives/v<version>/delivery-contract.md` after all included iterations are completed. The archive contains the completed version contract, its supporting inputs, and the original records for one or more included iterations, and must record:
+Each version created after `1.0.0` is planned under `docs/delivery/active/<version>/` and, after completion, is moved as one directory to `docs/delivery/archives/<version>/`. Its `delivery.md` records the selected delivery level and the evidence required by that level. The legacy `1.0.0` version remains under `docs/versions/1.0.0/` and archives to `docs/archives/v1.0.0/` without being migrated solely for structural consistency. Record the following when applicable:
 
 - `versionName` and `versionCode`
 - The exact Git commit represented by the APK
@@ -59,16 +86,16 @@ Each formal version is planned under `docs/versions/<version>/` and must be repr
 - Migration or compatibility impact
 - Completed validation evidence and affected devices or environments
 - Known limitations, unresolved defects, and other legacy issues
-- APK filename and external storage location
-- APK SHA-256 digest
-- Release-signing certificate SHA-256 fingerprint
+- Available APK or build identity, and external storage location when the APK is retained
+- APK SHA-256 digest when required by the selected level
+- Signing-certificate SHA-256 fingerprint when a stable signing identity is part of the selected level
 - Related Git tag and GitHub Release when either exists
 
 The archive must never contain a private signing key, keystore password, key password, or another signing secret.
 
 ## APK artifact contract
 
-The verified APK for each formal version is stored outside this product repository under `../max-dev-context`. Its exact directory convention remains to be decided before the first formal version is archived.
+When a completed version APK is retained, store it outside this product repository under `../max-dev-context`. Its exact directory convention remains to be decided before the first retained artifact is archived. Artifact retention is optional for an author daily-use baseline unless its version contract requires it, and mandatory for a formal release artifact.
 
 - APK files must not be committed to the `avenor-launcher` Git repository.
 - Whether APK files are tracked by the `max-dev-context` repository is not decided by this document. Until explicitly decided, treat the location as external filesystem storage rather than authorization to commit binary artifacts.
@@ -76,17 +103,17 @@ The verified APK for each formal version is stored outside this product reposito
 - The recorded SHA-256 digest must be computed from the exact archived APK and verified after copying it to the external location.
 - The artifact record must also identify the build time and the environment used to produce and validate the APK when that evidence becomes available.
 
-An APK is a formal version artifact only after it is installable, has passed the applicable version validation, matches the archived commit and identifiers, and has the recorded digests and signing fingerprint.
+An APK represents a completed version only after it is installable, has passed the validation required by the selected delivery level, and matches the recorded source commit and identifiers. Digest and signing-fingerprint evidence is required only when the selected level or version contract requires it.
 
 ## Signing continuity and custody
 
-Formal versions beginning with `1.0.0` must use one stable release-signing identity so supported updates can be recognized as updates of the same Android application.
+Every formal release artifact must use one stable release-signing identity so supported updates can be recognized as updates of the same Android application. An author daily-use baseline may use an existing development or author-controlled signing identity when its version contract records the resulting installation and update limitations.
 
 - The project author creates or explicitly authorizes creation of the release keystore and retains ownership and final control of it.
 - The release keystore, private key, passwords, and signing-property files must remain outside Git and outside authoritative project documentation.
 - Agents may recommend or assist with generation, build integration, fingerprint verification, and signing verification only with explicit author authorization. The author selects and retains the secrets and backup locations.
 - Each formal version archive records only the release certificate's SHA-256 fingerprint, never private signing material.
-- Before `1.0.0`, the project must establish secure storage and at least two independent, encrypted, author-controlled backups of the release keystore and required recovery information.
+- Before the first formal release artifact, the project must establish secure storage and at least two independent, encrypted, author-controlled backups of the release keystore and required recovery information.
 - Loss, compromise, rotation, or platform-managed migration of the signing identity requires explicit author approval, an impact assessment, and a documented migration decision before another formal version is declared.
 
 A future decision to distribute through Google Play or another store must separately define platform-managed signing, upload keys, channel requirements, and migration consequences. No distribution platform is currently authorized.

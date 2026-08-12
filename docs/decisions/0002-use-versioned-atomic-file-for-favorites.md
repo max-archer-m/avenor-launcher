@@ -2,7 +2,9 @@
 
 ## Status
 
-Proposed
+- Value: `Active`
+- Updated: 2026-08-12
+- Basis: The project author explicitly accepted the implemented persistence direction and its material technical trade-offs. Implementation commit `1afb30c` and documentation commit `166012e` are present on the current `main`; synchronization to the designated shared remote history remains pending.
 
 ## Date
 
@@ -70,8 +72,22 @@ Choosing a project-owned format also makes the read-before-write rule and preser
 - The Manifest disables backup and the Android 12+ data-extraction rules exclude every application storage domain from cloud backup and device transfer.
 - The project author reported a successful Gradle build for the implementation under review and correct persistence in the tested daily scenarios. The exact command, build variant, environment, and retained output were not reported.
 - Static source and XML checks support this proposal. Agent-run Gradle, instrumented persistence recreation, damaged-file injection, and physical-device restart evidence have not been performed in this change.
-- Functional acceptance does not itself accept this architecture decision. The project author must explicitly accept the persistence trade-offs before this ADR becomes an authoritative architecture boundary.
+- The project author explicitly accepted the persistence trade-offs on 2026-08-12. The recorded validation gaps remain open and are not treated as passed.
 
-## Supersedes
+## Implementation and Validation Evidence
+
+- Implementation commit: `1afb30c69232e80e133140eec2e69e147c9c2289`
+- ADR documentation commit: `166012e`
+- Shared-remote synchronization: Pending
+- Accepted evidence and remaining gaps: recorded in `Validation Evidence and Gaps` above
+
+## Replaces
 
 None
+
+## Inactivation
+
+- Date: Not applicable while `Active`
+- Reason: Not applicable while `Active`
+- Replaced by: None
+- Consequences: None

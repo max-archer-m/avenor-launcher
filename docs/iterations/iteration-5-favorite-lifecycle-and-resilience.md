@@ -2,7 +2,13 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-5-favorite-lifecycle-and-resilience.zh-CN.md](iteration-5-favorite-lifecycle-and-resilience.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its required evidence. It does not authorize implementation, approve candidate architecture, or declare the iteration complete. The project author must explicitly authorize implementation.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
+
+## Status
+
+- Value: `In Progress`
+- Updated: 2026-08-12
+- Basis: The implementation and observable result have been accepted, but implementation commit `00bdb98` and the corresponding iteration evidence remain ahead of the shared `origin/main` history. Synchronization is still required before this iteration can become `Completed`.
 
 ## Objective
 
@@ -53,7 +59,7 @@ Implementation details remain in code and tests. A newly consequential state-own
 
 ## Dependencies and sequence
 
-- The project author accepts the Iteration 4 favorite identity, schema, creation, Home presentation, and action-sheet input foundation as sufficient to extend; formal closure and completion of every recommended validation scenario are not required for entry.
+- Iteration 4 is `Completed`; its favorite identity, schema, creation, Home presentation, and action-sheet input behavior form the accepted foundation for this iteration.
 - Inventory and live-update behavior from Iterations 2 and 3 remains stable under favorite reconciliation.
 - The project author explicitly authorizes this iteration.
 - The project author may authorize Iteration 6 when the observable favorite lifecycle foundation is acceptable for compatibility and quality work and known gaps are recorded; unresolved core behavior must remain explicit rather than being relabeled as generic quality work.
@@ -107,8 +113,8 @@ No acceptance evidence exists merely because this contract is present.
 ## Related decisions, commits, and tags
 
 - Implementation commit: `00bdb98 feat(favorites): complete lifecycle and resilient reconciliation` delivered Home exact-entry launch with rapid-activation suppression, Home and Drawer remove-favorite actions, mutation gating, shared inventory state, explicit favorite availability, profile-complete exact-identity reconciliation, retained disabled or unknown favorites, localized feedback, and shared Home/Drawer marquee coordination.
-- [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) documents the implemented persistence boundary inherited from Iteration 4; its architecture status remains Proposed pending explicit author acceptance.
-- [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) documents the implemented profile-level snapshot completeness and conservative exact-identity reconciliation direction. Its architecture status remains Proposed pending the project author's explicit acceptance of the technical trade-offs.
+- Active [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) records the implemented persistence boundary inherited from Iteration 4 and the author's acceptance of its material technical trade-offs.
+- Active [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) records the implemented profile-level snapshot completeness and conservative exact-identity reconciliation direction and the author's acceptance of its material technical trade-offs.
 - Focused test source covers availability presentation, exact identity/profile independence, non-destructive partial reads, favorite-store mutations and damaged-file protection, action-sheet mutation states, and marquee priority. These tests have not been run by an agent in this change.
 - The project author reported a successful Gradle build for the implementation under review and considers its functional result acceptable for continuing delivery. The exact Gradle command, build variant, environment, procedure, and retained output were not reported.
 - Product decision: required for any behavior or acceptance change.
@@ -116,7 +122,7 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Final result
 
-The project author may close this iteration or continue when the observable favorite-lifecycle foundation is acceptable and known gaps are recorded. Completing every recommended scenario is not required. Unperformed checks are not passed, unresolved core behavior remains explicit, and the formal `1.0.0` gates are unchanged.
+No final `Completed` result is recorded yet. The implementation and observable favorite-lifecycle result have been accepted, but the implementation and corresponding iteration evidence must be synchronized to the author-designated shared Git history before the status can change from `In Progress` to `Completed`. Unperformed checks are not passed, unresolved core behavior remains explicit, and the formal `1.0.0` gates are unchanged.
 
 ## Remaining issues and handoff
 

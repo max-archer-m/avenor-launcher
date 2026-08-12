@@ -2,7 +2,13 @@
 
 > 英文语义源：[iteration-5-favorite-lifecycle-and-resilience.md](iteration-5-favorite-lifecycle-and-resilience.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其必需证据。本文不授权实现、不批准候选架构，也不声明迭代完成。项目作者必须明确授权实现。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
+
+## 状态
+
+- Value: `In Progress`
+- Updated: 2026-08-12
+- Basis: 实现与可观察结果已经接受，但实现 commit `00bdb98` 及对应迭代证据仍领先于共享的 `origin/main` 历史；同步完成前，本迭代不能成为 `Completed`。
 
 ## 目标
 
@@ -53,7 +59,7 @@
 
 ## 依赖和序列
 
-- 项目作者接受迭代 4 的收藏身份、schema、创建、Home 呈现和操作面板输入基础足以继续扩展；准入不要求其正式关闭或完成每个建议验证场景。
+- 迭代 4 为 `Completed`；其收藏身份、schema、创建、Home 呈现和操作面板输入行为构成本迭代已接受的基础。
 - 迭代 2 和 3 的清单与实时更新行为在收藏调和下保持稳定。
 - 项目作者明确授权本迭代。
 - 当可观察的收藏生命周期基础可接受、适合进入兼容性与质量工作且已知缺口得到记录时，项目作者可以授权迭代 6；未解决核心行为必须保持明确，不得改称为通用质量工作。
@@ -107,8 +113,8 @@
 ## 相关决定、commit 和 tag
 
 - 实现 commit：`00bdb98 feat(favorites): complete lifecycle and resilient reconciliation` 交付 Home 准确条目启动与快速重复抑制、Home 和 Drawer 取消收藏、变更门控、共享清单状态、明确收藏可用性、profile 完整的准确身份调和、禁用或未知收藏保留、本地化反馈以及 Home/Drawer 公共跑马灯协调。
-- [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) 记录从迭代 4 延续的已实现持久化边界；在项目作者明确接受前，其架构状态仍为 Proposed。
-- [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) 记录已实现的 profile 级快照完整性与保守准确身份调和方向。在项目作者明确接受其技术取舍前，其架构状态仍为 Proposed。
+- Active [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) 记录从迭代 4 延续的已实现持久化边界，以及作者对其重要技术取舍的接受。
+- Active [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) 记录已实现的 profile 级快照完整性与保守准确身份调和方向，以及作者对其重要技术取舍的接受。
 - 聚焦测试源码覆盖可用性呈现、准确身份/profile 独立性、非破坏性局部读取、收藏存储变更与损坏文件保护、操作面板变更状态和跑马灯优先级。本次变更中 agent 未运行这些测试。
 - 项目作者报告当前受审实现的 Gradle 构建成功，并认为其功能结果可接受、可以继续交付。准确的 Gradle 命令、构建变体、环境、步骤和保留输出未报告。
 - 产品决定：任何行为或验收变更都必须作出。
@@ -116,7 +122,7 @@
 
 ## 最终结果
 
-当可观察的收藏生命周期基础可接受且已知缺口得到记录时，项目作者可以关闭本迭代或继续推进。不要求完成每个建议场景。未执行检查不得标记为通过，未解决核心行为必须保持明确，正式 `1.0.0` 门禁保持不变。
+当前尚不记录最终 `Completed` 结果。实现与可观察的收藏生命周期结果已经接受，但在实现和对应迭代证据同步到作者指定的共享 Git 历史前，状态不能从 `In Progress` 变为 `Completed`。未执行检查不得标记为通过，未解决核心行为必须保持明确，正式 `1.0.0` 门禁保持不变。
 
 ## 剩余问题和交接
 

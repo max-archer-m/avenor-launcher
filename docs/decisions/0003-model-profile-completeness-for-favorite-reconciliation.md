@@ -2,7 +2,9 @@
 
 ## Status
 
-Proposed
+- Value: `Active`
+- Updated: 2026-08-12
+- Basis: The project author explicitly accepted the implemented reconciliation direction and its material technical trade-offs. Implementation commit `00bdb98` and documentation commit `166012e` are present on the current `main`; synchronization to the designated shared remote history remains pending.
 
 ## Date
 
@@ -66,8 +68,22 @@ This adds explicit state and focused platform checks while keeping destructive m
 - Focused test source covers explicit disabled presentation, partial-profile retention, exact-identity-only reconciliation, profile independence, callback-triggered refresh, and shared marquee priority.
 - The project author reported a successful Gradle build for the implementation under review and considers its functional result acceptable for continuing delivery. The exact command, build variant, environment, procedure, and retained output were not reported.
 - API 31, Pixel, locked-profile, disabled-component, damaged-file, and process-restart validation for this change remain unexecuted or unknown.
-- Functional acceptance does not itself accept this architecture decision. The project author must explicitly accept the reconciliation trade-offs before this ADR becomes an authoritative architecture boundary.
+- The project author explicitly accepted the reconciliation trade-offs on 2026-08-12. The recorded validation gaps remain open and are not treated as passed.
 
-## Supersedes
+## Implementation and Validation Evidence
+
+- Implementation commit: `00bdb986a6603a4181d80ef38acd6e9dea2127c5`
+- ADR documentation commit: `166012e`
+- Shared-remote synchronization: Pending
+- Accepted evidence and remaining gaps: recorded in `Validation Evidence and Gaps` above
+
+## Replaces
 
 None
+
+## Inactivation
+
+- Date: Not applicable while `Active`
+- Reason: Not applicable while `Active`
+- Replaced by: None
+- Consequences: None

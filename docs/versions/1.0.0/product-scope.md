@@ -166,7 +166,7 @@ The product scope is satisfied only when all of the following are observable acr
 - Included core behavior remains completable without network connectivity.
 - English, Simplified Chinese, and English fallback behavior apply consistently to every included user-visible string.
 
-Detailed measurable performance, power, memory, startup-response, and stability gates are not invented by this product-scope document. The technical assessment and later validation contract must propose evidence-based thresholds sufficient for the included journey to support the author's daily use.
+This product-scope document does not invent measurable performance, power, memory, startup-response, or stability thresholds. For the `1.0.0` author daily-use baseline, the author's accepted primary-device experience and absence of a known included-path blocker are sufficient; measured thresholds remain recommended evidence or a future formal-release-artifact gate.
 
 ## Technical assessment inputs
 
