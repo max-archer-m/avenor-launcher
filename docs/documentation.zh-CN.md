@@ -51,8 +51,10 @@
 | 版本、产物与发布治理 | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | 技术或运营契约 | 定义应用版本、归档、APK 产物、签名连续性、tag 与 GitHub Release |
 | 活动版本交付格式 | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | 项目治理契约 | 定义活动版本目录、必要输入、格式与项目里程碑边界 |
 | 迭代记录格式 | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | 项目治理契约 | 定义迭代命名、必需章节、证据与归档处理 |
-| 架构决定 | [`docs/decisions/`](decisions/) | - | 技术契约与历史决定记录 | 记录已接受的重大技术决定，但不替代系统架构文档 |
+| 架构决定 | [`docs/decisions/`](decisions/) | - | 技术契约、提案与历史决定记录 | 记录重大技术提案与已接受决定，但不替代系统架构文档；只有已接受的 ADR 才建立其所述架构边界 |
 | 许可证 | [`LICENSE`](../LICENSE) | - | 法律文件 | 包含 Apache License 2.0 原文 |
+
+当前已接受的架构决定是 [ADR-0001](decisions/0001-establish-replaceable-launcher-icon-rendering.md)。[ADR-0002](decisions/0002-use-versioned-atomic-file-for-favorites.md) 与 [ADR-0003](decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) 记录已实现的方向；在项目作者明确接受其技术取舍前，两者仍为提案。
 
 ## 规划中的权威位置
 

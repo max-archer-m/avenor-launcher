@@ -51,8 +51,10 @@ Contract classes interact as follows:
 | Version, artifact, and release governance | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | Technical or operational contract | Defines application versions, archives, APK artifacts, signing continuity, tags, and GitHub Releases |
 | Active version-delivery format | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | Project-governance contract | Defines active version directories, required inputs, formats, and the project milestone boundary |
 | Iteration-record format | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | Project-governance contract | Defines iteration naming, required sections, evidence, and archival handling |
-| Architecture decisions | [`docs/decisions/`](decisions/) | - | Technical contract and historical decision records | Records accepted consequential technical decisions without replacing system architecture documentation |
+| Architecture decisions | [`docs/decisions/`](decisions/) | - | Technical contract, proposals, and historical decision records | Records consequential technical proposals and accepted decisions without replacing system architecture documentation; only an accepted ADR establishes its stated architecture boundary |
 | License | [`LICENSE`](../LICENSE) | - | Legal instrument | Contains the Apache License 2.0 text |
+
+The currently accepted architecture decision is [ADR-0001](decisions/0001-establish-replaceable-launcher-icon-rendering.md). [ADR-0002](decisions/0002-use-versioned-atomic-file-for-favorites.md) and [ADR-0003](decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) document implemented directions that remain proposed until the project author explicitly accepts their technical trade-offs.
 
 ## Planned authoritative locations
 

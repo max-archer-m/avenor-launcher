@@ -142,7 +142,9 @@ The device spike must verify that the candidate distinguishes primary, cloned, a
 
 ### Favorite persistence
 
-Proto DataStore is the preferred persistence candidate because it provides an explicit typed schema, ordered repeated entries, atomic updates, and a migration path. Stable DataStore releases are preferred; alpha dependencies are excluded from the production baseline.
+Proto DataStore was the preferred persistence candidate before Iteration 4 implementation because it offered an explicit typed schema, ordered repeated entries, atomic updates, and a migration path. Stable DataStore releases were preferred and alpha dependencies were excluded from the candidate production baseline.
+
+[ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md) documents the implemented direction of a project-owned versioned `AtomicFile` serializer after evaluating that candidate against the required failure invariants and the iteration's minimal dependency boundary. The ADR remains Proposed until the project author explicitly accepts its technical trade-offs.
 
 The initial schema should contain only data needed to restore identity and order. It must not store application usage, timestamps, cached icons, labels, analytics, or historical inventory.
 
@@ -154,13 +156,15 @@ The initial schema should contain only data needed to restore identity and order
 - mutations require a successfully loaded state; and
 - the original unreadable file is not automatically replaced or cleared.
 
-If the selected DataStore integration cannot preserve those invariants without implementing excluded recovery UI, Preferences DataStore or a project-owned serializer must be reconsidered before implementation.
+The implemented project-owned serializer must preserve these invariants. A failure to do so requires revisiting the persistence decision rather than weakening the failure boundary or silently introducing the excluded recovery UI.
 
 ### Reconciliation
 
 A favorite remains stored during loading, inventory failure, and transient launch failure. Automatic removal requires a successful inventory refresh that confirms the exact persisted identity has permanently disappeared.
 
 Reconciliation must be deterministic and independently unit-tested. It must not infer permanent disappearance from a single failed launch, missing icon, missing label, callback ordering, locked profile, or failed inventory read.
+
+[ADR-0003](../../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) documents the implemented profile-completeness and exact-identity evidence direction. The ADR remains Proposed until the project author explicitly accepts its technical trade-offs.
 
 ### Storage and backup
 
@@ -194,7 +198,7 @@ Favorites are local user-content data even though they contain no message or fil
 
 ### Dependency licenses
 
-The initial dependency inventory is expected to contain AndroidX/Compose, Kotlin, DataStore, protocol-buffer runtime if Proto DataStore is selected, and potentially Hilt/Dagger and KSP. Exact artifacts and transitive runtime contents must be generated from the resolved release dependency graph.
+The implemented dependency inventory contains AndroidX/Compose and Kotlin without adding DataStore, protocol buffers, Hilt/Dagger, or KSP for favorite persistence. Exact artifacts and transitive runtime contents must still be generated from the resolved release dependency graph.
 
 The product currently excludes the Settings surface and its Third-party License entry. Therefore dependency selection must satisfy one of these conditions before `1.0.0` integration:
 
@@ -211,9 +215,9 @@ The technical role cannot decide that legal question alone. A resolved dependenc
 - Gradle 9.4.1 with Android Gradle Plugin 9.2, subject to the toolchain spike.
 - Kotlin through AGP's supported built-in Kotlin path where compatible.
 - Stable Jetpack Compose libraries managed through the stable Compose BOM.
-- Stable Activity Compose, Lifecycle, Core, and DataStore releases compatible with the selected SDK/toolchain.
+- Stable Activity Compose, Lifecycle, and Core releases compatible with the selected SDK/toolchain.
 - Kotlin coroutines.
-- Proto DataStore with protobuf-lite, subject to persistence-invariant and license review.
+- The implemented project-owned versioned `AtomicFile` serializer proposed by ADR-0002.
 - Hilt with KSP only if the exact stable combination builds and tests cleanly.
 
 Versions must be locked in a version catalog and Gradle wrapper when the project is created. “Latest” is a research policy, not a reproducible build declaration. Discovery of a newer stable tool or dependency version is advisory maintenance information rather than an automatic update requirement or acceptance failure. The project may group upgrades into a later authorized optimization or iteration when compatibility, migration cost, and validation can be handled coherently.
@@ -307,9 +311,9 @@ A baseline profile is added only if measured release-build evidence shows a mate
 
 - Samsung may expose cloned entries, badges, or user/profile identities differently from AOSP assumptions.
 - A platform callback may not by itself distinguish temporary unavailability from permanent disappearance; reconciliation may require a successful full snapshot.
-- The exact AGP 9.2, built-in Kotlin, Compose, KSP, Hilt, and protobuf-plugin combination has not yet been built in this repository.
+- The exact implemented toolchain and resolved dependency graph still require recorded formal-version evidence.
 - Mirror completeness and synchronization may differ from official upstream repositories, and the current non-ASCII Windows checkout path may expose tool-specific path failures.
-- Proto DataStore license obligations may require a notice mechanism even though Settings is excluded from `1.0.0`.
+- The resolved release dependency graph still requires qualified license review even though the selected favorite persistence adds no new library.
 - Gesture arbitration is the highest custom-UI risk and needs an early vertical slice on real touch hardware.
 - Absolute performance, memory, and power thresholds require implementation measurements and author approval.
 
@@ -352,6 +356,6 @@ Private Space remains outside the current product contract. Corruption detection
 
 Avenor Launcher `1.0.0` is technically feasible with a modern, maintainable Android architecture and without broad package visibility, hidden-profile access, network capability, or premature modularization.
 
-The recommended direction is a single-activity Compose application, a project-owned `LauncherApps` inventory repository, stable profile-plus-component identity, ordered local DataStore persistence, explicit backup exclusion, and layered automated plus physical-device validation.
+The implemented direction under review is a single-activity Compose application, a project-owned `LauncherApps` inventory repository, stable profile-plus-component identity, ordered versioned `AtomicFile` persistence proposed by ADR-0002, explicit backup exclusion, and layered automated plus physical-device validation.
 
-This conclusion authorizes neither implementation nor integration. The current delivery contract and iteration sequence remain prospective: version closure still requires repository build evidence, the resolved dependency and license inventory, physical-device clone/profile validation, and author-approved measured performance gates.
+This assessment did not itself authorize implementation or integration. Implemented iterations were separately authorized by the project author. The author has reported a successful Gradle build for the implementation under review, while formal version closure still requires the applicable recorded build identity and evidence, the resolved dependency and license inventory, physical-device clone/profile validation, and author-approved measured performance gates.

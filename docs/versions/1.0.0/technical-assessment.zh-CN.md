@@ -142,7 +142,9 @@ Home 选择由系统拥有。实现只能在选定产品旅程确有需要时调
 
 ### 收藏持久化
 
-Proto DataStore 是首选持久化候选，因为它提供显式类型 schema、有序重复条目、原子更新和迁移路径。生产基线优先稳定 DataStore 版本，排除 alpha 依赖。
+在迭代 4 实现前，Proto DataStore 是首选持久化候选，因为它提供显式类型 schema、有序重复条目、原子更新和迁移路径。候选生产基线优先稳定 DataStore 版本，排除 alpha 依赖。
+
+[ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md) 记录在依据必需失败不变量和本迭代最小依赖边界评估该候选后，实际实现项目自有版本化 `AtomicFile` serializer 的方向。在项目作者明确接受其技术取舍前，该 ADR 仍为 Proposed。
 
 初始 schema 只包含恢复身份和顺序所需的数据。不得存储应用使用情况、时间戳、缓存图标、名称、分析数据或历史清单。
 
@@ -154,13 +156,15 @@ Proto DataStore 是首选持久化候选，因为它提供显式类型 schema、
 - 只有成功加载的状态可以执行写入；以及
 - 不自动替换或清除原始不可读文件。
 
-如果所选 DataStore 集成无法在不实现已排除恢复 UI 的前提下保持这些不变量，则必须在实现前重新评估 Preferences DataStore 或项目自有 serializer。
+已实现的项目自有 serializer 必须保持这些不变量。如果无法满足，则必须重新审视持久化决定，不得弱化失败边界，也不得静默引入已排除的恢复 UI。
 
 ### 协调
 
 收藏在加载、清单失败和瞬时启动失败时仍保持存储。只有成功清单刷新确认准确持久化身份已经永久消失，才允许自动移除。
 
 协调必须确定且经过独立单元测试。不得根据单次启动失败、缺失图标、缺失名称、回调顺序、锁定 profile 或失败的清单读取推断永久消失。
+
+[ADR-0003](../../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) 记录实际实现的 profile 完整性与准确身份证据方向。在项目作者明确接受其技术取舍前，该 ADR 仍为 Proposed。
 
 ### 存储与备份
 
@@ -194,7 +198,7 @@ Proto DataStore 是首选持久化候选，因为它提供显式类型 schema、
 
 ### 依赖许可
 
-初始依赖清单预计包括 AndroidX/Compose、Kotlin、DataStore、选择 Proto DataStore 时的 Protocol Buffer runtime，以及可能的 Hilt/Dagger 和 KSP。准确 artifact 和传递 runtime 内容必须从解析后的 release 依赖图生成。
+实际依赖清单包含 AndroidX/Compose 和 Kotlin，收藏持久化未新增 DataStore、Protocol Buffer、Hilt/Dagger 或 KSP。准确 artifact 和传递 runtime 内容仍必须从解析后的 release 依赖图生成。
 
 产品当前排除 Settings 及其第三方许可入口。因此，`1.0.0` 集成前依赖选择必须满足以下条件之一：
 
@@ -211,9 +215,9 @@ Proto DataStore 是首选持久化候选，因为它提供显式类型 schema、
 - Gradle 9.4.1 与 Android Gradle Plugin 9.2，以工具链验证结果为准。
 - 在兼容时使用 AGP 支持的内置 Kotlin 路径。
 - 通过稳定 Compose BOM 管理稳定 Jetpack Compose 库。
-- 与所选 SDK/工具链兼容的稳定 Activity Compose、Lifecycle、Core 和 DataStore。
+- 与所选 SDK/工具链兼容的稳定 Activity Compose、Lifecycle 和 Core。
 - Kotlin coroutine。
-- Proto DataStore 与 protobuf-lite，以持久化不变量和许可审查为准。
+- ADR-0002 提议且已实现的项目自有版本化 `AtomicFile` serializer。
 - 只有准确稳定组合能够干净构建和测试时才采用 Hilt + KSP。
 
 工程建立时必须在 version catalog 和 Gradle wrapper 中锁定版本。“最新”是调研策略，不是可复现构建声明。发现工具或依赖存在较新的稳定版本，属于建议维护信息，不自动形成升级要求或验收失败。项目可以在后续获授权的优化需求或迭代中统一升级，以便完整处理兼容性、迁移成本和验证。
@@ -307,9 +311,9 @@ Macrobenchmark 结果必须包含多次迭代，并保留生成的 JSON 与 trac
 
 - Samsung 暴露克隆条目、badge 或用户/profile 身份的方式可能不同于 AOSP 假设。
 - 平台回调本身可能无法区分暂时不可用和永久消失；协调可能需要一次成功的完整快照。
-- 本仓库尚未构建准确的 AGP 9.2、内置 Kotlin、Compose、KSP、Hilt 和 protobuf plugin 组合。
+- 实际工具链和解析后的依赖图仍需要正式版本记录证据。
 - 镜像内容完整性和同步状态可能与官方上游不同，当前包含非 ASCII 字符的 Windows checkout 路径也可能暴露工具特有的路径失败。
-- 即使 Settings 被排除，Proto DataStore 的许可义务仍可能要求告知机制。
+- 即使所选收藏持久化没有新增库，解析后的 release 依赖图仍需要合格的许可证审查。
 - 手势仲裁是最高的自定义 UI 风险，需要在真实触摸硬件上尽早验证垂直切片。
 - 绝对性能、内存和功耗阈值需要实现实测和作者批准。
 
@@ -352,6 +356,6 @@ Private Space 仍在当前产品契约之外。损坏检测、源数据保留 UI
 
 Avenor Launcher `1.0.0` 可以使用现代、可维护的 Android 架构实现，不需要广泛软件包可见性、隐藏 profile 访问、网络能力或过早模块化。
 
-建议方向是：单 Activity Compose 应用；项目自有的 `LauncherApps` 清单 repository；稳定的 profile 与 component 组合身份；有序本地 DataStore 持久化；显式备份排除；以及分层自动化和物理设备验证。
+目前已实现、待评审的方向是：单 Activity Compose 应用；项目自有的 `LauncherApps` 清单 repository；稳定的 profile 与 component 组合身份；ADR-0002 提议的有序版本化 `AtomicFile` 持久化；显式备份排除；以及分层自动化和物理设备验证。
 
-该结论既不授权实现，也不授权集成。当前交付契约和迭代顺序仍为预期安排；版本关闭仍需要仓库构建证据、解析依赖与许可清单、物理设备克隆/profile 验证，以及作者批准的实测性能门槛。
+本评估本身不授权实现或集成；已实现迭代由项目作者另行授权。作者已报告当前受审实现的 Gradle 构建成功；正式版本关闭仍需要适用的构建身份与证据记录、解析依赖与许可清单、物理设备克隆/profile 验证，以及作者批准的实测性能门槛。
