@@ -31,7 +31,7 @@ The current contract does not define a dedicated overflow interaction for unusua
 - The application name is not interactive.
 - No application icon is shown in the header.
 - For a cloned application, display the platform-provided clone badge independently at the Bottom Sheet's bottom-right corner to follow the identity treatment observed on the author's Samsung device.
-- The badge uses a `12dp × 12dp` visual region with an end offset of `-2dp` and bottom offset of `-2dp`. The negative offsets intentionally place part of the badge beyond the sheet boundary and clip that portion.
+- The badge uses a `12dp × 12dp` visual region aligned to the Bottom Sheet's bottom-right corner without an outward offset.
 - The badge is decorative, cannot receive input, does not occupy a Launcher-action slot, and does not reserve content-layout space. Primary applications do not show it.
 - Selecting the information icon opens the system application-information surface.
 - Returning from system application information does not restore the sheet and refreshes the affected application state.
