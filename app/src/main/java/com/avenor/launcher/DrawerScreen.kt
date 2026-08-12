@@ -41,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -74,19 +75,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-
-private sealed interface DrawerUiState {
-    data object Loading : DrawerUiState
-
-    data class Content(val entries: List<LaunchableEntry>) : DrawerUiState
-
-    data object Error : DrawerUiState
-}
 
 private enum class DrawerLoadTrigger {
     Initial,
@@ -97,20 +87,19 @@ private enum class DrawerLoadTrigger {
 @Composable
 internal fun DrawerScreen(
     inventoryLoader: LaunchableInventoryLoader,
+    inventoryCoordinator: LaunchableInventoryCoordinator = remember(inventoryLoader) {
+        LaunchableInventoryCoordinator(inventoryLoader)
+    },
     entryLauncher: LaunchableEntryLauncher = LaunchableEntryLauncher { false },
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     active: Boolean = true,
     marqueePaused: Boolean = false,
-    onInventoryLoaded: (List<LaunchableEntry>) -> Unit = {},
     onLongPress: (LaunchableEntry) -> Unit = {},
 ) {
     var loadRequest by remember { mutableIntStateOf(0) }
     var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
-    var state by remember(inventoryLoader) {
-        mutableStateOf<DrawerUiState>(DrawerUiState.Loading)
-    }
-    val loadMutex = remember(inventoryLoader) { Mutex() }
+    val state by inventoryCoordinator.state.collectAsState()
     val activationGuard = remember { RapidActivationGuard() }
     val context = LocalContext.current
     val locale = LocalConfiguration.current.locales[0]
@@ -118,8 +107,11 @@ internal fun DrawerScreen(
     val currentState by rememberUpdatedState(state)
 
     LaunchedEffect(inventoryLoader, loadRequest) {
+        if (loadRequest == 0 && state is LaunchableInventoryState.Content) {
+            return@LaunchedEffect
+        }
         val positionBeforeRefresh = if (loadTrigger == DrawerLoadTrigger.LiveUpdate) {
-            (state as? DrawerUiState.Content)?.let { content ->
+            (state as? LaunchableInventoryState.Content)?.let { content ->
                 captureDrawerListPosition(
                     sections = buildDrawerSections(content.entries, locale),
                     firstVisibleItemIndex = listState.firstVisibleItemIndex,
@@ -129,23 +121,10 @@ internal fun DrawerScreen(
         } else {
             null
         }
-        if (loadTrigger != DrawerLoadTrigger.LiveUpdate) {
-            state = DrawerUiState.Loading
-        }
-        val updatedState = try {
-            val entries = loadMutex.withLock {
-                inventoryLoader.load()
-            }
-            onInventoryLoaded(entries)
-            if (entries.isEmpty()) DrawerUiState.Error else DrawerUiState.Content(entries)
-        } catch (cancellation: CancellationException) {
-            throw cancellation
-        } catch (_: Exception) {
-            DrawerUiState.Error
-        }
-        state = updatedState
+        inventoryCoordinator.load(showLoading = loadTrigger != DrawerLoadTrigger.LiveUpdate)
+        val updatedState = inventoryCoordinator.state.value
 
-        if (positionBeforeRefresh != null && updatedState is DrawerUiState.Content) {
+        if (positionBeforeRefresh != null && updatedState is LaunchableInventoryState.Content) {
             val restorationTarget = resolveDrawerRestorationTarget(
                 position = positionBeforeRefresh,
                 sections = buildDrawerSections(updatedState.entries, locale),
@@ -161,17 +140,27 @@ internal fun DrawerScreen(
     }
 
     LaunchedEffect(inventoryLoader, active) {
-        if (active && currentState is DrawerUiState.Content) {
-            loadTrigger = DrawerLoadTrigger.LiveUpdate
-            loadRequest += 1
+        if (active) {
+            when (currentState) {
+                is LaunchableInventoryState.Content -> {
+                    loadTrigger = DrawerLoadTrigger.LiveUpdate
+                    loadRequest += 1
+                }
+
+                is LaunchableInventoryState.Error -> {
+                    loadTrigger = DrawerLoadTrigger.Initial
+                    loadRequest += 1
+                }
+
+                LaunchableInventoryState.Loading -> Unit
+            }
         }
     }
 
     DisposableEffect(inventoryLoader, active) {
-        val monitor = inventoryLoader as? LaunchableInventoryMonitor
-        val observation = if (active && monitor != null) {
-            monitor.observe {
-                if (currentState is DrawerUiState.Content) {
+        val observation = if (active) {
+            inventoryCoordinator.observe {
+                if (currentState is LaunchableInventoryState.Content) {
                     loadTrigger = DrawerLoadTrigger.LiveUpdate
                     loadRequest += 1
                 }
@@ -185,7 +174,7 @@ internal fun DrawerScreen(
     }
 
     when (val currentState = state) {
-        DrawerUiState.Loading -> DrawerMessage(
+        LaunchableInventoryState.Loading -> DrawerMessage(
             modifier = modifier,
             message = stringResource(R.string.drawer_loading_applications),
             showProgress = true,
@@ -193,7 +182,7 @@ internal fun DrawerScreen(
             testTag = "drawer_loading",
         )
 
-        DrawerUiState.Error -> DrawerMessage(
+        is LaunchableInventoryState.Error -> DrawerMessage(
             modifier = modifier,
             message = stringResource(R.string.drawer_unable_to_load_applications),
             showProgress = false,
@@ -211,7 +200,7 @@ internal fun DrawerScreen(
             testTag = "drawer_error",
         )
 
-        is DrawerUiState.Content -> DrawerApplicationList(
+        is LaunchableInventoryState.Content -> DrawerApplicationList(
             modifier = modifier,
             listState = listState,
             entries = currentState.entries,
@@ -333,14 +322,14 @@ private fun DrawerApplicationList(
             }
         }
     }
-    val activeMarqueeKey = if (marqueePaused || listState.isScrollInProgress) {
-        null
-    } else {
-        listOf(pressedEntryKey, focusedEntryKey, centeredEntryKey)
-            .firstOrNull { entryKey ->
-                entryKey != null && overflowingEntries[entryKey] == true
-            }
-    }
+    val activeMarqueeKey = selectActiveMarqueeKey(
+        paused = marqueePaused,
+        scrolling = listState.isScrollInProgress,
+        pressedKey = pressedEntryKey,
+        focusedKey = focusedEntryKey,
+        centeredKey = centeredEntryKey,
+        overflowingKeys = overflowingEntries.keys,
+    )
 
     Box(
         modifier = Modifier.fillMaxSize(),

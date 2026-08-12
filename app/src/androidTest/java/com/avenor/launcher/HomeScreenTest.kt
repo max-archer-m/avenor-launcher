@@ -6,14 +6,20 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Process
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -35,6 +41,310 @@ class HomeScreenTest {
 
         composeRule.onNodeWithTag("home_time").assertIsDisplayed()
         composeRule.onNodeWithTag("home_date").assertIsDisplayed()
+    }
+
+    @Test
+    fun unavailableFavoriteRemainsVisibleInStoredPosition() {
+        val identity = LaunchableIdentity(
+            profileSerialNumber = 42,
+            componentName = ComponentName("com.example.unavailable", "MainActivity"),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(listOf(identity)),
+                    favoriteAvailability = mapOf(
+                        identity to FavoriteAvailability.Unknown(null),
+                    ),
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home_favorite_row").assertIsDisplayed()
+        composeRule.onNodeWithText("Application unavailable").assertIsDisplayed()
+    }
+
+    @Test
+    fun selectingAvailableFavoriteRequestsItsExactEntry() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 42,
+                componentName = ComponentName("com.example.favorite", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Favorite application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        var selectedAvailability: FavoriteAvailability? = null
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(listOf(entry.identity)),
+                    favoriteAvailability = mapOf(
+                        entry.identity to FavoriteAvailability.Available(entry),
+                    ),
+                    onLaunchFavorite = { selectedAvailability = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Favorite application").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(FavoriteAvailability.Available(entry), selectedAvailability)
+        }
+    }
+
+    @Test
+    fun failedHomeLaunchDoesNotDeleteFavorite() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 42,
+                componentName = ComponentName("com.example.failure", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Launch failure favorite",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val favoriteStore = TestFavoriteStore(listOf(entry.identity))
+        composeRule.setContent {
+            AvenorTheme {
+                AvenorApp(
+                    inventoryLoader = LaunchableInventoryLoader { completeSnapshot(entry) },
+                    entryLauncher = LaunchableEntryLauncher { false },
+                    favoriteStore = favoriteStore,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Launch failure favorite").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(listOf(entry.identity), favoriteStore.readableIdentities())
+        }
+    }
+
+    @Test
+    fun disabledFavoriteKeepsPresentationAndManagementEntry() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 42,
+                componentName = ComponentName("com.example.disabled", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Disabled application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        var selectedAvailability: FavoriteAvailability? = null
+        var managedEntry: LaunchableEntry? = null
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(listOf(entry.identity)),
+                    favoriteAvailability = mapOf(
+                        entry.identity to FavoriteAvailability.Disabled(entry),
+                    ),
+                    onLaunchFavorite = { selectedAvailability = it },
+                    onLongPressFavorite = { managedEntry = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Disabled application — Disabled").performClick()
+        composeRule.onNodeWithText("Disabled application — Disabled").performTouchInput {
+            longClick()
+        }
+
+        composeRule.runOnIdle {
+            assertEquals(FavoriteAvailability.Disabled(entry), selectedAvailability)
+            assertEquals(entry, managedEntry)
+        }
+    }
+
+    @Test
+    fun incompleteProfileAndUnknownIdentityAreNeverConfirmedRemoved() = runBlocking {
+        val identity = LaunchableIdentity(7, ComponentName("com.example", "MainActivity"))
+        val loader = object : LaunchableInventoryLoader, LaunchableIdentityStatusResolver {
+            override suspend fun load() = LaunchableInventorySnapshot(
+                entries = emptyList(),
+                profileReadStatus = mapOf(7L to ProfileInventoryReadStatus.Unavailable),
+            )
+
+            override suspend fun resolveMissingIdentity(
+                identity: LaunchableIdentity,
+                snapshot: LaunchableInventorySnapshot,
+                lastKnownEntry: LaunchableEntry?,
+            ) = FavoriteAvailability.TemporarilyUnavailable(lastKnownEntry)
+        }
+        val snapshot = loader.load()
+
+        val result = LaunchableInventoryCoordinator(loader).resolveFavorites(listOf(identity), snapshot)
+
+        assertEquals(
+            FavoriteAvailability.TemporarilyUnavailable(null),
+            result.getValue(identity),
+        )
+    }
+
+    @Test
+    fun reconciliationRemovesOnlyConfirmedExactIdentity() = runBlocking {
+        val removed = LaunchableIdentity(7, ComponentName("com.example", "RemovedActivity"))
+        val retained = LaunchableIdentity(7, ComponentName("com.example", "OtherActivity"))
+        val clone = LaunchableIdentity(8, ComponentName("com.example", "RemovedActivity"))
+        val loader = object : LaunchableInventoryLoader, LaunchableIdentityStatusResolver {
+            override suspend fun load() = LaunchableInventorySnapshot(
+                entries = emptyList(),
+                profileReadStatus = mapOf(
+                    7L to ProfileInventoryReadStatus.Complete,
+                    8L to ProfileInventoryReadStatus.Unavailable,
+                ),
+            )
+
+            override suspend fun resolveMissingIdentity(
+                identity: LaunchableIdentity,
+                snapshot: LaunchableInventorySnapshot,
+                lastKnownEntry: LaunchableEntry?,
+            ): FavoriteAvailability = when (identity) {
+                removed -> FavoriteAvailability.ConfirmedRemoved
+                else -> FavoriteAvailability.Unknown(lastKnownEntry)
+            }
+        }
+        val snapshot = loader.load()
+
+        val result = LaunchableInventoryCoordinator(loader)
+            .resolveFavorites(listOf(removed, retained, clone), snapshot)
+
+        assertEquals(FavoriteAvailability.ConfirmedRemoved, result.getValue(removed))
+        assertEquals(FavoriteAvailability.Unknown(null), result.getValue(retained))
+        assertEquals(FavoriteAvailability.Unknown(null), result.getValue(clone))
+    }
+
+    @Test
+    fun actionSheetOffersAddForNonFavoriteEntry() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.add", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Add candidate",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        var addRequested = false
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    favoriteState = FavoriteReadState.Readable(emptyList()),
+                    onDismiss = {},
+                    onAddFavorite = { addRequested = true },
+                    onRemoveFavorite = {},
+                    informationLauncher = ApplicationInformationLauncher { true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Add favorite").performClick()
+
+        composeRule.runOnIdle { assertEquals(true, addRequested) }
+    }
+
+    @Test
+    fun actionSheetDoesNotOfferDuplicateAddForFavoriteEntry() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.existing", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Existing favorite",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        var removeRequested = false
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    favoriteState = FavoriteReadState.Readable(listOf(entry.identity)),
+                    onDismiss = {},
+                    onAddFavorite = {},
+                    onRemoveFavorite = { removeRequested = true },
+                    informationLauncher = ApplicationInformationLauncher { true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Remove favorite").assertIsDisplayed()
+        composeRule.onNodeWithText("Add favorite").assertDoesNotExist()
+        composeRule.onNodeWithText("Remove favorite").performClick()
+        composeRule.runOnIdle { assertEquals(true, removeRequested) }
+    }
+
+    @Test
+    fun actionSheetDisablesFavoriteMutationWhenPersistenceIsUnavailable() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.failure", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Unavailable favorites",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    favoriteState = FavoriteReadState.ReadFailure,
+                    onDismiss = {},
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    informationLauncher = ApplicationInformationLauncher { true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("favorite_action").assertIsNotEnabled()
+        composeRule.onNodeWithText("Favorites unavailable").assertIsDisplayed()
+    }
+
+    @Test
+    fun actionSheetInformationActionUsesExactEntryAndDismisses() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 7,
+                componentName = ComponentName("com.example.details", "ExactActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Application details",
+            icon = ColorDrawable(Color.TRANSPARENT),
+            profileBadge = ColorDrawable(Color.WHITE),
+        )
+        var openedEntry: LaunchableEntry? = null
+        var dismissed = false
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    favoriteState = FavoriteReadState.Readable(emptyList()),
+                    onDismiss = { dismissed = true },
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    informationLauncher = ApplicationInformationLauncher {
+                        openedEntry = it
+                        true
+                    },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("application_action_sheet_profile_badge").assertIsDisplayed()
+        composeRule.onNodeWithTag("application_information_action").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(entry, openedEntry)
+            assertEquals(true, dismissed)
+        }
     }
 
     @Test
@@ -68,7 +378,7 @@ class HomeScreenTest {
         composeRule.setContent {
             AvenorTheme {
                 DrawerScreen(
-                    inventoryLoader = LaunchableInventoryLoader { listOf(entry) },
+                    inventoryLoader = LaunchableInventoryLoader { completeSnapshot(entry) },
                 )
             }
         }
@@ -92,7 +402,7 @@ class HomeScreenTest {
         composeRule.setContent {
             AvenorTheme {
                 DrawerScreen(
-                    inventoryLoader = LaunchableInventoryLoader { listOf(entry) },
+                    inventoryLoader = LaunchableInventoryLoader { completeSnapshot(entry) },
                     entryLauncher = LaunchableEntryLauncher {
                         launchedEntry = it
                         true
@@ -124,7 +434,7 @@ class HomeScreenTest {
                     inventoryLoader = LaunchableInventoryLoader {
                         attempts += 1
                         if (attempts == 1) error("Expected test failure")
-                        listOf(entry)
+                        completeSnapshot(entry)
                     },
                 )
             }
@@ -149,12 +459,13 @@ class HomeScreenTest {
         )
 
         var entries = listOf(entry("Before update"))
-        var inventoryChanged: () -> Unit = {}
+        var inventoryChanged: (LaunchableInventoryChange) -> Unit = {}
         val inventory = object : LaunchableInventoryLoader, LaunchableInventoryMonitor {
-            override suspend fun load(): List<LaunchableEntry> = entries
+            override suspend fun load(): LaunchableInventorySnapshot =
+                completeSnapshot(*entries.toTypedArray())
 
             override fun observe(
-                onInventoryChanged: () -> Unit,
+                onInventoryChanged: (LaunchableInventoryChange) -> Unit,
             ): LaunchableInventoryObservation {
                 inventoryChanged = onInventoryChanged
                 return LaunchableInventoryObservation { inventoryChanged = {} }
@@ -170,7 +481,7 @@ class HomeScreenTest {
 
         composeRule.runOnIdle {
             entries = listOf(entry("After update"))
-            inventoryChanged()
+            inventoryChanged(LaunchableInventoryChange.PackageChanged)
         }
 
         composeRule.onNodeWithText("After update").assertIsDisplayed()
@@ -290,4 +601,66 @@ class HomeScreenTest {
         now += 600L
         assertEquals(true, guard.tryAcquire())
     }
+
+    @Test
+    fun sharedMarqueePriorityAndPauseAreDeterministic() {
+        val overflowing = setOf("pressed", "focused", "centered")
+
+        assertEquals(
+            "pressed",
+            selectActiveMarqueeKey(false, false, "pressed", "focused", "centered", overflowing),
+        )
+        assertEquals(
+            "focused",
+            selectActiveMarqueeKey(false, false, null, "focused", "centered", overflowing),
+        )
+        assertEquals(
+            "centered",
+            selectActiveMarqueeKey(false, false, null, null, "centered", overflowing),
+        )
+        assertEquals(
+            null,
+            selectActiveMarqueeKey(true, false, "pressed", null, null, overflowing),
+        )
+        assertEquals(
+            null,
+            selectActiveMarqueeKey(false, true, "pressed", null, null, overflowing),
+        )
+    }
+}
+
+private fun completeSnapshot(vararg entries: LaunchableEntry): LaunchableInventorySnapshot =
+    LaunchableInventorySnapshot(
+        entries = entries.toList(),
+        profileReadStatus = entries
+            .map { it.identity.profileSerialNumber }
+            .distinct()
+            .associateWith { ProfileInventoryReadStatus.Complete },
+    )
+
+private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteStore {
+    private val mutableState = MutableStateFlow<FavoriteReadState>(
+        FavoriteReadState.Readable(initial),
+    )
+    override val state: StateFlow<FavoriteReadState> = mutableState
+    override suspend fun load() = Unit
+    override suspend fun add(identity: LaunchableIdentity): Boolean {
+        val readable = mutableState.value as FavoriteReadState.Readable
+        if (identity !in readable.identities) {
+            mutableState.value = FavoriteReadState.Readable(readable.identities + identity)
+        }
+        return true
+    }
+    override suspend fun remove(identity: LaunchableIdentity): Boolean =
+        removeAll(setOf(identity))
+    override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean {
+        val readable = mutableState.value as FavoriteReadState.Readable
+        mutableState.value = FavoriteReadState.Readable(
+            readable.identities.filterNot(identities::contains),
+        )
+        return true
+    }
+
+    fun readableIdentities(): List<LaunchableIdentity> =
+        (state.value as FavoriteReadState.Readable).identities
 }

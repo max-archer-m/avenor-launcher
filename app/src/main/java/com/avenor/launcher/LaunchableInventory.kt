@@ -3,6 +3,7 @@ package com.avenor.launcher
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
@@ -11,10 +12,16 @@ import android.os.Looper
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
+import java.util.Collections
 import androidx.core.content.getSystemService
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 internal data class LaunchableIdentity(
@@ -30,43 +37,175 @@ internal data class LaunchableEntry(
     val profileBadge: Drawable? = null,
 )
 
+internal enum class ProfileInventoryReadStatus {
+    Complete,
+    Unavailable,
+}
+
+internal data class LaunchableInventorySnapshot(
+    val entries: List<LaunchableEntry>,
+    val profileReadStatus: Map<Long, ProfileInventoryReadStatus>,
+)
+
 internal fun interface LaunchableInventoryLoader {
-    suspend fun load(): List<LaunchableEntry>
+    suspend fun load(): LaunchableInventorySnapshot
+}
+
+internal sealed interface FavoriteAvailability {
+    val presentationEntry: LaunchableEntry?
+
+    data class Available(val entry: LaunchableEntry) : FavoriteAvailability {
+        override val presentationEntry: LaunchableEntry = entry
+    }
+
+    data class Disabled(override val presentationEntry: LaunchableEntry?) : FavoriteAvailability
+    data class TemporarilyUnavailable(
+        override val presentationEntry: LaunchableEntry?,
+    ) : FavoriteAvailability
+    data class Unknown(override val presentationEntry: LaunchableEntry?) : FavoriteAvailability
+    data object ConfirmedRemoved : FavoriteAvailability {
+        override val presentationEntry: LaunchableEntry? = null
+    }
+}
+
+internal interface LaunchableIdentityStatusResolver {
+    suspend fun resolveMissingIdentity(
+        identity: LaunchableIdentity,
+        snapshot: LaunchableInventorySnapshot,
+        lastKnownEntry: LaunchableEntry?,
+    ): FavoriteAvailability
+
+    fun markAvailable(identity: LaunchableIdentity) = Unit
 }
 
 internal fun interface LaunchableInventoryObservation {
     fun stop()
 }
 
+internal sealed interface LaunchableInventoryChange {
+    data class PackageRemoved(
+        val packageName: String,
+        val profileSerialNumber: Long,
+    ) : LaunchableInventoryChange
+
+    data object PackageAdded : LaunchableInventoryChange
+    data object PackageChanged : LaunchableInventoryChange
+    data object PackagesAvailable : LaunchableInventoryChange
+    data object PackagesUnavailable : LaunchableInventoryChange
+    data object PackagesSuspended : LaunchableInventoryChange
+    data object PackagesUnsuspended : LaunchableInventoryChange
+}
+
 internal fun interface LaunchableInventoryMonitor {
-    fun observe(onInventoryChanged: () -> Unit): LaunchableInventoryObservation
+    fun observe(onInventoryChanged: (LaunchableInventoryChange) -> Unit):
+        LaunchableInventoryObservation
+}
+
+internal sealed interface LaunchableInventoryState {
+    data object Loading : LaunchableInventoryState
+    data class Content(val snapshot: LaunchableInventorySnapshot) : LaunchableInventoryState {
+        val entries: List<LaunchableEntry> get() = snapshot.entries
+    }
+    data class Error(val lastKnownSnapshot: LaunchableInventorySnapshot?) :
+        LaunchableInventoryState {
+        val lastKnownEntries: List<LaunchableEntry> get() = lastKnownSnapshot?.entries.orEmpty()
+    }
+}
+
+internal class LaunchableInventoryCoordinator(
+    private val loader: LaunchableInventoryLoader,
+) {
+    private val loadMutex = Mutex()
+    private val mutableState = MutableStateFlow<LaunchableInventoryState>(
+        LaunchableInventoryState.Loading,
+    )
+    private var lastSuccessfulSnapshot: LaunchableInventorySnapshot? = null
+    private val lastTrustedEntries = mutableMapOf<LaunchableIdentity, LaunchableEntry>()
+
+    val state: StateFlow<LaunchableInventoryState> = mutableState
+
+    suspend fun load(showLoading: Boolean) = loadMutex.withLock {
+        if (showLoading) mutableState.value = LaunchableInventoryState.Loading
+        mutableState.value = try {
+            val snapshot = loader.load()
+            if (snapshot.entries.isEmpty()) {
+                LaunchableInventoryState.Error(lastSuccessfulSnapshot)
+            } else {
+                lastSuccessfulSnapshot = snapshot
+                snapshot.entries.forEach { lastTrustedEntries[it.identity] = it }
+                LaunchableInventoryState.Content(snapshot)
+            }
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (_: Exception) {
+            LaunchableInventoryState.Error(lastSuccessfulSnapshot)
+        }
+    }
+
+    fun observe(
+        onInventoryChanged: (LaunchableInventoryChange) -> Unit,
+    ): LaunchableInventoryObservation? =
+        (loader as? LaunchableInventoryMonitor)?.observe(onInventoryChanged)
+
+    suspend fun resolveFavorites(
+        identities: List<LaunchableIdentity>,
+        snapshot: LaunchableInventorySnapshot,
+    ): Map<LaunchableIdentity, FavoriteAvailability> {
+        val entriesByIdentity = snapshot.entries.associateBy(LaunchableEntry::identity)
+        val resolver = loader as? LaunchableIdentityStatusResolver
+        return identities.associateWith { identity ->
+            entriesByIdentity[identity]?.let { entry ->
+                resolver?.markAvailable(identity)
+                FavoriteAvailability.Available(entry)
+            }
+                ?: resolver?.resolveMissingIdentity(
+                    identity = identity,
+                    snapshot = snapshot,
+                    lastKnownEntry = lastTrustedEntries[identity],
+                )
+                ?: FavoriteAvailability.Unknown(lastTrustedEntries[identity])
+        }
+    }
 }
 
 internal class AndroidLaunchableInventoryLoader(
     context: Context,
     private val iconRenderer: LauncherIconRenderer = SystemLauncherIconRenderer(context),
     private val iconAppearance: LauncherIconAppearance = LauncherIconAppearance(),
-) : LaunchableInventoryLoader, LaunchableInventoryMonitor {
+) : LaunchableInventoryLoader, LaunchableInventoryMonitor, LaunchableIdentityStatusResolver {
     private val applicationContext = context.applicationContext
     private val launcherApps = checkNotNull(applicationContext.getSystemService<LauncherApps>())
     private val userManager = checkNotNull(applicationContext.getSystemService<UserManager>())
+    private val pendingExactComponentDisappearance = Collections.synchronizedSet(
+        mutableSetOf<LaunchableIdentity>(),
+    )
+    private val temporarilyUnavailablePackages = Collections.synchronizedSet(
+        mutableSetOf<ProfilePackageKey>(),
+    )
 
-    override suspend fun load(): List<LaunchableEntry> = withContext(Dispatchers.IO) {
+    override suspend fun load(): LaunchableInventorySnapshot = withContext(Dispatchers.IO) {
         val density = applicationContext.resources.displayMetrics.densityDpi
         val locale = applicationContext.resources.configuration.locales[0]
         val entryComparator = LaunchableEntryComparator(locale)
 
         val currentUser = Process.myUserHandle()
 
-        launcherApps.profiles
+        val profileStatuses = mutableMapOf<Long, ProfileInventoryReadStatus>()
+        val entries = launcherApps.profiles
             .flatMap { user ->
                 val serialNumber = userManager.getSerialNumberForUser(user)
                 val activities = try {
-                    launcherApps.getActivityList(null, user)
+                    launcherApps.getActivityList(null, user).also {
+                        profileStatuses[serialNumber] = ProfileInventoryReadStatus.Complete
+                    }
                 } catch (failure: IllegalStateException) {
-                    if (user == currentUser) throw failure else emptyList()
+                    if (user == currentUser) throw failure
+                    profileStatuses[serialNumber] = ProfileInventoryReadStatus.Unavailable
+                    emptyList()
                 } catch (failure: SecurityException) {
-                    if (user == currentUser) throw failure else emptyList()
+                    if (user == currentUser) throw failure
+                    profileStatuses[serialNumber] = ProfileInventoryReadStatus.Unavailable
+                    emptyList()
                 }
 
                 activities.map { activity ->
@@ -111,22 +250,137 @@ internal class AndroidLaunchableInventoryLoader(
             }
             .distinctBy(LaunchableEntry::identity)
             .sortedWith(entryComparator)
+        LaunchableInventorySnapshot(entries, profileStatuses)
+    }
+
+    override suspend fun resolveMissingIdentity(
+        identity: LaunchableIdentity,
+        snapshot: LaunchableInventorySnapshot,
+        lastKnownEntry: LaunchableEntry?,
+    ): FavoriteAvailability =
+        withContext(Dispatchers.IO) {
+            when (snapshot.profileReadStatus[identity.profileSerialNumber]) {
+                ProfileInventoryReadStatus.Unavailable -> {
+                    return@withContext FavoriteAvailability.TemporarilyUnavailable(lastKnownEntry)
+                }
+                null -> {
+                    val profileStillExists = userManager.userProfiles.any {
+                        userManager.getSerialNumberForUser(it) == identity.profileSerialNumber
+                    }
+                    return@withContext if (profileStillExists) {
+                        FavoriteAvailability.TemporarilyUnavailable(lastKnownEntry)
+                    } else {
+                        FavoriteAvailability.ConfirmedRemoved
+                    }
+                }
+                ProfileInventoryReadStatus.Complete -> Unit
+            }
+            val user = launcherApps.profiles.firstOrNull {
+                userManager.getSerialNumberForUser(it) == identity.profileSerialNumber
+            } ?: return@withContext FavoriteAvailability.Unknown(lastKnownEntry)
+            val profilePackageKey = ProfilePackageKey(
+                identity.profileSerialNumber,
+                identity.componentName.packageName,
+            )
+            if (profilePackageKey in temporarilyUnavailablePackages) {
+                return@withContext FavoriteAvailability.TemporarilyUnavailable(lastKnownEntry)
+            }
+            val applicationInfo = try {
+                launcherApps.getApplicationInfo(
+                    identity.componentName.packageName,
+                    PackageManager.MATCH_DISABLED_COMPONENTS,
+                    user,
+                )
+            } catch (_: PackageManager.NameNotFoundException) {
+                return@withContext FavoriteAvailability.ConfirmedRemoved
+            } catch (_: SecurityException) {
+                return@withContext FavoriteAvailability.Unknown(lastKnownEntry)
+            } catch (_: IllegalStateException) {
+                return@withContext FavoriteAvailability.TemporarilyUnavailable(lastKnownEntry)
+            }
+            try {
+                val disabledPresentation = lastKnownEntry ?: if (user == Process.myUserHandle()) {
+                    val density = applicationContext.resources.displayMetrics.densityDpi
+                    val sourceIcon = runCatching {
+                        applicationInfo.loadIcon(applicationContext.packageManager)
+                    }.getOrDefault(applicationContext.packageManager.defaultActivityIcon)
+                    LaunchableEntry(
+                        identity = identity,
+                        user = user,
+                        label = applicationInfo.loadLabel(applicationContext.packageManager)
+                            .toString(),
+                        icon = iconRenderer.render(sourceIcon, user, iconAppearance),
+                    )
+                } else {
+                    null
+                }
+                if (!applicationInfo.enabled) {
+                    pendingExactComponentDisappearance.remove(identity)
+                    return@withContext FavoriteAvailability.Disabled(disabledPresentation)
+                }
+                if (user != Process.myUserHandle()) {
+                    return@withContext FavoriteAvailability.Unknown(lastKnownEntry)
+                }
+                @Suppress("DEPRECATION")
+                val activityInfo = applicationContext.packageManager.getActivityInfo(
+                    identity.componentName,
+                    PackageManager.MATCH_DISABLED_COMPONENTS,
+                )
+                if (activityInfo.enabled) {
+                    if (pendingExactComponentDisappearance.add(identity)) {
+                        FavoriteAvailability.Unknown(lastKnownEntry)
+                    } else {
+                        FavoriteAvailability.ConfirmedRemoved
+                    }
+                } else {
+                    pendingExactComponentDisappearance.remove(identity)
+                    FavoriteAvailability.Disabled(disabledPresentation)
+                }
+            } catch (_: PackageManager.NameNotFoundException) {
+                if (pendingExactComponentDisappearance.add(identity)) {
+                    FavoriteAvailability.Unknown(lastKnownEntry)
+                } else {
+                    FavoriteAvailability.ConfirmedRemoved
+                }
+            } catch (_: SecurityException) {
+                FavoriteAvailability.Unknown(lastKnownEntry)
+            } catch (_: IllegalStateException) {
+                FavoriteAvailability.TemporarilyUnavailable(lastKnownEntry)
+            }
+        }
+
+    override fun markAvailable(identity: LaunchableIdentity) {
+        pendingExactComponentDisappearance.remove(identity)
     }
 
     override fun observe(
-        onInventoryChanged: () -> Unit,
+        onInventoryChanged: (LaunchableInventoryChange) -> Unit,
     ): LaunchableInventoryObservation {
         val callback = object : LauncherApps.Callback() {
             override fun onPackageAdded(packageName: String, user: UserHandle) {
-                onInventoryChanged()
+                temporarilyUnavailablePackages.remove(
+                    ProfilePackageKey(userManager.getSerialNumberForUser(user), packageName),
+                )
+                onInventoryChanged(LaunchableInventoryChange.PackageAdded)
             }
 
             override fun onPackageChanged(packageName: String, user: UserHandle) {
-                onInventoryChanged()
+                temporarilyUnavailablePackages.remove(
+                    ProfilePackageKey(userManager.getSerialNumberForUser(user), packageName),
+                )
+                onInventoryChanged(LaunchableInventoryChange.PackageChanged)
             }
 
             override fun onPackageRemoved(packageName: String, user: UserHandle) {
-                onInventoryChanged()
+                temporarilyUnavailablePackages.remove(
+                    ProfilePackageKey(userManager.getSerialNumberForUser(user), packageName),
+                )
+                onInventoryChanged(
+                    LaunchableInventoryChange.PackageRemoved(
+                        packageName = packageName,
+                        profileSerialNumber = userManager.getSerialNumberForUser(user),
+                    ),
+                )
             }
 
             override fun onPackagesAvailable(
@@ -134,7 +388,11 @@ internal class AndroidLaunchableInventoryLoader(
                 user: UserHandle,
                 replacing: Boolean,
             ) {
-                onInventoryChanged()
+                val serial = userManager.getSerialNumberForUser(user)
+                packageNames.forEach { packageName ->
+                    temporarilyUnavailablePackages.remove(ProfilePackageKey(serial, packageName))
+                }
+                onInventoryChanged(LaunchableInventoryChange.PackagesAvailable)
             }
 
             override fun onPackagesUnavailable(
@@ -142,15 +400,27 @@ internal class AndroidLaunchableInventoryLoader(
                 user: UserHandle,
                 replacing: Boolean,
             ) {
-                onInventoryChanged()
+                val serial = userManager.getSerialNumberForUser(user)
+                packageNames.forEach { packageName ->
+                    temporarilyUnavailablePackages.add(ProfilePackageKey(serial, packageName))
+                }
+                onInventoryChanged(LaunchableInventoryChange.PackagesUnavailable)
             }
 
             override fun onPackagesSuspended(packageNames: Array<out String>, user: UserHandle) {
-                onInventoryChanged()
+                val serial = userManager.getSerialNumberForUser(user)
+                packageNames.forEach { packageName ->
+                    temporarilyUnavailablePackages.add(ProfilePackageKey(serial, packageName))
+                }
+                onInventoryChanged(LaunchableInventoryChange.PackagesSuspended)
             }
 
             override fun onPackagesUnsuspended(packageNames: Array<out String>, user: UserHandle) {
-                onInventoryChanged()
+                val serial = userManager.getSerialNumberForUser(user)
+                packageNames.forEach { packageName ->
+                    temporarilyUnavailablePackages.remove(ProfilePackageKey(serial, packageName))
+                }
+                onInventoryChanged(LaunchableInventoryChange.PackagesUnsuspended)
             }
         }
 
@@ -160,3 +430,8 @@ internal class AndroidLaunchableInventoryLoader(
         }
     }
 }
+
+private data class ProfilePackageKey(
+    val profileSerialNumber: Long,
+    val packageName: String,
+)

@@ -1,0 +1,83 @@
+package com.avenor.launcher
+
+import android.content.ComponentName
+import androidx.test.core.app.ApplicationProvider
+import java.io.DataOutputStream
+import java.util.UUID
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class FavoriteStoreTest {
+    @Test
+    fun addDeduplicateRemoveAndBatchRemovePreserveOrder() = runBlocking {
+        val file = temporaryFavoriteFile()
+        val store = AtomicFileFavoriteStore(file)
+        val first = identity(1, "com.example.first", "Main")
+        val second = identity(1, "com.example.second", "Main")
+        val clone = identity(2, "com.example.first", "Main")
+
+        store.load()
+        assertTrue(store.add(first))
+        assertTrue(store.add(second))
+        assertTrue(store.add(first))
+        assertTrue(store.add(clone))
+        assertEquals(listOf(first, second, clone), store.readableIdentities())
+        val reloadedStore = AtomicFileFavoriteStore(file)
+        reloadedStore.load()
+        assertEquals(listOf(first, second, clone), reloadedStore.readableIdentities())
+
+        assertTrue(store.remove(second))
+        assertTrue(store.removeAll(setOf(first)))
+        assertEquals(listOf(clone), store.readableIdentities())
+
+        file.delete()
+    }
+
+    @Test
+    fun damagedDocumentPublishesFailureAndMutationsStayDisabled() = runBlocking {
+        val file = temporaryFavoriteFile()
+        DataOutputStream(file.outputStream()).use { output ->
+            output.writeInt(0)
+            output.writeInt(1)
+            output.writeInt(0)
+        }
+        val original = file.readBytes()
+        val store = AtomicFileFavoriteStore(file)
+
+        store.load()
+
+        assertEquals(FavoriteReadState.ReadFailure, store.state.value)
+        assertFalse(store.add(identity(1, "com.example", "Main")))
+        assertFalse(store.remove(identity(1, "com.example", "Main")))
+        assertEquals(original.toList(), file.readBytes().toList())
+
+        file.delete()
+    }
+
+    @Test
+    fun failedWriteKeepsLastReadableState() = runBlocking {
+        val file = temporaryFavoriteFile()
+        val store = AtomicFileFavoriteStore(file)
+        val identity = identity(1, "com.example", "Main")
+        store.load()
+        assertTrue(file.mkdir())
+
+        assertFalse(store.add(identity))
+        assertEquals(emptyList<LaunchableIdentity>(), store.readableIdentities())
+
+        file.delete()
+    }
+
+    private fun temporaryFavoriteFile() = ApplicationProvider.getApplicationContext<android.content.Context>()
+        .cacheDir
+        .resolve("favorites-${UUID.randomUUID()}.bin")
+
+    private fun identity(serial: Long, packageName: String, className: String) =
+        LaunchableIdentity(serial, ComponentName(packageName, className))
+
+    private fun FavoriteStore.readableIdentities(): List<LaunchableIdentity> =
+        (state.value as FavoriteReadState.Readable).identities
+}

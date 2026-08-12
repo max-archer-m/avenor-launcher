@@ -1,9 +1,11 @@
 package com.avenor.launcher
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.pm.LauncherApps
 import android.graphics.Rect
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,7 +15,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.getSystemService
@@ -60,6 +62,8 @@ internal class AndroidApplicationInformationLauncher(context: Context) :
         false
     } catch (_: IllegalStateException) {
         false
+    } catch (_: ActivityNotFoundException) {
+        false
     }
 }
 
@@ -70,9 +74,11 @@ internal fun ApplicationActionSheet(
     favoriteState: FavoriteReadState,
     onDismiss: () -> Unit,
     onAddFavorite: () -> Unit,
+    onRemoveFavorite: () -> Unit,
     informationLauncher: ApplicationInformationLauncher,
 ) {
     val context = LocalContext.current
+    val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -156,6 +162,7 @@ internal fun ApplicationActionSheet(
                         -> FavoriteActionSlot(
                             label = stringResource(R.string.favorites_unavailable),
                             enabled = false,
+                            disabledAlpha = disabledAlpha,
                             onClick = {},
                         )
 
@@ -165,10 +172,17 @@ internal fun ApplicationActionSheet(
                             FavoriteActionSlot(
                                 label = stringResource(R.string.add_favorite),
                                 enabled = true,
+                                disabledAlpha = disabledAlpha,
                                 onClick = onAddFavorite,
                             )
                         } else {
-                            Spacer(Modifier.weight(1f))
+                            FavoriteActionSlot(
+                                label = stringResource(R.string.remove_favorite),
+                                icon = R.drawable.ic_cancel_favorite,
+                                enabled = true,
+                                disabledAlpha = disabledAlpha,
+                                onClick = onRemoveFavorite,
+                            )
                         }
                     }
                     repeat(4) { Spacer(Modifier.weight(1f)) }
@@ -184,7 +198,8 @@ internal fun ApplicationActionSheet(
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .size(badgeSize),
+                        .size(badgeSize)
+                        .testTag("application_action_sheet_profile_badge"),
                 )
             }
         }
@@ -194,7 +209,10 @@ internal fun ApplicationActionSheet(
 @Composable
 private fun RowScope.FavoriteActionSlot(
     label: String,
+    @DrawableRes
+    icon: Int = R.drawable.ic_add_favorite,
     enabled: Boolean,
+    disabledAlpha: Float,
     onClick: () -> Unit,
 ) {
     androidx.compose.material3.TextButton(
@@ -202,7 +220,7 @@ private fun RowScope.FavoriteActionSlot(
         enabled = enabled,
         colors = ButtonDefaults.textButtonColors(
             contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = disabledAlpha),
         ),
         modifier = Modifier
             .weight(1f)
@@ -210,7 +228,7 @@ private fun RowScope.FavoriteActionSlot(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                painter = painterResource(R.drawable.ic_add_favorite),
+                painter = painterResource(icon),
                 contentDescription = null,
                 modifier = Modifier.size(dimensionResource(R.dimen.action_sheet_action_icon_size)),
             )

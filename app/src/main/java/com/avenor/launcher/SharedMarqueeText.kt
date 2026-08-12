@@ -24,6 +24,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlin.math.roundToInt
 
+internal fun selectActiveMarqueeKey(
+    paused: Boolean,
+    scrolling: Boolean,
+    pressedKey: String?,
+    focusedKey: String?,
+    centeredKey: String?,
+    overflowingKeys: Set<String>,
+): String? = if (paused || scrolling) {
+    null
+} else {
+    listOf(pressedKey, focusedKey, centeredKey)
+        .firstOrNull { it != null && it in overflowingKeys }
+}
+
 @Composable
 internal fun SharedMarqueeText(
     text: String,

@@ -9,8 +9,13 @@
     <string name="application_information">Application information</string>
     <string name="application_information_unavailable">Unable to open application information</string>
     <string name="add_favorite">Add favorite</string>
+    <string name="remove_favorite">Remove favorite</string>
     <string name="favorites_unavailable">Favorites unavailable</string>
     <string name="loading_favorites">Loading favorites…</string>
     <string name="unable_to_load_favorites">Unable to load favorites</string>
     <string name="home_empty_favorites">Add applications from Drawer</string>
+    <string name="favorite_application_unavailable">Application unavailable</string>
+    <string name="favorite_application_disabled">Application disabled</string>
+    <string name="favorite_disabled_format">%1$s — Disabled</string>
+    <string name="favorite_unavailable_format">%1$s — Unavailable</string>
 </resources>

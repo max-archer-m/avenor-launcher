@@ -4,13 +4,18 @@ import android.app.role.RoleManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        val transparentSystemBarColor = getColor(R.color.avenor_transparent)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(transparentSystemBarColor),
+            navigationBarStyle = SystemBarStyle.dark(transparentSystemBarColor),
+        )
         installHomeBackBehavior()
         setContent {
             AvenorTheme {

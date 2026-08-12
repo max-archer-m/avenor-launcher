@@ -26,10 +26,15 @@ internal interface FavoriteStore {
     val state: StateFlow<FavoriteReadState>
     suspend fun load()
     suspend fun add(identity: LaunchableIdentity): Boolean
+    suspend fun remove(identity: LaunchableIdentity): Boolean
+    suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean
 }
 
-internal class AtomicFileFavoriteStore(context: Context) : FavoriteStore {
-    private val atomicFile = AtomicFile(context.filesDir.resolve(FILE_NAME))
+internal class AtomicFileFavoriteStore private constructor(
+    private val atomicFile: AtomicFile,
+) : FavoriteStore {
+    constructor(context: Context) : this(AtomicFile(context.filesDir.resolve(FILE_NAME)))
+    internal constructor(file: java.io.File) : this(AtomicFile(file))
     private val mutationMutex = Mutex()
     private val mutableState = MutableStateFlow<FavoriteReadState>(FavoriteReadState.Loading)
 
@@ -55,7 +60,6 @@ internal class AtomicFileFavoriteStore(context: Context) : FavoriteStore {
     override suspend fun add(identity: LaunchableIdentity): Boolean = mutationMutex.withLock {
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         if (identity in readable.identities) return true
-
         val updated = readable.identities + identity
         val writeSucceeded = withContext(Dispatchers.IO) {
             try {
@@ -71,13 +75,52 @@ internal class AtomicFileFavoriteStore(context: Context) : FavoriteStore {
         writeSucceeded
     }
 
+    override suspend fun remove(identity: LaunchableIdentity): Boolean = mutationMutex.withLock {
+        val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
+        if (identity !in readable.identities) return true
+
+        val updated = readable.identities - identity
+        val writeSucceeded = withContext(Dispatchers.IO) {
+            try {
+                writeDocument(updated)
+                true
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: Exception) {
+                false
+            }
+        }
+        if (writeSucceeded) mutableState.value = FavoriteReadState.Readable(updated)
+        writeSucceeded
+    }
+
+    override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean =
+        mutationMutex.withLock {
+            val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
+            val updated = readable.identities.filterNot(identities::contains)
+            if (updated.size == readable.identities.size) return true
+
+            val writeSucceeded = withContext(Dispatchers.IO) {
+                try {
+                    writeDocument(updated)
+                    true
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: Exception) {
+                    false
+                }
+            }
+            if (writeSucceeded) mutableState.value = FavoriteReadState.Readable(updated)
+            writeSucceeded
+        }
+
     private fun readDocument(): List<LaunchableIdentity> =
         DataInputStream(BufferedInputStream(atomicFile.openRead())).use { input ->
             require(input.readInt() == MAGIC) { "Unrecognized favorites document" }
             require(input.readInt() == SCHEMA_VERSION) { "Unsupported favorites schema" }
             val count = input.readInt()
-            require(count in 0..MAX_FAVORITES) { "Invalid favorite count" }
-            val identities = buildList(count) {
+            require(count >= 0) { "Invalid favorite count" }
+            val identities = buildList {
                 repeat(count) {
                     val serial = input.readLong()
                     val flattenedComponent = input.readUTF()
@@ -117,6 +160,5 @@ internal class AtomicFileFavoriteStore(context: Context) : FavoriteStore {
         const val FILE_NAME = "favorites.bin"
         const val MAGIC = 0x4156454E
         const val SCHEMA_VERSION = 1
-        const val MAX_FAVORITES = 10_000
     }
 }

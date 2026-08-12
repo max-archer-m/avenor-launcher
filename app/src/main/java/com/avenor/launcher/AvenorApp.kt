@@ -1,5 +1,6 @@
 package com.avenor.launcher
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
@@ -73,6 +75,7 @@ internal fun AvenorApp(
     favoriteStore: FavoriteStore? = null,
     informationLauncher: ApplicationInformationLauncher = ApplicationInformationLauncher { false },
 ) {
+    val androidContext = LocalContext.current
     val density = LocalDensity.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
@@ -96,24 +99,53 @@ internal fun AvenorApp(
     var settleJob by remember { mutableStateOf<Job?>(null) }
     val effectiveFavoriteStore = favoriteStore ?: remember { InMemoryFavoriteStore() }
     val favoriteState by effectiveFavoriteStore.state.collectAsState()
-    var inventoryEntries by remember { mutableStateOf<List<LaunchableEntry>>(emptyList()) }
+    val inventoryCoordinator = remember(inventoryLoader) {
+        LaunchableInventoryCoordinator(inventoryLoader)
+    }
+    val inventoryState by inventoryCoordinator.state.collectAsState()
+    var favoriteAvailability by remember {
+        mutableStateOf<Map<LaunchableIdentity, FavoriteAvailability>>(emptyMap())
+    }
     var selectedEntry by remember { mutableStateOf<LaunchableEntry?>(null) }
+    val homeActivationGuard = remember { RapidActivationGuard() }
+    val unavailableFavoriteMessage = stringResource(R.string.favorite_application_unavailable)
+    val launchFailureMessage = stringResource(R.string.application_unable_to_open)
 
     LaunchedEffect(effectiveFavoriteStore) {
         effectiveFavoriteStore.load()
     }
 
-    LaunchedEffect(inventoryLoader) {
-        runCatching { inventoryLoader.load() }
-            .onSuccess { inventoryEntries = it }
+    LaunchedEffect(inventoryCoordinator) {
+        inventoryCoordinator.load(showLoading = true)
+    }
+
+    LaunchedEffect(favoriteState) {
+        if (favoriteState !is FavoriteReadState.Readable) selectedEntry = null
+    }
+
+    LaunchedEffect(favoriteState, inventoryState, effectiveFavoriteStore, inventoryCoordinator) {
+        val readableFavorites = favoriteState as? FavoriteReadState.Readable
+            ?: return@LaunchedEffect
+        val completeInventory = inventoryState as? LaunchableInventoryState.Content
+            ?: return@LaunchedEffect
+        val resolved = inventoryCoordinator.resolveFavorites(
+            identities = readableFavorites.identities,
+            snapshot = completeInventory.snapshot,
+        )
+        favoriteAvailability = resolved
+        val confirmedRemovedIdentities = resolved
+            .filterValues { it == FavoriteAvailability.ConfirmedRemoved }
+            .keys
+        if (confirmedRemovedIdentities.isNotEmpty()) {
+            effectiveFavoriteStore.removeAll(confirmedRemovedIdentities)
+        }
     }
 
     DisposableEffect(lifecycleOwner, inventoryLoader) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                scope.launch {
-                    runCatching { inventoryLoader.load() }
-                        .onSuccess { inventoryEntries = it }
+                if (inventoryCoordinator.state.value is LaunchableInventoryState.Content) {
+                    scope.launch { inventoryCoordinator.load(showLoading = false) }
                 }
             }
         }
@@ -312,8 +344,31 @@ internal fun AvenorApp(
         ) {
             HomeScreen(
                 favoriteState = favoriteState,
-                inventoryEntries = inventoryEntries,
+                favoriteAvailability = favoriteAvailability,
+                marqueePaused = progress > 0f || selectedEntry != null,
                 onRetryFavorites = { scope.launch { effectiveFavoriteStore.load() } },
+                onLongPressFavorite = { entry -> selectedEntry = entry },
+                onLaunchFavorite = { availability ->
+                    when {
+                        availability !is FavoriteAvailability.Available -> {
+                            Toast.makeText(
+                                androidContext,
+                                unavailableFavoriteMessage,
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+
+                        homeActivationGuard.tryAcquire() &&
+                            !entryLauncher.launch(availability.entry) -> {
+                            Toast.makeText(
+                                androidContext,
+                                launchFailureMessage,
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                            scope.launch { inventoryCoordinator.load(showLoading = false) }
+                        }
+                    }
+                },
             )
         }
 
@@ -328,12 +383,12 @@ internal fun AvenorApp(
             ) {
                 DrawerScreen(
                     inventoryLoader = inventoryLoader,
+                    inventoryCoordinator = inventoryCoordinator,
                     entryLauncher = entryLauncher,
                     modifier = Modifier.nestedScroll(drawerNestedScrollConnection),
                     listState = drawerListState,
                     active = settledSurface == AvenorSurface.Drawer || progress > 0f,
-                    marqueePaused = progress > 0f && progress < 1f,
-                    onInventoryLoaded = { inventoryEntries = it },
+                    marqueePaused = progress > 0f && progress < 1f || selectedEntry != null,
                     onLongPress = { entry -> selectedEntry = entry },
                 )
             }
@@ -346,6 +401,10 @@ internal fun AvenorApp(
                 onDismiss = { selectedEntry = null },
                 onAddFavorite = {
                     scope.launch { effectiveFavoriteStore.add(entry.identity) }
+                    selectedEntry = null
+                },
+                onRemoveFavorite = {
+                    scope.launch { effectiveFavoriteStore.remove(entry.identity) }
                     selectedEntry = null
                 },
                 informationLauncher = informationLauncher,
@@ -365,6 +424,18 @@ private class InMemoryFavoriteStore : FavoriteStore {
         if (identity !in current.identities) {
             mutableState.value = FavoriteReadState.Readable(current.identities + identity)
         }
+        return true
+    }
+    override suspend fun remove(identity: LaunchableIdentity): Boolean {
+        val current = mutableState.value as FavoriteReadState.Readable
+        mutableState.value = FavoriteReadState.Readable(current.identities - identity)
+        return true
+    }
+    override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean {
+        val current = mutableState.value as FavoriteReadState.Readable
+        mutableState.value = FavoriteReadState.Readable(
+            current.identities.filterNot(identities::contains),
+        )
         return true
     }
 }
