@@ -317,7 +317,7 @@ private fun HomeFavoriteRow(
                 tint = MaterialTheme.colorScheme.onBackground,
             )
         } else {
-            val bitmap = remember(entry.icon, iconPixels) {
+            val bitmap = entry.iconBitmap?.asImageBitmap() ?: remember(entry.icon, iconPixels) {
                 entry.icon.toBitmap(iconPixels, iconPixels).asImageBitmap()
             }
             Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(iconSize))

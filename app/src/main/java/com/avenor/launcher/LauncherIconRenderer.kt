@@ -59,7 +59,7 @@ internal class SystemLauncherIconRenderer(
     private fun renderSystemAdaptiveIcon(source: Drawable): Bitmap {
         if (source is AdaptiveIconDrawable) return source.toIconBitmap()
 
-        val analysisSize = maxOf(iconSizePixels * ANALYSIS_SIZE_MULTIPLIER, MINIMUM_ANALYSIS_SIZE)
+        val analysisSize = maxOf(iconSizePixels, MINIMUM_ANALYSIS_SIZE)
         val sourceBitmap = source.toBitmap(
             width = analysisSize,
             height = analysisSize,
@@ -112,8 +112,7 @@ internal class SystemLauncherIconRenderer(
     }
 
     private companion object {
-        const val ANALYSIS_SIZE_MULTIPLIER = 2
-        const val MINIMUM_ANALYSIS_SIZE = 192
+        const val MINIMUM_ANALYSIS_SIZE = 96
         const val LEGACY_CONTENT_INSET_FRACTION = 0.1f
         val ICON_BITMAP_PAINT = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
     }
@@ -125,8 +124,8 @@ internal fun Bitmap.inferLegacyBackgroundColor(): Int {
     var opaqueSamples = 0
     var totalSamples = 0
 
-    for (y in 0 until height) {
-        for (x in 0 until width) {
+    for (y in 0 until height step EDGE_SAMPLE_STRIDE) {
+        for (x in 0 until width step EDGE_SAMPLE_STRIDE) {
             if (x >= edgeWidth && x < width - edgeWidth &&
                 y >= edgeWidth && y < height - edgeWidth
             ) {
@@ -155,6 +154,7 @@ private fun quantizeChannel(channel: Int): Int = (channel / COLOR_BUCKET_SIZE) *
     COLOR_BUCKET_CENTER_OFFSET
 
 private const val EDGE_SAMPLE_FRACTION = 0.08f
+private const val EDGE_SAMPLE_STRIDE = 4
 private const val BACKGROUND_ALPHA_THRESHOLD = 224
 private const val MINIMUM_OPAQUE_EDGE_RATIO = 0.25f
 private const val COLOR_BUCKET_SIZE = 16

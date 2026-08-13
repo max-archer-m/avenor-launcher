@@ -44,20 +44,64 @@ internal fun buildDrawerSections(
     locale: Locale,
 ): List<DrawerSection> {
     val normalizer = LaunchableLabelNormalizer()
-    val sortedEntries = entries.sortedWith(LaunchableEntryComparator(locale, normalizer))
-    val entriesBySection = sortedEntries.groupBy { entry ->
-        normalizer.sectionFor(entry.label)
+    val collator = Collator.getInstance(locale).apply {
+        strength = Collator.PRIMARY
+    }
+    val normalizedEntries = entries.map { entry ->
+        NormalizedDrawerEntry(
+            entry = entry,
+            normalizedLabel = normalizer.normalize(entry.label),
+        )
+    }.sortedWith(Comparator { left, right ->
+        val labelOrder = collator.compare(left.normalizedLabel, right.normalizedLabel)
+        if (labelOrder != 0) {
+            labelOrder
+        } else {
+            compareValuesBy(
+                left.entry,
+                right.entry,
+                { it.identity.profileSerialNumber },
+                { it.identity.componentName.flattenToString() },
+            )
+        }
+    })
+    val entriesBySection = normalizedEntries.groupBy { normalized ->
+        normalizer.sectionForNormalized(normalized.normalizedLabel)
     }
 
     return buildList {
-        add(DrawerSection(label = "#", entries = entriesBySection["#"].orEmpty()))
+        add(
+            DrawerSection(
+                label = "#",
+                entries = entriesBySection["#"].orEmpty().map(NormalizedDrawerEntry::entry),
+            ),
+        )
         for (sectionCharacter in 'A'..'Z') {
             val label = sectionCharacter.toString()
             val sectionEntries = entriesBySection[label].orEmpty()
             if (sectionEntries.isNotEmpty()) {
-                add(DrawerSection(label = label, entries = sectionEntries))
+                add(
+                    DrawerSection(
+                        label = label,
+                        entries = sectionEntries.map(NormalizedDrawerEntry::entry),
+                    ),
+                )
             }
         }
+    }
+}
+
+private data class NormalizedDrawerEntry(
+    val entry: LaunchableEntry,
+    val normalizedLabel: String,
+)
+
+private fun LaunchableLabelNormalizer.sectionForNormalized(normalizedLabel: String): String {
+    val firstCharacter = normalizedLabel.firstOrNull()?.uppercaseChar()
+    return if (firstCharacter != null && firstCharacter in 'A'..'Z') {
+        firstCharacter.toString()
+    } else {
+        "#"
     }
 }
 

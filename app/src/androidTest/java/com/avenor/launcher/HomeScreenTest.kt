@@ -365,6 +365,35 @@ class HomeScreenTest {
     }
 
     @Test
+    fun firstDrawerEntryDoesNotRepeatTheApplicationOwnedInitialLoad() {
+        var loadCount = 0
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example", "com.example.MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Example application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                AvenorApp(
+                    inventoryLoader = LaunchableInventoryLoader {
+                        loadCount += 1
+                        completeSnapshot(entry)
+                    },
+                )
+            }
+        }
+
+        composeRule.waitUntil { loadCount == 1 }
+        composeRule.onNodeWithTag("home_surface").performTouchInput { swipeUp() }
+        composeRule.onNodeWithText("Example application").assertIsDisplayed()
+        composeRule.runOnIdle { assertEquals(1, loadCount) }
+    }
+
+    @Test
     fun loadedInventoryDisplaysApplicationList() {
         val entry = LaunchableEntry(
             identity = LaunchableIdentity(
@@ -528,6 +557,28 @@ class HomeScreenTest {
 
         assertEquals(listOf("#", "A", "B", "E", "W"), sections.map(DrawerSection::label))
         assertEquals(listOf("2FAS"), sections.first().entries.map(LaunchableEntry::label))
+    }
+
+    @Test
+    fun drawerUsesSectionsPreparedByTheBackgroundInventorySnapshot() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example", "com.example.MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Example application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val preparedSections = listOf(DrawerSection("E", listOf(entry)))
+        val snapshot = LaunchableInventorySnapshot(
+            entries = listOf(entry),
+            profileReadStatus = mapOf(0L to ProfileInventoryReadStatus.Complete),
+            drawerSections = preparedSections,
+            drawerSectionsLocale = Locale.US,
+        )
+
+        assertEquals(preparedSections, snapshot.drawerSectionsFor(Locale.US))
     }
 
     @Test

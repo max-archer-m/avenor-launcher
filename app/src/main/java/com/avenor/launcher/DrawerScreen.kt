@@ -1,6 +1,7 @@
 package com.avenor.launcher
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -73,6 +74,7 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Job
@@ -90,6 +92,7 @@ internal fun DrawerScreen(
     inventoryCoordinator: LaunchableInventoryCoordinator = remember(inventoryLoader) {
         LaunchableInventoryCoordinator(inventoryLoader)
     },
+    initialLoadHandledExternally: Boolean = false,
     entryLauncher: LaunchableEntryLauncher = LaunchableEntryLauncher { false },
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
@@ -99,6 +102,7 @@ internal fun DrawerScreen(
 ) {
     var loadRequest by remember { mutableIntStateOf(0) }
     var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
+    var hasBeenActive by remember { mutableStateOf(false) }
     val state by inventoryCoordinator.state.collectAsState()
     val activationGuard = remember { RapidActivationGuard() }
     val context = LocalContext.current
@@ -107,13 +111,15 @@ internal fun DrawerScreen(
     val currentState by rememberUpdatedState(state)
 
     LaunchedEffect(inventoryLoader, loadRequest) {
-        if (loadRequest == 0 && state is LaunchableInventoryState.Content) {
+        if (loadRequest == 0 &&
+            (initialLoadHandledExternally || state is LaunchableInventoryState.Content)
+        ) {
             return@LaunchedEffect
         }
         val positionBeforeRefresh = if (loadTrigger == DrawerLoadTrigger.LiveUpdate) {
             (state as? LaunchableInventoryState.Content)?.let { content ->
                 captureDrawerListPosition(
-                    sections = buildDrawerSections(content.entries, locale),
+                    sections = content.snapshot.drawerSectionsFor(locale),
                     firstVisibleItemIndex = listState.firstVisibleItemIndex,
                     firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
                 )
@@ -127,7 +133,7 @@ internal fun DrawerScreen(
         if (positionBeforeRefresh != null && updatedState is LaunchableInventoryState.Content) {
             val restorationTarget = resolveDrawerRestorationTarget(
                 position = positionBeforeRefresh,
-                sections = buildDrawerSections(updatedState.entries, locale),
+                sections = updatedState.snapshot.drawerSectionsFor(locale),
             )
             if (restorationTarget != null) {
                 withFrameNanos { }
@@ -141,6 +147,10 @@ internal fun DrawerScreen(
 
     LaunchedEffect(inventoryLoader, active) {
         if (active) {
+            if (!hasBeenActive) {
+                hasBeenActive = true
+                return@LaunchedEffect
+            }
             when (currentState) {
                 is LaunchableInventoryState.Content -> {
                     loadTrigger = DrawerLoadTrigger.LiveUpdate
@@ -203,7 +213,7 @@ internal fun DrawerScreen(
         is LaunchableInventoryState.Content -> DrawerApplicationList(
             modifier = modifier,
             listState = listState,
-            entries = currentState.entries,
+            sections = currentState.snapshot.drawerSectionsFor(locale),
             marqueePaused = marqueePaused || !active,
             onLaunch = { entry ->
                 if (activationGuard.tryAcquire() && !entryLauncher.launch(entry)) {
@@ -265,15 +275,11 @@ private fun DrawerMessage(
 private fun DrawerApplicationList(
     modifier: Modifier,
     listState: LazyListState,
-    entries: List<LaunchableEntry>,
+    sections: List<DrawerSection>,
     marqueePaused: Boolean,
     onLaunch: (LaunchableEntry) -> Unit,
     onLongPress: (LaunchableEntry) -> Unit,
 ) {
-    val locale = LocalConfiguration.current.locales[0]
-    val sections = remember(entries, locale) {
-        buildDrawerSections(entries, locale)
-    }
     val sectionAnchors = remember(sections) {
         buildMap {
             var itemIndex = 0
@@ -330,6 +336,10 @@ private fun DrawerApplicationList(
         centeredKey = centeredEntryKey,
         overflowingKeys = overflowingEntries.keys,
     )
+    val marqueeMeasurementEnabled = !marqueePaused && !listState.isScrollInProgress
+    LaunchedEffect(marqueeMeasurementEnabled) {
+        if (!marqueeMeasurementEnabled) overflowingEntries.clear()
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -362,6 +372,7 @@ private fun DrawerApplicationList(
                     DrawerApplicationRow(
                         entry = entry,
                         marqueeEligible = activeMarqueeKey == entryKey,
+                        marqueeMeasurementEnabled = marqueeMeasurementEnabled,
                         onOverflowChanged = { overflow ->
                             if (overflow) {
                                 overflowingEntries[entryKey] = true
@@ -555,6 +566,7 @@ private fun DrawerSectionHeader(label: String) {
 private fun DrawerApplicationRow(
     entry: LaunchableEntry,
     marqueeEligible: Boolean,
+    marqueeMeasurementEnabled: Boolean,
     onOverflowChanged: (Boolean) -> Unit,
     onPressedChanged: (Boolean) -> Unit,
     onFocusedChanged: (Boolean) -> Unit,
@@ -596,14 +608,25 @@ private fun DrawerApplicationRow(
             .testTag("drawer_application_row"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        DrawerApplicationIcon(entry.icon, iconSizePixels)
+        DrawerApplicationIcon(entry.iconBitmap, entry.icon, iconSizePixels)
         Spacer(Modifier.width(dimensionResource(R.dimen.drawer_application_icon_label_gap)))
-        SharedMarqueeText(
-            text = entry.label,
-            eligible = marqueeEligible,
-            onOverflowChanged = onOverflowChanged,
-            modifier = Modifier.weight(1f),
-        )
+        if (marqueeMeasurementEnabled) {
+            SharedMarqueeText(
+                text = entry.label,
+                eligible = marqueeEligible,
+                onOverflowChanged = onOverflowChanged,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Text(
+                text = entry.label,
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
     }
 }
 
@@ -611,12 +634,13 @@ private fun LaunchableEntry.drawerEntryKey(): String =
     "${identity.profileSerialNumber}:${identity.componentName.flattenToString()}"
 
 @Composable
-private fun DrawerApplicationIcon(icon: Drawable, iconSizePixels: Int) {
-    val bitmap = remember(icon, iconSizePixels) {
-        icon.toBitmap(
-            width = iconSizePixels,
-            height = iconSizePixels,
-        ).asImageBitmap()
+private fun DrawerApplicationIcon(
+    preparedBitmap: Bitmap?,
+    icon: Drawable,
+    iconSizePixels: Int,
+) {
+    val bitmap = preparedBitmap?.asImageBitmap() ?: remember(icon, iconSizePixels) {
+        icon.toBitmap(width = iconSizePixels, height = iconSizePixels).asImageBitmap()
     }
 
     Image(

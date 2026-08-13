@@ -2,8 +2,10 @@ package com.avenor.launcher
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
@@ -12,9 +14,12 @@ import android.os.Looper
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
+import android.util.LruCache
 import java.util.Collections
+import java.util.Locale
 import androidx.core.content.getSystemService
 import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
@@ -34,6 +39,7 @@ internal data class LaunchableEntry(
     val user: UserHandle,
     val label: String,
     val icon: Drawable,
+    val iconBitmap: Bitmap? = null,
     val profileBadge: Drawable? = null,
 )
 
@@ -45,7 +51,13 @@ internal enum class ProfileInventoryReadStatus {
 internal data class LaunchableInventorySnapshot(
     val entries: List<LaunchableEntry>,
     val profileReadStatus: Map<Long, ProfileInventoryReadStatus>,
+    val drawerSections: List<DrawerSection>? = null,
+    val drawerSectionsLocale: Locale? = null,
 )
+
+internal fun LaunchableInventorySnapshot.drawerSectionsFor(locale: Locale): List<DrawerSection> =
+    drawerSections?.takeIf { drawerSectionsLocale == locale }
+        ?: buildDrawerSections(entries, locale)
 
 internal fun interface LaunchableInventoryLoader {
     suspend fun load(): LaunchableInventorySnapshot
@@ -182,16 +194,20 @@ internal class AndroidLaunchableInventoryLoader(
     private val temporarilyUnavailablePackages = Collections.synchronizedSet(
         mutableSetOf<ProfilePackageKey>(),
     )
+    private val renderedIconCache = LruCache<RenderedIconCacheKey, PreparedIcon>(
+        MAXIMUM_CACHED_ICONS,
+    )
 
     override suspend fun load(): LaunchableInventorySnapshot = withContext(Dispatchers.IO) {
         val density = applicationContext.resources.displayMetrics.densityDpi
         val locale = applicationContext.resources.configuration.locales[0]
-        val entryComparator = LaunchableEntryComparator(locale)
-
+        val iconSizePixels = applicationContext.resources.getDimensionPixelSize(
+            R.dimen.drawer_application_icon_size,
+        )
         val currentUser = Process.myUserHandle()
 
         val profileStatuses = mutableMapOf<Long, ProfileInventoryReadStatus>()
-        val entries = launcherApps.profiles
+        val unsortedEntries = launcherApps.profiles
             .flatMap { user ->
                 val serialNumber = userManager.getSerialNumberForUser(user)
                 val activities = try {
@@ -209,24 +225,24 @@ internal class AndroidLaunchableInventoryLoader(
                 }
 
                 activities.map { activity ->
-                    val fallbackIcon = applicationContext.packageManager.defaultActivityIcon
-                    val sourceIcon = runCatching {
-                        activity.getIcon(density)
-                    }.getOrDefault(fallbackIcon)
-                    val icon = runCatching {
-                        iconRenderer.render(sourceIcon, user, iconAppearance)
-                    }.getOrElse {
-                        iconRenderer.render(fallbackIcon, user, iconAppearance)
-                    }
+                    val identity = LaunchableIdentity(
+                        profileSerialNumber = serialNumber,
+                        componentName = activity.componentName,
+                    )
+                    val preparedIcon = preparedIconFor(
+                        activity = activity,
+                        user = user,
+                        identity = identity,
+                        density = density,
+                        iconSizePixels = iconSizePixels,
+                    )
 
                     LaunchableEntry(
-                        identity = LaunchableIdentity(
-                            profileSerialNumber = serialNumber,
-                            componentName = activity.componentName,
-                        ),
+                        identity = identity,
                         user = user,
                         label = activity.label.toString(),
-                        icon = icon,
+                        icon = preparedIcon.drawable,
+                        iconBitmap = preparedIcon.bitmap,
                         profileBadge = if (user == currentUser) {
                             null
                         } else {
@@ -249,8 +265,14 @@ internal class AndroidLaunchableInventoryLoader(
                 }
             }
             .distinctBy(LaunchableEntry::identity)
-            .sortedWith(entryComparator)
-        LaunchableInventorySnapshot(entries, profileStatuses)
+        val drawerSections = buildDrawerSections(unsortedEntries, locale)
+        val entries = drawerSections.flatMap(DrawerSection::entries)
+        LaunchableInventorySnapshot(
+            entries = entries,
+            profileReadStatus = profileStatuses,
+            drawerSections = drawerSections,
+            drawerSectionsLocale = locale,
+        )
     }
 
     override suspend fun resolveMissingIdentity(
@@ -304,12 +326,18 @@ internal class AndroidLaunchableInventoryLoader(
                     val sourceIcon = runCatching {
                         applicationInfo.loadIcon(applicationContext.packageManager)
                     }.getOrDefault(applicationContext.packageManager.defaultActivityIcon)
+                    val renderedIcon = iconRenderer.render(sourceIcon, user, iconAppearance)
                     LaunchableEntry(
                         identity = identity,
                         user = user,
                         label = applicationInfo.loadLabel(applicationContext.packageManager)
                             .toString(),
-                        icon = iconRenderer.render(sourceIcon, user, iconAppearance),
+                        icon = renderedIcon,
+                        iconBitmap = runCatching {
+                            val iconSizePixels = applicationContext.resources
+                                .getDimensionPixelSize(R.dimen.drawer_application_icon_size)
+                            renderedIcon.toBitmap(iconSizePixels, iconSizePixels)
+                        }.getOrNull(),
                     )
                 } else {
                     null
@@ -353,32 +381,81 @@ internal class AndroidLaunchableInventoryLoader(
         pendingExactComponentDisappearance.remove(identity)
     }
 
+    private fun preparedIconFor(
+        activity: LauncherActivityInfo,
+        user: UserHandle,
+        identity: LaunchableIdentity,
+        density: Int,
+        iconSizePixels: Int,
+    ): PreparedIcon {
+        val cacheKey = RenderedIconCacheKey(
+            identity = identity,
+            density = density,
+            uiMode = applicationContext.resources.configuration.uiMode,
+            shape = iconAppearance.shape,
+        )
+        renderedIconCache.get(cacheKey)?.let { return it }
+
+        val fallbackIcon = applicationContext.packageManager.defaultActivityIcon
+        val sourceIcon = runCatching {
+            activity.getIcon(density)
+        }.getOrDefault(fallbackIcon)
+        val renderedIcon = runCatching {
+            iconRenderer.render(sourceIcon, user, iconAppearance)
+        }.getOrElse {
+            iconRenderer.render(fallbackIcon, user, iconAppearance)
+        }
+        return PreparedIcon(
+            drawable = renderedIcon,
+            bitmap = runCatching {
+                renderedIcon.toBitmap(iconSizePixels, iconSizePixels)
+            }.getOrNull(),
+        ).also { preparedIcon ->
+            renderedIconCache.put(cacheKey, preparedIcon)
+        }
+    }
+
+    private fun invalidateCachedIcons(packageName: String, profileSerialNumber: Long) {
+        renderedIconCache.snapshot().keys
+            .filter { key ->
+                key.identity.profileSerialNumber == profileSerialNumber &&
+                    key.identity.componentName.packageName == packageName
+            }
+            .forEach(renderedIconCache::remove)
+    }
+
     override fun observe(
         onInventoryChanged: (LaunchableInventoryChange) -> Unit,
     ): LaunchableInventoryObservation {
         val callback = object : LauncherApps.Callback() {
             override fun onPackageAdded(packageName: String, user: UserHandle) {
+                val serialNumber = userManager.getSerialNumberForUser(user)
+                invalidateCachedIcons(packageName, serialNumber)
                 temporarilyUnavailablePackages.remove(
-                    ProfilePackageKey(userManager.getSerialNumberForUser(user), packageName),
+                    ProfilePackageKey(serialNumber, packageName),
                 )
                 onInventoryChanged(LaunchableInventoryChange.PackageAdded)
             }
 
             override fun onPackageChanged(packageName: String, user: UserHandle) {
+                val serialNumber = userManager.getSerialNumberForUser(user)
+                invalidateCachedIcons(packageName, serialNumber)
                 temporarilyUnavailablePackages.remove(
-                    ProfilePackageKey(userManager.getSerialNumberForUser(user), packageName),
+                    ProfilePackageKey(serialNumber, packageName),
                 )
                 onInventoryChanged(LaunchableInventoryChange.PackageChanged)
             }
 
             override fun onPackageRemoved(packageName: String, user: UserHandle) {
+                val serialNumber = userManager.getSerialNumberForUser(user)
+                invalidateCachedIcons(packageName, serialNumber)
                 temporarilyUnavailablePackages.remove(
-                    ProfilePackageKey(userManager.getSerialNumberForUser(user), packageName),
+                    ProfilePackageKey(serialNumber, packageName),
                 )
                 onInventoryChanged(
                     LaunchableInventoryChange.PackageRemoved(
                         packageName = packageName,
-                        profileSerialNumber = userManager.getSerialNumberForUser(user),
+                        profileSerialNumber = serialNumber,
                     ),
                 )
             }
@@ -428,6 +505,22 @@ internal class AndroidLaunchableInventoryLoader(
         return LaunchableInventoryObservation {
             launcherApps.unregisterCallback(callback)
         }
+    }
+
+    private data class PreparedIcon(
+        val drawable: Drawable,
+        val bitmap: Bitmap?,
+    )
+
+    private data class RenderedIconCacheKey(
+        val identity: LaunchableIdentity,
+        val density: Int,
+        val uiMode: Int,
+        val shape: LauncherIconShape,
+    )
+
+    private companion object {
+        const val MAXIMUM_CACHED_ICONS = 256
     }
 }
 

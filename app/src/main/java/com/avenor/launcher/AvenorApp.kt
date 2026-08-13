@@ -119,6 +119,11 @@ internal fun AvenorApp(
         inventoryCoordinator.load(showLoading = true)
     }
 
+    DisposableEffect(inventoryCoordinator) {
+        val cacheInvalidationObservation = inventoryCoordinator.observe { }
+        onDispose { cacheInvalidationObservation?.stop() }
+    }
+
     LaunchedEffect(favoriteState) {
         if (favoriteState !is FavoriteReadState.Readable) selectedEntry = null
     }
@@ -384,6 +389,7 @@ internal fun AvenorApp(
                 DrawerScreen(
                     inventoryLoader = inventoryLoader,
                     inventoryCoordinator = inventoryCoordinator,
+                    initialLoadHandledExternally = true,
                     entryLauncher = entryLauncher,
                     modifier = Modifier.nestedScroll(drawerNestedScrollConnection),
                     listState = drawerListState,
