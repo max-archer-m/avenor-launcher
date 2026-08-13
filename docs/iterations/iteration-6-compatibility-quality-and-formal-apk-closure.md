@@ -6,9 +6,9 @@
 
 ## Status
 
-- Value: `In Progress`
+- Value: `Completed`
 - Updated: 2026-08-13
-- Basis: Iteration 5 is complete, the remote signing configuration has been accepted by the project author, and the defined primary-device daily-use closure work is now in progress.
+- Basis: The project author accepted the `053b6b7` implementation baseline and its complete primary-device daily-use journey. The implementation is synchronized to `origin/main`; the commit containing this status transition synchronizes the corresponding closure documentation.
 
 ## Objective
 
@@ -92,29 +92,30 @@ The following primary-device validation is required for the `1.0.0` author daily
 
 ## Acceptance evidence
 
-Before completion, record:
+The project author reported and accepted the following daily-use evidence:
 
-- available build/install procedure, primary-device identity, result, APK/build identity, and source commit;
-- `applicationId`, `versionName`, and `versionCode` from the accepted installation;
-- the complete selected journey result and any observed blocker;
-- signing identity category and known update or reinstall limitation;
-- every missing compatibility, automated, performance, dependency, license, manifest, permission, backup, security, privacy, digest, and external-retention result;
-- every known limitation, unresolved defect, technical debt, migration issue, workaround, and author disposition; and
-- links to accepted Iterations 1 through 5 and their evidence.
+- Accepted source commit: `053b6b7da58a27a9c237d98c2e49f7a94e5b1d3e` (`perf(drawer): reduce application list rendering cost`).
+- Accepted application identity: `applicationId` `com.avenor.launcher`, `versionName` `1.0.0`, and `versionCode` `1`.
+- Primary environment: Samsung Galaxy S23 Ultra on Android 16/API 36.
+- Result: the complete selected offline daily-use journey passed, and the author reported no known core-path blocker.
+- Signing category: author-local private signing identity. A later in-place update must use the same signing identity; if that identity becomes unavailable, update continuity cannot be assumed.
+- Iterations 1 through 5 are `Completed` and retain their linked evidence.
 
-No acceptance evidence exists merely because this contract is present.
+The exact Gradle build command, installation command, APK filename, digest, retained artifact location, and command output were not reported. API 31 and Pixel compatibility, the complete automated matrix, performance distributions, merged-manifest and resolved-dependency review, qualified license conclusions, formal security and privacy review, release-signing custody and backup, and formal-release-artifact evidence remain unknown or unperformed recommended follow-up. None is represented as passed.
 
 ## Related decisions, commits, and tags
 
-- Architecture, ADR, product-decision, and release-governance links: record every applicable decision.
-- Implementation and closure commits: record the exact source history represented by the APK.
+- Applicable architecture decisions: [ADR-0001](../decisions/0001-establish-replaceable-launcher-icon-rendering.md), [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md), and [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md). ADR status and exact scope remain authoritative in each linked record.
+- Accepted implementation baseline: `053b6b7da58a27a9c237d98c2e49f7a94e5b1d3e` (`perf(drawer): reduce application list rendering cost`).
+- Signing configuration commit: `97a38e6 build(signing): configure local release credentials`; private signing material remains outside Git.
+- Closure documentation: synchronized by the commit containing this status transition; Git history is authoritative for its identifier.
 - Tag: not required for `1.0.0`; create only through separate explicit project-author authorization.
 - GitHub Release and public distribution: not required or authorized by this iteration.
 
 ## Final result
 
-No final `Completed` result exists while this iteration is `In Progress`. It becomes `Completed` when the project author accepts one traceable APK and its observed primary-device journey for ongoing daily use, known gaps are recorded, and the implementation and documentation are committed and synchronized. Formal-release-artifact evidence remains outside this iteration unless separately authorized.
+The project author accepted the `053b6b7` implementation baseline, the identified `1.0.0` APK, and the reported Samsung Galaxy S23 Ultra primary-device journey for ongoing daily use, with no known core-path blocker. The implementation is synchronized to `origin/main`, and the commit containing this status transition synchronizes the corresponding closure documentation. Iteration 6 is `Completed` at the `Author daily-use baseline` level. Formal-release-artifact evidence remains outside this iteration unless separately authorized.
 
 ## Remaining issues and handoff
 
-On completion, move the version contract, supporting version inputs, and original included iteration records into `docs/archives/v1.0.0/`, update links, preserve the next project-wide iteration number as `7`, and record all remaining issues for later authorized delivery. A tag, milestone, GitHub Release, or public distribution remains a separate decision.
+Proceed with the separately reviewable `1.0.0` version-completion and archive task. That task moves the version contract, supporting version inputs, and original included iteration records into `docs/archives/v1.0.0/`, updates links, preserves the next project-wide iteration number as `7`, and records all remaining issues for later authorized delivery. A tag, milestone, GitHub Release, or public distribution remains a separate decision.

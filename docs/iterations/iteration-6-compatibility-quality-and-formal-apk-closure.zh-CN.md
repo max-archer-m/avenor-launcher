@@ -6,9 +6,9 @@
 
 ## 状态
 
-- Value: `In Progress`
+- Value: `Completed`
 - Updated: 2026-08-13
-- Basis: 迭代 5 已完成，远端签名配置已经项目作者验收，既定的主要设备日常使用收尾工作现已进行中。
+- Basis: 项目作者已验收 `053b6b7` 实现基线及其完整主要设备日常使用路径。实现已同步到 `origin/main`；包含本状态转换的 commit 同步对应收尾文档。
 
 ## 目标
 
@@ -92,29 +92,30 @@
 
 ## 验收证据
 
-完成前记录：
+项目作者报告并验收以下日常使用证据：
 
-- 可用构建/安装步骤、主要设备身份、结果、APK/构建身份和源码 commit；
-- 已接受安装中的 `applicationId`、`versionName` 和 `versionCode`；
-- 完整所选路径结果及任何观察到的阻塞；
-- 签名身份类别和已知更新或重新安装限制；
-- 每项缺失兼容性、自动化、性能、依赖、许可证、Manifest、权限、备份、安全、隐私、摘要和外部保留结果；
-- 每个已知限制、未解决缺陷、技术债、迁移问题、替代方式和作者处置；
-- 已验收迭代 1 至 5 及其证据的链接。
+- 已验收源码 commit：`053b6b7da58a27a9c237d98c2e49f7a94e5b1d3e`（`perf(drawer): reduce application list rendering cost`）。
+- 已验收应用身份：`applicationId` `com.avenor.launcher`、`versionName` `1.0.0` 和 `versionCode` `1`。
+- 主要环境：Android 16/API 36 的 Samsung Galaxy S23 Ultra。
+- 结果：完整所选离线日常使用路径通过，作者报告不存在已知核心路径阻塞。
+- 签名类别：作者本地私有签名身份。后续原位更新必须继续使用同一签名身份；如果该身份不可用，则不能假定更新连续性。
+- 迭代 1 至 5 均为 `Completed`，并保留各自链接的证据。
 
-不能仅因本契约存在就视为验收证据存在。
+准确的 Gradle 构建命令、安装命令、APK 文件名、摘要、保留位置和命令输出未报告。API 31 与 Pixel 兼容性、完整自动化矩阵、性能分布、merged manifest 与解析依赖审查、合格许可证结论、正式安全和隐私审查、release 签名保管与备份，以及正式发布制品证据继续属于未知或未执行的建议后续工作；其中任何一项均未表述为通过。
 
 ## 相关决定、commit 和 tag
 
-- 架构、ADR、产品决定和发布治理链接：记录每个适用决定。
-- 实现和关闭 commit：记录 APK 所表示的准确源码历史。
+- 适用架构决定：[ADR-0001](../decisions/0001-establish-replaceable-launcher-icon-rendering.md)、[ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md)和 [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md)。各链接记录中的 ADR 状态与准确范围保持权威。
+- 已验收实现基线：`053b6b7da58a27a9c237d98c2e49f7a94e5b1d3e`（`perf(drawer): reduce application list rendering cost`）。
+- 签名配置 commit：`97a38e6 build(signing): configure local release credentials`；私有签名材料保持在 Git 之外。
+- 收尾文档：由包含本状态转换的 commit 同步；其标识以 Git 历史为准。
 - Tag：`1.0.0` 不要求 tag；只有在项目作者单独明确授权后才创建。
 - GitHub Release 和公开分发：本迭代不要求也不授权。
 
 ## 最终结果
 
-本迭代处于 `In Progress` 时尚无最终 `Completed` 结果。只有项目作者接受一个可追踪 APK 及其主要设备观察路径用于持续日常使用、已知缺口均已记录，并且实现和文档已经 commit 和同步时，本迭代才变为 `Completed`。除非另行授权，正式发布制品证据不属于本迭代范围。
+项目作者已验收 `053b6b7` 实现基线、具有既定身份的 `1.0.0` APK，以及报告的 Samsung Galaxy S23 Ultra 主要设备路径，用于持续日常使用，且不存在已知核心路径阻塞。实现已同步到 `origin/main`，包含本状态转换的 commit 同步对应收尾文档。迭代 6 以 `Author daily-use baseline` 级别达到 `Completed`。除非另行授权，正式发布制品证据不属于本迭代范围。
 
 ## 剩余问题和交接
 
-完成后，将版本契约、支撑版本输入和原始纳入迭代记录移入 `docs/archives/v1.0.0/`，更新链接，将下一个项目级迭代编号保留为 `7`，并记录所有剩余问题以供后续获授权交付处理。Tag、里程碑、GitHub Release 或公开分发仍是独立决定。
+继续开展可独立审阅的 `1.0.0` 版本完成与归档任务。该任务把版本契约、支撑版本输入和原始纳入迭代记录移入 `docs/archives/v1.0.0/`，更新链接，将下一个项目级迭代编号保留为 `7`，并记录所有剩余问题以供后续获授权交付处理。Tag、里程碑、GitHub Release 或公开分发仍是独立决定。
