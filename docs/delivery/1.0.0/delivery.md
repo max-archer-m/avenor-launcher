@@ -1,6 +1,6 @@
 # Avenor Launcher 1.0.0 Delivery Contract
 
-> Semantic source: English. Chinese counterpart: [delivery-contract.zh-CN.md](delivery-contract.zh-CN.md).
+> Semantic source: English. Chinese counterpart: [delivery.zh-CN.md](delivery.zh-CN.md).
 >
 > This version-level contract integrates the approved [1.0.0 product scope](product-scope.md) and the evidence-limited [technical assessment](technical-assessment.md) under the project's [version, artifact, and release governance](../../release.md). It links the included iteration contracts rather than duplicating their delivery details.
 >
@@ -49,16 +49,16 @@ Candidate technical directions such as stable API 37 `compileSdk`, the exact JDK
 
 ## Included product-delivery iterations
 
-The preliminary delivery sequence contains six cumulative product increments:
+The completed delivery contains six cumulative product increments:
 
 | Iteration | Product increment | Primary completion evidence |
 | --- | --- | --- |
-| [Iteration 1](../../iterations/iteration-1-home-minimum-usable-surface.md) | Home minimum usable surface | Installable Home candidate with localized time/date behavior on the required foundation environments |
-| [Iteration 2](../../iterations/iteration-2-drawer-application-discovery-and-launch.md) | Drawer application discovery and launch | Home-to-Drawer entry, platform-exposed application list, recovery, and exact-entry launch |
-| [Iteration 3](../../iterations/iteration-3-drawer-navigation-and-live-state-completeness.md) | Drawer navigation and live-state completeness | Product-complete grouping, index, transition gestures, updates, and stable state |
-| [Iteration 4](../../iterations/iteration-4-application-action-sheet-and-favorite-creation.md) | Application action sheet and favorite creation | Modal application information and persistent add-to-Home behavior |
-| [Iteration 5](../../iterations/iteration-5-favorite-lifecycle-and-resilience.md) | Favorite lifecycle and resilience | Complete add, launch, restart, remove, reconciliation, and offline favorite loop |
-| [Iteration 6](../../iterations/iteration-6-compatibility-quality-and-formal-apk-closure.md) | Daily-use baseline closure | Primary-device core-journey acceptance, source/APK traceability, known-gap recording, and version archive evidence |
+| [Iteration 1](iteration-1-home-minimum-usable-surface.md) | Home minimum usable surface | Installable Home candidate with localized time/date behavior on the required foundation environments |
+| [Iteration 2](iteration-2-drawer-application-discovery-and-launch.md) | Drawer application discovery and launch | Home-to-Drawer entry, platform-exposed application list, recovery, and exact-entry launch |
+| [Iteration 3](iteration-3-drawer-navigation-and-live-state-completeness.md) | Drawer navigation and live-state completeness | Product-complete grouping, index, transition gestures, updates, and stable state |
+| [Iteration 4](iteration-4-application-action-sheet-and-favorite-creation.md) | Application action sheet and favorite creation | Modal application information and persistent add-to-Home behavior |
+| [Iteration 5](iteration-5-favorite-lifecycle-and-resilience.md) | Favorite lifecycle and resilience | Complete add, launch, restart, remove, reconciliation, and offline favorite loop |
+| [Iteration 6](iteration-6-compatibility-quality-and-formal-apk-closure.md) | Daily-use baseline closure | Primary-device core-journey acceptance, source/APK traceability, known-gap recording, and completed version evidence |
 
 Each linked record defines one observable product increment, its exclusions, technical change areas, dependencies, and validation plan. The sequence is cumulative: a later iteration preserves all accepted behavior from earlier iterations unless an authorized contract change says otherwise.
 
@@ -111,7 +111,7 @@ Record the device, OS/API, application identifiers, source commit, APK or build 
 
 API 31 and Pixel compatibility, complete automated tests and release lint, merged-manifest and resolved-dependency review, repeatable performance/memory/power distributions, absolute quality thresholds, baseline-profile evaluation, and qualified license conclusions remain valuable follow-up evidence. Missing results remain unknown. A discovered included-path failure on the designated primary device must still be resolved or explicitly change the product contract before completion.
 
-## Artifact, signing, and archive requirements
+## Artifact, signing, and completed-record requirements
 
 - The daily-use baseline is one installable APK with `applicationId` `com.avenor.launcher`, `versionName` `1.0.0`, and `versionCode` `1`.
 - Changing `applicationId` before the daily-use baseline is accepted replaces the planned identity only after author approval. Changing it after the baseline exists creates a distinct Android application identity and must not be represented as an ordinary in-place upgrade.
@@ -120,7 +120,7 @@ API 31 and Pixel compatibility, complete automated tests and release lint, merge
 - If the author retains the APK, keep it outside the product repository and record its logical location. External retention, SHA-256 calculation, and copying remain separately authorized actions rather than completion requirements.
 - This contract does not authorize copying, committing, uploading, or distributing the APK.
 
-After completion, move the integrated contract, supporting version inputs, and original iteration records into `docs/archives/v1.0.0/`, update affected links, and record the delivery level, identifiers, source commit, included iterations, important changes, migrations, primary-device evidence, limitations, available APK/build identity, retained logical location when one exists, and any separately approved tag or GitHub Release. Do not require or invent a release digest or certificate fingerprint for this level.
+The integrated delivery record, supporting version inputs, and original iteration records remain together in the stable `docs/delivery/1.0.0/` directory. This completed record contains the delivery level, identifiers, source commit, included iterations, important changes, primary-device evidence, limitations, and available APK/build identity. No retained artifact location, release digest, or certificate fingerprint was reported or required for this level.
 
 `1.0.0` does not require a tag, milestone declaration, GitHub Release, remote upload, store action, or public distribution.
 
@@ -134,14 +134,15 @@ Each remaining item records its affected environment and behavior, user impact, 
 
 ## Completion result
 
-`1.0.0` may be declared complete only when:
+`1.0.0` is complete at the `Author daily-use baseline` level.
 
-1. all six included iteration contracts have status `Completed` with traceable acceptance evidence;
-2. one installable APK with the required identifiers is traceable to the recorded source commit;
-3. the complete selected offline journey passes on the author-designated primary physical device without a known included-path blocker;
-4. all known limitations, skipped checks, compatibility gaps, and follow-up ownership are recorded without concealing a failed included requirement;
-5. the project author accepts the APK and observed result for ongoing daily use;
-6. the implementation and delivery documentation are committed and synchronized to the author-designated shared Git history; and
-7. the completed version and iteration records are moved into `docs/archives/v1.0.0/` with links updated.
+- All six included iterations are `Completed` with their evidence retained in this stable version directory.
+- The accepted APK uses `applicationId` `com.avenor.launcher`, `versionName` `1.0.0`, and `versionCode` `1`, and represents source commit `053b6b7da58a27a9c237d98c2e49f7a94e5b1d3e`.
+- The project author accepted the complete selected offline journey on a Samsung Galaxy S23 Ultra running Android 16/API 36 and reported no known core-path blocker.
+- The APK uses an author-local private signing identity. A later in-place update must use the same identity; update continuity cannot be assumed if that identity becomes unavailable.
+- The exact Gradle and installation commands, APK filename, digest, retained artifact location, and command output were not reported.
+- API 31 and Pixel compatibility, the complete automated matrix, performance distributions, merged-manifest and resolved-dependency review, qualified license conclusions, formal security and privacy review, release-signing custody and backup, and formal-release-artifact evidence remain unknown or unperformed follow-up rather than passed results.
+- The version boundary was declared because the complete minimum offline Home, Drawer, application launch, action-sheet, and persistent favorite journey was accepted for the author's ongoing daily use.
+- No tag, milestone, GitHub Release, upload, publication, or public distribution was created or required.
 
-Until those facts exist, this section defines closure evidence and does not claim that `1.0.0` has been installed, accepted as an author daily-use baseline, archived, or completed.
+The implementation and Iteration 6 closure record are committed in the single development history. The commit containing this completed delivery update synchronizes the version record; Git history is authoritative for that identifier.

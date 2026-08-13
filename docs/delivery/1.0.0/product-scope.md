@@ -192,11 +192,11 @@ A technical constraint may produce a documented product-scope proposal, but it d
 
 - `1.0.0` is `versionName` `1.0.0` with `versionCode` `1`.
 - A formal `1.0.0` exists only after its included iterations are completed and the exact APK is installable and verified under [release governance](../../release.md).
-- The completed version requires the applicable archive, artifact digest, signing fingerprint, source-commit identity, validation evidence, known limitations, and external artifact record required by release governance.
+- The completed version requires the applicable completed delivery record, artifact digest, signing fingerprint, source-commit identity, validation evidence, known limitations, and external artifact record required by release governance.
 - `1.0.0` does not require or authorize a Git tag.
 - `1.0.0` does not require or authorize a GitHub Release, remote artifact upload, store submission, or other public distribution.
 - This product-scope document does not authorize implementation, signing-key creation, artifact movement, committing, tagging, pushing, or release actions. Each action remains subject to the project's explicit authorization rules.
 
 ## Completion handoff
 
-This document supplies product input to the version technical assessment. After technical assessment is complete, the version `delivery-contract.md` may integrate the confirmed product scope, technical feasibility, iteration plan, risks, and exit evidence into the complete `1.0.0` delivery contract without duplicating the detailed current product specifications.
+This document supplies product input to the version technical assessment. After technical assessment is complete, the version `delivery.md` may integrate the confirmed product scope, technical feasibility, iteration plan, risks, and exit evidence into the complete `1.0.0` delivery contract without duplicating the detailed current product specifications.

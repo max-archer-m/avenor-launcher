@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-6-compatibility-quality-and-formal-apk-closure.zh-CN.md](iteration-6-compatibility-quality-and-formal-apk-closure.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration closes the `Author daily-use baseline`; it does not create a `Formal release artifact` or authorize signing, artifact movement, a tag, a release, or public distribution.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](delivery.md). This iteration closes the `Author daily-use baseline`; it does not create a `Formal release artifact` or authorize signing, artifact movement, a tag, a release, or public distribution.
 
 ## Status
 
@@ -16,11 +16,11 @@ Establish one installable and traceable `1.0.0` APK that the project author acce
 
 ## Product and version references
 
-- [1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md)
-- [1.0.0 product scope](../versions/1.0.0/product-scope.md)
-- [1.0.0 technical assessment](../versions/1.0.0/technical-assessment.md)
-- [Version, artifact, and release governance](../release.md)
-- [Iteration record format](iteration-record-format.md)
+- [1.0.0 delivery contract](delivery.md)
+- [1.0.0 product scope](product-scope.md)
+- [1.0.0 technical assessment](technical-assessment.md)
+- [Version, artifact, and release governance](../../release.md)
+- [Iteration record format](../../iterations/iteration-record-format.md)
 
 ## Observable outcome
 
@@ -34,7 +34,7 @@ One `1.0.0` APK installs on the author-designated primary physical device, compl
 - Record every unperformed automated, API 31, Pixel, performance, manifest, dependency, license, security, privacy, and release-artifact check as an explicit gap rather than a pass.
 - Record and disposition OEM limitations and contract mismatches through the applicable authority.
 - Record development-signing or author-controlled signing implications for update and reinstall behavior.
-- Prepare factual version archive records for the selected delivery level and update links only after all completion evidence exists.
+- Prepare the factual completed version record for the selected delivery level only after all completion evidence exists.
 
 ## Excluded work
 
@@ -48,7 +48,7 @@ One `1.0.0` APK installs on the author-designated primary physical device, compl
 
 - Primary-device defect correction and focused regression evidence for the selected journey.
 - APK identifiers, source traceability, installation evidence, and signing/reinstall limitations.
-- Version archive preparation and link migration.
+- Stable completed-version record preparation.
 
 This iteration does not introduce speculative architecture. A defect fix that reveals a consequential architecture choice follows the ADR process; a product behavior change returns to the product manager and project author.
 
@@ -56,7 +56,7 @@ This iteration does not introduce speculative architecture. A defect fix that re
 
 - Iterations 1 through 5 must be `Completed`, or the project author must explicitly change the dependency sequence, before this iteration changes from `Planned` to `In Progress`. Completion of their recommended scenarios is not required unless the version contract makes a scenario a formal-version gate.
 - Available build and install identity, the source commit, and the primary-device validation procedure are recorded as daily-use closing evidence. Missing recommended commands remain explicit gaps.
-- The project author separately authorizes optional signing identity creation, external artifact movement, and archive mutation when an action becomes ready.
+- The project author separately authorizes optional signing identity creation and external artifact movement when an action becomes ready.
 - Version completion follows only after every gate in the version contract is satisfied.
 
 ## Migration and compatibility impact
@@ -105,7 +105,7 @@ The exact Gradle build command, installation command, APK filename, digest, reta
 
 ## Related decisions, commits, and tags
 
-- Applicable architecture decisions: [ADR-0001](../decisions/0001-establish-replaceable-launcher-icon-rendering.md), [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md), and [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md). ADR status and exact scope remain authoritative in each linked record.
+- Applicable architecture decisions: [ADR-0001](../../decisions/0001-establish-replaceable-launcher-icon-rendering.md), [ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md), and [ADR-0003](../../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md). ADR status and exact scope remain authoritative in each linked record.
 - Accepted implementation baseline: `053b6b7da58a27a9c237d98c2e49f7a94e5b1d3e` (`perf(drawer): reduce application list rendering cost`).
 - Signing configuration commit: `97a38e6 build(signing): configure local release credentials`; private signing material remains outside Git.
 - Closure documentation: synchronized by the commit containing this status transition; Git history is authoritative for its identifier.
@@ -118,4 +118,4 @@ The project author accepted the `053b6b7` implementation baseline, the identifie
 
 ## Remaining issues and handoff
 
-Proceed with the separately reviewable `1.0.0` version-completion and archive task. That task moves the version contract, supporting version inputs, and original included iteration records into `docs/archives/v1.0.0/`, updates links, preserves the next project-wide iteration number as `7`, and records all remaining issues for later authorized delivery. A tag, milestone, GitHub Release, or public distribution remains a separate decision.
+The completed version record remains with this iteration and the other `1.0.0` delivery inputs under the stable `docs/delivery/1.0.0/` path. The next project-wide iteration number remains `7`, and all remaining issues stay recorded for later authorized delivery. A tag, milestone, GitHub Release, or public distribution remains a separate decision.

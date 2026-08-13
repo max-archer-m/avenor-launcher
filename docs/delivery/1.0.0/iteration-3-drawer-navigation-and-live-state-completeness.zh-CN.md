@@ -2,7 +2,7 @@
 
 > 英文语义源：[iteration-3-drawer-navigation-and-live-state-completeness.md](iteration-3-drawer-navigation-and-live-state-completeness.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](delivery.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
 
 ## 状态
 
@@ -16,11 +16,11 @@
 
 ## 产品和版本引用
 
-- [1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)
-- [1.0.0 产品范围](../versions/1.0.0/product-scope.zh-CN.md)
-- [产品导航](../product/navigation.zh-CN.md)
-- [Drawer 交互](../product/drawer.zh-CN.md)
-- [产品设计基础约束](../product/design-foundations.zh-CN.md)
+- [1.0.0 交付契约](delivery.zh-CN.md)
+- [1.0.0 产品范围](product-scope.zh-CN.md)
+- [产品导航](../../product/navigation.zh-CN.md)
+- [Drawer 交互](../../product/drawer.zh-CN.md)
+- [产品设计基础约束](../../product/design-foundations.zh-CN.md)
 
 ## 可观察结果
 
@@ -44,7 +44,7 @@
 - 收藏创建、持久化、Home 收藏启动、移除、调和或恢复。
 - Settings 齿轮行为，因为 Settings 排除在 `1.0.0` 外；不添加占位符。
 - 产品范围排除的 TalkBack 专用替代字母索引交互和更广设备适配。
-- 完整版本实测质量、release 签名、正式 APK、归档、tag 或分发操作。
+- 完整版本实测质量、release 签名、正式 APK、已完成版本记录、tag 或分发操作。
 
 ## 技术影响面
 
@@ -111,7 +111,7 @@
 ## 相关决定、commit 和 tag
 
 - 实现 commit：`e589653 feat(drawer): implement navigation and live updates` 交付可逆过渡、列表边界仲裁、本地化分组、字母索引、实时清单更新、位置保持和 Drawer 公共跑马灯基础。
-- [ADR-0001](../decisions/0001-establish-replaceable-launcher-icon-rendering.md) 记录 Drawer 与后续 Home 收藏共同采用的图标渲染边界。
+- [ADR-0001](../../decisions/0001-establish-replaceable-launcher-icon-rendering.md) 记录 Drawer 与后续 Home 收藏共同采用的图标渲染边界。
 - 作者在实现过程中报告已接受分阶段交付的迭代 3 手势、索引、分组与 Drawer 交互。准确命令、API 31 证据、Pixel 证据和完整建议矩阵仍为未知。
 - Tag：本迭代未授权也不要求 tag。
 

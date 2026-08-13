@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-4-application-action-sheet-and-favorite-creation.zh-CN.md](iteration-4-application-action-sheet-and-favorite-creation.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](delivery.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
 
 ## Status
 
@@ -16,13 +16,13 @@ Let the author long-press an application, use the included modal application act
 
 ## Product and version references
 
-- [1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md)
-- [1.0.0 product scope](../versions/1.0.0/product-scope.md)
-- [1.0.0 technical assessment](../versions/1.0.0/technical-assessment.md)
-- [Home interaction](../product/home.md)
-- [Drawer interaction](../product/drawer.md)
-- [Application action sheet](../product/app-action-sheet.md)
-- [Product design foundations](../product/design-foundations.md)
+- [1.0.0 delivery contract](delivery.md)
+- [1.0.0 product scope](product-scope.md)
+- [1.0.0 technical assessment](technical-assessment.md)
+- [Home interaction](../../product/home.md)
+- [Drawer interaction](../../product/drawer.md)
+- [Application action sheet](../../product/app-action-sheet.md)
+- [Product design foundations](../../product/design-foundations.md)
 
 ## Observable outcome
 
@@ -45,7 +45,7 @@ The author can long-press a Drawer entry, open the modal application action shee
 - Remove-favorite actions and complete favorite lifecycle assigned to Iteration 5.
 - Favorite reordering, reorder mode, platform application shortcuts, uninstall, disable, clone removal, Settings, or a user-visible third-party license surface.
 - The complete favorite-corruption recovery UI excluded from `1.0.0`.
-- Full-version compatibility, measured quality, signing, formal APK, archive, tag, or distribution actions.
+- Full-version compatibility, measured quality, signing, formal APK, completed-version recording, tag, or distribution actions.
 
 ## Technical change areas
 
@@ -113,7 +113,7 @@ No acceptance evidence exists merely because this contract is present.
 ## Related decisions, commits, and tags
 
 - Implementation commit: `1afb30c feat(favorites): add persistent favorite creation` delivered the modal action sheet, exact ordered identity schema, atomic add and deduplication, read states, Home presentation, and process reload foundation.
-- Active [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) records the implemented versioned `AtomicFile` persistence direction and the author's acceptance of its material technical trade-offs.
+- Active [ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md) records the implemented versioned `AtomicFile` persistence direction and the author's acceptance of its material technical trade-offs.
 - The clone/profile badge contract now uses a `12dp × 12dp` region aligned to the sheet bottom-right without an outward offset or active clipping.
 - The project author reported a successful Gradle build, correct persistence in tested daily scenarios, correct Samsung clone presentation, and correct long-press interaction. The exact Gradle command, build variant, environment, retained output, damaged-file injection, API 31, Pixel, merged-manifest, and full dependency/license evidence remain unknown.
 - Product decision: required before adding a user-visible notice surface or changing approved behavior.

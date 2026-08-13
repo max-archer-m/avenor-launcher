@@ -17,15 +17,18 @@ See the [project overview](overview.md) for confirmed intent, boundaries, and un
 - [Project overview](overview.md)
 - [Simplified Chinese project overview](overview.zh-CN.md)
 - [Documentation map and governance](docs/documentation.md)
+- [Development guide](docs/development.md)
+- [Validation guide](docs/validation.md)
 - [Product foundation requirements](docs/requirements/product-foundation.md)
 - [Version, artifact, and release governance](docs/release.md)
+- [1.0.0 completed delivery](docs/delivery/1.0.0/delivery.md)
 - [Version delivery documents](docs/versions/version-delivery-format.md)
 - [Iteration record format](docs/iterations/iteration-record-format.md)
 - [Agent instructions](AGENTS.md)
 - [Simplified Chinese agent instructions](AGENTS.zh-CN.md)
 - [License](LICENSE)
 
-Architecture, development, validation, security, and privacy documentation have not yet been established. Their planned locations and creation conditions are recorded in the [documentation map](docs/documentation.md).
+System architecture, security, and privacy documentation have not yet been established. Their planned locations and creation conditions are recorded in the [documentation map](docs/documentation.md). The development and validation guides record the current minimum project baseline.
 
 ## License
 

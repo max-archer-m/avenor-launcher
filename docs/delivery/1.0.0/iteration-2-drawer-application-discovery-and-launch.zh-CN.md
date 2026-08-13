@@ -2,7 +2,7 @@
 
 > 英文语义源：[iteration-2-drawer-application-discovery-and-launch.md](iteration-2-drawer-application-discovery-and-launch.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](delivery.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
 
 ## 状态
 
@@ -16,12 +16,12 @@
 
 ## 产品和版本引用
 
-- [1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)
-- [1.0.0 产品范围](../versions/1.0.0/product-scope.zh-CN.md)
-- [1.0.0 技术评估](../versions/1.0.0/technical-assessment.zh-CN.md)
-- [产品导航](../product/navigation.zh-CN.md)
-- [Drawer 交互](../product/drawer.zh-CN.md)
-- [产品设计基础约束](../product/design-foundations.zh-CN.md)
+- [1.0.0 交付契约](delivery.zh-CN.md)
+- [1.0.0 产品范围](product-scope.zh-CN.md)
+- [1.0.0 技术评估](technical-assessment.zh-CN.md)
+- [产品导航](../../product/navigation.zh-CN.md)
+- [Drawer 交互](../../product/drawer.zh-CN.md)
+- [产品设计基础约束](../../product/design-foundations.zh-CN.md)
 
 链接的产品文档继续作为权威来源。本迭代建立核心发现与启动路径；迭代 3 完成高级导航与实时状态行为。
 
@@ -34,7 +34,7 @@
 - 建立项目所有的可启动清单边界，以及 UI 状态使用的不可变快照。
 - 使用 Android 的 Launcher 感知平台边界获取清单并准确启动条目。
 - 将平台暴露的每个可启动 Activity 视为独立条目，避免仅按软件包名去重。
-- 在可用时呈现平台标签、图标和 badge，并提供安全的通用图标回退。图标呈现通过 [ADR-0001](../decisions/0001-establish-replaceable-launcher-icon-rendering.md) 定义的可替换边界：保留原生自适应行为，在设备 mask 内规范化旧式图标且不裁掉其可识别内容，并在规范化后添加资料或分身 badge。
+- 在可用时呈现平台标签、图标和 badge，并提供安全的通用图标回退。图标呈现通过 [ADR-0001](../../decisions/0001-establish-replaceable-launcher-icon-rendering.md) 定义的可替换边界：保留原生自适应行为，在设备 mask 内规范化旧式图标且不裁掉其可识别内容，并在规范化后添加资料或分身 badge。
 - 呈现稳定且足以支持核心发现的单列应用列表，采用产品规定的平台转写与 locale-aware 混合排序，作为迭代 3 完整行为的基础。
 - 实现相互区分的 Loading、Content 和 Error 状态。将完整读取为空或没有留下任何可用清单的失败视为 Error，并提供本地化手动 Retry。非当前资料的局部失败可以省略该资料，同时保留已有 Content，且不要求提供提示。
 - 实现基础二元状态切换：向上拖动达到与契约一致的 `120dp` 释放门槛后进入 Drawer，并通过 Back 返回，且不会意外激活应用。该临时入口路径不实现也不满足分配给迭代 3 的完整直接操纵过渡。
@@ -47,7 +47,7 @@
 - 分配给迭代 3 的连续拖动进度、包含甩动目标判定的完整释放决定、回弹、列表边界移交、指针仲裁、最终字母索引交互、完整章节锚点行为及实时更新位置保留。
 - 应用操作面板、应用信息、收藏、持久化、调和和 Home 收藏呈现。
 - Settings、排序、快捷操作、卸载、移除分身或其他任何排除在 `1.0.0` 外的操作。
-- 完整版本性能、签名、正式 APK、归档、tag 或分发操作。
+- 完整版本性能、签名、正式 APK、已完成版本记录、tag 或分发操作。
 
 ## 技术影响面
 
@@ -129,7 +129,7 @@
 
 ## 相关决定、commit 和 tag
 
-- 图标渲染 ADR：[ADR-0001：建立可替换的 Launcher 图标渲染边界](../decisions/0001-establish-replaceable-launcher-icon-rendering.md)。
+- 图标渲染 ADR：[ADR-0001：建立可替换的 Launcher 图标渲染边界](../../decisions/0001-establish-replaceable-launcher-icon-rendering.md)。
 - 身份或清单 ADR：仅在另一个已证明决定重大且持久时添加。
 - 验证治理 commit：`2db2e12`（`docs(project): clarify iteration validation policy`）。
 - 产品契约 commit：`4d40b6c`（`docs(product): refine Drawer inventory and presentation contracts`）。

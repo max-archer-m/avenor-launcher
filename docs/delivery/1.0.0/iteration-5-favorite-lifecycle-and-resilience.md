@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-5-favorite-lifecycle-and-resilience.zh-CN.md](iteration-5-favorite-lifecycle-and-resilience.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](delivery.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
 
 ## Status
 
@@ -16,12 +16,12 @@ Complete the `1.0.0` favorite lifecycle so the author can add, persist, launch, 
 
 ## Product and version references
 
-- [1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md)
-- [1.0.0 product scope](../versions/1.0.0/product-scope.md)
-- [Product navigation](../product/navigation.md)
-- [Home interaction](../product/home.md)
-- [Drawer interaction](../product/drawer.md)
-- [Application action sheet](../product/app-action-sheet.md)
+- [1.0.0 delivery contract](delivery.md)
+- [1.0.0 product scope](product-scope.md)
+- [Product navigation](../../product/navigation.md)
+- [Home interaction](../../product/home.md)
+- [Drawer interaction](../../product/drawer.md)
+- [Application action sheet](../../product/app-action-sheet.md)
 
 ## Observable outcome
 
@@ -46,7 +46,7 @@ The author can find and launch an exposed application, add it to Home, launch it
 - Favorite reorder mode, drag handles, position swapping, reorder haptics, and reorder auto-scroll.
 - Complete favorite-corruption repair, reset, export, backup, restore, or user-visible read-only recovery UI.
 - Platform application shortcuts, uninstall, disable, clone removal, Settings, manual language selection, or other excluded actions.
-- Full-version performance thresholds, release signing, formal APK, archive, tag, or distribution actions.
+- Full-version performance thresholds, release signing, formal APK, completed-version recording, tag, or distribution actions.
 
 ## Technical change areas
 
@@ -113,8 +113,8 @@ No acceptance evidence exists merely because this contract is present.
 ## Related decisions, commits, and tags
 
 - Implementation commit: `00bdb98 feat(favorites): complete lifecycle and resilient reconciliation` delivered Home exact-entry launch with rapid-activation suppression, Home and Drawer remove-favorite actions, mutation gating, shared inventory state, explicit favorite availability, profile-complete exact-identity reconciliation, retained disabled or unknown favorites, localized feedback, and shared Home/Drawer marquee coordination.
-- Active [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) records the implemented persistence boundary inherited from Iteration 4 and the author's acceptance of its material technical trade-offs.
-- Active [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) records the implemented profile-level snapshot completeness and conservative exact-identity reconciliation direction and the author's acceptance of its material technical trade-offs.
+- Active [ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md) records the implemented persistence boundary inherited from Iteration 4 and the author's acceptance of its material technical trade-offs.
+- Active [ADR-0003](../../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) records the implemented profile-level snapshot completeness and conservative exact-identity reconciliation direction and the author's acceptance of its material technical trade-offs.
 - Focused test source covers availability presentation, exact identity/profile independence, non-destructive partial reads, favorite-store mutations and damaged-file protection, action-sheet mutation states, and marquee priority. These tests have not been run by an agent in this change.
 - The project author reported a successful Gradle build for the implementation under review and considers its functional result acceptable for continuing delivery. The exact Gradle command, build variant, environment, procedure, and retained output were not reported.
 - Product decision: required for any behavior or acceptance change.

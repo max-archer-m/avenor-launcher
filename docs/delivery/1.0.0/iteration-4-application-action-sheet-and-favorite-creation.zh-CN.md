@@ -2,7 +2,7 @@
 
 > 英文语义源：[iteration-4-application-action-sheet-and-favorite-creation.md](iteration-4-application-action-sheet-and-favorite-creation.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](delivery.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
 
 ## 状态
 
@@ -16,13 +16,13 @@
 
 ## 产品和版本引用
 
-- [1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)
-- [1.0.0 产品范围](../versions/1.0.0/product-scope.zh-CN.md)
-- [1.0.0 技术评估](../versions/1.0.0/technical-assessment.zh-CN.md)
-- [Home 交互](../product/home.zh-CN.md)
-- [Drawer 交互](../product/drawer.zh-CN.md)
-- [应用操作面板](../product/app-action-sheet.zh-CN.md)
-- [产品设计基础约束](../product/design-foundations.zh-CN.md)
+- [1.0.0 交付契约](delivery.zh-CN.md)
+- [1.0.0 产品范围](product-scope.zh-CN.md)
+- [1.0.0 技术评估](technical-assessment.zh-CN.md)
+- [Home 交互](../../product/home.zh-CN.md)
+- [Drawer 交互](../../product/drawer.zh-CN.md)
+- [应用操作面板](../../product/app-action-sheet.zh-CN.md)
+- [产品设计基础约束](../../product/design-foundations.zh-CN.md)
 
 ## 可观察结果
 
@@ -45,7 +45,7 @@
 - 分配给迭代 5 的移除收藏操作和完整收藏生命周期。
 - 收藏排序、排序模式、平台应用快捷操作、卸载、禁用、移除分身、Settings 或面向用户的第三方许可证界面。
 - 排除在 `1.0.0` 外的完整收藏损坏恢复 UI。
-- 完整版本兼容性、实测质量、签名、正式 APK、归档、tag 或分发操作。
+- 完整版本兼容性、实测质量、签名、正式 APK、已完成版本记录、tag 或分发操作。
 
 ## 技术影响面
 
@@ -113,7 +113,7 @@ Proto DataStore 是候选方向，不是预先批准的结果。本迭代选择�
 ## 相关决定、commit 和 tag
 
 - 实现 commit：`1afb30c feat(favorites): add persistent favorite creation` 交付模态操作面板、准确有序身份 schema、原子添加与去重、读取状态、Home 呈现和进程重新加载基础。
-- Active [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) 记录已实现的版本化 `AtomicFile` 持久化方向，以及作者对其重要技术取舍的接受。
+- Active [ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md) 记录已实现的版本化 `AtomicFile` 持久化方向，以及作者对其重要技术取舍的接受。
 - 分身/profile badge 契约现使用对齐面板右下角的 `12dp × 12dp` 区域，不设置向外偏移，也不主动裁切。
 - 项目作者报告 Gradle 构建成功、已测试日常场景中的持久化正确、三星分身呈现正确且长按交互正确。准确的 Gradle 命令、构建变体、环境、保留输出、损坏文件注入、API 31、Pixel、合并 Manifest 和完整依赖/许可证证据仍为未知。
 - 产品决定：添加面向用户的 notice 界面或改变已批准行为前必须作出。

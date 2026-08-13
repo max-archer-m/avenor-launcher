@@ -2,7 +2,7 @@
 
 > 英文语义源：[iteration-6-compatibility-quality-and-formal-apk-closure.md](iteration-6-compatibility-quality-and-formal-apk-closure.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，关闭 `Author daily-use baseline`；它不创建 `Formal release artifact`，也不授权签名、产物移动、tag、发布或公开分发。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](delivery.zh-CN.md)，关闭 `Author daily-use baseline`；它不创建 `Formal release artifact`，也不授权签名、产物移动、tag、发布或公开分发。
 
 ## 状态
 
@@ -16,11 +16,11 @@
 
 ## 产品和版本引用
 
-- [1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)
-- [1.0.0 产品范围](../versions/1.0.0/product-scope.zh-CN.md)
-- [1.0.0 技术评估](../versions/1.0.0/technical-assessment.zh-CN.md)
-- [版本、产物与发布治理](../release.zh-CN.md)
-- [迭代记录格式](iteration-record-format.zh-CN.md)
+- [1.0.0 交付契约](delivery.zh-CN.md)
+- [1.0.0 产品范围](product-scope.zh-CN.md)
+- [1.0.0 技术评估](technical-assessment.zh-CN.md)
+- [版本、产物与发布治理](../../release.zh-CN.md)
+- [迭代记录格式](../../iterations/iteration-record-format.zh-CN.md)
 
 ## 可观察结果
 
@@ -34,7 +34,7 @@
 - 将每项未执行的自动化、API 31、Pixel、性能、Manifest、依赖、许可证、安全、隐私和发布制品检查记录为明确缺口，而不是通过。
 - 通过适用决定权记录和处置 OEM 限制与契约不匹配。
 - 记录开发签名或作者控制签名对更新和重新安装行为的影响。
-- 只有全部完成证据存在后，才按所选交付级别准备事实性版本归档记录并更新链接。
+- 只有全部完成证据存在后，才按所选交付级别准备事实性的已完成版本记录。
 
 ## 排除工作
 
@@ -48,7 +48,7 @@
 
 - 所选路径的主要设备缺陷修复和聚焦回归证据。
 - APK 标识、源码可追踪性、安装证据和签名/重新安装限制。
-- 版本归档准备和链接迁移。
+- 稳定的已完成版本记录准备。
 
 本迭代不引入推测性架构。暴露重大架构选择的缺陷修复遵循 ADR 流程；产品行为变更返回产品经理和项目作者处理。
 
@@ -56,7 +56,7 @@
 
 - 迭代 1 至 5 必须为 `Completed`，或由项目作者明确改变依赖顺序，本迭代才能从 `Planned` 变为 `In Progress`。除非版本契约将某一场景规定为正式版本门禁，否则不要求先完成这些迭代的全部建议场景。
 - 将可用构建和安装身份、源码 commit 与主要设备验证步骤记录为日常使用收尾证据。缺失的建议命令继续作为明确缺口。
-- 可选签名身份创建、外部产物移动和归档变更分别就绪时，项目作者分别作出授权。
+- 可选签名身份创建和外部产物移动分别就绪时，项目作者分别作出授权。
 - 只有满足版本契约中的每个门禁后，才完成版本。
 
 ## 迁移和兼容性影响
@@ -105,7 +105,7 @@
 
 ## 相关决定、commit 和 tag
 
-- 适用架构决定：[ADR-0001](../decisions/0001-establish-replaceable-launcher-icon-rendering.md)、[ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md)和 [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md)。各链接记录中的 ADR 状态与准确范围保持权威。
+- 适用架构决定：[ADR-0001](../../decisions/0001-establish-replaceable-launcher-icon-rendering.md)、[ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md)和 [ADR-0003](../../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md)。各链接记录中的 ADR 状态与准确范围保持权威。
 - 已验收实现基线：`053b6b7da58a27a9c237d98c2e49f7a94e5b1d3e`（`perf(drawer): reduce application list rendering cost`）。
 - 签名配置 commit：`97a38e6 build(signing): configure local release credentials`；私有签名材料保持在 Git 之外。
 - 收尾文档：由包含本状态转换的 commit 同步；其标识以 Git 历史为准。
@@ -118,4 +118,4 @@
 
 ## 剩余问题和交接
 
-继续开展可独立审阅的 `1.0.0` 版本完成与归档任务。该任务把版本契约、支撑版本输入和原始纳入迭代记录移入 `docs/archives/v1.0.0/`，更新链接，将下一个项目级迭代编号保留为 `7`，并记录所有剩余问题以供后续获授权交付处理。Tag、里程碑、GitHub Release 或公开分发仍是独立决定。
+已完成版本记录与本迭代及其他 `1.0.0` 交付输入继续保留在稳定的 `docs/delivery/1.0.0/` 路径下。下一个项目级迭代编号保持为 `7`，所有剩余问题继续记录以供后续获授权交付处理。Tag、里程碑、GitHub Release 或公开分发仍是独立决定。

@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-1-home-minimum-usable-surface.zh-CN.md](iteration-1-home-minimum-usable-surface.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](delivery.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
 
 ## Status
 
@@ -16,12 +16,12 @@ Deliver an installable Avenor build that Android can recognize as a Home applica
 
 ## Product and version references
 
-- [1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md)
-- [1.0.0 product scope](../versions/1.0.0/product-scope.md)
-- [1.0.0 technical assessment](../versions/1.0.0/technical-assessment.md)
-- [Product navigation](../product/navigation.md)
-- [Home interaction](../product/home.md)
-- [Product design foundations](../product/design-foundations.md)
+- [1.0.0 delivery contract](delivery.md)
+- [1.0.0 product scope](product-scope.md)
+- [1.0.0 technical assessment](technical-assessment.md)
+- [Product navigation](../../product/navigation.md)
+- [Home interaction](../../product/home.md)
+- [Product design foundations](../../product/design-foundations.md)
 
 The linked product documents remain authoritative for detailed behavior. This iteration selects only the Home behavior listed below.
 
@@ -50,7 +50,7 @@ The author can install and directly open Avenor, Android recognizes it as an ava
 - Drawer content, Home-to-Drawer interaction, application inventory, application launching, alphabet index, and live application updates.
 - Favorite display, creation, persistence, launch, removal, reconciliation, reorder, or recovery behavior.
 - Application action sheet and Settings.
-- Full-version compatibility, performance thresholds, release signing, formal APK creation, artifact movement, archive, tag, or release actions.
+- Full-version compatibility, performance thresholds, release signing, formal APK creation, artifact movement, completed-version recording, tag, or release actions.
 - Any user-visible behavior outside the approved `1.0.0` product scope.
 
 ## Technical change areas

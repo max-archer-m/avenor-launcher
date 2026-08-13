@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-2-drawer-application-discovery-and-launch.zh-CN.md](iteration-2-drawer-application-discovery-and-launch.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](delivery.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
 
 ## Status
 
@@ -16,12 +16,12 @@ Extend the accepted Home increment so the author can enter Drawer, see the launc
 
 ## Product and version references
 
-- [1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md)
-- [1.0.0 product scope](../versions/1.0.0/product-scope.md)
-- [1.0.0 technical assessment](../versions/1.0.0/technical-assessment.md)
-- [Product navigation](../product/navigation.md)
-- [Drawer interaction](../product/drawer.md)
-- [Product design foundations](../product/design-foundations.md)
+- [1.0.0 delivery contract](delivery.md)
+- [1.0.0 product scope](product-scope.md)
+- [1.0.0 technical assessment](technical-assessment.md)
+- [Product navigation](../../product/navigation.md)
+- [Drawer interaction](../../product/drawer.md)
+- [Product design foundations](../../product/design-foundations.md)
 
 The linked product documents remain authoritative. This iteration establishes the core discovery and launch path; Iteration 3 completes the advanced navigation and live-state behavior.
 
@@ -34,7 +34,7 @@ Starting from the accepted Home build, the author can use the approved upward in
 - Establish the project-owned launchable inventory boundary and immutable snapshot used by UI state.
 - Use Android's launcher-aware platform boundary for inventory and exact-entry launch.
 - Treat each platform-exposed launchable activity as an independent entry and avoid package-name-only deduplication.
-- Present platform labels, icons, and badges when available, with safe generic-icon fallback. Route icon presentation through the replaceable boundary defined by [ADR-0001](../decisions/0001-establish-replaceable-launcher-icon-rendering.md): preserve native adaptive behavior, normalize legacy artwork inside the device mask without cropping its identifying content, and apply profile or clone badging after normalization.
+- Present platform labels, icons, and badges when available, with safe generic-icon fallback. Route icon presentation through the replaceable boundary defined by [ADR-0001](../../decisions/0001-establish-replaceable-launcher-icon-rendering.md): preserve native adaptive behavior, normalize legacy artwork inside the device mask without cropping its identifying content, and apply profile or clone badging after normalization.
 - Present a stable single-column application list sufficient for core discovery, using the product-defined platform transliteration and locale-aware mixed ordering as the foundation completed by Iteration 3.
 - Implement distinct Loading, Content, and Error states. Treat an empty complete read or a failure that leaves no usable inventory as Error and provide localized manual Retry. An isolated non-current-profile failure may omit that profile while preserving available Content without a required warning.
 - Implement a basic binary state transition that enters Drawer after the upward drag reaches the contract-aligned `120dp` release gate and returns through Back without accidental application activation. This interim entry path does not implement or satisfy the complete direct-manipulation transition assigned to Iteration 3.
@@ -47,7 +47,7 @@ Starting from the accepted Home build, the author can use the approved upward in
 - Continuous drag progress, the complete release decision including fling targeting, rebound, list-boundary transfer, pointer arbitration, final alphabet-index interaction, complete section-anchor behavior, and live-update position preservation assigned to Iteration 3.
 - Application action sheet, application information, favorites, persistence, reconciliation, and Home favorite presentation.
 - Settings, reorder, shortcuts, uninstall, clone removal, or any other excluded `1.0.0` action.
-- Full-version performance, signing, formal APK, archive, tag, or distribution actions.
+- Full-version performance, signing, formal APK, completed-version recording, tag, or distribution actions.
 
 ## Technical change areas
 
@@ -129,7 +129,7 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Related decisions, commits, and tags
 
-- Icon rendering ADR: [ADR-0001: Establish a Replaceable Launcher Icon Rendering Boundary](../decisions/0001-establish-replaceable-launcher-icon-rendering.md).
+- Icon rendering ADR: [ADR-0001: Establish a Replaceable Launcher Icon Rendering Boundary](../../decisions/0001-establish-replaceable-launcher-icon-rendering.md).
 - Identity or inventory ADR: add only if another proven decision is consequential and durable.
 - Validation-governance commit: `2db2e12` (`docs(project): clarify iteration validation policy`).
 - Product-contract commit: `4d40b6c` (`docs(product): refine Drawer inventory and presentation contracts`).

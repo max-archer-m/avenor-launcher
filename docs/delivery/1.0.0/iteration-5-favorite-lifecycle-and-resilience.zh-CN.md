@@ -2,7 +2,7 @@
 
 > 英文语义源：[iteration-5-favorite-lifecycle-and-resilience.md](iteration-5-favorite-lifecycle-and-resilience.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](delivery.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
 
 ## 状态
 
@@ -16,12 +16,12 @@
 
 ## 产品和版本引用
 
-- [1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)
-- [1.0.0 产品范围](../versions/1.0.0/product-scope.zh-CN.md)
-- [产品导航](../product/navigation.zh-CN.md)
-- [Home 交互](../product/home.zh-CN.md)
-- [Drawer 交互](../product/drawer.zh-CN.md)
-- [应用操作面板](../product/app-action-sheet.zh-CN.md)
+- [1.0.0 交付契约](delivery.zh-CN.md)
+- [1.0.0 产品范围](product-scope.zh-CN.md)
+- [产品导航](../../product/navigation.zh-CN.md)
+- [Home 交互](../../product/home.zh-CN.md)
+- [Drawer 交互](../../product/drawer.zh-CN.md)
+- [应用操作面板](../../product/app-action-sheet.zh-CN.md)
 
 ## 可观察结果
 
@@ -46,7 +46,7 @@
 - 收藏排序模式、拖动把手、位置交换、排序触觉反馈和排序自动滚动。
 - 完整收藏损坏修复、重置、导出、备份、恢复或面向用户的只读恢复 UI。
 - 平台应用快捷操作、卸载、禁用、移除分身、Settings、手动语言选择或其他排除操作。
-- 完整版本性能阈值、release 签名、正式 APK、归档、tag 或分发操作。
+- 完整版本性能阈值、release 签名、正式 APK、已完成版本记录、tag 或分发操作。
 
 ## 技术影响面
 
@@ -113,8 +113,8 @@
 ## 相关决定、commit 和 tag
 
 - 实现 commit：`00bdb98 feat(favorites): complete lifecycle and resilient reconciliation` 交付 Home 准确条目启动与快速重复抑制、Home 和 Drawer 取消收藏、变更门控、共享清单状态、明确收藏可用性、profile 完整的准确身份调和、禁用或未知收藏保留、本地化反馈以及 Home/Drawer 公共跑马灯协调。
-- Active [ADR-0002](../decisions/0002-use-versioned-atomic-file-for-favorites.md) 记录从迭代 4 延续的已实现持久化边界，以及作者对其重要技术取舍的接受。
-- Active [ADR-0003](../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) 记录已实现的 profile 级快照完整性与保守准确身份调和方向，以及作者对其重要技术取舍的接受。
+- Active [ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md) 记录从迭代 4 延续的已实现持久化边界，以及作者对其重要技术取舍的接受。
+- Active [ADR-0003](../../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) 记录已实现的 profile 级快照完整性与保守准确身份调和方向，以及作者对其重要技术取舍的接受。
 - 聚焦测试源码覆盖可用性呈现、准确身份/profile 独立性、非破坏性局部读取、收藏存储变更与损坏文件保护、操作面板变更状态和跑马灯优先级。本次变更中 agent 未运行这些测试。
 - 项目作者报告当前受审实现的 Gradle 构建成功，并认为其功能结果可接受、可以继续交付。准确的 Gradle 命令、构建变体、环境、步骤和保留输出未报告。
 - 产品决定：任何行为或验收变更都必须作出。

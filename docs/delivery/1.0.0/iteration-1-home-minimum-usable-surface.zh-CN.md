@@ -2,7 +2,7 @@
 
 > 英文语义源：[iteration-1-home-minimum-usable-surface.md](iteration-1-home-minimum-usable-surface.md)。
 >
-> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
+> 本迭代适用于 [Avenor Launcher 1.0.0 交付契约](delivery.zh-CN.md)，定义一个产品增量及其证据。状态记录当前生命周期结果；本文不独立授权新的实现或批准候选架构。
 
 ## 状态
 
@@ -16,12 +16,12 @@
 
 ## 产品和版本引用
 
-- [1.0.0 交付契约](../versions/1.0.0/delivery-contract.zh-CN.md)
-- [1.0.0 产品范围](../versions/1.0.0/product-scope.zh-CN.md)
-- [1.0.0 技术评估](../versions/1.0.0/technical-assessment.zh-CN.md)
-- [产品导航](../product/navigation.zh-CN.md)
-- [Home 交互](../product/home.zh-CN.md)
-- [产品设计基础约束](../product/design-foundations.zh-CN.md)
+- [1.0.0 交付契约](delivery.zh-CN.md)
+- [1.0.0 产品范围](product-scope.zh-CN.md)
+- [1.0.0 技术评估](technical-assessment.zh-CN.md)
+- [产品导航](../../product/navigation.zh-CN.md)
+- [Home 交互](../../product/home.zh-CN.md)
+- [产品设计基础约束](../../product/design-foundations.zh-CN.md)
 
 链接的产品文档继续作为详细行为的权威来源。本迭代只选择下列 Home 行为。
 
@@ -50,7 +50,7 @@
 - Drawer 内容、Home-to-Drawer 交互、应用清单、应用启动、字母索引和实时应用更新。
 - 收藏显示、创建、持久化、启动、移除、调和、排序或恢复行为。
 - 应用操作面板和 Settings。
-- 完整版本兼容性、性能阈值、release 签名、正式 APK 创建、产物移动、归档、tag 或发布操作。
+- 完整版本兼容性、性能阈值、release 签名、正式 APK 创建、产物移动、已完成版本记录、tag 或发布操作。
 - 已批准 `1.0.0` 产品范围以外的任何面向用户行为。
 
 ## 技术影响面

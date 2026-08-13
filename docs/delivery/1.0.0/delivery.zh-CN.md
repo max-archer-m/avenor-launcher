@@ -1,6 +1,6 @@
 # Avenor Launcher 1.0.0 交付契约
 
-> 英文语义源：[delivery-contract.md](delivery-contract.md)。
+> 英文语义源：[delivery.md](delivery.md)。
 >
 > 本版本级契约依据项目的[版本、产物与发布治理](../../release.zh-CN.md)，整合已批准的 [1.0.0 产品范围](product-scope.zh-CN.md)和受证据限制的[技术评估](technical-assessment.zh-CN.md)。本文通过链接引用纳入的迭代契约，而不复制其交付细节。
 >
@@ -49,16 +49,16 @@
 
 ## 纳入的产品交付迭代
 
-初步交付序列包含六个累积产品增量：
+已完成交付包含六个累积产品增量：
 
 | 迭代 | 产品增量 | 主要完成证据 |
 | --- | --- | --- |
-| [迭代 1](../../iterations/iteration-1-home-minimum-usable-surface.zh-CN.md) | Home 最低可用界面 | 可安装的 Home 候选，以及必需基础环境中的本地化时间/日期行为 |
-| [迭代 2](../../iterations/iteration-2-drawer-application-discovery-and-launch.zh-CN.md) | Drawer 应用发现与启动 | Home-to-Drawer 入口、平台暴露应用列表、恢复与准确条目启动 |
-| [迭代 3](../../iterations/iteration-3-drawer-navigation-and-live-state-completeness.zh-CN.md) | Drawer 导航与实时状态完整性 | 产品完整的分组、索引、过渡手势、更新与稳定状态 |
-| [迭代 4](../../iterations/iteration-4-application-action-sheet-and-favorite-creation.zh-CN.md) | 应用操作面板与创建收藏 | 模态应用信息和持久化添加到 Home 行为 |
-| [迭代 5](../../iterations/iteration-5-favorite-lifecycle-and-resilience.zh-CN.md) | 收藏生命周期与韧性 | 完整添加、启动、重启、移除、调和与离线收藏闭环 |
-| [迭代 6](../../iterations/iteration-6-compatibility-quality-and-formal-apk-closure.zh-CN.md) | 日常使用基线收尾 | 主要设备核心路径验收、源码/APK 可追踪性、已知缺口记录和版本归档证据 |
+| [迭代 1](iteration-1-home-minimum-usable-surface.zh-CN.md) | Home 最低可用界面 | 可安装的 Home 候选，以及必需基础环境中的本地化时间/日期行为 |
+| [迭代 2](iteration-2-drawer-application-discovery-and-launch.zh-CN.md) | Drawer 应用发现与启动 | Home-to-Drawer 入口、平台暴露应用列表、恢复与准确条目启动 |
+| [迭代 3](iteration-3-drawer-navigation-and-live-state-completeness.zh-CN.md) | Drawer 导航与实时状态完整性 | 产品完整的分组、索引、过渡手势、更新与稳定状态 |
+| [迭代 4](iteration-4-application-action-sheet-and-favorite-creation.zh-CN.md) | 应用操作面板与创建收藏 | 模态应用信息和持久化添加到 Home 行为 |
+| [迭代 5](iteration-5-favorite-lifecycle-and-resilience.zh-CN.md) | 收藏生命周期与韧性 | 完整添加、启动、重启、移除、调和与离线收藏闭环 |
+| [迭代 6](iteration-6-compatibility-quality-and-formal-apk-closure.zh-CN.md) | 日常使用基线收尾 | 主要设备核心路径验收、源码/APK 可追踪性、已知缺口记录和已完成版本证据 |
 
 每个链接记录定义一个可观察产品增量、排除项、技术影响面、依赖和验证计划。序列是累积的：后续迭代保留前序迭代已验收行为，除非获授权契约变更另有规定。
 
@@ -111,7 +111,7 @@
 
 API 31 和 Pixel 兼容性、完整自动化测试和 release lint、merged manifest 与已解析依赖审查、可重复性能/内存/功耗分布、绝对质量阈值、baseline profile 评估和合格许可证结论继续作为有价值的后续证据。缺失结果保持未知。在指定主要设备上发现的纳入路径失败仍须解决，或在完成前明确修改产品契约。
 
-## 产物、签名和归档要求
+## 产物、签名和已完成记录要求
 
 - 日常使用基线是一个可安装、`applicationId` 为 `com.avenor.launcher`、`versionName` 为 `1.0.0` 且 `versionCode` 为 `1` 的 APK。
 - 日常使用基线获验收前修改 `applicationId`，只在作者批准后替换计划身份；基线存在后修改它会形成不同的 Android 应用身份，不得表述为普通的原位升级。
@@ -120,7 +120,7 @@ API 31 和 Pixel 兼容性、完整自动化测试和 release lint、merged mani
 - 如果作者保留 APK，应将其放在产品仓库之外并记录逻辑位置。外部保留、SHA-256 计算和复制仍属于需要单独授权的操作，不是完成要求。
 - 本契约不授权复制、提交、上传或分发 APK。
 
-完成后，将整合契约、支撑版本输入和原始迭代记录移入 `docs/archives/v1.0.0/`，更新受影响链接，并记录交付级别、标识、源码 commit、纳入迭代、重要变更、迁移、主要设备证据、限制、可用 APK/构建身份、存在时的保留逻辑位置，以及任何另行获批 tag 或 GitHub Release。本级别不要求或编造发布摘要或证书指纹。
+整合交付记录、支撑版本输入和原始迭代记录继续统一保留在稳定的 `docs/delivery/1.0.0/` 目录中。该已完成记录包含交付级别、标识、源码 commit、纳入迭代、重要变更、主要设备证据、限制和可用 APK/构建身份。本级别未报告也不要求保留产物位置、发布摘要或证书指纹。
 
 `1.0.0` 不要求 tag、里程碑声明、GitHub Release、远程上传、应用商店操作或公开分发。
 
@@ -134,14 +134,15 @@ API 31 和 Pixel 兼容性、完整自动化测试和 release lint、merged mani
 
 ## 完成结果
 
-只有满足以下条件时，才能宣告 `1.0.0` 完成：
+`1.0.0` 已达到 `Author daily-use baseline` 级别并完成。
 
-1. 六个纳入迭代契约的状态均为 `Completed`，并具有可追踪验收证据；
-2. 一个具有必需标识的可安装 APK 可追踪到记录的源码 commit；
-3. 完整所选离线路径在作者指定的主要物理设备上通过，且不存在已知纳入路径阻塞；
-4. 所有已知限制、跳过检查、兼容性缺口和后续归属都已记录，且不掩盖纳入要求失败；
-5. 项目作者接受该 APK 和观察结果用于持续日常使用；
-6. 实现和交付文档已经 commit 并同步到作者指定的共享 Git 历史；
-7. 已完成版本与迭代记录移入 `docs/archives/v1.0.0/`，且链接已更新。
+- 六个纳入迭代均为 `Completed`，其证据保留在该稳定版本目录中。
+- 已验收 APK 使用 `applicationId` `com.avenor.launcher`、`versionName` `1.0.0` 和 `versionCode` `1`，对应源码 commit `053b6b7da58a27a9c237d98c2e49f7a94e5b1d3e`。
+- 项目作者在 Android 16/API 36 的 Samsung Galaxy S23 Ultra 上验收完整所选离线路径，并报告不存在已知核心路径阻塞。
+- APK 使用作者本地私有签名身份。后续原位更新必须使用同一身份；如果该身份不可用，则不能假定更新连续性。
+- 准确 Gradle 与安装命令、APK 文件名、摘要、保留位置和命令输出未报告。
+- API 31 与 Pixel 兼容性、完整自动化矩阵、性能分布、merged manifest 与解析依赖审查、合格许可证结论、正式安全和隐私审查、release 签名保管与备份，以及正式发布制品证据继续属于未知或未执行的后续事项，而不是已通过结果。
+- 宣告该版本边界的原因是：完整最低离线 Home、Drawer、应用启动、操作面板和持久化收藏路径已获验收，可供作者持续日常使用。
+- 未创建也不要求 tag、里程碑、GitHub Release、上传、发布或公开分发。
 
-在这些事实存在前，本节定义关闭证据，不声明 `1.0.0` 已安装、已接受为作者日常使用基线、已归档或已完成。
+实现和迭代 6 收尾记录均已提交到单线开发历史；包含本次已完成交付更新的 commit 同步版本记录，其标识以 Git 历史为准。

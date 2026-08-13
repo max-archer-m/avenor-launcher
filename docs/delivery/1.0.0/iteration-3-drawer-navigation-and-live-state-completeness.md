@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [iteration-3-drawer-navigation-and-live-state-completeness.zh-CN.md](iteration-3-drawer-navigation-and-live-state-completeness.zh-CN.md).
 >
-> Applies to the [Avenor Launcher 1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
+> Applies to the [Avenor Launcher 1.0.0 delivery contract](delivery.md). This iteration contract defines one product increment and its evidence. Its status records the current lifecycle result; it does not independently authorize new implementation or approve candidate architecture.
 
 ## Status
 
@@ -16,11 +16,11 @@ Complete the `1.0.0` Drawer product behavior so application discovery remains fa
 
 ## Product and version references
 
-- [1.0.0 delivery contract](../versions/1.0.0/delivery-contract.md)
-- [1.0.0 product scope](../versions/1.0.0/product-scope.md)
-- [Product navigation](../product/navigation.md)
-- [Drawer interaction](../product/drawer.md)
-- [Product design foundations](../product/design-foundations.md)
+- [1.0.0 delivery contract](delivery.md)
+- [1.0.0 product scope](product-scope.md)
+- [Product navigation](../../product/navigation.md)
+- [Drawer interaction](../../product/drawer.md)
+- [Product design foundations](../../product/design-foundations.md)
 
 ## Observable outcome
 
@@ -44,7 +44,7 @@ The author can find an intended launchable entry through stable locale-aware gro
 - Favorite creation, persistence, Home favorite launch, removal, reconciliation, or recovery.
 - Settings gear behavior, because Settings is excluded from `1.0.0`; no placeholder is added.
 - TalkBack-specific alternate alphabet-index interaction and broader device adaptations excluded by the product scope.
-- Full-version measured quality, release signing, formal APK, archive, tag, or distribution actions.
+- Full-version measured quality, release signing, formal APK, completed-version recording, tag, or distribution actions.
 
 ## Technical change areas
 
@@ -111,7 +111,7 @@ No acceptance evidence exists merely because this contract is present.
 ## Related decisions, commits, and tags
 
 - Implementation commit: `e589653 feat(drawer): implement navigation and live updates` delivered the reversible transition, list-boundary arbitration, locale grouping, alphabet index, live inventory updates, position preservation, and shared Drawer marquee foundation.
-- [ADR-0001](../decisions/0001-establish-replaceable-launcher-icon-rendering.md) records the icon-rendering boundary used by Drawer and later Home favorites.
+- [ADR-0001](../../decisions/0001-establish-replaceable-launcher-icon-rendering.md) records the icon-rendering boundary used by Drawer and later Home favorites.
 - Author validation reported the staged Iteration 3 gesture, index, grouping, and Drawer interaction slices as accepted during implementation. Exact commands, API 31 evidence, Pixel evidence, and the complete recommended matrix remain unknown.
 - Tags: none authorized or required by this iteration.
 
