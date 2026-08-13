@@ -6,9 +6,9 @@
 
 ## Status
 
-- Value: `Planned`
-- Updated: 2026-08-10
-- Basis: The primary-device daily-use closure scope is defined, but its implementation, validation, and version-closing execution have not been authorized by this record.
+- Value: `In Progress`
+- Updated: 2026-08-13
+- Basis: Iteration 5 is complete, the remote signing configuration has been accepted by the project author, and the defined primary-device daily-use closure work is now in progress.
 
 ## Objective
 
@@ -113,7 +113,7 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Final result
 
-No final result exists while this iteration is `Planned`. It becomes `Completed` when the project author accepts one traceable APK and its observed primary-device journey for ongoing daily use, known gaps are recorded, and the implementation and documentation are committed and synchronized. Formal-release-artifact evidence remains outside this iteration unless separately authorized.
+No final `Completed` result exists while this iteration is `In Progress`. It becomes `Completed` when the project author accepts one traceable APK and its observed primary-device journey for ongoing daily use, known gaps are recorded, and the implementation and documentation are committed and synchronized. Formal-release-artifact evidence remains outside this iteration unless separately authorized.
 
 ## Remaining issues and handoff
 

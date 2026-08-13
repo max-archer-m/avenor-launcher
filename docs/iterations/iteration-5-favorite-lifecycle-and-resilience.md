@@ -6,9 +6,9 @@
 
 ## Status
 
-- Value: `In Progress`
-- Updated: 2026-08-12
-- Basis: The implementation and observable result have been accepted, but implementation commit `00bdb98` and the corresponding iteration evidence remain ahead of the shared `origin/main` history. Synchronization is still required before this iteration can become `Completed`.
+- Value: `Completed`
+- Updated: 2026-08-13
+- Basis: The implementation and observable result have been accepted, and implementation commit `00bdb98` with the corresponding iteration evidence is synchronized to the shared `origin/main` history.
 
 ## Objective
 
@@ -122,7 +122,7 @@ No acceptance evidence exists merely because this contract is present.
 
 ## Final result
 
-No final `Completed` result is recorded yet. The implementation and observable favorite-lifecycle result have been accepted, but the implementation and corresponding iteration evidence must be synchronized to the author-designated shared Git history before the status can change from `In Progress` to `Completed`. Unperformed checks are not passed, unresolved core behavior remains explicit, and the formal `1.0.0` gates are unchanged.
+The implementation and observable favorite-lifecycle result have been accepted, and the implementation and corresponding iteration evidence are synchronized to the author-designated shared Git history. Iteration 5 is `Completed`. Unperformed checks are not passed, unresolved core behavior remains explicit, and the formal `1.0.0` gates are unchanged.
 
 ## Remaining issues and handoff
 
