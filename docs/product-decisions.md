@@ -50,7 +50,7 @@ A version delivery contract should normally identify one primary product outcome
 
 ## Tags and releases
 
-A Git tag identifies an implementation snapshot. It is delivery evidence, not a product-scope level and not a substitute for a version-delivery record or version archive. The authoritative version, artifact, tag, GitHub Release, and milestone rules are defined in [`docs/release.md`](release.md).
+A Git tag identifies an implementation snapshot. It is delivery evidence, not a product-scope level and not a substitute for a version-delivery record or completed-version record. The authoritative version, artifact, tag, GitHub Release, and milestone rules are defined in [`docs/release.md`](release.md).
 
 - A formal application version may exist without a tag.
 - Tags are reserved for author-approved important and stable implementation baselines; they are not required for every formal version.

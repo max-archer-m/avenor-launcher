@@ -4,9 +4,7 @@
 
 ## Purpose and naming
 
-For versions created after `1.0.0`, each `docs/delivery/active/<version>/` directory contains that version's active iteration records beside `delivery.md`. Each iteration is a bounded, independently reviewable delivery unit that contributes to one formal version.
-
-The active `1.0.0` iterations predate this structure and remain under `docs/iterations/` until they move to the legacy `docs/archives/v1.0.0/` archive. Do not migrate them solely to adopt the new layout.
+Each `docs/delivery/<version>/` directory contains that version's iteration records beside `delivery.md` from planning through completion. Each iteration is a bounded, independently reviewable delivery unit that contributes to one formal version.
 
 Use `iteration-<number>-<title>.md`, with one project-wide, monotonically increasing positive-integer sequence beginning at `1`, for example `iteration-1-home-minimum-usable-surface.md`. Never renumber, reuse, or restart identifiers. Do not add leading zeroes. Use a concise lowercase English slug for `<title>`.
 
@@ -67,7 +65,7 @@ Avenor Launcher is currently maintained by its project author as a personal proj
 - `Status` is mandatory. `Value` must exactly match one enumeration value. `Updated` records the date of the latest status transition, not an ordinary content edit. `Basis` briefly states the evidence and author decision supporting the value; for `Completed`, identify the synchronized implementation and documentation history or link to where it is recorded. When synchronization uses something other than the normal shared Git branch, identify the author-designated shared history without adding machine-specific or secret information.
 - Content changes that do not transition status do not change the `Updated` date. Record material in-status scope adjustments in the relevant body section and Git history.
 - `Objective` states one coherent delivery result rather than a list of unrelated tasks.
-- `Product and version references` links the current product sources and the applicable sibling `delivery.md`. Legacy `1.0.0` records link to `docs/versions/1.0.0/delivery-contract.md`. It does not duplicate those documents.
+- `Product and version references` links the current product sources and the applicable sibling `delivery.md`. It does not duplicate those documents.
 - `Observable outcome` describes what can be demonstrated or verified when the iteration succeeds.
 - `Included work` and `Excluded work` make the iteration boundary explicit.
 - `Technical change areas` identifies affected behavior, components, interfaces, data, build, and validation surfaces at a durable level; Git remains authoritative for line-level changes.
@@ -76,4 +74,4 @@ Avenor Launcher is currently maintained by its project author as a personal proj
 - `Final result` records the observable outcome and the author decision supporting `Completed` or `Cancelled`; while `Planned` or `In Progress`, it states that no final result exists yet. `Remaining issues and handoff` records all known evidence gaps, follow-up owners, and downstream effects. Recommended validation does not block `Completed` when the rules above are satisfied, but the document must not claim that an unperformed check passed.
 - An iteration may recommend a product or technical decision but does not authorize one.
 
-When a post-`1.0.0` version completes, its iteration records move with the whole version directory from `docs/delivery/active/<version>/` to `docs/delivery/archives/<version>/`. Update inbound links. The identifier sequence remains project-wide; archiving `iteration-7-...` through `iteration-10-...`, for example, makes `11` the next available identifier. Legacy `1.0.0` follows its existing archive path.
+When a version completes, its iteration records remain in the stable `docs/delivery/<version>/` directory and retain the historical protection defined above. The identifier sequence remains project-wide; completing a version containing `iteration-7-...` through `iteration-10-...`, for example, makes `11` the next available identifier.

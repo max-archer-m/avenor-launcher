@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [release.zh-CN.md](release.zh-CN.md).
 >
-> This document is the authoritative operational contract for application versions, version archives, APK artifacts, signing continuity, Git tags, and GitHub Releases. It does not authorize a particular version, tag, GitHub Release, public distribution, or implementation scope.
+> This document is the authoritative operational contract for application versions, completed version records, APK artifacts, signing continuity, Git tags, and GitHub Releases. It does not authorize a particular version, tag, GitHub Release, public distribution, or implementation scope.
 
 ## Project version model
 
@@ -75,9 +75,9 @@ Pure documentation changes never change the application version. A source, resou
 
 Within one `MAJOR` family, any older formal version must have a supported direct upgrade path to any newer formal version. For a cross-major upgrade, the applicable major-version delivery contract must define supported source versions, migrations, validation, and limitations before release.
 
-## Iterations and version archives
+## Iterations and completed version records
 
-Each version created after `1.0.0` is planned under `docs/delivery/active/<version>/` and, after completion, is moved as one directory to `docs/delivery/archives/<version>/`. Its `delivery.md` records the selected delivery level and the evidence required by that level. The legacy `1.0.0` version remains under `docs/versions/1.0.0/` and archives to `docs/archives/v1.0.0/` without being migrated solely for structural consistency. Record the following when applicable:
+Each version uses one stable `docs/delivery/<version>/` directory from planning through completion. Its `delivery.md` records the selected delivery level, completion criteria, and factual result. Completing a version does not rename or move the directory; it makes the version and its completed iteration records protected delivery history. Record the following when applicable:
 
 - `versionName` and `versionCode`
 - The exact Git commit represented by the APK
@@ -91,7 +91,7 @@ Each version created after `1.0.0` is planned under `docs/delivery/active/<versi
 - Signing-certificate SHA-256 fingerprint when a stable signing identity is part of the selected level
 - Related Git tag and GitHub Release when either exists
 
-The archive must never contain a private signing key, keystore password, key password, or another signing secret.
+The completed version record must never contain a private signing key, keystore password, key password, or another signing secret.
 
 ## APK artifact contract
 
@@ -112,7 +112,7 @@ Every formal release artifact must use one stable release-signing identity so su
 - The project author creates or explicitly authorizes creation of the release keystore and retains ownership and final control of it.
 - The release keystore, private key, passwords, and signing-property files must remain outside Git and outside authoritative project documentation.
 - Agents may recommend or assist with generation, build integration, fingerprint verification, and signing verification only with explicit author authorization. The author selects and retains the secrets and backup locations.
-- Each formal version archive records only the release certificate's SHA-256 fingerprint, never private signing material.
+- Each applicable completed version record stores only the release certificate's SHA-256 fingerprint, never private signing material.
 - Before the first formal release artifact, the project must establish secure storage and at least two independent, encrypted, author-controlled backups of the release keystore and required recovery information.
 - Loss, compromise, rotation, or platform-managed migration of the signing identity requires explicit author approval, an impact assessment, and a documented migration decision before another formal version is declared.
 
@@ -122,14 +122,14 @@ A future decision to distribute through Google Play or another store must separa
 
 Application versions, Git tags, and GitHub Releases are separate records:
 
-- Every formal version is archived, but not every formal version receives a Git tag.
+- Every formal version retains a completed delivery record, but not every formal version receives a Git tag.
 - A tag is appropriate when accumulated related functionality or experience improvements establish an important, stable implementation baseline. For example, `1.0.0` may remain untagged while a later `1.3.0` becomes a tagged baseline.
 - Tag creation and the exact target commit require explicit project-author approval. Agents may recommend whether a version is worth tagging.
 - Tag naming remains to be decided before the first tag is created.
 - Creating a tag does not require creating a GitHub Release.
 - A GitHub Release must reference an existing approved tag and requires separate explicit author approval.
 - No GitHub Release is required while the project has no public distribution line. A future release may attach the verified APK only when the author explicitly approves that distribution action and its security and validation gates are satisfied.
-- Neither this document nor a version archive authorizes a tag, remote push, GitHub Release, or APK upload.
+- Neither this document nor a completed version record authorizes a tag, remote push, GitHub Release, or APK upload.
 
 For this project, a milestone exists only when the project author explicitly declares an important baseline and its approved Git tag exists. A GitHub Release is optional and requires separate approval when the author chooses outward-facing publication. A version or an approved tag not declared as a milestone is not a milestone automatically.
 

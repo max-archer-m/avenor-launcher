@@ -4,16 +4,16 @@
 
 ## Purpose
 
-For versions created after `1.0.0`, `docs/delivery/active/<version>/` contains one version delivery document and all of its iteration records. The directory selects work from the current product definition; it does not redefine the product or imply that every current product behavior will be delivered in that version.
+`docs/delivery/<version>/` contains one version delivery document and all of its iteration records from initial planning through completion. The directory selects work from the current product definition; it does not redefine the product or imply that every current product behavior will be delivered in that version.
 
-Use the exact `versionName` without a `v` prefix, for example `docs/delivery/active/1.1.0/`.
+Use the exact `versionName` without a `v` prefix, for example `docs/delivery/1.0.0/`. Do not append lifecycle suffixes such as `-active`, `-completed`, or `-archived`.
 
 ## Required structure
 
 Create the version document when real delivery inputs exist. Create iteration records only when their real planning inputs exist:
 
 ```text
-docs/delivery/active/<version>/
+docs/delivery/<version>/
 - delivery.md
 - delivery.zh-CN.md
 - iteration-<number>-<title>.md
@@ -49,13 +49,9 @@ docs/delivery/active/<version>/
 
 Remove a section only when it is genuinely inapplicable. Link detailed product behavior, validation methods, architecture, and release rules instead of copying them. `Delivery level` names one exact level and any explicitly promoted gate. Before completion, `Completion criteria` states the required evidence and `Completion result` states that no final result exists; after completion, `Completion result` records the factual outcome.
 
-## Version completion and archive
+## Version completion and historical protection
 
-After the version is completed, update `delivery.md` and move the whole directory from `docs/delivery/active/<version>/` to `docs/delivery/archives/<version>/`. Update inbound links during the move. A tag or GitHub Release is not required for version completion.
-
-## Legacy `1.0.0` exception
-
-The active `1.0.0` version predates this format. Its `product-scope.md`, `technical-assessment.md`, and `delivery-contract.md` remain under `docs/versions/1.0.0/`, and its iteration records remain under `docs/iterations/`. Do not migrate or rewrite them solely to adopt this format. When `1.0.0` completes, archive it under `docs/archives/v1.0.0/` according to its existing delivery document. All later versions use the unified structure above.
+After the version is completed, update `delivery.md` with the factual result and retain the same `docs/delivery/<version>/` path. The completed version document and its iteration records become protected delivery history: do not rewrite their scope, evidence, or result except to correct an identified factual or link error without changing historical meaning. A tag or GitHub Release is not required for version completion.
 
 ## Milestone boundary
 

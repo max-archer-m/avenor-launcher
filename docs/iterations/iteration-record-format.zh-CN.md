@@ -4,9 +4,7 @@
 
 ## 目的与命名
 
-对于 `1.0.0` 之后创建的版本，每个 `docs/delivery/active/<version>/` 目录在 `delivery.md` 同级保存该版本的活动迭代记录。每个迭代是边界明确、可独立评审并服务于一个正式版本的交付单元。
-
-活动版本 `1.0.0` 的迭代早于该结构，继续位于 `docs/iterations/`，直至移入旧结构 `docs/archives/v1.0.0/`。不得仅为采用新结构而迁移。
+每个 `docs/delivery/<version>/` 目录从规划到完成始终在 `delivery.md` 同级保存该版本的迭代记录。每个迭代是边界明确、可独立评审并服务于一个正式版本的交付单元。
 
 文件名使用 `iteration-<number>-<title>.md`，全项目采用从 `1` 开始、单调递增的正整数唯一序列，例如 `iteration-1-home-minimum-usable-surface.md`。不得重编号、复用或重启序列，也不添加前导零。`<title>` 使用简短的小写英文 slug。
 
@@ -67,7 +65,7 @@ Avenor Launcher 当前由项目作者作为个人项目维护。因此，迭代�
 - `状态` 为必填部分，`Value` 必须与枚举值之一完全一致。`Updated` 记录最近一次状态转换日期，而不是普通内容编辑日期。`Basis` 简要记录支持该状态的证据和作者决定；状态为 `Completed` 时，应标明已同步的实现和文档历史，或链接到相应记录。若同步目标不是常规共享 Git 分支，应标明作者指定的共享历史，但不得加入机器特定信息或秘密信息。
 - 不引起状态转换的内容修改不得改变 `Updated` 日期。状态内的实质范围小调整应记录在正文相关章节和 Git 历史中。
 - `Objective` 描述一个内聚交付结果，不是互不相关的任务清单。
-- `Product and version references` 链接当前产品来源及同目录的 `delivery.md`。旧结构 `1.0.0` 记录链接 `docs/versions/1.0.0/delivery-contract.md`。不得复制这些文档。
+- `Product and version references` 链接当前产品来源及同目录的 `delivery.md`，不得复制这些文档。
 - `Observable outcome` 描述迭代成功后可演示或验证的结果。
 - `Included work` 与 `Excluded work` 明确迭代边界。
 - `Technical change areas` 在持久层级标识受影响行为、组件、接口、数据、构建与验证表面；逐行变更仍以 Git 为准。
@@ -76,4 +74,4 @@ Avenor Launcher 当前由项目作者作为个人项目维护。因此，迭代�
 - `Final result` 记录可观察结果以及支持 `Completed` 或 `Cancelled` 的作者决定；处于 `Planned` 或 `In Progress` 时，应说明尚无最终结果。`Remaining issues and handoff` 记录全部已知证据缺口、后续责任人和下游影响。满足上述规则时，建议验证不阻塞 `Completed`，但文档不得宣称未执行检查已经通过。
 - 迭代可以建议产品或技术决定，但不授权该决定。
 
-`1.0.0` 之后的版本完成时，迭代记录随整个版本目录从 `docs/delivery/active/<version>/` 移至 `docs/delivery/archives/<version>/`，并更新入站链接。编号继续使用全项目序列；例如归档 `iteration-7-...` 至 `iteration-10-...` 后，下一个可用编号为 `11`。旧结构 `1.0.0` 继续使用现有归档路径。
+版本完成时，迭代记录继续保留在稳定的 `docs/delivery/<version>/` 目录中，并适用上述历史保护规则。编号继续使用全项目序列；例如完成包含 `iteration-7-...` 至 `iteration-10-...` 的版本后，下一个可用编号为 `11`。

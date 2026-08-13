@@ -50,7 +50,7 @@
 
 ## Tag 与发布
 
-Git tag 标识一个实现快照。它是交付证据，不是产品范围层级，也不代替版本交付记录或版本归档。权威版本、产物、tag、GitHub Release 与里程碑规则由 [`docs/release.md`](release.md) 定义。
+Git tag 标识一个实现快照。它是交付证据，不是产品范围层级，也不代替版本交付记录或已完成版本记录。权威版本、产物、tag、GitHub Release 与里程碑规则由 [`docs/release.md`](release.md) 定义。
 
 - 正式应用版本可在没有 tag 的情况下成立。
 - tag 只用于获得作者批准的重要、稳定实现基线，不要求每个正式版本都创建 tag。

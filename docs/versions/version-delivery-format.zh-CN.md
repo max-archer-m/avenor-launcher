@@ -4,16 +4,16 @@
 
 ## 目的
 
-对于 `1.0.0` 之后创建的版本，`docs/delivery/active/<version>/` 保存一份版本交付文档及其全部迭代记录。版本目录从当前产品定义中选择工作，不重定义产品，也不表示该版本必须交付当前产品的全部行为。
+`docs/delivery/<version>/` 从初始规划到完成始终保存一份版本交付文档及其全部迭代记录。版本目录从当前产品定义中选择工作，不重定义产品，也不表示该版本必须交付当前产品的全部行为。
 
-使用不带 `v` 前缀的准确 `versionName`，例如 `docs/delivery/active/1.1.0/`。
+使用不带 `v` 前缀的准确 `versionName`，例如 `docs/delivery/1.0.0/`。不得添加 `-active`、`-completed` 或 `-archived` 等生命周期后缀。
 
 ## 必需结构
 
 存在真实交付输入时创建版本文档；只有存在真实规划输入时才创建迭代记录：
 
 ```text
-docs/delivery/active/<version>/
+docs/delivery/<version>/
 - delivery.md
 - delivery.zh-CN.md
 - iteration-<number>-<title>.md
@@ -49,13 +49,9 @@ docs/delivery/active/<version>/
 
 只有确实不适用时才删除章节。详细产品行为、验证方法、架构和发布规则应链接其权威来源，不复制正文。`Delivery level` 标明一个准确级别及任何明确提升的门禁。完成前，`Completion criteria` 陈述所需证据，`Completion result` 说明尚无最终结果；完成后，`Completion result` 记录事实结果。
 
-## 版本完成与归档
+## 版本完成与历史保护
 
-版本完成后，更新 `delivery.md`，并将整个目录从 `docs/delivery/active/<version>/` 移至 `docs/delivery/archives/<version>/`。移动时更新入站链接。版本完成不要求 tag 或 GitHub Release。
-
-## 旧结构 `1.0.0` 例外
-
-活动版本 `1.0.0` 早于本格式。其 `product-scope.md`、`technical-assessment.md` 和 `delivery-contract.md` 继续位于 `docs/versions/1.0.0/`，迭代记录继续位于 `docs/iterations/`。不得仅为采用本格式而迁移或重写。`1.0.0` 完成后，按其现有交付文档归档至 `docs/archives/v1.0.0/`。后续版本全部使用上述统一结构。
+版本完成后，在 `delivery.md` 中更新事实结果，并保留同一个 `docs/delivery/<version>/` 路径。已完成版本文档及其迭代记录成为受保护的交付历史：除修正已识别的事实或链接错误且不改变历史含义外，不得改写其范围、证据或结果。版本完成不要求 tag 或 GitHub Release。
 
 ## 里程碑边界
 
