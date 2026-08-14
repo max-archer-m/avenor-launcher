@@ -1,6 +1,6 @@
 # Drawer 交互规格
 
-> 英文语义源：[drawer.md](drawer.md)。公共导航见 [navigation.zh-CN.md](navigation.zh-CN.md)。
+> 英文语义源：[drawer.md](drawer.md)。公共导航见 [navigation.zh-CN.md](navigation.zh-CN.md)，空间草图见共享的 [Drawer 线框](wireframes/drawer.txt)，阅读规则见[线框索引](low-fidelity-wireframes.zh-CN.md)。
 
 ## 目的与布局
 
@@ -11,7 +11,7 @@ Drawer 展示从平台暴露给 Launcher 的来源中成功读取的全部可启
 - 应用清单使用单列列表；未来网格属于可叠加能力，不在当前契约中定义。
 - 每个分组锚点标题独占一行，并在对应分组处于当前区域时吸顶。
 - 每个应用条目至少高 `56dp`，展示 `40dp` 的平台图标、存在时的平台 badge 和应用名称；图标与名称之间为 `16dp`。
-- 应用名称只占一行。能够完整展示时保持静止；发生溢出时，使用 [design-foundations.zh-CN.md](design-foundations.zh-CN.md) 定义的公共跑马灯行为。
+- 应用名称只占一行并保持静止；无法完整显示时，使用 [design-foundations.zh-CN.md](design-foundations.zh-CN.md) 定义的末尾省略号。
 - 点击应用后立即启动，并抑制短时间内的重复启动。
 - 长按应用产生长按触觉反馈并打开应用操作面板。
 
@@ -71,7 +71,7 @@ Drawer 展示从平台暴露给 Launcher 的来源中成功读取的全部可启
 
 - 成功读取但没有任何可启动应用条目时，视为错误，不作为有效空 Drawer。
 - 应用清单读取失败且没有留下任何可用的可启动条目时，使用同一错误状态。
-- 应用区域隐藏进度指示器，显示错误图标、本地化提示 `无法加载应用` 和 `重试` 操作。
+- 应用区域隐藏进度指示器，显示非交互的 `40dp` 错误图标和本地化提示 `无法加载应用`，并提供独立的 `重试` 操作。
 - 错误状态不再建议用户重启 Avenor。
 - 点击重试后清除可见错误状态，返回加载状态，并开始新一次应用清单读取。
 - 用户停留在同一 Error 呈现期间，Activity 恢复、网络变化、软件包回调和其他普通生命周期事件不得自动重试或清除错误。离开 Drawer 后再次进入时，开始一次新的初始读取。

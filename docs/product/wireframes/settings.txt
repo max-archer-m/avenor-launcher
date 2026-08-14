@@ -1,0 +1,96 @@
++------------------------------------------------------------------------------+
+|                           SETTINGS / LOW FIDELITY                            |
+|                                                                              |
+|  [BACK / 24DP]  AVENOR LAUNCHER SETTINGS                                     |
+|                                                                              |
+|------------------------------------------------------------------------------|
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  DEFAULT HOME APPLICATION                                                    |
+|                                                                              |
+|                                                                              |
+|  [40DP STATUS ICON]  CURRENT DEFAULT STATUS                                  |
+|                                                                              |
+|                                                                              |
+|                      OPEN SYSTEM HOME SETTINGS       >                       |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|------------------------------------------------------------------------------|
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  PRODUCT INFORMATION                                                         |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  [40DP ICON]  PRIVACY                                  >                     |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  [40DP ICON]  LICENSE                                  >                     |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  [40DP ICON]  APPLICATION VERSION                                            |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  [40DP ICON]  BASIC INFORMATION                        >                     |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|------------------------------------------------------------------------------|
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  USER-VISIBLE TEXT FOLLOWS SYSTEM LOCALE                                     |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  ENGLISH AND SIMPLIFIED CHINESE RESOURCES                                    |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  STANDARD DARK THEME BACKGROUND                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  ROWS USE RIPPLE PRESS FEEDBACK                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  ADDITIONAL SETTINGS ARE NOT IMPLIED                                         |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                               BOTTOM SAFE AREA                               |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
++------------------------------------------------------------------------------+

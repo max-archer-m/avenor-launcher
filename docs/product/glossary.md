@@ -10,11 +10,11 @@
 | Launchable entry | 可启动应用条目 | One platform-exposed target that Avenor can launch; a primary app and clone are separate entries |
 | Favorite | 收藏应用 | A launchable entry saved to Home |
 | Application shortcut | 应用快捷操作 | An action exposed by the application through the platform |
-| Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, reorder, or uninstall |
+| Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, edit, or uninstall |
 | Application action sheet | 应用操作面板 | The modal Bottom Sheet containing application identity, application shortcuts, and Launcher actions |
 | Section anchor | 分组锚点 | A pinned Drawer section heading such as A or `#` |
 | Alphabet index | 字母索引 | The fixed right-side Drawer index used to jump between anchors |
-| Reorder mode | 排序模式 | The Home state in which favorites can be repositioned |
+| Edit mode | 编辑模式 | The Home state that exposes module boundaries and allows favorites to be reordered or moved between groups |
 | Badge | 标记 | Platform-provided visual identity for a clone or profile context |
 | Application information | 应用信息 | The system-owned information and management surface for an application |
 | Private Space | 私密空间 | Android hidden-profile capability outside the current product contract; Avenor does not request `ACCESS_HIDDEN_PROFILES` to access it |

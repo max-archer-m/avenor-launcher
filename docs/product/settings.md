@@ -1,6 +1,6 @@
 # Settings Interaction Specification
 
-> Public semantic source: English. Chinese counterpart: [settings.zh-CN.md](settings.zh-CN.md).
+> Public semantic source: English. Chinese counterpart: [settings.zh-CN.md](settings.zh-CN.md). The spatial sketch is the shared [Settings wireframe](wireframes/settings.txt), with reading rules in the [wireframe index](low-fidelity-wireframes.md).
 
 ## Entry and return
 

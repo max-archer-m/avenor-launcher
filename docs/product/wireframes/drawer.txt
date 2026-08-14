@@ -1,0 +1,96 @@
++------------------------------------------------------------------------------+
+|                            DRAWER / LOW FIDELITY                             |
+|                                                                              |
+|  ALL APPLICATIONS                                      A                     |
+|------------------------------------------------------------------------------|
+|                                                                              |
+|  #                                                        #                  |
+|                                                                              |
+|     [40DP ICON]  1PASSWORD                                 A                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  A                                                        B                  |
+|                                                                              |
+|     [40DP ICON]  APP ALPHA                                 C                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|     [40DP ICON]  APP ARCHIVE                               D                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  B                                                        E                  |
+|                                                                              |
+|     [40DP ICON]  BROWSER                                   F                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  C                                                        G                  |
+|                                                                              |
+|     [40DP ICON]  CALENDAR                                  H                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|     [40DP ICON]  CAMERA                                    I                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  M                                                        J                  |
+|                                                                              |
+|     [40DP ICON]  MAPS                                      K                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|     [40DP ICON]  MUSIC                                     L                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  P                                                        M                  |
+|                                                                              |
+|     [40DP ICON]  PHOTOS                                    N                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  S                                                        O                  |
+|                                                                              |
+|     [40DP ICON]  SETTINGS                                  P                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|     [40DP ICON]  SYSTEM TOOL                               Q                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  W                                                        R                  |
+|                                                                              |
+|     [40DP ICON]  WORK APP                                  S                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  Z                                                        T                  |
+|                                                                              |
+|     [40DP ICON]  ZETA                                      U                 |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                           V                  |
+|                                                                              |
+|  APPLICATION NAMES: ONE LINE / END ELLIPSIS              W                   |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                           X                  |
+|                                                                              |
+|  ANCHOR HEADERS STICK WHILE THE LIST SCROLLS              Y                  |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                           Z                  |
+|                                                                              |
+|                                                                              |
+|  VISIBLE INDEX CAPTURES TOUCH                       [GEAR]                   |
+|                                                                              |
+|                                                                              |
+|                               BOTTOM SAFE AREA                               |
++------------------------------------------------------------------------------+

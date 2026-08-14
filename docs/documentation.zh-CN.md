@@ -53,10 +53,11 @@
 | 产品基础需求 | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | 当前事实与规则 | 记录产品问题、作者场景、当前范围、验收意图和开放产品问题 |
 | 产品决策与范围变更 | [`docs/product-decisions.md`](product-decisions.md) | [`docs/product-decisions.zh-CN.md`](product-decisions.zh-CN.md) | 项目治理与决策理由 | 定义决策权，并在启用时记录已经确认的重大产品选择 |
 | 产品导航 | [`docs/product/navigation.md`](product/navigation.md) | [`docs/product/navigation.zh-CN.md`](product/navigation.zh-CN.md) | 当前事实与规则 | 定义界面层级、进入、退出、Back、恢复和公共过渡 |
-| Home 交互 | [`docs/product/home.md`](product/home.md) | [`docs/product/home.zh-CN.md`](product/home.zh-CN.md) | 当前事实与规则 | 定义 Home 信息、收藏、启动行为和排序模式 |
+| Home 交互 | [`docs/product/home.md`](product/home.md) | [`docs/product/home.zh-CN.md`](product/home.zh-CN.md) | 当前事实与规则 | 定义 Home 信息、收藏、滚动、启动行为和编辑模式 |
 | Drawer 交互 | [`docs/product/drawer.md`](product/drawer.md) | [`docs/product/drawer.zh-CN.md`](product/drawer.zh-CN.md) | 当前事实与规则 | 定义应用清单、分组、排序、字母索引和实时更新 |
 | 应用操作面板 | [`docs/product/app-action-sheet.md`](product/app-action-sheet.md) | [`docs/product/app-action-sheet.zh-CN.md`](product/app-action-sheet.zh-CN.md) | 当前事实与规则 | 定义模态应用快捷操作和启动器操作 |
 | Settings 交互 | [`docs/product/settings.md`](product/settings.md) | [`docs/product/settings.zh-CN.md`](product/settings.zh-CN.md) | 当前事实与规则 | 定义当前 Settings 信息与行为 |
+| 低保真线框图 | [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) | [`docs/product/low-fidelity-wireframes.zh-CN.md`](product/low-fidelity-wireframes.zh-CN.md) | 当前产品可视化 | 可视化当前 Home、Drawer、应用操作面板与 Settings 契约，但不替代其规范性文字 |
 | 产品设计基础约束 | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | 当前事实与规则 | 定义当前主题、布局、字体、图标、无障碍和资源原则 |
 | 产品字典 | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | 当前事实与规则 | 定义规范产品术语 |
 | 版本、产物与发布治理 | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | 当前事实与规则 | 定义交付级别、应用版本、已完成记录、APK 产物、签名连续性、tag 与 GitHub Release |

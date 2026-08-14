@@ -42,6 +42,8 @@ The learning motivation may shape the project process and retrospectives, but it
 
 The author. Current product trade-offs are evaluated first against whether the author can use the product reliably every day.
 
+Ergonomic decisions primarily optimize for right-hand holding with right-thumb input and left-hand holding with right-hand tapping. Other postures are secondary rather than equal optimization targets.
+
 ### Secondary users
 
 There are no identified secondary users. Possible future publication on GitHub or in application stores does not demonstrate broader demand or expand the current target audience.
@@ -79,8 +81,8 @@ Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](h
 
 ### In scope
 
-- Home: the Android home entry displaying system time, date, favorite applications, and a Drawer entry.
-- Favorites: the author can maintain the application entries shown on Home according to the Home and application-action-sheet specifications.
+- Home: one non-pageable, non-collapsible Android home surface displaying system time, date, primary favorites, companion favorites, and a Drawer entry. The page does not scroll, while each favorite group scrolls independently only when its content exceeds its visible region.
+- Favorites: the author can maintain the primary and companion application entries shown on Home according to the Home and application-action-sheet specifications. Both groups provide direct application access; primary favorites represent relatively higher-frequency use and companion favorites represent important but relatively lower-frequency use.
 - Drawer: a single-list presentation of every launchable entry successfully read from the sources Android exposes, including cloned application entries when the platform exposes and Avenor successfully reads them. An isolated non-current-profile read failure does not block entries already available from other profiles.
 - Settings: current default-Launcher status, an entry to Android system settings for the default home application, and secondary product-information entries. Language follows supported system-locale resources automatically; manual language selection is outside the current scope.
 - Complete offline availability for core tasks.
@@ -90,7 +92,7 @@ Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](h
 ### Out of scope
 
 - Visual refinement whose primary goal is aesthetic quality.
-- Widgets, folders, themes, and extensive or unrestricted layout and visual customization.
+- Widgets, folder-like grouping, Home paging, themes, and extensive or unrestricted layout and visual customization.
 - One-action clearing or restoration of all local configuration.
 - Network-backed information such as weather.
 - Accounts, cloud synchronization, or a self-hosted server.
@@ -102,7 +104,7 @@ Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](h
 
 ## Additive requirements
 
-An additive requirement may be added to the current product contract when useful without defining or blocking movement between capability layers. Current candidates include landscape support, foldable and tablet adaptation, themes and colors, weather information, widgets, and folders.
+An additive requirement may be added to the current product contract when useful without defining or blocking movement between capability layers. Current candidates include landscape support, foldable and tablet adaptation, themes and colors, weather information, and widgets. Folder-like grouping is excluded because it conflicts with the current direct-access principle.
 
 An additive requirement does not become current scope merely because it can be added independently, and it does not bypass scope, privacy, security, validation, or maintenance review.
 
@@ -111,6 +113,9 @@ An additive requirement does not become current scope merely because it can be a
 - The user can launch Avenor Launcher as the Android home-screen entry point.
 - Home displays time and date supplied by the device system.
 - Home displays locally saved favorite application entries and allows the selected favorite to be launched.
+- Home targets an approximate 20:60:20 division of its safe available height: basic information, the complete primary-and-companion favorite composition, and a reserved bottom secondary region. The favorite composition does not expand into that bottom region while the future secondary capability remains undefined.
+- Within the middle composition, primary favorites use approximately the left 60% and companion favorites the right 40% of its horizontal space. The ratio expresses product hierarchy rather than a user-adjustable split, and neither group borrows unused capacity from the other. Primary favorites use 48dp icons with at least 64dp interaction targets; companion favorites use 32dp icons with at least 48dp interaction targets. Both display a static, one-line application name with end ellipsis when needed.
+- Drawer additions append to primary favorites by default without navigating to Home or entering edit mode. A full visible viewport does not reject an addition: each group stays stationary while its content fits and scrolls independently after overflow. Edit mode adds drag handles and shared editing surfaces around all three Home modules; it supports in-group ordering, moving a favorite to an empty position in the other group, and swapping group assignments and positions when the cross-group target is occupied. Back exits edit mode.
 - An unreadable or damaged favorite persistence result is presented as a recoverable loading failure rather than an empty favorite list. Avenor preserves the original data, disables favorite mutations, and keeps independent Drawer and application-launch paths available while a read-only Retry is offered.
 - The user can access the Drawer from Home.
 - Whether or not Avenor Launcher is selected as the default home application, the Drawer presents a single list of every application entry successfully read from the visible and launchable sources Android normally exposes within Avenor's current role and least-privilege boundary and allows the selected entry to be launched.
@@ -136,6 +141,9 @@ An additive requirement does not become current scope merely because it can be a
 
 - Given Avenor Launcher is selected as the home application on a supported Android device, when the user performs the system action to return home, then the system displays Avenor Launcher Home.
 - Given the user enters Home, when core content finishes loading, then Home displays system time, date, saved favorite application entries, and a Drawer entry.
+- Given the user adds an application from Drawer, including when the visible primary viewport is already full, then Avenor appends and saves it as a primary favorite, closes the action sheet, preserves the Drawer position, and does not navigate to Home or enter edit mode.
+- Given a favorite group's content fits its viewport, when the user drags within that group, then the group does not scroll and an upward drag can enter the Drawer transition; given the content overflows, then the group scrolls first and transfers only same-gesture displacement remaining after its end boundary to the Drawer transition.
+- Given the user drags a favorite into the other group during edit mode, when the target position is empty, then Avenor moves and saves the favorite in that group; when the target is occupied, then Avenor swaps and saves both favorites' group assignments and positions without removing or overwriting either entry.
 - Given favorite persistence cannot be reliably read, when Home presents the favorite region, then it distinguishes the failure from an empty list, preserves the original data, disables favorite writes, offers a read-only Retry, and keeps Drawer discovery and application launching available; when Retry fails, then the same inline error returns without an additional Toast or data overwrite.
 - Given the user is on Home, when the user performs the defined Drawer-entry action, then the Drawer presents a single list of application entries successfully read from the sources Android exposes.
 - Given Avenor Launcher is not selected as the default home application, when the user launches Avenor Launcher directly and enters the Drawer, then the Drawer still displays every application entry successfully read from the sources that should be visible and launchable under Android platform rules.
@@ -171,7 +179,7 @@ The current product lets users maintain Home favorites and use individual Settin
 
 ## Local data boundary
 
-- The only user-content data is the identifier of each launchable application entry saved as a Home favorite. Identifiers must distinguish cloned entries exposed by the platform and must not store or deduplicate solely by package name.
+- The only user-content data is each launchable application entry saved as a Home favorite together with its primary-or-companion group assignment and user-defined position. Entry identifiers must distinguish cloned entries exposed by the platform and must not store or deduplicate solely by package name.
 - System-locale-derived language presentation and other interface settings in the current product contract are local behavior, not behavioral analytics data.
 - Time and date come directly from the device system and are not retained as historical data.
 - The current product does not collect or store notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.

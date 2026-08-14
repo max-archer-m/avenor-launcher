@@ -1,15 +1,18 @@
 # Home Interaction Specification
 
-> Public semantic source: English. Chinese counterpart: [home.zh-CN.md](home.zh-CN.md). Shared navigation is defined in [navigation.md](navigation.md); shared visual rules are defined in [design-foundations.md](design-foundations.md).
+> Public semantic source: English. Chinese counterpart: [home.zh-CN.md](home.zh-CN.md). Shared navigation is defined in [navigation.md](navigation.md); shared visual rules are defined in [design-foundations.md](design-foundations.md); the complete spatial sketches are the shared [normal Home](wireframes/home.txt) and [Home edit mode](wireframes/home-edit-mode.txt) wireframes, with reading rules in the [wireframe index](low-fidelity-wireframes.md).
 
 ## Purpose and structure
 
-Home is the Launcher primary surface. Its content is one top-to-bottom column:
+Home is the Launcher primary surface. It is one fixed, non-pageable, non-collapsible surface without folders. The page itself does not scroll; only the primary and companion favorite regions can scroll independently under the overflow rules below. Its content is arranged from top to bottom:
 
 1. Basic information region: time, then date and weekday.
-2. Favorite application list: every saved launchable entry in user-defined order.
+2. Middle favorite composition: primary favorites and companion favorites, containing every accepted saved launchable entry.
+3. Bottom secondary region: reserved space for a later product capability whose content and interaction are not yet defined.
 
-The basic information region normally occupies approximately 20%–30% of available vertical space. Content fit and accessibility take priority over enforcing that proportion. The favorite list occupies the remaining space, starts at the top of its region, and scrolls only when necessary. A scrollbar appears only during scrolling.
+The three regions target an approximate 20:60:20 division of Home's safe available height: 20% for basic information, 60% for the complete primary-and-companion favorite composition, and 20% for the bottom secondary region. These proportions guide the overall composition rather than overriding safe insets, content integrity, or minimum interaction targets. The favorite container does not expand into the bottom region when that region is empty.
+
+Within the middle favorite composition, the primary-favorite area uses approximately the left 60% and the companion-favorite area the right 40% of the available horizontal space. This is a compositional hierarchy, not a user-adjustable divider. “Calm” and “restrained” do not impose a deliberately low favorite count; they constrain distraction and avoidable operations. Both groups keep fixed visible regions and independently become vertically scrollable only when their content exceeds their own viewport.
 
 Home content uses 16dp horizontal inset and a provisional 32dp vertical inset. These are container paddings rather than external margins because they define the safe internal distance between Home content and its available bounds.
 
@@ -23,16 +26,21 @@ Home content uses 16dp horizontal inset and a provisional 32dp vertical inset. T
 - The time line is at least `64dp` high and does not require a separately enlarged target beyond its rendered line region.
 - The date-and-weekday row is `48dp` high and vertically centers its text. The complete row is its focusable touch target.
 
-## Favorite list
+## Favorite region
 
 - A new installation starts with no favorites and shows a concise empty-state invitation to add applications from Drawer.
-- Adding a favorite from Drawer appends it to the end of the list.
+- Every favorite belongs to exactly one of two direct-access groups: primary favorites or companion favorites. A favorite added from Drawer is assigned to the primary group by default. The user can later move it between groups through Home edit mode; adding a favorite does not navigate to Home or enter edit mode.
+- Primary favorites represent the author's relatively highest-frequency direct-access applications and occupy the approximately 60% area.
+- Companion favorites remain important direct-access applications but are used relatively less often than primary favorites and occupy the approximately 40% area. “Companion” does not mean hidden, disabled, or optional.
+- Drawer additions are appended to the primary group. The product does not reject an addition because the primary viewport is full; overflow extends the primary group's scrollable content while preserving existing order. Avenor does not place the entry into companion favorites automatically.
 - The same launchable entry cannot appear more than once. A primary application and its clone are distinct entries and may each be favorited.
-- Entries are a vertical single-column list. Each row is at least `56dp` high and contains a `40dp` platform-provided application icon, its clone or profile badge when present, and the application name, with `16dp` between icon and name.
-- An application name occupies exactly one line. A name that fits remains static; an overflowing name uses the shared marquee behavior defined in [design-foundations.md](design-foundations.md).
+- Primary and companion favorites must be visually distinguishable without becoming two ordinary list-density variants. Primary favorites use `48dp × 48dp` application icons inside interaction targets of at least `64dp × 64dp`. Companion favorites use `32dp × 32dp` application icons inside interaction targets of at least `48dp × 48dp`.
+- Both groups display one-line application names. A name that does not fit uses end ellipsis and remains static; Home does not use marquee text.
+- Neither group has a product-defined slot limit derived from the current viewport. Each group measures its own viewport and content extent. When content fits, that group does not scroll; when content exceeds the viewport, it scrolls vertically without changing the other group's position or scroll state. The two groups do not borrow visible space from one another, and fewer favorites preserve unused space rather than enlarging icons or spacing.
 - Icon shape and badge use the platform-provided representation consistently across Home, Drawer, and related application UI.
 - Selecting an entry immediately launches it. Ordinary selection does not produce haptic feedback. Duplicate rapid activation must be suppressed.
 - Long-pressing an entry produces long-press haptic feedback and opens the application action sheet defined in [app-action-sheet.md](app-action-sheet.md).
+- Favorite selection and long-press participate in the Home-wide upward-drag arbitration defined in [navigation.md](navigation.md). An upward drag that takes ownership does not launch the favorite, open its action sheet, or produce the favorite's long-press feedback.
 - A favorite is removed automatically only after a successful inventory refresh confirms that its application was uninstalled, its clone was removed, or that specific launchable identity permanently disappeared.
 - An inventory loading failure never deletes or hides saved favorites.
 - An application that still exists but is disabled remains in its stored position as a visibly disabled favorite. Selecting it does not attempt a normal launch and provides a short localized unavailable Toast. Long-press remains available for applicable information or management actions.
@@ -43,55 +51,58 @@ Home content uses 16dp horizontal inset and a provisional 32dp vertical inset. T
 
 - A favorite persistence read is successful only when Avenor can reliably interpret the complete stored favorite state. An unreadable or damaged result is not an empty favorite list and must not show the new-installation empty state.
 - While the initial read or a user-requested retry is in progress, the favorite region shows a progress indicator and the localized message `Loading favorites…`. It does not show favorite rows, the empty-state invitation, an error icon, or a Retry action concurrently.
-- If the state cannot be reliably read, the favorite region hides the progress indicator, shows an error icon, displays the localized message `Unable to load favorites`, and provides a `Retry` action.
+- If the state cannot be reliably read, the favorite region hides the progress indicator, shows a non-interactive `40dp` error icon, displays the localized message `Unable to load favorites`, and provides a separate `Retry` action.
 - The failure state preserves the original unreadable data and must not initialize, migrate, repair, clear, replace, or otherwise overwrite it. Process recreation and device restart do not reinterpret the failure as an empty list.
-- While the failure or retry state remains active, all add-favorite, remove-favorite, and reorder mutations are disabled. Home time and date, Home-to-Drawer navigation, Drawer inventory, and application launching remain available.
+- While the failure or retry state remains active, all add-favorite, remove-favorite, and edit-mode mutations are disabled. Home time and date, Home-to-Drawer navigation, Drawer inventory, and application launching remain available.
 - Selecting Retry starts one read-only reload, changes the favorite region to the loading presentation, and disables repeated Retry activation until that attempt completes. Retry does not write, repair, migrate, clear, or replace stored favorite data.
 - A successful retry restores the exact readable favorite state and its order without an additional write. A reliably read empty state shows the normal empty-state invitation and restores favorite mutations.
 - A failed retry returns to the same persistent failure presentation, restores the Retry action, preserves the original unreadable data, and keeps favorite mutations disabled. It does not add a Toast because the visible favorite-region error already communicates the result. The user may retry again.
 - A normal initial read occurs on a new process start. Avenor does not continuously retry, poll, or use network-state changes as a retry trigger. Any additional safe read trigger requires technical validation and must preserve the same no-write boundary.
 - If a favorite mutation surface is already open when the failure is detected, close it without applying a favorite change. Repair, export, reset, backup, and restore behavior require a later product decision and technical assessment.
 
-## Reorder mode
+## Edit mode
 
-- Reorder mode is available only when Home contains at least two favorites and is entered from the selected favorite's Launcher actions. With zero or one favorite, the reorder action is hidden.
-- Every favorite displays a three-horizontal-line drag handle on its right, visually comparable to common media-list reorder handles.
-- Dragging an item across another stored position swaps the positions and produces one short haptic response for the completed position change.
-- The changed order is saved immediately.
-- System Back is the only current exit from reorder mode. Exiting does not undo completed moves.
-- The visible drag handles are the current indication that reorder mode is active. No additional title, banner, completion button, or exit action is defined.
+- Edit mode is entered from the selected favorite's Launcher actions and is available whenever that action sheet can open for a favorite. The action is labeled as editing rather than ordering because the mode supports both ordering and group assignment.
+- In edit mode, every favorite displays a drag handle. The basic-information, favorite-composition, and reserved-bottom regions each receive the shared translucent light-gray, small-rounded-corner editing surface defined in [design-foundations.md](design-foundations.md). These three surfaces communicate Home's module boundaries; they do not make the time/date or reserved-bottom regions editable.
+- Dragging within the same group reorders that group. Crossing into the other group targets that group's visible positions: dropping onto an empty position moves the dragged favorite into the target group, while dropping onto an occupied position swaps the two favorites' group assignments and positions. A cross-group operation never removes, overwrites, or unfavorites either entry.
+- During a valid cross-group drag, the target position provides the same live displacement or placeholder feedback as an in-group reorder. A favorite adopts the target group's icon and interaction-target specification while previewed there. Dragging near the leading or trailing edge of either overflowing group automatically scrolls that target group so off-screen stored positions remain reachable. An invalid drop returns the favorite to its last valid position without changing saved state.
+- Each completed position change, cross-group move, or cross-group swap produces one short haptic response and is saved immediately. Both affected entries adopt the visual specification of their resulting groups.
+- System Back is the only current exit from edit mode. Exiting removes the editing surfaces and drag handles without undoing completed moves.
+- The editing surfaces and visible drag handles are the current indications that edit mode is active. No additional title, banner, completion button, or exit action is defined.
 
-### Automatic scrolling
-
-- The top and bottom `48dp` of the visible favorite-list viewport are reorder auto-scroll zones.
-- While a dragged item remains inside an auto-scroll zone, the list scrolls in that direction. Speed increases as the pointer approaches the outer edge; the exact speed curve is a shared implementation token validated on a physical device.
-- Auto-scroll stops immediately when the pointer leaves both zones or when the list reaches its corresponding boundary.
-- Crossing a stored item position during auto-scroll performs the same swap, immediate save, and one short haptic response as an ordinary reorder move. Remaining in an edge zone or scrolling without crossing a stored position does not produce haptic feedback.
+- A drag beginning on a favorite's handle owns item movement. A vertical drag elsewhere inside a favorite group scrolls that group when it overflows. Edit mode never changes pages or reveals a collapsed group.
 - Releasing the item keeps and immediately saves its current position.
-- Reorder mode exclusively owns vertical favorite-list dragging. Home-to-Drawer dragging is unavailable until reorder mode ends, so bottom-edge auto-scroll cannot begin a Drawer transition.
+- Edit mode disables Home-to-Drawer dragging. Item dragging, group scrolling, and automatic edge scrolling retain exclusive ownership until edit mode ends.
 
-### Inventory changes during reorder
+## Bottom secondary region
+
+- The bottom secondary region retains approximately 20% of Home's safe available height even before its future capability is defined.
+- It is not part of either favorite group's visible viewport. An empty bottom region does not enlarge either group, although each group may retain additional favorites through its own scrolling content.
+- The current contract assigns no content, data, selection, scrolling, ribbon, paging, or other interaction to this region. A horizontal ribbon or any alternative requires a later author decision and an update to the applicable Home and navigation contracts.
+
+### Inventory changes during edit mode
 
 | Inventory event | Current behavior |
 | --- | --- |
-| A new application is installed | Keep reorder mode; favorites are unchanged |
-| A non-favorite application is removed | Keep reorder mode; favorites are unchanged |
-| A favorite's name changes | Update the row in place and keep reorder mode |
-| A favorite's icon or platform badge changes | Update the row in place and keep reorder mode |
-| A favorite application is uninstalled | End reorder mode, remove the favorite, preserve already saved moves, and notify the user |
-| A favorite clone is removed | End reorder mode, remove that clone favorite, preserve already saved moves, and notify the user |
-| A favorite application is disabled | End reorder mode, retain it as a disabled favorite in its saved position, preserve already saved moves, and notify the user |
-| Favorite identity can no longer be confirmed | End reorder mode, retain the saved entry and order pending refresh, and notify the user |
-| The full application inventory fails to load | End reorder mode, retain all favorites and their saved order, and notify the user |
-| The favorite count falls below two | End reorder mode after applying the relevant event behavior |
+| A new application is installed | Keep edit mode; favorites are unchanged |
+| A non-favorite application is removed | Keep edit mode; favorites are unchanged |
+| A favorite's name changes | Update the row in place and keep edit mode |
+| A favorite's icon or platform badge changes | Update the row in place and keep edit mode |
+| A favorite application is uninstalled | End edit mode, remove the favorite, preserve already saved moves, and notify the user |
+| A favorite clone is removed | End edit mode, remove that clone favorite, preserve already saved moves, and notify the user |
+| A favorite application is disabled | End edit mode, retain it as a disabled favorite in its saved position, preserve already saved moves, and notify the user |
+| Favorite identity can no longer be confirmed | End edit mode, retain the saved entry and order pending refresh, and notify the user |
+| The full application inventory fails to load | End edit mode, retain all favorites and their saved order, and notify the user |
+| The favorite count falls below two | Keep edit mode while at least one favorite remains; end it when no favorite remains |
 
-- Use one localized message for a confirmed favorite change: `Favorites changed. Reorder ended.`
-- Use one localized message for an inventory or identity refresh failure: `Unable to update application status. Reorder ended.`
+- Use one localized message for a confirmed favorite change: `Favorites changed. Edit mode ended.`
+- Use one localized message for an inventory or identity refresh failure: `Unable to update application status. Edit mode ended.`
 - Present both messages as short Toasts.
 
 ## Acceptance intent
 
-- Empty, short, and scrollable favorite lists preserve the same top-aligned structure.
+- Empty and populated favorite states preserve the same fixed Home structure. Primary and companion favorites remain part of one middle-screen composition and approximately follow the 60:40 horizontal hierarchy. A group stays stationary when its content fits and scrolls independently when its content overflows.
+- Outside edit mode, Home-to-Drawer dragging remains available from the favorite region according to its scroll-boundary handoff and from every other Avenor-managed Home element without producing the element's click or long-press action.
 - Primary and cloned entries remain visibly distinguishable when the platform supplies a badge; Avenor-specific fallback distinction is outside the current scope.
 - Returning to Home during the same process preserves its meaningful list state; process recreation follows [navigation.md](navigation.md).
 - An unreadable favorite state remains distinguishable from a valid empty list, cannot be overwritten through favorite actions, and can recover through a successful read-only Retry without blocking independent application discovery and launch paths.

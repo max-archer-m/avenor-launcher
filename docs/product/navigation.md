@@ -48,10 +48,14 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 ## Home to Drawer
 
 - An upward drag on Home is the only current entry into Drawer.
-- Home-to-Drawer dragging is disabled while favorite reorder mode is active; reorder dragging and its edge auto-scroll exclusively own vertical favorite-list gestures.
-- If the favorite list cannot scroll or has reached its bottom boundary, upward displacement transfers to the Home-to-Drawer transition.
-- If the favorite list can still consume upward displacement, it scrolls and the surface transition does not consume that displacement.
-- When the list reaches its bottom boundary during one continuous upward gesture, remaining displacement may transfer directly into the transition without requiring the user to lift and drag again.
+- In normal Home mode, the drag may begin anywhere inside Avenor's Home interaction area, including over the time, date, favorite entries, empty state, loading state, error state, and Retry control. System-reserved inset gestures remain governed by Android.
+- An upward drag beginning outside a favorite group enters the Home-to-Drawer transition directly. Inside either favorite group, that group first consumes upward displacement while it can scroll toward its end. The primary and companion groups arbitrate independently.
+- If the touched group does not overflow, it consumes no scroll displacement and the upward drag enters the transition directly. If it overflows, reaching its end boundary transfers the remaining displacement from the same continuous gesture into the Home-to-Drawer transition without requiring the user to lift. Transition progress begins from the displacement transferred after the boundary, not from distance already consumed as list scrolling.
+- Downward dragging inside an overflowing favorite group scrolls that group toward its start and does not initiate a Home surface transition. The other favorite group's position remains unchanged.
+- Home-to-Drawer dragging is disabled while Home edit mode is active. Handle drags own item movement; other vertical drags inside an overflowing favorite group scroll that group until edit mode ends.
+- A pointer sequence can resolve to only one Home action. Before an interactive element's selection or long-press action has been committed, recognition of an upward drag transfers ownership to the Home-to-Drawer transition and suppresses that element's selection, long-press, and haptic response.
+- Selection is committed only when the pointer is released without the sequence becoming an upward drag or a long-press. Once a long-press has been recognized and its action has opened, the same pointer sequence does not also begin the Drawer transition.
+- A cancelled sequence performs no selection or long-press action and follows the transition cancellation behavior when a Home-to-Drawer drag had already taken ownership.
 
 ## Drawer to Home
 
@@ -67,7 +71,7 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 - On Drawer, Back returns to Home.
 - On Settings, Back returns to the previous Avenor surface, currently Drawer.
 - On the application action sheet, Back dismisses the sheet and returns to the unchanged underlying surface.
-- Process restoration begins at Home. Drawer, Settings, an action sheet, reorder mode, and their transient positions are not restored after process recreation.
+- Process restoration begins at Home. Drawer, Settings, an action sheet, edit mode, and their transient positions are not restored after process recreation. Within the same process, each favorite group's meaningful scroll position is preserved when returning to Home; process recreation resets both groups to their start positions.
 
 ## System surfaces
 
@@ -83,7 +87,8 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 - A 100dp drag produces 50% gesture progress and 150dp of interactive Drawer displacement before endpoint settling.
 - Releasing at 119dp without a qualifying fling returns to the origin; releasing at 120dp or beyond completes to the target.
 - A qualifying target-directed fling below 120dp completes to the target.
-- Position and opacity remain continuous when the user reverses direction, releases, completes, rebounds, or transfers a gesture from list scrolling.
+- Position and opacity remain continuous when the user reverses direction, releases, completes, or rebounds. Drawer-to-Home remains continuous when a gesture transfers from Drawer list scrolling.
+- In normal Home mode, an upward drag can begin over every Avenor-managed Home element without also activating or long-pressing that element.
 - Drawer cannot be dismissed by a downward list gesture until its list has reached the top boundary; remaining displacement then transfers in the same gesture.
 - Opening or closing Drawer does not accidentally launch, long-press, or scroll an application entry.
 - The implementation may choose any architecture that satisfies these observable behaviors.

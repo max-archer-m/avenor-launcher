@@ -10,11 +10,11 @@
 | Launchable entry | 可启动应用条目 | Avenor 可以启动的一个平台目标；主应用与分身是不同条目 |
 | Favorite | 收藏应用 | 保存到 Home 的可启动应用条目 |
 | Application shortcut | 应用快捷操作 | 应用通过平台暴露的操作 |
-| Launcher action | 启动器操作 | Avenor 提供的操作，例如收藏、排序或卸载 |
+| Launcher action | 启动器操作 | Avenor 提供的操作，例如收藏、编辑或卸载 |
 | Application action sheet | 应用操作面板 | 包含应用身份、应用快捷操作和启动器操作的模态 Bottom Sheet |
 | Section anchor | 分组锚点 | Drawer 中吸顶的分组标题，例如 A 或 `#` |
 | Alphabet index | 字母索引 | Drawer 右侧用于跳转到锚点的固定索引 |
-| Reorder mode | 排序模式 | Home 中允许重新排列收藏应用的状态 |
+| Edit mode | 编辑模式 | Home 中显示模块边界，并允许收藏排序或跨组移动的状态 |
 | Badge | 标记 | 平台提供的分身或资料身份视觉标记 |
 | Application information | 应用信息 | 系统负责的应用信息与管理界面 |
 | Private Space | 私密空间 | 当前产品契约之外的 Android 隐藏资料能力；Avenor 不申请 `ACCESS_HIDDEN_PROFILES` 访问该能力 |

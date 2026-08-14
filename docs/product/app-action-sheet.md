@@ -1,6 +1,6 @@
 # Application Action Sheet
 
-> Public semantic source: English. Chinese counterpart: [app-action-sheet.zh-CN.md](app-action-sheet.zh-CN.md).
+> Public semantic source: English. Chinese counterpart: [app-action-sheet.zh-CN.md](app-action-sheet.zh-CN.md). The spatial sketch is the shared [application action sheet wireframe](wireframes/app-action-sheet.txt), with reading rules in the [wireframe index](low-fidelity-wireframes.md).
 
 ## Presentation
 
@@ -17,10 +17,10 @@ The application action sheet is a modal bottom sheet opened by long-pressing an 
 
 From top to bottom:
 
-1. Application name aligned left and an application-information icon aligned right.
+1. Application name aligned left and a standard `24dp` application-information icon aligned right.
 2. A light divider with `16dp` horizontal inset.
-3. An optional application-shortcut region containing platform-provided shortcuts, each displayed as icon plus name, followed by a light divider with `16dp` horizontal inset.
-4. Launcher actions in a horizontal row, each with icon above label.
+3. An optional application-shortcut region containing platform-provided shortcuts, each displayed with a standard `24dp` icon plus name, followed by a light divider with `16dp` horizontal inset.
+4. Launcher actions in a horizontal row, each with a standard `24dp` icon above its label.
 
 If the platform exposes no application shortcuts, omit the complete application-shortcut region, including its trailing divider. The divider below the application identity remains, so identity and Launcher actions retain one boundary without adjacent duplicate dividers.
 
@@ -40,11 +40,12 @@ The current contract does not define a dedicated overflow interaction for unusua
 ## Launcher actions
 
 - Launcher actions use five fixed horizontal slots ordered from left to right. Visible actions compact into the leftmost available slots; hidden actions leave no internal gap, and unused slots remain empty on the right. Actions do not redistribute evenly across the full width.
+- Each Launcher action's complete icon-and-label item is one interaction target. The `24dp` icon is not an independent or smaller touch target.
 - At most five Launcher actions are defined; this limit does not apply to platform application shortcuts.
-- On Home the action order is remove favorite, reorder, then uninstall. Reorder is hidden when Home has fewer than two favorites; uninstall is hidden when unavailable; later visible actions shift left.
+- On Home the action order is remove favorite, edit, then uninstall. Edit opens Home edit mode and remains available for a single favorite; uninstall is hidden when unavailable, and later visible actions shift left.
 - On Drawer the action order is add favorite or remove favorite according to current state, then uninstall when available. Uninstall shifts into the next left slot and is hidden when unavailable.
 - When favorite persistence cannot be reliably read, Avenor cannot determine whether the selected application is currently a favorite. Replace the add-favorite or remove-favorite action with one disabled favorite slot labeled `Favorites unavailable`, using the standard heart icon. The slot cannot receive input and does not produce a Toast. Application information and other non-favorite actions remain governed by their own availability. After a successful favorite-data read, restore the applicable add-favorite or remove-favorite action from the recovered state.
-- Adding a favorite appends it on Home while Drawer remains at its current position.
+- Adding a favorite appends it to the primary-favorite group, closes the sheet, and preserves Drawer's current anchor and relative scroll position. It does not navigate to Home or enter edit mode. A full visible primary viewport does not block the addition; the primary group becomes scrollable when its content overflows. Avenor does not place the entry into companion favorites automatically.
 - Removing a favorite closes the sheet and removes the Home entry. When invoked from Drawer, the application remains in Drawer and the current anchor and relative scroll position do not change.
 - Uninstall is hidden for applications the system does not allow the user to uninstall or only permits disabling.
 - For a cloned application, show uninstall only when the platform can be confirmed to address removal of that selected clone without uninstalling the primary application. If that guarantee is unavailable, hide uninstall and leave system management available through application information. Never degrade a clone-removal action into primary-application uninstall.
@@ -57,7 +58,7 @@ The current contract does not define a dedicated overflow interaction for unusua
 
 - Add favorite: heart.
 - Remove favorite: broken heart.
-- Reorder: vertical-direction arrows.
+- Edit: vertical-direction arrows.
 - Uninstall: trash.
 - Application information: information symbol.
 

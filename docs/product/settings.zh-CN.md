@@ -1,6 +1,6 @@
 # Settings 交互规格
 
-> 英文语义源：[settings.md](settings.md)。
+> 英文语义源：[settings.md](settings.md)。空间草图见共享的 [Settings 线框](wireframes/settings.txt)，阅读规则见[线框索引](low-fidelity-wireframes.zh-CN.md)。
 
 ## 入口与返回
 

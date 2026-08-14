@@ -1,6 +1,6 @@
 # Drawer Interaction Specification
 
-> Public semantic source: English. Chinese counterpart: [drawer.zh-CN.md](drawer.zh-CN.md). Shared navigation is defined in [navigation.md](navigation.md).
+> Public semantic source: English. Chinese counterpart: [drawer.zh-CN.md](drawer.zh-CN.md). Shared navigation is defined in [navigation.md](navigation.md); the spatial sketch is the shared [Drawer wireframe](wireframes/drawer.txt), with reading rules in the [wireframe index](low-fidelity-wireframes.md).
 
 ## Purpose and layout
 
@@ -11,7 +11,7 @@ Drawer presents every launchable application entry successfully read from the so
 - The application inventory is a single-column list; a future grid is an additive capability and is outside the current contract.
 - Each section anchor occupies its own row and remains pinned while its section is current.
 - Each application row is at least `56dp` high and displays a `40dp` platform icon, platform-provided badge when present, and application name, with `16dp` between icon and name.
-- An application name occupies exactly one line. A name that fits remains static; an overflowing name uses the shared marquee behavior defined in [design-foundations.md](design-foundations.md).
+- An application name occupies exactly one static line. A name that does not fit uses end ellipsis as defined in [design-foundations.md](design-foundations.md).
 - Selecting an application immediately launches it and suppresses duplicate rapid activation.
 - Long-pressing an application produces long-press haptic feedback and opens the application action sheet.
 
@@ -71,7 +71,7 @@ Drawer presents every launchable application entry successfully read from the so
 
 - A successful read that returns no launchable entries is treated as an error rather than a valid empty Drawer.
 - A failed inventory read that leaves no usable launchable entries uses the same error state.
-- The application region hides the progress indicator, shows an error icon, displays the localized message `Unable to load applications`, and provides a `Retry` action.
+- The application region hides the progress indicator, shows a non-interactive `40dp` error icon, displays the localized message `Unable to load applications`, and provides a separate `Retry` action.
 - The error state does not instruct the user to restart Avenor.
 - Selecting Retry clears the visible error state, returns to the Loading state, and starts a new inventory read.
 - While the user remains on the same Error presentation, activity resume, network changes, package callbacks, and other ordinary lifecycle events do not automatically retry or clear the error. Leaving Drawer and later entering it again starts a new initial read.
