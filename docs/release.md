@@ -68,10 +68,25 @@ Pure documentation changes never change the application version. A source, resou
 
 - Android `versionName` is the formal `MAJOR.MINOR.PATCH` value defined above.
 - Android `versionCode` starts at `1` for `1.0.0`.
-- Every formal `versionName` change increments `versionCode` by exactly one.
-- `versionCode` is never calculated from `versionName`; it may not be skipped, reused, or decreased.
+- Every APK that becomes a traceable artifact through distribution for installation, delivery validation, or observability-platform upload must use the next unused `versionCode`, incremented by exactly one.
+- Repeated local builds that are not retained, distributed, used as delivery evidence, or uploaded to an observability platform may reuse their configured `versionCode`.
+- A completed formal version uses the next unused `versionCode` available at its accepted artifact boundary. A planned `versionCode` is provisional until that boundary.
+- `versionCode` is never calculated from `versionName`; the allocation sequence may not skip a value, and an allocated value may not be reclaimed, reused for a different traceable APK, or decreased.
 - Two different formal `versionName` values may not share a `versionCode`.
 - Downgrade is not supported.
+
+## Build identity and observability
+
+Product version, APK build sequence, build stage, source revision, and Git milestone identity are separate dimensions:
+
+- `versionName` expresses the product version and follows the project version model. It does not encode development stage, monitoring state, or tag status.
+- `versionCode` distinguishes ordered, traceable APK builds. Development and release artifacts are not distinguished through odd/even allocation, fixed `+2` release jumps, or another reserved numeric pattern.
+- A traceable development or internal APK may carry the planned target `versionName` without declaring that product version complete. It does not add a suffix or create a prerelease version.
+- Every traceable APK record identifies its build stage as `development`, `internal`, or `release`, together with its exact source Git commit. These stage labels are artifact metadata and do not introduce a prerelease-version format.
+- Record each allocated `versionCode` and its APK identity in the applicable iteration or delivery evidence even when that build is later rejected or superseded, so the next allocation remains unambiguous.
+- When an observability or crash-monitoring platform is adopted, its uploaded build identity must be traceable to `applicationId`, `versionName`, `versionCode`, build stage, and source commit. Platform-specific release markers must not replace the project delivery record.
+- A build does not become a completed formal version merely because it is uploaded to a monitoring platform or marked as a release there.
+- Privacy, security, data collection, consent or disclosure, dependency and license impact, symbol or mapping-file custody, access control, retention, and upload authority must be reviewed before a monitoring integration is authorized.
 
 Within one `MAJOR` family, any older formal version must have a supported direct upgrade path to any newer formal version. For a cross-major upgrade, the applicable major-version delivery contract must define supported source versions, migrations, validation, and limitations before release.
 
@@ -126,6 +141,7 @@ Application versions, Git tags, and GitHub Releases are separate records:
 - A tag is appropriate when accumulated related functionality or experience improvements establish an important, stable implementation baseline. For example, `1.0.0` may remain untagged while a later `1.3.0` becomes a tagged baseline.
 - Tag creation and the exact target commit require explicit project-author approval. Agents may recommend whether a version is worth tagging.
 - Tag naming remains to be decided before the first tag is created.
+- Creating a tag does not increment or otherwise change the accepted APK's `versionName` or `versionCode`. The tag must point to the exact source commit represented by that artifact.
 - Creating a tag does not require creating a GitHub Release.
 - A GitHub Release must reference an existing approved tag and requires separate explicit author approval.
 - No GitHub Release is required while the project has no public distribution line. A future release may attach the verified APK only when the author explicitly approves that distribution action and its security and validation gates are satisfied.
@@ -145,4 +161,5 @@ The following operational details must be decided from the actual Android projec
 - Release-keystore format, parameters, secure locations, backup procedure, and authorized signing workflow
 - Authoritative build, signing, digest, install, upgrade, and validation commands
 - The exact tag naming convention
+- Any future observability or crash-monitoring platform, its build-stage configuration, release-marking workflow, symbol or mapping-file custody, privacy disclosures, retention, and access controls
 - Any future distribution channel and its publication gates
