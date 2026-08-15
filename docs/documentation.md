@@ -53,10 +53,11 @@ When two authoritative documents state the same rule, select one owner and repla
 | Product foundation requirements | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | Current facts and rules | Records the product problem, author context, current scope, acceptance intent, and open product questions |
 | Product decisions and scope changes | [`docs/product-decisions.md`](product-decisions.md) | [`docs/product-decisions.zh-CN.md`](product-decisions.zh-CN.md) | Project governance and decision rationale | Defines decision authority and records consequential confirmed product choices when used |
 | Product navigation | [`docs/product/navigation.md`](product/navigation.md) | [`docs/product/navigation.zh-CN.md`](product/navigation.zh-CN.md) | Current facts and rules | Defines surface hierarchy, entry, exit, Back, restoration, and shared transitions |
-| Home interaction | [`docs/product/home.md`](product/home.md) | [`docs/product/home.zh-CN.md`](product/home.zh-CN.md) | Current facts and rules | Defines Home information, favorites, scrolling, launch behavior, and edit mode |
-| Drawer interaction | [`docs/product/drawer.md`](product/drawer.md) | [`docs/product/drawer.zh-CN.md`](product/drawer.zh-CN.md) | Current facts and rules | Defines the application inventory, grouping, sorting, alphabet index, and live updates |
-| Application action sheet | [`docs/product/app-action-sheet.md`](product/app-action-sheet.md) | [`docs/product/app-action-sheet.zh-CN.md`](product/app-action-sheet.zh-CN.md) | Current facts and rules | Defines modal application shortcuts and Launcher actions |
-| Settings interaction | [`docs/product/settings.md`](product/settings.md) | [`docs/product/settings.zh-CN.md`](product/settings.zh-CN.md) | Current facts and rules | Defines current Settings information and behavior |
+| Home interaction | [`docs/product/surfaces/home.md`](product/surfaces/home.md) | [`docs/product/surfaces/home.zh-CN.md`](product/surfaces/home.zh-CN.md) | Current facts and rules | Defines Home information, favorites, scrolling, launch behavior, and edit mode |
+| Drawer interaction | [`docs/product/surfaces/drawer.md`](product/surfaces/drawer.md) | [`docs/product/surfaces/drawer.zh-CN.md`](product/surfaces/drawer.zh-CN.md) | Current facts and rules | Defines the application inventory, grouping, sorting, alphabet index, and live updates |
+| Application action sheet | [`docs/product/surfaces/app-action-sheet.md`](product/surfaces/app-action-sheet.md) | [`docs/product/surfaces/app-action-sheet.zh-CN.md`](product/surfaces/app-action-sheet.zh-CN.md) | Current facts and rules | Defines modal application shortcuts and Launcher actions |
+| Settings interaction | [`docs/product/surfaces/settings.md`](product/surfaces/settings.md) | [`docs/product/surfaces/settings.zh-CN.md`](product/surfaces/settings.zh-CN.md) | Current facts and rules | Defines current Settings information and behavior |
+| Double-tap lock | [`docs/product/features/double-tap-lock.md`](product/features/double-tap-lock.md) | [`docs/product/features/double-tap-lock.zh-CN.md`](product/features/double-tap-lock.zh-CN.md) | Current facts and rules | Defines the Home gesture, optional accessibility-service boundary, authorization, failure, and disclosure behavior |
 | Low-fidelity wireframes | [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) | [`docs/product/low-fidelity-wireframes.zh-CN.md`](product/low-fidelity-wireframes.zh-CN.md) | Current product visualization | Visualizes the current Home, Drawer, application action sheet, and Settings contracts without replacing their normative text |
 | Product design foundations | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | Current facts and rules | Defines current theme, layout, typography, icon, accessibility, and resource principles |
 | Product glossary | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | Current facts and rules | Defines canonical product terms |
@@ -90,15 +91,15 @@ Maintain product information in three distinct responsibilities:
 
 ### Interaction specifications
 
-Create interaction specifications only when the applicable behavior is ready to be defined. Split them by page, dialog, or relatively independent feature module, for example:
+Create interaction specifications only when the applicable behavior is ready to be defined. Place page, dialog, panel, and other independently identifiable interface-surface contracts under `docs/product/surfaces/`. Place relatively independent features with their own activation, authorization, state, failure, privacy, or acceptance boundaries under `docs/product/features/`. Keep cross-surface foundations and shared product rules directly under `docs/product/`, for example:
 
-- `docs/product/home.md`
-- `docs/product/drawer.md`
-- `docs/product/settings.md`
-- `docs/product/<feature>.md`
+- `docs/product/surfaces/home.md`
+- `docs/product/surfaces/drawer.md`
+- `docs/product/surfaces/settings.md`
+- `docs/product/features/<feature>.md`
 - `docs/product/shared-components.md` when multiple specifications need a genuinely shared interaction contract
 
-Each specification is the authoritative current definition for its own responsibility. It may link to shared component rules instead of duplicating them. It must not preserve a chronological history of every version or iteration; use product decisions, delivery records, and Git history for that purpose.
+Each specification is the authoritative current definition for its own responsibility. Classify it by its primary product responsibility rather than its implementation location: a feature may be triggered from one surface and still belong under `features/` when its independent boundary is the reason for the document. It may link to surface, feature, or shared component rules instead of duplicating them. It must not preserve a chronological history of every version or iteration; use product decisions, delivery records, and Git history for that purpose.
 
 When an iteration changes current behavior, record the before-and-after delivery scope in the iteration record, follow `docs/product-decisions.md` when the author has enabled decision records, and update the affected current product specification in the same change or before integrating the implementation.
 

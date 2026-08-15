@@ -54,6 +54,7 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 - Downward dragging inside an overflowing favorite group scrolls that group toward its start and does not initiate a Home surface transition. The other favorite group's position remains unchanged.
 - Home-to-Drawer dragging is disabled while Home edit mode is active. Handle drags own item movement; other vertical drags inside an overflowing favorite group scroll that group until edit mode ends.
 - A pointer sequence can resolve to only one Home action. Before an interactive element's selection or long-press action has been committed, recognition of an upward drag transfers ownership to the Home-to-Drawer transition and suppresses that element's selection, long-press, and haptic response.
+- In eligible basic-information blank space, two taps may resolve to the lock gesture defined in [double-tap-lock.md](features/double-tap-lock.md). Any drag that takes transition ownership cancels that recognition. Time, date-and-weekday, favorites, and other interactive targets never participate in double-tap locking.
 - Selection is committed only when the pointer is released without the sequence becoming an upward drag or a long-press. Once a long-press has been recognized and its action has opened, the same pointer sequence does not also begin the Drawer transition.
 - A cancelled sequence performs no selection or long-press action and follows the transition cancellation behavior when a Home-to-Drawer drag had already taken ownership.
 

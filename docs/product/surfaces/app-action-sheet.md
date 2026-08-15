@@ -1,6 +1,6 @@
 # Application Action Sheet
 
-> Public semantic source: English. Chinese counterpart: [app-action-sheet.zh-CN.md](app-action-sheet.zh-CN.md). The spatial sketch is the shared [application action sheet wireframe](wireframes/app-action-sheet.txt), with reading rules in the [wireframe index](low-fidelity-wireframes.md).
+> Public semantic source: English. Chinese counterpart: [app-action-sheet.zh-CN.md](app-action-sheet.zh-CN.md). The spatial sketch is the shared [application action sheet wireframe](../wireframes/app-action-sheet.txt), with reading rules in the [wireframe index](../low-fidelity-wireframes.md).
 
 ## Presentation
 

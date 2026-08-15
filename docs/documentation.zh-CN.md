@@ -53,10 +53,11 @@
 | 产品基础需求 | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | 当前事实与规则 | 记录产品问题、作者场景、当前范围、验收意图和开放产品问题 |
 | 产品决策与范围变更 | [`docs/product-decisions.md`](product-decisions.md) | [`docs/product-decisions.zh-CN.md`](product-decisions.zh-CN.md) | 项目治理与决策理由 | 定义决策权，并在启用时记录已经确认的重大产品选择 |
 | 产品导航 | [`docs/product/navigation.md`](product/navigation.md) | [`docs/product/navigation.zh-CN.md`](product/navigation.zh-CN.md) | 当前事实与规则 | 定义界面层级、进入、退出、Back、恢复和公共过渡 |
-| Home 交互 | [`docs/product/home.md`](product/home.md) | [`docs/product/home.zh-CN.md`](product/home.zh-CN.md) | 当前事实与规则 | 定义 Home 信息、收藏、滚动、启动行为和编辑模式 |
-| Drawer 交互 | [`docs/product/drawer.md`](product/drawer.md) | [`docs/product/drawer.zh-CN.md`](product/drawer.zh-CN.md) | 当前事实与规则 | 定义应用清单、分组、排序、字母索引和实时更新 |
-| 应用操作面板 | [`docs/product/app-action-sheet.md`](product/app-action-sheet.md) | [`docs/product/app-action-sheet.zh-CN.md`](product/app-action-sheet.zh-CN.md) | 当前事实与规则 | 定义模态应用快捷操作和启动器操作 |
-| Settings 交互 | [`docs/product/settings.md`](product/settings.md) | [`docs/product/settings.zh-CN.md`](product/settings.zh-CN.md) | 当前事实与规则 | 定义当前 Settings 信息与行为 |
+| Home 交互 | [`docs/product/surfaces/home.md`](product/surfaces/home.md) | [`docs/product/surfaces/home.zh-CN.md`](product/surfaces/home.zh-CN.md) | 当前事实与规则 | 定义 Home 信息、收藏、滚动、启动行为和编辑模式 |
+| Drawer 交互 | [`docs/product/surfaces/drawer.md`](product/surfaces/drawer.md) | [`docs/product/surfaces/drawer.zh-CN.md`](product/surfaces/drawer.zh-CN.md) | 当前事实与规则 | 定义应用清单、分组、排序、字母索引和实时更新 |
+| 应用操作面板 | [`docs/product/surfaces/app-action-sheet.md`](product/surfaces/app-action-sheet.md) | [`docs/product/surfaces/app-action-sheet.zh-CN.md`](product/surfaces/app-action-sheet.zh-CN.md) | 当前事实与规则 | 定义模态应用快捷操作和启动器操作 |
+| Settings 交互 | [`docs/product/surfaces/settings.md`](product/surfaces/settings.md) | [`docs/product/surfaces/settings.zh-CN.md`](product/surfaces/settings.zh-CN.md) | 当前事实与规则 | 定义当前 Settings 信息与行为 |
+| 双击锁屏 | [`docs/product/features/double-tap-lock.md`](product/features/double-tap-lock.md) | [`docs/product/features/double-tap-lock.zh-CN.md`](product/features/double-tap-lock.zh-CN.md) | 当前事实与规则 | 定义 Home 手势、可选无障碍服务边界、授权、失败与披露行为 |
 | 低保真线框图 | [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) | [`docs/product/low-fidelity-wireframes.zh-CN.md`](product/low-fidelity-wireframes.zh-CN.md) | 当前产品可视化 | 可视化当前 Home、Drawer、应用操作面板与 Settings 契约，但不替代其规范性文字 |
 | 产品设计基础约束 | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | 当前事实与规则 | 定义当前主题、布局、字体、图标、无障碍和资源原则 |
 | 产品字典 | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | 当前事实与规则 | 定义规范产品术语 |
@@ -90,15 +91,15 @@
 
 ### 交互规格
 
-仅在相关行为已具备定义条件时创建交互规格。按页面、弹窗或相对独立的功能模块拆分，例如：
+仅在相关行为已具备定义条件时创建交互规格。将页面、弹窗、面板及其他可独立识别的界面表面契约放在 `docs/product/surfaces/` 下；将具有独立启用、授权、状态、失败、隐私或验收边界的相对独立功能放在 `docs/product/features/` 下；跨界面基础和公共产品规则直接保留在 `docs/product/` 下。例如：
 
-- `docs/product/home.md`
-- `docs/product/drawer.md`
-- `docs/product/settings.md`
-- `docs/product/<feature>.md`
+- `docs/product/surfaces/home.md`
+- `docs/product/surfaces/drawer.md`
+- `docs/product/surfaces/settings.md`
+- `docs/product/features/<feature>.md`
 - 当多份规格实际共用交互契约时，创建 `docs/product/shared-components.md`
 
-每份规格是其职责范围内的当前权威定义。它可以链接到公共组件规则，而不复制内容。交互规格不保留每个版本或迭代的时间顺序历史；该历史由产品决定、交付记录和 Git 历史承担。
+每份规格是其职责范围内的当前权威定义。应按主要产品责任而非实现位置分类：当独立边界正是建立该文档的原因时，一个从单一界面触发的功能仍可归入 `features/`。规格可以链接到界面表面、功能或公共组件规则，而不复制内容。交互规格不保留每个版本或迭代的时间顺序历史；该历史由产品决定、交付记录和 Git 历史承担。
 
 当迭代改变当前行为时，在迭代记录中记录交付前后的范围；当作者启用决策记录后，遵循 `docs/product-decisions.md`；并在同一变更中或接入实现前更新受影响的当前产品规格。
 

@@ -1,6 +1,6 @@
 # 应用操作面板
 
-> 英文语义源：[app-action-sheet.md](app-action-sheet.md)。空间草图见共享的[应用操作面板线框](wireframes/app-action-sheet.txt)，阅读规则见[线框索引](low-fidelity-wireframes.zh-CN.md)。
+> 英文语义源：[app-action-sheet.md](app-action-sheet.md)。空间草图见共享的[应用操作面板线框](../wireframes/app-action-sheet.txt)，阅读规则见[线框索引](../low-fidelity-wireframes.zh-CN.md)。
 
 ## 呈现
 

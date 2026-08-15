@@ -1,6 +1,6 @@
 # Drawer Interaction Specification
 
-> Public semantic source: English. Chinese counterpart: [drawer.zh-CN.md](drawer.zh-CN.md). Shared navigation is defined in [navigation.md](navigation.md); the spatial sketch is the shared [Drawer wireframe](wireframes/drawer.txt), with reading rules in the [wireframe index](low-fidelity-wireframes.md).
+> Public semantic source: English. Chinese counterpart: [drawer.zh-CN.md](drawer.zh-CN.md). Shared navigation is defined in [navigation.md](../navigation.md); the spatial sketch is the shared [Drawer wireframe](../wireframes/drawer.txt), with reading rules in the [wireframe index](../low-fidelity-wireframes.md).
 
 ## Purpose and layout
 
@@ -11,7 +11,7 @@ Drawer presents every launchable application entry successfully read from the so
 - The application inventory is a single-column list; a future grid is an additive capability and is outside the current contract.
 - Each section anchor occupies its own row and remains pinned while its section is current.
 - Each application row is at least `56dp` high and displays a `40dp` platform icon, platform-provided badge when present, and application name, with `16dp` between icon and name.
-- An application name occupies exactly one static line. A name that does not fit uses end ellipsis as defined in [design-foundations.md](design-foundations.md).
+- An application name occupies exactly one static line. A name that does not fit uses end ellipsis as defined in [design-foundations.md](../design-foundations.md).
 - Selecting an application immediately launches it and suppresses duplicate rapid activation.
 - Long-pressing an application produces long-press haptic feedback and opens the application action sheet.
 

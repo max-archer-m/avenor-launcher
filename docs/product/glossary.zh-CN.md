@@ -15,6 +15,7 @@
 | Section anchor | 分组锚点 | Drawer 中吸顶的分组标题，例如 A 或 `#` |
 | Alphabet index | 字母索引 | Drawer 右侧用于跳转到锚点的固定索引 |
 | Edit mode | 编辑模式 | Home 中显示模块边界，并允许收藏排序或跨组移动的状态 |
+| Double-tap lock | 双击锁屏 | 通过 Avenor 用途受限的无障碍服务请求一次 Android 系统锁屏操作的可选 Home 手势 |
 | Badge | 标记 | 平台提供的分身或资料身份视觉标记 |
 | Application information | 应用信息 | 系统负责的应用信息与管理界面 |
 | Private Space | 私密空间 | 当前产品契约之外的 Android 隐藏资料能力；Avenor 不申请 `ACCESS_HIDDEN_PROFILES` 访问该能力 |

@@ -1,6 +1,6 @@
 # Settings 交互规格
 
-> 英文语义源：[settings.md](settings.md)。空间草图见共享的 [Settings 线框](wireframes/settings.txt)，阅读规则见[线框索引](low-fidelity-wireframes.zh-CN.md)。
+> 英文语义源：[settings.md](settings.md)。空间草图见共享的 [Settings 线框](../wireframes/settings.txt)，阅读规则见[线框索引](../low-fidelity-wireframes.zh-CN.md)。
 
 ## 入口与返回
 
@@ -15,6 +15,8 @@
 - **默认主屏幕应用：** 展示当前默认 Launcher 状态，并打开系统默认主屏幕应用设置。
 - 标题为 `默认主屏幕应用`；副标题根据当前系统状态显示 `已设为默认启动器` 或 `未设为默认启动器`。
 - 从系统界面返回后立即刷新副标题。
+- **双击锁屏：** 只有 [double-tap-lock.zh-CN.md](../features/double-tap-lock.zh-CN.md) 所需的 Avenor 无障碍服务已经启用并连接时，副标题显示 `已开启`；其他情况显示 `已关闭`。
+- 点击双击锁屏后打开本地说明与披露流程，而不是直接切换开关。Android 系统状态是唯一权威来源；从无障碍设置返回后立即刷新副标题。
 
 ### 语言行为
 
@@ -43,6 +45,7 @@
 - 面板的遮罩、顶部拖动柄、下拉关闭、点击遮罩关闭和 Back 关闭行为与应用操作面板一致。
 - 隐私内容超过面板可用高度时纵向滚动；关闭后返回 Settings 原位置。
 - 实际隐私文本仍待起草；当产品数据和发行条件需要时，应取得专业复核。
+- 隐私声明必须包含当前双击锁屏无障碍服务、唯一用途、不读取窗口内容与不收集数据的边界，以及由用户控制的系统授权方式。
 
 ## License 呈现
 

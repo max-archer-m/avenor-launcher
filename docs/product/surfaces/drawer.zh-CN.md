@@ -1,6 +1,6 @@
 # Drawer 交互规格
 
-> 英文语义源：[drawer.md](drawer.md)。公共导航见 [navigation.zh-CN.md](navigation.zh-CN.md)，空间草图见共享的 [Drawer 线框](wireframes/drawer.txt)，阅读规则见[线框索引](low-fidelity-wireframes.zh-CN.md)。
+> 英文语义源：[drawer.md](drawer.md)。公共导航见 [navigation.zh-CN.md](../navigation.zh-CN.md)，空间草图见共享的 [Drawer 线框](../wireframes/drawer.txt)，阅读规则见[线框索引](../low-fidelity-wireframes.zh-CN.md)。
 
 ## 目的与布局
 
@@ -11,7 +11,7 @@ Drawer 展示从平台暴露给 Launcher 的来源中成功读取的全部可启
 - 应用清单使用单列列表；未来网格属于可叠加能力，不在当前契约中定义。
 - 每个分组锚点标题独占一行，并在对应分组处于当前区域时吸顶。
 - 每个应用条目至少高 `56dp`，展示 `40dp` 的平台图标、存在时的平台 badge 和应用名称；图标与名称之间为 `16dp`。
-- 应用名称只占一行并保持静止；无法完整显示时，使用 [design-foundations.zh-CN.md](design-foundations.zh-CN.md) 定义的末尾省略号。
+- 应用名称只占一行并保持静止；无法完整显示时，使用 [design-foundations.zh-CN.md](../design-foundations.zh-CN.md) 定义的末尾省略号。
 - 点击应用后立即启动，并抑制短时间内的重复启动。
 - 长按应用产生长按触觉反馈并打开应用操作面板。
 

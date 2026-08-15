@@ -1,6 +1,6 @@
 # Settings Interaction Specification
 
-> Public semantic source: English. Chinese counterpart: [settings.zh-CN.md](settings.zh-CN.md). The spatial sketch is the shared [Settings wireframe](wireframes/settings.txt), with reading rules in the [wireframe index](low-fidelity-wireframes.md).
+> Public semantic source: English. Chinese counterpart: [settings.zh-CN.md](settings.zh-CN.md). The spatial sketch is the shared [Settings wireframe](../wireframes/settings.txt), with reading rules in the [wireframe index](../low-fidelity-wireframes.md).
 
 ## Entry and return
 
@@ -15,6 +15,8 @@
 - **Default home application:** Displays current default-Launcher state and opens the system default-home application settings.
 - The title is `Default home application`. The supporting text is `Avenor is the default launcher` or `Avenor is not the default launcher` according to current system state.
 - Returning from the system destination refreshes the supporting text immediately.
+- **Double-tap to lock:** Displays `On` only while the Avenor accessibility service required by [double-tap-lock.md](../features/double-tap-lock.md) is enabled and connected; otherwise it displays `Off`.
+- Selecting Double-tap to lock opens its local explanation and disclosure flow rather than behaving as a direct toggle. Android system state is authoritative, and returning from accessibility settings refreshes the supporting text immediately.
 
 ### Language behavior
 
@@ -43,6 +45,7 @@ Complex logs, update checks, backup, cloud synchronization, diagnostic export, a
 - The sheet uses the same scrim, top drag handle, drag-to-dismiss, scrim-tap dismissal, and Back dismissal behavior as the application action sheet.
 - Privacy content scrolls vertically when it exceeds the available sheet height. Closing returns to the same Settings position.
 - The actual privacy text remains to be authored and professionally reviewed when the product's data and distribution conditions require it.
+- The statement must include the current double-tap-lock accessibility service, its sole purpose, its no-window-content and no-data-collection boundary, and user-controlled system authorization.
 
 ## License presentation
 
