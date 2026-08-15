@@ -678,6 +678,41 @@ class HomeScreenTest {
             selectActiveMarqueeKey(false, true, "pressed", null, null, overflowing),
         )
     }
+
+    @Test
+    fun homeFavoriteActionSheetOffersEditForTwoOrMoreFavorites() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.first", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "First favorite",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val second = LaunchableIdentity(
+            profileSerialNumber = 0,
+            componentName = ComponentName("com.example.second", "MainActivity"),
+        )
+        var editRequested = false
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    favoriteState = FavoriteReadState.Readable(listOf(entry.identity, second)),
+                    onDismiss = {},
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    onEditFavorites = { editRequested = true },
+                    canEditFavorites = true,
+                    informationLauncher = ApplicationInformationLauncher { true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("edit_favorites_action").performClick()
+        composeRule.runOnIdle { assertEquals(true, editRequested) }
+    }
 }
 
 private fun completeSnapshot(vararg entries: LaunchableEntry): LaunchableInventorySnapshot =
@@ -709,6 +744,13 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
         mutableState.value = FavoriteReadState.Readable(
             readable.identities.filterNot(identities::contains),
         )
+        return true
+    }
+
+    override suspend fun replaceOrder(identities: List<LaunchableIdentity>): Boolean {
+        val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
+        if (!isValidReplacement(readable.identities, identities)) return false
+        mutableState.value = FavoriteReadState.Readable(identities)
         return true
     }
 

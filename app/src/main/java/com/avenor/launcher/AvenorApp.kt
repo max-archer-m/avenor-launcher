@@ -107,9 +107,14 @@ internal fun AvenorApp(
         mutableStateOf<Map<LaunchableIdentity, FavoriteAvailability>>(emptyMap())
     }
     var selectedEntry by remember { mutableStateOf<LaunchableEntry?>(null) }
+    var selectedEntryFromHome by remember { mutableStateOf(false) }
+    var homeEditMode by remember { mutableStateOf(false) }
+    var editMembership by remember { mutableStateOf<Set<LaunchableIdentity>>(emptySet()) }
     val homeActivationGuard = remember { RapidActivationGuard() }
     val unavailableFavoriteMessage = stringResource(R.string.favorite_application_unavailable)
     val launchFailureMessage = stringResource(R.string.application_unable_to_open)
+    val favoritesChangedMessage = stringResource(R.string.favorites_changed_edit_ended)
+    val inventoryFailureMessage = stringResource(R.string.inventory_update_failed_edit_ended)
 
     LaunchedEffect(effectiveFavoriteStore) {
         effectiveFavoriteStore.load()
@@ -126,6 +131,23 @@ internal fun AvenorApp(
 
     LaunchedEffect(favoriteState) {
         if (favoriteState !is FavoriteReadState.Readable) selectedEntry = null
+        if (homeEditMode) {
+            val readable = favoriteState as? FavoriteReadState.Readable
+            if (readable == null) {
+                homeEditMode = false
+                Toast.makeText(androidContext, inventoryFailureMessage, Toast.LENGTH_SHORT).show()
+            } else if (readable.identities.toSet() != editMembership) {
+                homeEditMode = false
+                Toast.makeText(androidContext, favoritesChangedMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    LaunchedEffect(inventoryState) {
+        if (homeEditMode && inventoryState is LaunchableInventoryState.Error) {
+            homeEditMode = false
+            Toast.makeText(androidContext, inventoryFailureMessage, Toast.LENGTH_SHORT).show()
+        }
     }
 
     LaunchedEffect(favoriteState, inventoryState, effectiveFavoriteStore, inventoryCoordinator) {
@@ -218,7 +240,11 @@ internal fun AvenorApp(
         settleTo(target)
     }
 
-    BackHandler(enabled = settledSurface == AvenorSurface.Drawer || progress > 0f) {
+    BackHandler(enabled = homeEditMode) {
+        homeEditMode = false
+    }
+
+    BackHandler(enabled = !homeEditMode && (settledSurface == AvenorSurface.Drawer || progress > 0f)) {
         settleTo(AvenorSurface.Home)
     }
 
@@ -344,15 +370,30 @@ internal fun AvenorApp(
             modifier = Modifier
                 .fillMaxSize()
                 .alpha((1f - (2f * progress)).coerceIn(0f, 1f))
-                .then(gestureModifier)
+                .then(if (homeEditMode) Modifier else gestureModifier)
                 .testTag("home_surface"),
         ) {
             HomeScreen(
                 favoriteState = favoriteState,
                 favoriteAvailability = favoriteAvailability,
                 marqueePaused = progress > 0f || selectedEntry != null,
+                editMode = homeEditMode,
                 onRetryFavorites = { scope.launch { effectiveFavoriteStore.load() } },
-                onLongPressFavorite = { entry -> selectedEntry = entry },
+                onLongPressFavorite = { entry ->
+                    selectedEntryFromHome = true
+                    selectedEntry = entry
+                },
+                onReorderFavorites = { identities ->
+                    scope.launch {
+                        if (!effectiveFavoriteStore.replaceOrder(identities)) {
+                            Toast.makeText(
+                                androidContext,
+                                R.string.favorite_reorder_unavailable,
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+                    }
+                },
                 onLaunchFavorite = { availability ->
                     when {
                         availability !is FavoriteAvailability.Available -> {
@@ -395,7 +436,10 @@ internal fun AvenorApp(
                     listState = drawerListState,
                     active = settledSurface == AvenorSurface.Drawer || progress > 0f,
                     marqueePaused = progress > 0f && progress < 1f || selectedEntry != null,
-                    onLongPress = { entry -> selectedEntry = entry },
+                    onLongPress = { entry ->
+                        selectedEntryFromHome = false
+                        selectedEntry = entry
+                    },
                 )
             }
         }
@@ -404,7 +448,10 @@ internal fun AvenorApp(
             ApplicationActionSheet(
                 entry = entry,
                 favoriteState = favoriteState,
-                onDismiss = { selectedEntry = null },
+                onDismiss = {
+                    selectedEntry = null
+                    selectedEntryFromHome = false
+                },
                 onAddFavorite = {
                     scope.launch { effectiveFavoriteStore.add(entry.identity) }
                     selectedEntry = null
@@ -413,6 +460,16 @@ internal fun AvenorApp(
                     scope.launch { effectiveFavoriteStore.remove(entry.identity) }
                     selectedEntry = null
                 },
+                onEditFavorites = {
+                    editMembership = (favoriteState as? FavoriteReadState.Readable)
+                        ?.identities
+                        ?.toSet()
+                        .orEmpty()
+                    homeEditMode = true
+                    selectedEntry = null
+                    selectedEntryFromHome = false
+                },
+                canEditFavorites = selectedEntryFromHome,
                 informationLauncher = informationLauncher,
             )
         }
@@ -442,6 +499,12 @@ private class InMemoryFavoriteStore : FavoriteStore {
         mutableState.value = FavoriteReadState.Readable(
             current.identities.filterNot(identities::contains),
         )
+        return true
+    }
+    override suspend fun replaceOrder(identities: List<LaunchableIdentity>): Boolean {
+        val current = mutableState.value as? FavoriteReadState.Readable ?: return false
+        if (!isValidReplacement(current.identities, identities)) return false
+        mutableState.value = FavoriteReadState.Readable(identities)
         return true
     }
 }

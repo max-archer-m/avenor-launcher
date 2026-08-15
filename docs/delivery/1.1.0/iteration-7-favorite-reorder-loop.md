@@ -4,9 +4,9 @@
 
 ## Status
 
-- Value: `Planned`
-- Updated: 2026-08-13
-- Basis: The author selected favorite reordering for `1.1.0`; production implementation has not yet been authorized.
+- Value: `Completed`
+- Updated: 2026-08-16
+- Basis: The implementation was completed and the project author reported that Iteration 7 acceptance passed.
 
 ## Objective
 
@@ -70,18 +70,20 @@ Recommended scenarios include zero/one/two/many primary favorites; confirmation 
 
 ## Acceptance evidence
 
-No implementation evidence exists. When performed, record executor, build/source identity, device, starting order, moves, resulting persisted order, failures, and skipped scenarios.
+- On 2026-08-16, the project author reported that the Iteration 7 changes passed acceptance.
+- The accepted implementation covers the Home-only Edit entry for two or more primary favorites, full-width edit presentation, primary-favorite reorder and persistence, Back exit, and edit-mode gesture ownership.
+- The author did not provide the build identity, device identity, detailed scenario log, or separate automated-command results in this acceptance report; those details remain `Unknown` and no additional result is inferred.
 
 ## Related decisions, commits, and tags
 
 - [ADR-0002](../../decisions/0002-use-versioned-atomic-file-for-favorites.md)
 - [ADR-0003](../../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md)
-- No implementation commit or tag exists for this iteration.
+- The implementation and completion-state change are included in the corresponding Git commit; no tag was created.
 
 ## Final result
 
-No final result exists while the iteration is `Planned`.
+Iteration 7 is complete. The accepted result provides the selected `1.1.0` primary-favorite reorder loop without adding companion-favorite or cross-group behavior.
 
 ## Remaining issues and handoff
 
-Development should first compare the current persistence and gesture implementation with the linked product contract, then report any consequential mismatch before implementation. The author must authorize the transition to `In Progress`.
+No Iteration 7 delivery issue remains open. Validation details absent from the author report remain `Unknown`; broader companion-favorite and cross-group editing remain outside the selected `1.1.0` scope.

@@ -10,6 +10,11 @@
     <string name="application_information_unavailable">无法打开应用信息</string>
     <string name="add_favorite">添加收藏</string>
     <string name="remove_favorite">取消收藏</string>
+    <string name="edit_favorites">编辑</string>
+    <string name="favorite_reorder_handle">移动收藏</string>
+    <string name="favorite_reorder_unavailable">无法保存收藏顺序</string>
+    <string name="favorites_changed_edit_ended">收藏应用已发生变化，编辑模式已结束</string>
+    <string name="inventory_update_failed_edit_ended">暂时无法更新应用状态，编辑模式已结束</string>
     <string name="favorites_unavailable">收藏不可用</string>
     <string name="loading_favorites">正在加载收藏…</string>
     <string name="unable_to_load_favorites">无法加载收藏</string>

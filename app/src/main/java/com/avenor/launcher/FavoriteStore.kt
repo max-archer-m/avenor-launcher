@@ -28,6 +28,7 @@ internal interface FavoriteStore {
     suspend fun add(identity: LaunchableIdentity): Boolean
     suspend fun remove(identity: LaunchableIdentity): Boolean
     suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean
+    suspend fun replaceOrder(identities: List<LaunchableIdentity>): Boolean
 }
 
 internal class AtomicFileFavoriteStore private constructor(
@@ -114,6 +115,26 @@ internal class AtomicFileFavoriteStore private constructor(
             writeSucceeded
         }
 
+    override suspend fun replaceOrder(identities: List<LaunchableIdentity>): Boolean =
+        mutationMutex.withLock {
+            val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
+            if (!isValidReplacement(readable.identities, identities)) return false
+            if (identities == readable.identities) return true
+
+            val writeSucceeded = withContext(Dispatchers.IO) {
+                try {
+                    writeDocument(identities)
+                    true
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: Exception) {
+                    false
+                }
+            }
+            if (writeSucceeded) mutableState.value = FavoriteReadState.Readable(identities)
+            writeSucceeded
+        }
+
     private fun readDocument(): List<LaunchableIdentity> =
         DataInputStream(BufferedInputStream(atomicFile.openRead())).use { input ->
             require(input.readInt() == MAGIC) { "Unrecognized favorites document" }
@@ -161,4 +182,16 @@ internal class AtomicFileFavoriteStore private constructor(
         const val MAGIC = 0x4156454E
         const val SCHEMA_VERSION = 1
     }
+}
+
+internal fun isValidReplacement(
+    current: List<LaunchableIdentity>,
+    replacement: List<LaunchableIdentity>,
+): Boolean = replacement.size == current.size &&
+    replacement.distinct().size == replacement.size &&
+    replacement.toSet() == current.toSet()
+
+internal fun <T> List<T>.moved(fromIndex: Int, toIndex: Int): List<T> {
+    if (fromIndex !in indices || toIndex !in indices || fromIndex == toIndex) return this
+    return toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
 }

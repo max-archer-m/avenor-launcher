@@ -95,6 +95,29 @@ class FavoriteStoreTest {
         file.delete()
     }
 
+    @Test
+    fun replaceOrderPersistsOnlyACompletePermutation() = runBlocking {
+        val file = temporaryFavoriteFile()
+        val store = AtomicFileFavoriteStore(file)
+        val first = identity(1, "com.example.first", "Main")
+        val second = identity(1, "com.example.second", "Main")
+        val third = identity(2, "com.example.third", "Main")
+        store.load()
+        store.add(first)
+        store.add(second)
+        store.add(third)
+
+        assertFalse(store.replaceOrder(listOf(first, first, third)))
+        assertFalse(store.replaceOrder(listOf(first, second)))
+        assertEquals(listOf(first, second, third), store.readableIdentities())
+        assertTrue(store.replaceOrder(listOf(third, first, second)))
+
+        val reloadedStore = AtomicFileFavoriteStore(file)
+        reloadedStore.load()
+        assertEquals(listOf(third, first, second), reloadedStore.readableIdentities())
+        file.delete()
+    }
+
     private fun temporaryFavoriteFile() = ApplicationProvider.getApplicationContext<android.content.Context>()
         .cacheDir
         .resolve("favorites-${UUID.randomUUID()}.bin")

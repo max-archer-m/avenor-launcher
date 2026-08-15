@@ -75,11 +75,17 @@ internal fun ApplicationActionSheet(
     onDismiss: () -> Unit,
     onAddFavorite: () -> Unit,
     onRemoveFavorite: () -> Unit,
+    onEditFavorites: () -> Unit = {},
+    canEditFavorites: Boolean = false,
     informationLauncher: ApplicationInformationLauncher,
 ) {
     val context = LocalContext.current
     val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val showsEdit = canEditFavorites &&
+        favoriteState is FavoriteReadState.Readable &&
+        entry.identity in favoriteState.identities &&
+        favoriteState.identities.size >= 2
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -183,9 +189,19 @@ internal fun ApplicationActionSheet(
                                 disabledAlpha = disabledAlpha,
                                 onClick = onRemoveFavorite,
                             )
+                            if (showsEdit) {
+                                FavoriteActionSlot(
+                                    label = stringResource(R.string.edit_favorites),
+                                    icon = R.drawable.ic_edit_favorites,
+                                    enabled = true,
+                                    disabledAlpha = disabledAlpha,
+                                    onClick = onEditFavorites,
+                                    testTag = "edit_favorites_action",
+                                )
+                            }
                         }
                     }
-                    repeat(4) { Spacer(Modifier.weight(1f)) }
+                    repeat(if (showsEdit) 3 else 4) { Spacer(Modifier.weight(1f)) }
                 }
             }
 
@@ -214,6 +230,7 @@ private fun RowScope.FavoriteActionSlot(
     enabled: Boolean,
     disabledAlpha: Float,
     onClick: () -> Unit,
+    testTag: String = "favorite_action",
 ) {
     androidx.compose.material3.TextButton(
         onClick = onClick,
@@ -224,7 +241,7 @@ private fun RowScope.FavoriteActionSlot(
         ),
         modifier = Modifier
             .weight(1f)
-            .testTag("favorite_action"),
+            .testTag(testTag),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(

@@ -27,6 +27,12 @@
     <dimen name="home_favorite_icon_size">40dp</dimen>
     <dimen name="home_favorite_icon_label_gap">16dp</dimen>
     <dimen name="home_favorite_error_icon_size">48dp</dimen>
+    <dimen name="home_module_spacing">16dp</dimen>
+    <dimen name="home_edit_surface_radius">8dp</dimen>
+    <dimen name="home_reorder_handle_size">24dp</dimen>
+    <dimen name="home_reorder_handle_target_size">48dp</dimen>
+    <dimen name="home_reorder_edge_scroll_step">12dp</dimen>
+    <dimen name="home_reorder_drag_elevation">12dp</dimen>
     <dimen name="action_sheet_horizontal_padding">16dp</dimen>
     <dimen name="action_sheet_divider_inset">16dp</dimen>
     <dimen name="action_sheet_handle_width">32dp</dimen>
