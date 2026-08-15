@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!--
+          Debug-only technical probe. Iteration 10 must not move this service to
+          main until its evidence-backed ADR exists and authorizes integration.
+        -->
+        <service
+            android:name=".AccessibilityLockProbeService"
+            android:description="@string/accessibility_lock_probe_description"
+            android:exported="true"
+            android:label="@string/accessibility_lock_probe_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_lock_probe_config" />
+        </service>
+    </application>
+
+</manifest>

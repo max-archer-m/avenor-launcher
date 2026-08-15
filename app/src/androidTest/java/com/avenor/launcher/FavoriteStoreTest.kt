@@ -12,6 +12,30 @@ import org.junit.Test
 
 class FavoriteStoreTest {
     @Test
+    fun contextStoreWritesFavoritesInsideTheExcludedFilesDirectory() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val file = context.filesDir.resolve("favorites.bin")
+        val newFile = context.filesDir.resolve("favorites.bin.new")
+        val legacyBackupFile = context.filesDir.resolve("favorites.bin.bak")
+        file.delete()
+        newFile.delete()
+        legacyBackupFile.delete()
+        val store = AtomicFileFavoriteStore(context)
+
+        try {
+            store.load()
+            assertTrue(store.add(identity(1, "com.example", "Main")))
+
+            assertTrue(file.isFile)
+            assertEquals(context.filesDir.canonicalFile, file.parentFile?.canonicalFile)
+        } finally {
+            file.delete()
+            newFile.delete()
+            legacyBackupFile.delete()
+        }
+    }
+
+    @Test
     fun addDeduplicateRemoveAndBatchRemovePreserveOrder() = runBlocking {
         val file = temporaryFavoriteFile()
         val store = AtomicFileFavoriteStore(file)

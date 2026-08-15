@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_lock_probe_description">仅用于验证用途受限锁屏服务边界的调试技术探针</string>
+    <string name="accessibility_lock_probe_label">Avenor 双击锁屏技术探针</string>
+</resources>
