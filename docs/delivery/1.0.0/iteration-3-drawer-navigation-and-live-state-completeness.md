@@ -19,7 +19,7 @@ Complete the `1.0.0` Drawer product behavior so application discovery remains fa
 - [1.0.0 delivery contract](delivery.md)
 - [1.0.0 product scope](product-scope.md)
 - [Product navigation](../../product/navigation.md)
-- [Drawer interaction](../../product/drawer.md)
+- [Drawer interaction](../../product/surfaces/drawer.md)
 - [Product design foundations](../../product/design-foundations.md)
 
 ## Observable outcome

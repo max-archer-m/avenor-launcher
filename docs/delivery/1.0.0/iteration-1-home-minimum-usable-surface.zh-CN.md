@@ -20,7 +20,7 @@
 - [1.0.0 产品范围](product-scope.zh-CN.md)
 - [1.0.0 技术评估](technical-assessment.zh-CN.md)
 - [产品导航](../../product/navigation.zh-CN.md)
-- [Home 交互](../../product/home.zh-CN.md)
+- [Home 交互](../../product/surfaces/home.zh-CN.md)
 - [产品设计基础约束](../../product/design-foundations.zh-CN.md)
 
 链接的产品文档继续作为详细行为的权威来源。本迭代只选择下列 Home 行为。

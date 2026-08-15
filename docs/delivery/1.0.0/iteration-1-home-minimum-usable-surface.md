@@ -20,7 +20,7 @@ Deliver an installable Avenor build that Android can recognize as a Home applica
 - [1.0.0 product scope](product-scope.md)
 - [1.0.0 technical assessment](technical-assessment.md)
 - [Product navigation](../../product/navigation.md)
-- [Home interaction](../../product/home.md)
+- [Home interaction](../../product/surfaces/home.md)
 - [Product design foundations](../../product/design-foundations.md)
 
 The linked product documents remain authoritative for detailed behavior. This iteration selects only the Home behavior listed below.

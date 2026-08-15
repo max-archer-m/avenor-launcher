@@ -28,11 +28,12 @@ The Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusable method
 - Development guide: [docs/development.md](docs/development.md)
 - Validation guide: [docs/validation.md](docs/validation.md)
 - Product foundation requirements: [docs/requirements/product-foundation.md](docs/requirements/product-foundation.md)
+- Privacy and data handling: [docs/product/features/privacy.md](docs/product/features/privacy.md)
 - Version, artifact, and release governance: [docs/release.md](docs/release.md)
 - Version and iteration delivery formats: [docs/versions/version-delivery-format.md](docs/versions/version-delivery-format.md) and [docs/iterations/iteration-record-format.md](docs/iterations/iteration-record-format.md)
 - License: [LICENSE](LICENSE)
 
-System architecture, security, and privacy documents have not yet been established. The development and validation guides record the current minimum project baseline without claiming unperformed commands or results. Architecture decisions exist only where an active ADR records their exact scope; do not infer broader architecture from an ADR or treat implementation assessments and other planned paths as current architecture evidence.
+System architecture and security documents have not yet been established. The current product Privacy statement and data-handling boundary are defined in the product document linked above; it is not a specialist legal or store-approval conclusion. The development and validation guides record the current minimum project baseline without claiming unperformed commands or results. Architecture decisions exist only where an active ADR records their exact scope; do not infer broader architecture from an ADR or treat implementation assessments and other planned paths as current architecture evidence.
 
 ## Language
 

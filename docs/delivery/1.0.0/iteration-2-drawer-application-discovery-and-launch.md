@@ -20,7 +20,7 @@ Extend the accepted Home increment so the author can enter Drawer, see the launc
 - [1.0.0 product scope](product-scope.md)
 - [1.0.0 technical assessment](technical-assessment.md)
 - [Product navigation](../../product/navigation.md)
-- [Drawer interaction](../../product/drawer.md)
+- [Drawer interaction](../../product/surfaces/drawer.md)
 - [Product design foundations](../../product/design-foundations.md)
 
 The linked product documents remain authoritative. This iteration establishes the core discovery and launch path; Iteration 3 completes the advanced navigation and live-state behavior.

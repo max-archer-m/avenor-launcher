@@ -19,9 +19,9 @@ Complete the `1.0.0` favorite lifecycle so the author can add, persist, launch, 
 - [1.0.0 delivery contract](delivery.md)
 - [1.0.0 product scope](product-scope.md)
 - [Product navigation](../../product/navigation.md)
-- [Home interaction](../../product/home.md)
-- [Drawer interaction](../../product/drawer.md)
-- [Application action sheet](../../product/app-action-sheet.md)
+- [Home interaction](../../product/surfaces/home.md)
+- [Drawer interaction](../../product/surfaces/drawer.md)
+- [Application action sheet](../../product/surfaces/app-action-sheet.md)
 
 ## Observable outcome
 

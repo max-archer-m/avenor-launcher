@@ -19,7 +19,7 @@
 - [1.0.0 交付契约](delivery.zh-CN.md)
 - [1.0.0 产品范围](product-scope.zh-CN.md)
 - [产品导航](../../product/navigation.zh-CN.md)
-- [Drawer 交互](../../product/drawer.zh-CN.md)
+- [Drawer 交互](../../product/surfaces/drawer.zh-CN.md)
 - [产品设计基础约束](../../product/design-foundations.zh-CN.md)
 
 ## 可观察结果

@@ -20,7 +20,7 @@
 - [1.0.0 产品范围](product-scope.zh-CN.md)
 - [1.0.0 技术评估](technical-assessment.zh-CN.md)
 - [产品导航](../../product/navigation.zh-CN.md)
-- [Drawer 交互](../../product/drawer.zh-CN.md)
+- [Drawer 交互](../../product/surfaces/drawer.zh-CN.md)
 - [产品设计基础约束](../../product/design-foundations.zh-CN.md)
 
 链接的产品文档继续作为权威来源。本迭代建立核心发现与启动路径；迭代 3 完成高级导航与实时状态行为。

@@ -22,9 +22,9 @@ The selected behavior is governed by:
 
 - [Product foundation requirements](../../requirements/product-foundation.md)
 - [Product navigation](../../product/navigation.md)
-- [Home interaction](../../product/home.md)
-- [Drawer interaction](../../product/drawer.md)
-- [Application action sheet](../../product/app-action-sheet.md)
+- [Home interaction](../../product/surfaces/home.md)
+- [Drawer interaction](../../product/surfaces/drawer.md)
+- [Application action sheet](../../product/surfaces/app-action-sheet.md)
 - [Product design foundations](../../product/design-foundations.md)
 - [Product glossary](../../product/glossary.md)
 

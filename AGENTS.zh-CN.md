@@ -28,11 +28,12 @@ Toolkit locator 为 `../max-ai-toolkit`。Toolkit 提供可复用的方法；本
 - 开发指南：[docs/development.zh-CN.md](docs/development.zh-CN.md)
 - 验证指南：[docs/validation.zh-CN.md](docs/validation.zh-CN.md)
 - 产品基础需求：[docs/requirements/product-foundation.zh-CN.md](docs/requirements/product-foundation.zh-CN.md)
+- 隐私与数据处理：[docs/product/features/privacy.zh-CN.md](docs/product/features/privacy.zh-CN.md)
 - 版本、产物与发布治理：[docs/release.zh-CN.md](docs/release.zh-CN.md)
 - 版本与迭代交付格式：[docs/versions/version-delivery-format.zh-CN.md](docs/versions/version-delivery-format.zh-CN.md) 和 [docs/iterations/iteration-record-format.zh-CN.md](docs/iterations/iteration-record-format.zh-CN.md)
 - 许可证：[LICENSE](LICENSE)
 
-系统架构、安全和隐私文档尚未建立。开发与验证指南记录当前最小项目基线，但不声称未执行的命令或结果。架构决定只在 `Active` ADR 所记录的准确范围内存在；不得从单份 ADR 推断更广泛的架构，也不得将实现评估或其他规划路径视为当前架构证据。
+系统架构和安全文档尚未建立。当前产品 Privacy 正文与数据处理边界由上方链接的产品文档定义；它不是专业法律结论或商店审核通过结论。开发与验证指南记录当前最小项目基线，但不声称未执行的命令或结果。架构决定只在 `Active` ADR 所记录的准确范围内存在；不得从单份 ADR 推断更广泛的架构，也不得将实现评估或其他规划路径视为当前架构证据。
 
 ## 语言
 

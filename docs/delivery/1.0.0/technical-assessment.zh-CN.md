@@ -16,9 +16,9 @@
 
 - [产品基础需求](../../requirements/product-foundation.zh-CN.md)
 - [产品导航](../../product/navigation.zh-CN.md)
-- [Home 交互](../../product/home.zh-CN.md)
-- [Drawer 交互](../../product/drawer.zh-CN.md)
-- [应用操作表](../../product/app-action-sheet.zh-CN.md)
+- [Home 交互](../../product/surfaces/home.zh-CN.md)
+- [Drawer 交互](../../product/surfaces/drawer.zh-CN.md)
+- [应用操作表](../../product/surfaces/app-action-sheet.zh-CN.md)
 - [产品设计基础](../../product/design-foundations.zh-CN.md)
 - [版本与发布治理](../../release.zh-CN.md)
 - [1.0.0 产品范围](product-scope.zh-CN.md)

@@ -19,9 +19,9 @@
 - [1.0.0 交付契约](delivery.zh-CN.md)
 - [1.0.0 产品范围](product-scope.zh-CN.md)
 - [1.0.0 技术评估](technical-assessment.zh-CN.md)
-- [Home 交互](../../product/home.zh-CN.md)
-- [Drawer 交互](../../product/drawer.zh-CN.md)
-- [应用操作面板](../../product/app-action-sheet.zh-CN.md)
+- [Home 交互](../../product/surfaces/home.zh-CN.md)
+- [Drawer 交互](../../product/surfaces/drawer.zh-CN.md)
+- [应用操作面板](../../product/surfaces/app-action-sheet.zh-CN.md)
 - [产品设计基础约束](../../product/design-foundations.zh-CN.md)
 
 ## 可观察结果
