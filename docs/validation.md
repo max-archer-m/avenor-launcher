@@ -47,6 +47,7 @@ An emulator result does not establish physical-device behavior. One device resul
 - Focused implementation changes: use the narrowest relevant build, automated check, and manual journey allowed by the current authorization and environment.
 - Iteration completion: satisfy its acceptance evidence and record every skipped, unavailable, failed, or unknown check as required by the iteration format.
 - Version completion: apply only the gates selected by the version's delivery level and contract. Recommended higher-level evidence does not become mandatory by implication.
+- Device and compatibility gates: the applicable version contract identifies each mandatory environment. Recommended API, device, OEM, or profile evidence that is not performed must be recorded as `Unknown`, `Not run`, or `Unavailable` and does not become a completion blocker merely because it was listed. If a recommended check is performed and exposes a failure on an included path, record and resolve it or return it for explicit author disposition; do not ignore the result because the check was recommended.
 - Formal release artifacts: apply the additional matrix, automation, review, signing, traceability, and retention gates explicitly defined by [release governance](release.md) and the applicable version contract.
 
 ## Result reporting
