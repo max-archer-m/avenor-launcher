@@ -187,7 +187,7 @@ The current product lets users maintain Home favorites and use individual Settin
 - System-locale-derived language presentation and other interface settings in the current product contract are local behavior, not behavioral analytics data.
 - Time and date come directly from the device system and are not retained as historical data.
 - The current product does not collect or store accessibility window content or events, notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.
-- The current product has no account, cloud synchronization, server, or cross-device backup.
+- The current product has no account, cloud synchronization, server, cloud backup, or cross-device backup. Android cloud backup and device-to-device transfer backup are disabled for Avenor-owned favorite data until a later author-approved restoration contract defines otherwise.
 
 ## Dependencies and risks
 

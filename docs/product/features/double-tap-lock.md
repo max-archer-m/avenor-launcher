@@ -1,6 +1,6 @@
 # Double-Tap Lock Interaction Specification
 
-> Public semantic source: English. Chinese counterpart: [double-tap-lock.zh-CN.md](double-tap-lock.zh-CN.md).
+> Public semantic source: English. Chinese counterpart: [double-tap-lock.zh-CN.md](double-tap-lock.zh-CN.md). Current Privacy and prominent-disclosure copy is defined in [privacy.md](privacy.md).
 
 ## Purpose and scope
 
@@ -26,7 +26,7 @@ Settings contains one primary item titled `Double-tap to lock`.
 
 - Supporting text is `On` when the required Avenor accessibility service is enabled and connected, and `Off` otherwise.
 - Selecting the item opens a local explanation surface showing the current state, purpose, privacy boundary, and an `Open accessibility settings` action.
-- Before a handoff intended to enable the service, Avenor presents a separate prominent disclosure with `Cancel` and `Continue`. Continue confirms the current handoff and opens the system destination; Avenor does not need to retain a disclosure-acknowledgement history, and continuing does not imply that Android enabled the service.
+- Before a handoff intended to enable the service, Avenor presents the separate prominent disclosure defined in [privacy.md](privacy.md#double-tap-lock-prominent-disclosure), with `Cancel` and `Agree and continue`. Agree and continue confirms only the current handoff and opens the system destination; Avenor retains no disclosure-acknowledgement history, and continuing does not imply that Android enabled the service.
 - Returning from system settings refreshes the actual service state immediately. Android's state is authoritative; Avenor does not display an independent toggle that can become inconsistent with it.
 - When enabled, the explanation surface offers the same system-settings handoff so the user can review or disable the service.
 - Failure to open the system destination shows the short localized Toast `Unable to open accessibility settings` and preserves the current Settings position.
@@ -45,7 +45,7 @@ The current product authorizes an Android accessibility service only for this ex
 
 ## Privacy and distribution
 
-The local Privacy presentation must identify the accessibility service, its sole lock-screen purpose, whether it reads or collects data, how the user enables or disables it, and that Android controls the authorization.
+The local Privacy presentation and separate prominent disclosure use the current product copy in [privacy.md](privacy.md). The disclosure is not replaced by the Privacy statement, service description, application listing, or external page.
 
 Current GitHub-only distribution does not remove this disclosure obligation. Any future store distribution must re-evaluate the applicable accessibility-service declaration, prominent-disclosure, consent, listing, and review requirements before publication.
 

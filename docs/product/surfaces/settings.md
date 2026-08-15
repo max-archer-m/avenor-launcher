@@ -28,7 +28,7 @@
 
 ### About
 
-- **Privacy:** Opens the local Privacy Bottom Sheet.
+- **Privacy:** Opens the local Privacy Bottom Sheet defined by [privacy.md](../features/privacy.md).
 - **Avenor License:** Opens the local Avenor License Bottom Sheet; the English label uses `License`.
 - **Third-party License:** Appears as a separate entry after actual dependencies exist and can be inventoried, and opens its own local scrollable presentation.
 - **Project repository:** Opens the configured repository URL through an implicit system browser action.
@@ -44,8 +44,8 @@ Complex logs, update checks, backup, cloud synchronization, diagnostic export, a
 - The statement must remain available offline.
 - The sheet uses the same scrim, top drag handle, drag-to-dismiss, scrim-tap dismissal, and Back dismissal behavior as the application action sheet.
 - Privacy content scrolls vertically when it exceeds the available sheet height. Closing returns to the same Settings position.
-- The actual privacy text remains to be authored and professionally reviewed when the product's data and distribution conditions require it.
-- The statement must include the current double-tap-lock accessibility service, its sole purpose, its no-window-content and no-data-collection boundary, and user-controlled system authorization.
+- The displayed text is the current user-visible Privacy statement in [privacy.md](../features/privacy.md). It includes the current local data, backup, deletion, external-link, permission, and double-tap-lock boundaries.
+- The GitHub Issues contact address is selectable and uses the implicit browser and localized failure behavior defined by that Privacy contract.
 
 ## License presentation
 
