@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
@@ -712,6 +713,160 @@ class HomeScreenTest {
 
         composeRule.onNodeWithTag("edit_favorites_action").performClick()
         composeRule.runOnIdle { assertEquals(true, editRequested) }
+    }
+
+    @Test
+    fun actionSheetShowsAndInvokesExactApplicationShortcut() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 7,
+                componentName = ComponentName("com.example.shortcuts", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Shortcut application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val shortcut = ApplicationShortcut(
+            packageName = "com.example.shortcuts",
+            shortcutId = "exact-shortcut",
+            label = "Exact shortcut",
+            icon = null,
+            user = entry.user,
+            rank = 2,
+        )
+        var invoked: ApplicationShortcut? = null
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    favoriteState = FavoriteReadState.Readable(emptyList()),
+                    onDismiss = {},
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    shortcuts = listOf(shortcut),
+                    onShortcut = { invoked = it },
+                    informationLauncher = ApplicationInformationLauncher { true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("application_shortcut_region").assertIsDisplayed()
+        composeRule.onNodeWithText("Exact shortcut").performClick()
+        composeRule.runOnIdle { assertEquals(shortcut, invoked) }
+    }
+
+    @Test
+    fun actionSheetOmitsShortcutRegionWhenNoneAreAvailable() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(0, ComponentName("com.example.none", "MainActivity")),
+            user = Process.myUserHandle(),
+            label = "No shortcuts",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    favoriteState = FavoriteReadState.Readable(emptyList()),
+                    onDismiss = {},
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    informationLauncher = ApplicationInformationLauncher { true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("application_shortcut_region").assertDoesNotExist()
+    }
+
+    @Test
+    fun actionSheetScrollsApplicationShortcutsWithinAvailableHeight() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                0,
+                ComponentName("com.example.many.shortcuts", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Many shortcuts",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val shortcuts = List(20) { index ->
+            ApplicationShortcut(
+                packageName = entry.identity.componentName.packageName,
+                shortcutId = "shortcut-$index",
+                label = "Shortcut $index",
+                icon = null,
+                user = entry.user,
+                rank = index,
+            )
+        }
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    favoriteState = FavoriteReadState.Readable(emptyList()),
+                    onDismiss = {},
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    informationLauncher = ApplicationInformationLauncher { true },
+                    shortcuts = shortcuts,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Shortcut 19").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun homeActionSheetLoadsAndLaunchesShortcutForExactEntry() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 11,
+                componentName = ComponentName("com.example.source", "ExactActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Shortcut source",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val shortcut = ApplicationShortcut(
+            packageName = entry.identity.componentName.packageName,
+            shortcutId = "open-exact",
+            label = "Open exact shortcut",
+            icon = null,
+            user = entry.user,
+            rank = 0,
+        )
+        var loadedEntry: LaunchableEntry? = null
+        var launchedShortcut: ApplicationShortcut? = null
+        val controller = object : ApplicationShortcutController {
+            override suspend fun load(entry: LaunchableEntry): List<ApplicationShortcut> {
+                loadedEntry = entry
+                return listOf(shortcut)
+            }
+
+            override fun launch(shortcut: ApplicationShortcut): Boolean {
+                launchedShortcut = shortcut
+                return true
+            }
+        }
+        composeRule.setContent {
+            AvenorTheme {
+                AvenorApp(
+                    inventoryLoader = LaunchableInventoryLoader { completeSnapshot(entry) },
+                    favoriteStore = TestFavoriteStore(listOf(entry.identity)),
+                    shortcutController = controller,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Shortcut source").performTouchInput { longClick() }
+        composeRule.onNodeWithText("Open exact shortcut").assertIsDisplayed().performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(entry, loadedEntry)
+            assertEquals(shortcut, launchedShortcut)
+        }
+        composeRule.onNodeWithTag("application_action_sheet").assertDoesNotExist()
     }
 }
 

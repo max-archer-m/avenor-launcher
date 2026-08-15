@@ -6,6 +6,8 @@ import android.content.pm.LauncherApps
 import android.graphics.Rect
 import android.widget.Toast
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,8 +17,10 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -39,6 +43,8 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.toBitmap
 
@@ -78,6 +84,8 @@ internal fun ApplicationActionSheet(
     onEditFavorites: () -> Unit = {},
     canEditFavorites: Boolean = false,
     informationLauncher: ApplicationInformationLauncher,
+    shortcuts: List<ApplicationShortcut> = emptyList(),
+    onShortcut: (ApplicationShortcut) -> Unit = {},
 ) {
     val context = LocalContext.current
     val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
@@ -156,6 +164,14 @@ internal fun ApplicationActionSheet(
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                 )
+                if (shortcuts.isNotEmpty()) {
+                    ApplicationShortcutRegion(
+                        modifier = Modifier.weight(1f, fill = false),
+                        entry = entry,
+                        shortcuts = shortcuts,
+                        onShortcut = onShortcut,
+                    )
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -253,4 +269,70 @@ private fun RowScope.FavoriteActionSlot(
             Text(text = label, maxLines = 1)
         }
     }
+}
+
+@Composable
+private fun ApplicationShortcutRegion(
+    modifier: Modifier = Modifier,
+    entry: LaunchableEntry,
+    shortcuts: List<ApplicationShortcut>,
+    onShortcut: (ApplicationShortcut) -> Unit,
+) {
+    val iconSize = dimensionResource(R.dimen.action_sheet_shortcut_icon_size)
+    val iconPixels = with(LocalDensity.current) { iconSize.roundToPx() }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .testTag("application_shortcut_region"),
+    ) {
+        shortcuts.forEach { shortcut ->
+            val iconDrawable = shortcut.icon ?: entry.icon
+            val bitmap = androidx.compose.runtime.remember(
+                shortcut.packageName,
+                shortcut.shortcutId,
+                iconDrawable,
+                iconPixels,
+            ) {
+                iconDrawable.toBitmap(iconPixels, iconPixels).asImageBitmap()
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(
+                        min = dimensionResource(R.dimen.action_sheet_shortcut_row_min_height),
+                    )
+                    .clickable(role = Role.Button) { onShortcut(shortcut) }
+                    .padding(
+                        horizontal = dimensionResource(R.dimen.action_sheet_horizontal_padding),
+                    )
+                    .testTag("application_shortcut_${shortcut.shortcutId}"),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                androidx.compose.foundation.Image(
+                    bitmap = bitmap,
+                    contentDescription = null,
+                    modifier = Modifier.size(iconSize),
+                )
+                Spacer(
+                    Modifier.size(
+                        dimensionResource(R.dimen.action_sheet_shortcut_icon_label_gap),
+                    ),
+                )
+                Text(
+                    text = shortcut.label,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+        }
+    }
+    HorizontalDivider(
+        modifier = Modifier.padding(
+            horizontal = dimensionResource(R.dimen.action_sheet_divider_inset),
+        ),
+        color = MaterialTheme.colorScheme.onSurface,
+    )
 }

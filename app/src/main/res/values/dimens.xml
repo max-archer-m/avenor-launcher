@@ -42,4 +42,7 @@
     <dimen name="action_sheet_action_icon_size">24dp</dimen>
     <dimen name="action_sheet_icon_label_gap">4dp</dimen>
     <dimen name="action_sheet_badge_size">12dp</dimen>
+    <dimen name="action_sheet_shortcut_icon_size">24dp</dimen>
+    <dimen name="action_sheet_shortcut_icon_label_gap">16dp</dimen>
+    <dimen name="action_sheet_shortcut_row_min_height">48dp</dimen>
 </resources>

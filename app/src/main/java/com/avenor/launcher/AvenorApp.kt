@@ -65,7 +65,12 @@ internal fun AvenorApp() {
     }
     val favoriteStore = remember(context) { AtomicFileFavoriteStore(context) }
     val informationLauncher = remember(context) { AndroidApplicationInformationLauncher(context) }
-    AvenorApp(inventoryLoader, entryLauncher, favoriteStore, informationLauncher)
+    val shortcutController = remember(context) {
+        AndroidApplicationShortcutController(context)
+    }
+    AvenorApp(
+        inventoryLoader, entryLauncher, favoriteStore, informationLauncher, shortcutController,
+    )
 }
 
 @Composable
@@ -74,6 +79,7 @@ internal fun AvenorApp(
     entryLauncher: LaunchableEntryLauncher = LaunchableEntryLauncher { false },
     favoriteStore: FavoriteStore? = null,
     informationLauncher: ApplicationInformationLauncher = ApplicationInformationLauncher { false },
+    shortcutController: ApplicationShortcutController = EmptyApplicationShortcutController,
 ) {
     val androidContext = LocalContext.current
     val density = LocalDensity.current
@@ -109,6 +115,8 @@ internal fun AvenorApp(
     var selectedEntry by remember { mutableStateOf<LaunchableEntry?>(null) }
     var selectedEntryFromHome by remember { mutableStateOf(false) }
     var homeEditMode by remember { mutableStateOf(false) }
+    var shortcutOwner by remember { mutableStateOf<LaunchableIdentity?>(null) }
+    var applicationShortcuts by remember { mutableStateOf(emptyList<ApplicationShortcut>()) }
     var editMembership by remember { mutableStateOf<Set<LaunchableIdentity>>(emptySet()) }
     val homeActivationGuard = remember { RapidActivationGuard() }
     val unavailableFavoriteMessage = stringResource(R.string.favorite_application_unavailable)
@@ -129,6 +137,17 @@ internal fun AvenorApp(
         onDispose { cacheInvalidationObservation?.stop() }
     }
 
+
+    LaunchedEffect(selectedEntry, shortcutController) {
+        shortcutOwner = null
+        applicationShortcuts = emptyList()
+        val entry = selectedEntry ?: return@LaunchedEffect
+        val loaded = shortcutController.load(entry)
+        if (selectedEntry?.identity == entry.identity) {
+            shortcutOwner = entry.identity
+            applicationShortcuts = loaded
+        }
+    }
     LaunchedEffect(favoriteState) {
         if (favoriteState !is FavoriteReadState.Readable) selectedEntry = null
         if (homeEditMode) {
@@ -471,6 +490,14 @@ internal fun AvenorApp(
                 },
                 canEditFavorites = selectedEntryFromHome,
                 informationLauncher = informationLauncher,
+                shortcuts = applicationShortcuts.takeIf {
+                    shortcutOwner == entry.identity
+                }.orEmpty(),
+                onShortcut = { shortcut ->
+                    shortcutController.launch(shortcut)
+                    selectedEntry = null
+                    selectedEntryFromHome = false
+                },
             )
         }
     }

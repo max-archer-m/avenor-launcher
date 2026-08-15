@@ -4,9 +4,9 @@
 
 ## Status
 
-- Value: `Planned`
-- Updated: 2026-08-13
-- Basis: The author selected application shortcuts for `1.1.0`; production implementation has not yet been authorized.
+- Value: `Completed`
+- Updated: 2026-08-16
+- Basis: The implementation was completed and the project author reported that Iteration 8 acceptance passed.
 
 ## Objective
 
@@ -65,17 +65,20 @@ Recommended scenarios include Home and Drawer origins; no/one/multiple shortcuts
 
 ## Acceptance evidence
 
-No implementation evidence exists. When performed, record the shortcut-providing applications, selected identity/profile, origin, device/API, invoked result, state preservation, failures, and skipped scenarios.
+- On 2026-08-16, the project author reported that the Iteration 8 changes passed acceptance.
+- The accepted implementation covers platform shortcut discovery for the exact selected application identity and profile, shared Home and Drawer presentation, invocation and dismissal, omission when unavailable, and adaptive scrolling for larger shortcut sets.
+- Focused UI tests cover exact shortcut presentation/invocation, the absent-shortcut state, application-to-controller identity flow, dismissal, and scrolling to the end of a larger shortcut set; these tests were added but were not run in this completion turn.
+- The author did not provide the build identity, device/API identity, detailed scenario log, clone/work-profile evidence, or separate automated-command results in this acceptance report; those details remain `Unknown` and no additional result is inferred.
 
 ## Related decisions, commits, and tags
 
 - [ADR-0003](../../decisions/0003-model-profile-completeness-for-favorite-reconciliation.md)
-- No implementation commit or tag exists for this iteration.
+- The implementation and completion-state change are included in the corresponding Git commit; no tag was created.
 
 ## Final result
 
-No final result exists while the iteration is `Planned`.
+Iteration 8 is complete. The accepted result presents and invokes platform-provided application shortcuts within the current Launcher role and permission boundary without persisting shortcut data or adding a dedicated overflow product interaction.
 
 ## Remaining issues and handoff
 
-Development must first establish evidence for discovery and invocation on the current Android baseline. A consequential permission, identity, or architecture finding returns to the author; the author must authorize `In Progress`.
+No Iteration 8 delivery issue remains open. Validation details absent from the author report remain `Unknown`; shortcut availability outside the current Launcher role and permission boundary remains intentionally unsupported.
