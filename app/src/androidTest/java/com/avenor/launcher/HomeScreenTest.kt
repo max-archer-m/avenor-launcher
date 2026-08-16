@@ -8,6 +8,7 @@ import android.os.Process
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onNodeWithTag
@@ -867,6 +868,82 @@ class HomeScreenTest {
             assertEquals(shortcut, launchedShortcut)
         }
         composeRule.onNodeWithTag("application_action_sheet").assertDoesNotExist()
+    }
+
+    @Test
+    fun drawerSettingsGearJumpsToDedicatedEntryBeforeOpening() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                0,
+                ComponentName("com.example.settings", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Settings source",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        var settingsOpened = false
+        composeRule.setContent {
+            AvenorTheme {
+                DrawerScreen(
+                    inventoryLoader = LaunchableInventoryLoader { completeSnapshot(entry) },
+                    onOpenSettings = { settingsOpened = true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("drawer_index_settings").performClick()
+        composeRule.runOnIdle { assertEquals(false, settingsOpened) }
+        composeRule.onNodeWithTag("drawer_settings_anchor").assertIsDisplayed()
+        composeRule.onNodeWithTag("drawer_settings_entry").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { assertEquals(true, settingsOpened) }
+    }
+
+    @Test
+    fun settingsPresentsBasicOfflineLoop() {
+        var homeSettingsOpened = false
+        var repositoryOpened = false
+        var backRequested = false
+        val platform = object : SettingsPlatform {
+            override fun isDefaultHome() = true
+
+            override fun openDefaultHomeSettings(): Boolean {
+                homeSettingsOpened = true
+                return true
+            }
+
+            override fun openProjectRepository(): Boolean {
+                repositoryOpened = true
+                return true
+            }
+
+            override fun versionText() = "v1.1.0(2)"
+        }
+        composeRule.setContent {
+            AvenorTheme {
+                SettingsScreen(
+                    platform = platform,
+                    licenseText = "Apache License test content",
+                    onBack = { backRequested = true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("settings_title").assertTextEquals("Settings")
+        composeRule.onNodeWithText("Avenor is the default launcher").assertIsDisplayed()
+        composeRule.onNodeWithText("v1.1.0(2)").assertIsDisplayed()
+        composeRule.onNodeWithTag("settings_default_home").performClick()
+        composeRule.runOnIdle { assertEquals(true, homeSettingsOpened) }
+
+        composeRule.onNodeWithTag("settings_project_repository").performClick()
+        composeRule.runOnIdle { assertEquals(true, repositoryOpened) }
+
+        composeRule.onNodeWithTag("settings_back").performClick()
+        composeRule.runOnIdle { assertEquals(true, backRequested) }
+
+        composeRule.onNodeWithTag("settings_license").performClick()
+        composeRule.onNodeWithTag("avenor_license_sheet").assertIsDisplayed()
+        composeRule.onNodeWithText("Apache License test content").assertIsDisplayed()
+
     }
 }
 

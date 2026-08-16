@@ -23,4 +23,14 @@
     <string name="favorite_application_disabled">应用已停用</string>
     <string name="favorite_disabled_format">%1$s — 已停用</string>
     <string name="favorite_unavailable_format">%1$s — 暂不可用</string>
+    <string name="settings">设置</string>
+    <string name="back">返回</string>
+    <string name="avenor_launcher_settings">Avenor Launcher 设置</string>
+    <string name="default_home_application">默认主屏幕应用</string>
+    <string name="avenor_is_default_launcher">已设为默认启动器</string>
+    <string name="avenor_is_not_default_launcher">未设为默认启动器</string>
+    <string name="avenor_license">Avenor 许可证</string>
+    <string name="avenor_license_title">Avenor 许可证</string>
+    <string name="project_repository">项目仓库</string>
+    <string name="unable_to_open_project_link">无法打开项目链接</string>
 </resources>

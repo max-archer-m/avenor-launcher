@@ -18,7 +18,7 @@
     <dimen name="drawer_index_width">32dp</dimen>
     <dimen name="drawer_index_slot_height">20dp</dimen>
     <dimen name="drawer_index_text_size">11sp</dimen>
-    <dimen name="drawer_index_complete_height">540dp</dimen>
+    <dimen name="drawer_index_complete_height">560dp</dimen>
     <dimen name="drawer_index_bubble_size">64dp</dimen>
     <dimen name="drawer_index_bubble_text_size">32sp</dimen>
     <dimen name="drawer_index_bubble_index_gap">16dp</dimen>
@@ -45,4 +45,12 @@
     <dimen name="action_sheet_shortcut_icon_size">24dp</dimen>
     <dimen name="action_sheet_shortcut_icon_label_gap">16dp</dimen>
     <dimen name="action_sheet_shortcut_row_min_height">48dp</dimen>
+    <dimen name="drawer_index_settings_icon_size">11dp</dimen>
+    <dimen name="settings_top_bar_min_height">56dp</dimen>
+    <dimen name="settings_horizontal_padding">16dp</dimen>
+    <dimen name="settings_primary_one_line_min_height">56dp</dimen>
+    <dimen name="settings_primary_two_line_min_height">72dp</dimen>
+    <dimen name="settings_secondary_item_min_height">40dp</dimen>
+    <dimen name="settings_trailing_icon_size">24dp</dimen>
+    <dimen name="settings_license_title_vertical_padding">12dp</dimen>
 </resources>

@@ -68,8 +68,16 @@ internal fun AvenorApp() {
     val shortcutController = remember(context) {
         AndroidApplicationShortcutController(context)
     }
+    val settingsPlatform = remember(context) { AndroidSettingsPlatform(context) }
+    val licenseText = remember(context) { readAvenorLicense(context) }
     AvenorApp(
-        inventoryLoader, entryLauncher, favoriteStore, informationLauncher, shortcutController,
+        inventoryLoader = inventoryLoader,
+        entryLauncher = entryLauncher,
+        favoriteStore = favoriteStore,
+        informationLauncher = informationLauncher,
+        shortcutController = shortcutController,
+        settingsPlatform = settingsPlatform,
+        licenseText = licenseText,
     )
 }
 
@@ -80,6 +88,8 @@ internal fun AvenorApp(
     favoriteStore: FavoriteStore? = null,
     informationLauncher: ApplicationInformationLauncher = ApplicationInformationLauncher { false },
     shortcutController: ApplicationShortcutController = EmptyApplicationShortcutController,
+    settingsPlatform: SettingsPlatform = EmptySettingsPlatform,
+    licenseText: String = "",
 ) {
     val androidContext = LocalContext.current
     val density = LocalDensity.current
@@ -115,6 +125,7 @@ internal fun AvenorApp(
     var selectedEntry by remember { mutableStateOf<LaunchableEntry?>(null) }
     var selectedEntryFromHome by remember { mutableStateOf(false) }
     var homeEditMode by remember { mutableStateOf(false) }
+    var settingsOpen by remember { mutableStateOf(false) }
     var shortcutOwner by remember { mutableStateOf<LaunchableIdentity?>(null) }
     var applicationShortcuts by remember { mutableStateOf(emptyList<ApplicationShortcut>()) }
     var editMembership by remember { mutableStateOf<Set<LaunchableIdentity>>(emptySet()) }
@@ -263,9 +274,13 @@ internal fun AvenorApp(
         homeEditMode = false
     }
 
-    BackHandler(enabled = !homeEditMode && (settledSurface == AvenorSurface.Drawer || progress > 0f)) {
+    BackHandler(enabled = !homeEditMode && !settingsOpen &&
+        (settledSurface == AvenorSurface.Drawer || progress > 0f)
+    ) {
         settleTo(AvenorSurface.Home)
     }
+
+    BackHandler(enabled = settingsOpen) { settingsOpen = false }
 
     val gestureModifier = Modifier.pointerInput(
         settledSurface,
@@ -453,11 +468,17 @@ internal fun AvenorApp(
                     entryLauncher = entryLauncher,
                     modifier = Modifier.nestedScroll(drawerNestedScrollConnection),
                     listState = drawerListState,
-                    active = settledSurface == AvenorSurface.Drawer || progress > 0f,
-                    marqueePaused = progress > 0f && progress < 1f || selectedEntry != null,
+                    active = !settingsOpen &&
+                        (settledSurface == AvenorSurface.Drawer || progress > 0f),
+                    marqueePaused = settingsOpen ||
+                        progress > 0f && progress < 1f || selectedEntry != null,
                     onLongPress = { entry ->
                         selectedEntryFromHome = false
                         selectedEntry = entry
+                    },
+                    onOpenSettings = {
+                        selectedEntry = null
+                        settingsOpen = true
                     },
                 )
             }
@@ -498,6 +519,14 @@ internal fun AvenorApp(
                     selectedEntry = null
                     selectedEntryFromHome = false
                 },
+            )
+        }
+
+        if (settingsOpen) {
+            SettingsScreen(
+                platform = settingsPlatform,
+                licenseText = licenseText,
+                onBack = { settingsOpen = false },
             )
         }
     }

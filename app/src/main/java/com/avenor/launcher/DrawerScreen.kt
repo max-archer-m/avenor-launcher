@@ -99,6 +99,7 @@ internal fun DrawerScreen(
     active: Boolean = true,
     marqueePaused: Boolean = false,
     onLongPress: (LaunchableEntry) -> Unit = {},
+    onOpenSettings: () -> Unit = {},
 ) {
     var loadRequest by remember { mutableIntStateOf(0) }
     var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
@@ -221,6 +222,7 @@ internal fun DrawerScreen(
                 }
             },
             onLongPress = onLongPress,
+            onOpenSettings = onOpenSettings,
         )
     }
 }
@@ -279,6 +281,7 @@ private fun DrawerApplicationList(
     marqueePaused: Boolean,
     onLaunch: (LaunchableEntry) -> Unit,
     onLongPress: (LaunchableEntry) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     val sectionAnchors = remember(sections) {
         buildMap {
@@ -288,6 +291,9 @@ private fun DrawerApplicationList(
                 itemIndex += 1 + section.entries.size
             }
         }
+    }
+    val settingsAnchor = remember(sections) {
+        sections.sumOf { section -> 1 + section.entries.size }
     }
     val coroutineScope = rememberCoroutineScope()
     val hapticFeedback = LocalHapticFeedback.current
@@ -395,6 +401,15 @@ private fun DrawerApplicationList(
                     )
                 }
             }
+            stickyHeader(key = "section:settings") {
+                DrawerSectionHeader(
+                    label = stringResource(R.string.settings),
+                    modifier = Modifier.testTag("drawer_settings_anchor"),
+                )
+            }
+            item(key = "settings") {
+                DrawerSettingsRow(onClick = onOpenSettings)
+            }
         }
 
         DrawerAlphabetIndex(
@@ -411,6 +426,13 @@ private fun DrawerApplicationList(
                 }
             },
             onActiveLabelChange = { label -> activeIndexLabel = label },
+            onSelectSettings = {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                indexJumpJob?.cancel()
+                indexJumpJob = coroutineScope.launch {
+                    listState.scrollToItem(settingsAnchor)
+                }
+            },
         )
 
         activeIndexLabel?.let { label ->
@@ -433,21 +455,24 @@ private fun DrawerAlphabetIndex(
     modifier: Modifier = Modifier,
     onSelect: (String) -> Unit,
     onActiveLabelChange: (String?) -> Unit,
+    onSelectSettings: () -> Unit,
 ) {
     val slotHeight = dimensionResource(R.dimen.drawer_index_slot_height)
     val density = LocalDensity.current
     val indexState = rememberLazyListState()
+    val settingsIndexEntry = "settings"
+    val indexEntries = remember(labels) { labels + settingsIndexEntry }
     LazyColumn(
         modifier = modifier
             .heightIn(max = dimensionResource(R.dimen.drawer_index_complete_height))
-            .height(slotHeight * labels.size)
+            .height(slotHeight * indexEntries.size)
             .width(dimensionResource(R.dimen.drawer_index_width))
-            .pointerInput(labels, indexState) {
+            .pointerInput(indexEntries, indexState) {
                 val edgeThresholdPx = with(density) { slotHeight.toPx() }
 
-                fun labelAt(y: Float): String? = indexState.layoutInfo.visibleItemsInfo
+                fun entryAt(y: Float): String? = indexState.layoutInfo.visibleItemsInfo
                     .firstOrNull { item -> y >= item.offset && y < item.offset + item.size }
-                    ?.let { item -> labels.getOrNull(item.index) }
+                    ?.let { item -> indexEntries.getOrNull(item.index) }
 
                 try {
                     awaitEachGesture {
@@ -455,15 +480,20 @@ private fun DrawerAlphabetIndex(
                         var selectedLabel: String? = null
                         var multiplePointersDetected = false
 
-                        fun select(label: String?) {
-                            if (label == null || label == selectedLabel) return
-                            selectedLabel = label
-                            onActiveLabelChange(label)
-                            onSelect(label)
+                        fun select(entry: String?) {
+                            if (entry == null || entry == selectedLabel) return
+                            selectedLabel = entry
+                            if (entry == settingsIndexEntry) {
+                                onActiveLabelChange(null)
+                                onSelectSettings()
+                            } else {
+                                onActiveLabelChange(entry)
+                                onSelect(entry)
+                            }
                         }
 
                         down.consume()
-                        select(labelAt(down.position.y))
+                        select(entryAt(down.position.y))
                         var pointersRemainPressed: Boolean
                         do {
                             val event = awaitPointerEvent()
@@ -485,7 +515,7 @@ private fun DrawerAlphabetIndex(
                                         indexState.dispatchRawDelta(edgeThresholdPx)
                                     }
                                 }
-                                select(labelAt(activeChange.position.y))
+                                select(entryAt(activeChange.position.y))
                             }
                             pointersRemainPressed = event.changes.any { it.pressed }
                         } while (pointersRemainPressed)
@@ -525,6 +555,31 @@ private fun DrawerAlphabetIndex(
                 )
             }
         }
+        item(key = "index:settings") {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(slotHeight)
+                    .semantics {
+                        role = Role.Button
+                        onClick {
+                            onSelectSettings()
+                            true
+                        }
+                    }
+                    .testTag("drawer_index_settings"),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_settings),
+                    contentDescription = stringResource(R.string.settings),
+                    modifier = Modifier.size(
+                        dimensionResource(R.dimen.drawer_index_settings_icon_size),
+                    ),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+        }
     }
 }
 
@@ -549,10 +604,13 @@ private fun DrawerIndexBubble(
 }
 
 @Composable
-private fun DrawerSectionHeader(label: String) {
+private fun DrawerSectionHeader(
+    label: String,
+    modifier: Modifier = Modifier,
+) {
     Text(
         text = label,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(min = dimensionResource(R.dimen.drawer_section_header_min_height))
             .padding(vertical = dimensionResource(R.dimen.drawer_section_header_vertical_padding))
@@ -560,6 +618,34 @@ private fun DrawerSectionHeader(label: String) {
         color = MaterialTheme.colorScheme.onBackground,
         style = MaterialTheme.typography.labelLarge,
     )
+}
+
+@Composable
+private fun DrawerSettingsRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = dimensionResource(R.dimen.drawer_application_row_min_height))
+            .clickable(role = Role.Button, onClick = onClick)
+            .testTag("drawer_settings_entry"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_settings),
+            contentDescription = null,
+            modifier = Modifier.size(dimensionResource(R.dimen.drawer_application_icon_size)),
+            tint = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.width(dimensionResource(R.dimen.drawer_application_icon_label_gap)))
+        Text(
+            text = stringResource(R.string.settings),
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+    }
 }
 
 @Composable
