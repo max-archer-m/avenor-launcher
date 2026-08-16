@@ -10,7 +10,7 @@ This document defines the current relationship, entry, exit, restoration, and sh
 
 - Home is the initial surface whenever the Launcher starts or restores after process recreation.
 - Home and Drawer are distinct product surfaces even if implementation later uses one draggable container.
-- Settings is reachable only from the fixed Settings index at the bottom of the Drawer alphabet index.
+- Settings is reachable only by selecting the fixed Settings row in the final Drawer section. The Settings gear at the bottom of the AlphabetIndex navigates to that section and does not open Settings directly.
 - Home has no Settings entry.
 
 ## Transition model

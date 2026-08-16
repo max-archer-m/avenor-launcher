@@ -54,11 +54,7 @@
 |                                                                              |
 |  S                                                        O                  |
 |                                                                              |
-|     [40DP ICON]  SETTINGS                                  P                 |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|     [40DP ICON]  SYSTEM TOOL                               Q                 |
+|     [40DP ICON]  SYSTEM TOOL                               P                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
@@ -88,9 +84,13 @@
 |                                                                              |
 |                                                           Z                  |
 |                                                                              |
+|  SETTINGS                                           [11DP GEAR / 20DP SLOT]  |
 |                                                                              |
-|  VISIBLE INDEX CAPTURES TOUCH                       [GEAR]                   |
+|     [SETTINGS GEAR]  SETTINGS                                                |
 |                                                                              |
+|  INDEX GEAR JUMPS HERE; ONLY THE ROW OPENS SETTINGS                          |
+|                                                                              |
+|  CONTENT INDEX CAPTURES TOUCH; LOADING / ERROR HIDES IT                      |
 |                                                                              |
 |                               BOTTOM SAFE AREA                               |
 +------------------------------------------------------------------------------+

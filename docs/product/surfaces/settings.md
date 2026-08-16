@@ -4,7 +4,8 @@
 
 ## Entry and return
 
-- Settings opens only from the fixed gear destination below the Drawer alphabet index.
+- The page title is `Settings`.
+- Settings opens only when the user selects the fixed Settings row at the end of the Drawer list. Selecting the gear anchor in the AlphabetIndex only navigates to that row's section.
 - Back returns to Drawer and preserves its prior list position during the same process.
 - Settings uses an opaque standard Material 3 dark color scheme. Unlike Home and Drawer, it paints its Material surface background rather than exposing the system background beneath the application.
 

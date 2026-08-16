@@ -35,19 +35,22 @@ Drawer presents every launchable application entry successfully read from the so
 - Every application participates in the same ordering regardless of whether it is a system, downloaded, primary, or cloned application.
 - When displayed names collate equally, identity precedence is primary application, cloned application, then work-profile application.
 - When both displayed-name collation and identity category are equal, use a stable launchable-entry identity as the final tie-breaker. The observable order must remain stable across refreshes; the product contract does not prescribe the implementation field or API.
+- After every application section, the Drawer list ends with a fixed independent section headed `Settings`. This heading is an anchor in the same list, but it is not an application section and does not participate in application sorting.
+- The fixed Settings section contains one clickable row with a Settings gear icon and the name `Settings`. Only selecting this row opens Settings.
 
 ## Alphabet index
 
-- A fixed right-side index is visible whenever Drawer is visible.
+- A fixed right-side index is visible whenever Drawer presents navigable Content. Full-surface Loading and Error states hide the entire index because those states do not present any list anchors; the index is not partially displayed.
 - It contains `#`, each non-empty A–Z section, and a fixed Settings gear below Z. Empty alphabetical sections are omitted.
-- Index labels use `11sp` medium-weight text in fixed `20dp` slots. The Settings gear occupies one slot with the same height; non-empty entries are not stretched to redistribute unused height.
+- Index labels use `11sp` medium-weight text in fixed `20dp` slots. The Settings gear graphic is `11dp` inside one complete `20dp` index slot; its slot and index interaction range must not be reduced to the graphic bounds. Non-empty entries are not stretched to redistribute unused height.
 - The maximum index model contains 28 slots: `#`, A–Z, and Settings. Its minimum complete available height is therefore `560dp`, calculated as `28 × 20dp` after excluding status-bar, navigation-bar, display-cutout, Drawer-padding, and system-gesture insets.
 - At `560dp` or more of available height, the index does not scroll. Below `560dp`, the index becomes an independently scrollable vertical region while the application list remains separately scrollable.
 - Selecting an index entry jumps immediately to its anchor and produces index-step haptic feedback.
 - Sliding across a different available entry changes the active anchor and produces one haptic response for that change; remaining on the same entry does not repeat it.
 - A magnified bubble displays only the active character using `32sp` medium-weight text inside a region at least `64dp × 64dp`. It remains visible while the pointer is held and disappears immediately on release or cancellation.
 - While the index owns the pointer, the application list does not scroll.
-- The Settings gear is a fixed index destination rather than a separate Drawer button. It opens Settings.
+- The Settings gear is an index anchor, not a control that opens Settings. Selecting it by tap or index sliding jumps only to the fixed Settings section at the end of the Drawer list and produces the same index-step haptic feedback as any other anchor change.
+- The Settings row in that section is the only Drawer control that opens Settings.
 - Returning from Settings preserves the Drawer list position during the same process.
 - TalkBack semantics and an accessibility-specific alternate index interaction are outside the current personal-use scope.
 
@@ -59,13 +62,14 @@ Drawer presents every launchable application entry successfully read from the so
 - The intentional absence of Private Space entries under the current product boundary is not an inventory failure.
 - A routine live update preserves the current section anchor and the relative scroll position within that anchor whenever the anchor still exists.
 - If the current anchor disappears, move to the next existing application anchor in sort order and pin its heading at the top.
-- If no later application anchor exists, remain at the bottom of the application list. The fixed Settings gear is not an application anchor and is never opened automatically by an inventory update.
+- If no later application anchor exists, remain at the bottom of the application list without automatically moving into the Settings section. The Settings anchor is not an application anchor, and an inventory update never opens Settings.
 - An update never automatically launches an application or opens an application action sheet or Settings.
 
 ### Loading
 
 - While no usable inventory result is available and a read is in progress, the application region shows a progress indicator and the localized message `Loading applications…`.
 - Loading is an in-progress state, not an empty or error result. The error icon and Retry action are not shown concurrently with the progress indicator.
+- The application list, fixed Settings section, and AlphabetIndex are absent for the full duration of this state.
 
 ### Empty or failed result
 
@@ -73,6 +77,7 @@ Drawer presents every launchable application entry successfully read from the so
 - A failed inventory read that leaves no usable launchable entries uses the same error state.
 - The application region hides the progress indicator, shows a non-interactive `40dp` error icon, displays the localized message `Unable to load applications`, and provides a separate `Retry` action.
 - The error state does not instruct the user to restart Avenor.
+- The application list, fixed Settings section, and AlphabetIndex remain absent while this full-surface error is shown.
 - Selecting Retry clears the visible error state, returns to the Loading state, and starts a new inventory read.
 - While the user remains on the same Error presentation, activity resume, network changes, package callbacks, and other ordinary lifecycle events do not automatically retry or clear the error. Leaving Drawer and later entering it again starts a new initial read.
 - A successful retry displays the application list. An empty or failed retry returns to the same error state.

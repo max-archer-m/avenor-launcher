@@ -4,9 +4,9 @@
 
 ## Status
 
-- Value: `Planned`
-- Updated: 2026-08-13
-- Basis: The author selected basic Settings capability for `1.1.0`; production implementation has not yet been authorized.
+- Value: `Completed`
+- Updated: 2026-08-16
+- Basis: The project author reported completing experience acceptance for this iteration on 2026-08-16. This record does not infer build, automated-test, source-identity, or device evidence that was not supplied.
 
 ## Objective
 
@@ -23,11 +23,14 @@ Deliver a coherent offline Settings loop for default-Launcher management and ess
 
 ## Observable outcome
 
-The author opens Settings from the fixed Drawer gear, sees the current default-home state, opens the system default-home settings and observes refreshed state on return, reads the local Avenor License, opens the project repository through the system browser, sees the exact application version, and returns to the preserved Drawer position.
+The author selects the Settings gear in AlphabetIndex and lands on the fixed Settings section at the end of Drawer without opening Settings, then selects its Settings row to open the page titled `Settings`. From there the author sees the current default-home state, opens the system default-home settings and observes refreshed state on return, reads the local Avenor License, opens the project repository through the system browser, sees the exact application version, and returns to the preserved Drawer position.
 
 ## Included work
 
-- Fixed Settings gear destination and Settings navigation/restoration.
+- Fixed Settings section and clickable Settings row at the end of Drawer.
+- AlphabetIndex Settings gear as an index anchor with normal index-step haptic feedback, a `11dp` graphic in a full `20dp` slot, and no direct Settings launch.
+- Complete AlphabetIndex suppression during full-surface Drawer Loading and Error states.
+- Settings navigation/restoration and the localized page title `Settings` / `设置`.
 - Opaque Material 3 dark Settings surface and contracted item presentation.
 - Default-home state and system settings handoff with refresh on return.
 - Local offline Avenor License presentation.
@@ -44,7 +47,7 @@ The author opens Settings from the fixed Drawer gear, sees the current default-h
 
 ## Technical change areas
 
-Drawer index destination, navigation state, Settings UI/resources, default-home platform intent and state query, local license asset presentation, repository URI invocation, and build-version display. Exact navigation and asset-loading structure remain implementation choices.
+Drawer Settings-section anchoring, AlphabetIndex state and haptics, navigation state, Settings UI/resources, default-home platform intent and state query, local license asset presentation, repository URI invocation, and build-version display. Exact navigation and asset-loading structure remain implementation choices.
 
 ## Dependencies and sequence
 
@@ -67,20 +70,20 @@ Core Settings remains offline. The repository entry delegates URL handling to th
 
 ## Validation plan
 
-Recommended scenarios include gear entry; Back and position restoration; default/not-default states; system destination return and cancellation; unavailable destination; English, Simplified Chinese, and fallback locale; offline license reading; long-content scrolling; repository browser success/failure; exact `1.1.0(2)` display; process recreation; and regression of Home/Drawer/action sheets. Unless promoted, these are not automatic iteration gates.
+Recommended scenarios include tapping and sliding onto the AlphabetIndex gear; one normal index-step haptic response per gear-anchor change; landing on the final Settings heading and row without opening Settings; opening Settings only from that row; preserving the full `20dp` gear slot with an `11dp` graphic; hiding the entire AlphabetIndex in full-surface Loading and Error states; the `Settings` / `设置` page title; Back and Drawer-position restoration; default/not-default states; system destination return and cancellation; unavailable destination; English, Simplified Chinese, and fallback locale; offline license reading; long-content scrolling; repository browser success/failure; exact `1.1.0(2)` display; process recreation; and regression of Home/Drawer/action sheets. Unless promoted, these are not automatic iteration gates.
 
 ## Acceptance evidence
 
-No implementation evidence exists. When performed, record executor, source/build identity, device/API/OEM, initial default-home state, system handoff result, displayed version, local content behavior, browser result, regressions, and skipped scenarios.
+The project author reported completing experience acceptance for Iteration 9 on 2026-08-16. No build command or result, automated-test result, source/build identity, device/API/OEM details, or per-scenario execution record was supplied with that acceptance; this document makes no claim that any of those checks ran or passed.
 
 ## Related decisions, commits, and tags
 
-- No new ADR, implementation commit, or tag exists for this iteration.
+- No new ADR is required by this clarification. No implementation commit or tag evidence was supplied for this record.
 
 ## Final result
 
-No final result exists while the iteration is `Planned`.
+Iteration 9 is complete on the basis of the author's reported experience acceptance. Completion records the accepted Settings loop and revised Drawer entry behavior; it does not certify unreported build, automation, or device validation and does not complete the `1.1.0` version.
 
 ## Remaining issues and handoff
 
-Development should validate the OEM system destination before fixing implementation behavior. After author acceptance, the version still requires the completion evidence in [delivery.md](delivery.md); iteration completion alone does not complete `1.1.0`.
+Any later release closure still needs the applicable version-level evidence in [delivery.md](delivery.md), including evidence not supplied with this iteration acceptance. Iteration completion alone does not complete `1.1.0`, and the remaining Iteration 10 scope and Settings navigation boundaries are unchanged.

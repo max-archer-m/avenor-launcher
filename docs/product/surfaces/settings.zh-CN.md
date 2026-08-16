@@ -4,7 +4,8 @@
 
 ## 入口与返回
 
-- Settings 只能从 Drawer 字母索引下方固定存在的齿轮目标进入。
+- 页面标题为 `设置`。
+- 只有点击 Drawer 列表末尾固定的设置条目才进入 Settings；选中字母索引中的齿轮锚点只导航到该条目所在分组。
 - Back 返回 Drawer，并在同一进程内保留此前列表位置。
 - Settings 使用不透明的标准 Material 3 dark color scheme。它与 Home、Drawer 的区别是会绘制 Material 表面背景，不透出应用下方的系统背景。
 

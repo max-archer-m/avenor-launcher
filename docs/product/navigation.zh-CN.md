@@ -10,7 +10,7 @@
 
 - Launcher 启动或进程重建后，以 Home 作为初始界面。
 - 即使后续实现使用同一个 draggable 容器，Home 与 Drawer 仍是两个不同的产品功能界面。
-- Settings 只能从 Drawer 字母索引底部固定存在的设置索引进入。
+- Settings 只能通过点击 Drawer 末尾固定设置分组中的设置条目进入。AlphabetIndex 底部的设置齿轮只导航到该分组，不直接打开 Settings。
 - Home 不提供 Settings 入口。
 
 ## 过渡模型
