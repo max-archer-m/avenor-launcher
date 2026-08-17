@@ -31,6 +31,7 @@ Avenor Launcher is currently maintained by its project author as a personal proj
 - Routine agent implementation does not require an automatic Gradle run. Agent-executed Gradle validation occurs only when the author requests it or an authorized higher-level validation task requires it.
 - A specific check becomes mandatory only when the project author explicitly makes it an iteration gate or when an applicable higher-level contract requires it for a formal version, artifact, signing, archive, or release result.
 - Iteration progression does not imply formal-version completion. The applicable version contract retains its own completion and release gates.
+- Iteration completion means that the recorded selected scope and acceptance criteria are complete. It does not claim complete implementation of the current product contract, including later changes to that contract.
 
 ```markdown
 # Iteration <number>: <Iteration title>
@@ -63,11 +64,11 @@ Avenor Launcher is currently maintained by its project author as a personal proj
 ## Field rules
 
 - `Status` is mandatory. `Value` must exactly match one enumeration value. `Updated` records the date of the latest status transition, not an ordinary content edit. `Basis` briefly states the evidence and author decision supporting the value; for `Completed`, identify the synchronized implementation and documentation history or link to where it is recorded. When synchronization uses something other than the normal shared Git branch, identify the author-designated shared history without adding machine-specific or secret information.
-- Content changes that do not transition status do not change the `Updated` date. Record material in-status scope adjustments in the relevant body section and Git history.
+- Content changes that do not transition status do not change the `Updated` date. Record material in-status scope adjustments in the relevant body section and Git history. If a product-contract change materially changes the iteration objective, primary outcome, acceptance criteria, or boundary, record an explicit scope amendment before completion or cancel and replace the iteration rather than silently changing its meaning.
 - `Objective` states one coherent delivery result rather than a list of unrelated tasks.
-- `Product and version references` links the current product sources and the applicable sibling `delivery.md`. It does not duplicate those documents.
+- `Product and version references` links the current product sources and the applicable sibling `delivery.md`. When the timing of a contract change matters, record the applicable product-contract baseline or source revision. It does not duplicate those documents.
 - `Observable outcome` describes what can be demonstrated or verified when the iteration succeeds.
-- `Included work` and `Excluded work` make the iteration boundary explicit.
+- `Included work` defines the positive, observable delivery boundary. `Excluded work` records only boundary-sensitive non-goals that could otherwise be mistaken for included work; do not enumerate every behavior absent from the iteration. Use `deferred` only when a later destination or future commitment has been confirmed.
 - `Technical change areas` identifies affected behavior, components, interfaces, data, build, and validation surfaces at a durable level; Git remains authoritative for line-level changes.
 - Impact sections must say `None identified` only after the area was considered; omit no material impact silently.
 - `Validation plan` lists recommended scenarios and identifies any explicitly promoted mandatory check. `Acceptance evidence` records commands, environments, devices, results, and unavailable checks actually observed without treating missing evidence as a pass.

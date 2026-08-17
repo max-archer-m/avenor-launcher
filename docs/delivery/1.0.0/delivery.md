@@ -28,7 +28,9 @@ The version therefore closes on accepted daily-use evidence from the author's de
 
 The [1.0.0 product scope](product-scope.md) is authoritative for included behavior, exclusions, product acceptance intent, and detailed current-product references. This contract selects that scope without redefining it.
 
-The product-scope exclusions remain excluded from `1.0.0`, including deferred Settings behavior, favorite reordering, platform application shortcuts, uninstall and clone-removal actions, manual language selection, complete favorite-corruption recovery behavior, broader device adaptation, network or account capability, analytics, later capability layers, and public distribution.
+This completed record is evaluated against the `1.0.0` product-scope and delivery baseline authorized for this version. Later changes to the current product contract do not retroactively expand this version's selected scope or alter its completion result.
+
+The product-scope boundary exclusions remain outside `1.0.0`, including Settings behavior, favorite reordering, platform application shortcuts, uninstall and clone-removal actions, manual language selection, complete favorite-corruption recovery behavior, broader device adaptation, network or account capability, analytics, later capability layers, and public distribution. These are not a complete inventory of the current product contract; they are the boundary-sensitive non-goals recorded for this version.
 
 If implementation or validation evidence conflicts with included behavior, the affected work stops at the contract mismatch. The technical role records the evidence and impact; the product manager and project author decide any product-scope or acceptance change. An iteration may not silently convert a failed requirement into an implementation limitation.
 
@@ -136,6 +138,7 @@ Each remaining item records its affected environment and behavior, user impact, 
 
 `1.0.0` is complete at the `Author daily-use baseline` level.
 
+- This completion result applies only to the selected `1.0.0` scope and the `Author daily-use baseline` gates recorded in this contract. It does not claim complete implementation of the current product contract or of later changes to that contract.
 - All six included iterations are `Completed` with their evidence retained in this stable version directory.
 - The accepted APK uses `applicationId` `com.avenor.launcher`, `versionName` `1.0.0`, and `versionCode` `1`, and represents source commit `053b6b7da58a27a9c237d98c2e49f7a94e5b1d3e`.
 - The project author accepted the complete selected offline journey on a Samsung Galaxy S23 Ultra running Android 16/API 36 and reported no known core-path blocker.
