@@ -40,6 +40,14 @@ Each durable fact has one primary location. Other documents link to or briefly i
 
 When two authoritative documents state the same rule, select one owner and replace the duplicate with a link. A delivery record may summarize the scope it selects, but it must not become a second product specification, validation guide, architecture document, or release policy.
 
+## Current product contract and delivery history
+
+Current product documents describe the continuously maintained product contract and the intended product behavior. They are not claims that every historical or planned version already implements the complete contract.
+
+Version and iteration records describe the scope selected and authorized for that delivery at its applicable baseline. A completed delivery record is evaluated against its own selected scope, acceptance criteria, delivery level, and recorded evidence. Later changes to the current product contract do not retroactively change that historical result.
+
+When a delivery record needs to explain a boundary, it should prefer positive selected scope and observable acceptance criteria. Record an exclusion only when it prevents a likely scope misunderstanding. Use `deferred` only when a later destination or future commitment has actually been confirmed; an unselected capability is not automatically deferred.
+
 ## Current authoritative documents
 
 | Information type | English or public entry | Chinese entry | Category | Responsibility |
@@ -144,7 +152,7 @@ Create iteration records beside `delivery.md` under `docs/delivery/<version>/` w
 - Each record should state the objective, product-document references, before-and-after behavior where applicable, in-scope work, exclusions, dependencies, risks, affected code areas at a durable level, validation plan and evidence, related decisions and ADRs, commits or tags, and final outcome.
 - Record detailed code evolution at the level of behavior, components, interfaces, data, architecture, build, migration, and validation consequences. Git commits and diffs remain authoritative for line-by-line source history.
 
-Iteration records define their delivery scope while active and preserve factual delivery history after completion. They are not permanent copies of product requirements or architecture.
+Iteration records define their delivery scope while active and preserve factual delivery history after completion. They are not permanent copies of product requirements or architecture. Their completion result applies to the recorded iteration scope and acceptance criteria, not to every behavior in the current product contract.
 
 ### Completed version records
 

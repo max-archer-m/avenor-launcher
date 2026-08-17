@@ -10,7 +10,7 @@
 
 ## Objective
 
-Let the author deliberately reorder two or more primary Home favorites and retain each completed move without weakening the accepted favorite lifecycle. This iteration does not deliver the companion-favorite model or the complete cross-group edit capability in the current product contract.
+Let the author deliberately reorder two or more primary Home favorites and retain each completed move without weakening the accepted favorite lifecycle. This iteration does not include the companion-favorite model or complete cross-group editing within the authorized `1.1.0` iteration boundary. This statement records the iteration boundary and does not determine the future product status of those capabilities.
 
 ## Product and version references
 
@@ -20,6 +20,8 @@ Let the author deliberately reorder two or more primary Home favorites and retai
 - [Navigation](../../product/navigation.md#home-to-drawer)
 - [Design foundations](../../product/design-foundations.md#layout)
 - [Home edit-mode wireframe](../../product/wireframes/home-edit-mode.txt)
+
+The selected behavior is interpreted from the product contract and `1.1.0` delivery scope applicable when this iteration is authorized. A later change to the current product contract does not retroactively expand this completed iteration's scope or alter its result.
 
 ## Observable outcome
 
@@ -38,7 +40,7 @@ From a primary favorite's Launcher actions, the author enters reorder mode and s
 
 - Automatic, usage-based, alphabetical, or recommended ordering.
 - Undo, reset, Done button, additional mode banner, or cross-device synchronization.
-- Companion-favorite presentation, assignment, persistence, or editing; movement or swapping between favorite groups; and the complete two-group edit capability defined by the current product contract.
+- Companion-favorite presentation, assignment, persistence, or editing; movement or swapping between favorite groups; and the complete two-group edit capability are not selected for this iteration. This exclusion does not classify their future product status.
 - Application shortcuts, Settings, and double-tap lock.
 
 ## Technical change areas

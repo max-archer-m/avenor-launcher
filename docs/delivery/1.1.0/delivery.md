@@ -4,9 +4,15 @@
 >
 > This delivery selects behavior from the current product specifications. It does not authorize implementation, a product or architecture change, signing, artifact movement, a commit, push, tag, GitHub Release, or distribution.
 
+## Version-contract boundary
+
+This delivery record preserves the scope selected for `1.1.0` at its authorization boundary. The current product contract may continue to change while this version is planned or completed. Later product-contract changes do not retroactively expand this version's selected scope or alter its completion result.
+
+The completion result, when recorded, applies only to the selected `1.1.0` scope, its acceptance criteria, the `Author daily-use baseline`, and the evidence retained by this version record.
+
 ## Version intent
 
-`1.1.0` extends the accepted `1.0.0` daily-use baseline with four user-controlled utility increments: full-width primary-favorite editing and reordering, platform application shortcuts from both application contexts, the basic Settings surface, and optional double-tap lock with its authorization and disclosure loop. A final closure increment removes the unnecessary application-name marquee and validates the selected version journey. Companion favorites and the complete two-group edit capability remain outside this version's selected delivery subset.
+`1.1.0` extends the accepted `1.0.0` daily-use baseline with four user-controlled utility increments: full-width primary-favorite editing and reordering, platform application shortcuts from both application contexts, the basic Settings surface, and optional double-tap lock with its authorization and disclosure loop. A final closure increment removes the unnecessary application-name marquee and validates the selected version journey. Companion favorites and the complete two-group edit capability are not selected for this version. This boundary statement does not determine their future product status.
 
 The version remains within V1 fixed presentation. Iteration records state only real delivery dependencies and do not bind their scope to a terminal, contributor, branch, forecast date, or permanent development line. The current execution plan may still use one active task line without changing these contracts.
 
@@ -43,7 +49,7 @@ All accepted `1.0.0` Home, Drawer, launch, action-sheet, and favorite behavior r
 - Privacy content beyond the confirmed local statement required for the current product and double-tap-lock disclosure boundary.
 - Third-party License presentation, pending an authoritative dependency inventory and applicable review.
 - Manual language selection, diagnostics, update checks, backup, cloud behavior, or broader Settings capability.
-- A shortcut overflow design beyond the current product contract.
+- A shortcut overflow interaction is not selected for `1.1.0`; this record does not determine its future product status.
 - Public distribution, tag, milestone, or GitHub Release.
 - Multi-branch, parallel task-line, or multi-contributor workflow changes.
 

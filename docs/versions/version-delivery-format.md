@@ -6,6 +6,8 @@
 
 `docs/delivery/<version>/` contains one version delivery document and all of its iteration records from initial planning through completion. The directory selects work from the current product definition; it does not redefine the product or imply that every current product behavior will be delivered in that version.
 
+The current product definition may change after a version or iteration is authorized. A version record therefore describes its selected scope at the applicable delivery baseline, not an obligation to match every later revision of the current product definition. Completion applies only to the selected scope, acceptance criteria, delivery level, and evidence recorded by that version.
+
 Use the exact `versionName` without a `v` prefix, for example `docs/delivery/1.0.0/`. Do not append lifecycle suffixes such as `-active`, `-completed`, or `-archived`.
 
 ## Required structure
@@ -20,7 +22,7 @@ docs/delivery/<version>/
 - iteration-<number>-<title>.zh-CN.md
 ```
 
-- `delivery.md` is the English semantic source for the version's user value, selected scope, exclusions, necessary technical conclusions, included iterations, validation, known limitations, completion criteria, and result.
+- `delivery.md` is the English semantic source for the version's user value, selected scope, exclusions, necessary technical conclusions, included iterations, validation, known limitations, completion criteria, and result. It should identify the applicable product-contract baseline when that baseline matters to interpreting the version boundary.
 - Every `delivery.md` declares exactly one delivery level from [release governance](../release.md): `Development build`, `Author daily-use baseline`, or `Formal release artifact`. It applies only that level's gates plus any explicitly promoted version-specific gate. `Development build` cannot complete a formal application version.
 - Iteration records remain beside `delivery.md`, use the project-wide identifier sequence, and link to it without duplicating version-wide rules.
 - Create a separate technical assessment only when an independent technical review is genuinely needed. It is supporting analysis, not a mandatory layer. After the issue is resolved, place durable conclusions in the applicable product, architecture, development, validation, release, decision, or delivery source; do not maintain duplicate conclusions indefinitely.
@@ -47,7 +49,7 @@ docs/delivery/<version>/
 ## Completion result
 ```
 
-Remove a section only when it is genuinely inapplicable. Link detailed product behavior, validation methods, architecture, and release rules instead of copying them. `Delivery level` names one exact level and any explicitly promoted gate. Before completion, `Completion criteria` states the required evidence and `Completion result` states that no final result exists; after completion, `Completion result` records the factual outcome.
+Remove a section only when it is genuinely inapplicable. Link detailed product behavior, validation methods, architecture, and release rules instead of copying them. `Delivery level` names one exact level and any explicitly promoted gate. `Included scope and user journey` should define the positive delivery boundary and observable result. `Exclusions` should contain only boundary-sensitive non-goals; use `deferred` only when a later destination or commitment is confirmed. Before completion, `Completion criteria` states the required evidence and `Completion result` states that no final result exists; after completion, `Completion result` records the factual outcome and makes clear that it applies only to the selected version scope.
 
 ## Version completion and historical protection
 

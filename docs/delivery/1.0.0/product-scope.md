@@ -5,6 +5,10 @@
 > This document is the product-scope input for version `1.0.0`. It selects a minimum usable subset of the current product contract; it does not replace or narrow that contract.
 >
 > Detailed behavior remains authoritative in the linked current product documents. Technical feasibility, architecture, implementation sequencing, and validation design belong to the version technical assessment and iteration contracts.
+>
+> This is a version-boundary record. The current product documents may change after this scope was authorized; this document is evaluated against the `1.0.0` selected scope and its applicable delivery level, not against every later revision of the current product contract.
+>
+> No separate product-contract revision identifier is recorded for this historical scope. The selected behavior and boundaries in this document are the preserved `1.0.0` product-scope baseline.
 
 ## Version intent
 
@@ -28,7 +32,7 @@ The selected behavior is governed by:
 - [Product design foundations](../../product/design-foundations.md)
 - [Product glossary](../../product/glossary.md)
 
-Where this version excludes behavior defined by those documents, the exclusion applies only to `1.0.0`. The behavior remains part of the current product contract and may be selected by a later delivery contract.
+Where this version does not select behavior defined by those documents, the non-selection applies only to `1.0.0` at this version boundary. The behavior remains part of the current product contract unless a later product decision changes it, and a later delivery contract may select it. This record does not attempt to enumerate every behavior that was not selected.
 
 ## Included user journey
 
@@ -128,9 +132,9 @@ Where this version excludes behavior defined by those documents, the exclusion a
 - Any required Android capability, manifest declaration, permission, or package-visibility rule must be necessary for and traceable to an included capability.
 - Denial or absence of a dependent platform capability must not block unrelated included core behavior.
 
-## Explicitly excluded from 1.0.0
+## Boundary exclusions for 1.0.0
 
-The following current-contract behavior is deferred from this version:
+The following current-contract behavior is outside the selected `1.0.0` scope:
 
 - The complete Settings surface and its Drawer gear destination
 - Default-Launcher status presentation and the in-application link to system default-Home settings
@@ -152,7 +156,7 @@ The following capabilities remain outside the current product contract and are a
 
 ## Product acceptance intent
 
-The product scope is satisfied only when all of the following are observable across the Android 12/API 31 minimum-version emulator and the recorded Android 16/API 36 and Android 17/API 37 physical devices, according to the applicable validation plan:
+The following is the complete acceptance intent for the selected product scope. The `1.0.0` completion result is evaluated at the `Author daily-use baseline` level; its required environment and completion gates are defined by `delivery.md` and may be narrower than this complete acceptance intent. Later delivery levels may use this full intent as their validation baseline.
 
 - Android can recognize Avenor as a Home application and the author can complete a system-owned selection path.
 - Returning Home while Avenor is the default opens Avenor Home without blocking or crashing.
@@ -192,7 +196,7 @@ A technical constraint may produce a documented product-scope proposal, but it d
 
 - `1.0.0` is `versionName` `1.0.0` with `versionCode` `1`.
 - A formal `1.0.0` exists only after its included iterations are completed and the exact APK is installable and verified under [release governance](../../release.md).
-- The completed version requires the applicable completed delivery record, artifact digest, signing fingerprint, source-commit identity, validation evidence, known limitations, and external artifact record required by release governance.
+- A `Formal release artifact` requires the applicable completed delivery record, artifact digest, signing fingerprint, source-commit identity, validation evidence, known limitations, and external artifact record required by release governance. At the `Author daily-use baseline` level, the applicable requirements are the gates recorded in `1.0.0/delivery.md`; unavailable formal-release evidence must remain recorded as unknown or deferred rather than being treated as passed.
 - `1.0.0` does not require or authorize a Git tag.
 - `1.0.0` does not require or authorize a GitHub Release, remote artifact upload, store submission, or other public distribution.
 - This product-scope document does not authorize implementation, signing-key creation, artifact movement, committing, tagging, pushing, or release actions. Each action remains subject to the project's explicit authorization rules.

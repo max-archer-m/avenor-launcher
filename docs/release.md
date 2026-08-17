@@ -14,6 +14,7 @@ Avenor Launcher uses a project-defined versioning profile with the numeric form 
 - A formal version identifies an installable and verified Android APK. It is not created by documentation work alone.
 - Every formal version contains one or more completed iterations. The applicable version delivery contract selects the subset of the current product contract delivered by that version.
 - `1.0.0` is the first minimum usable version. It is not required to implement every behavior described by the current product contract; its exact delivery scope must be established through the version and iteration contracts.
+- The current product contract may continue to change while versions are planned, delivered, or completed. A completed version record preserves the scope and evidence accepted at its own delivery boundary and may therefore differ from the later current product contract without being retroactively incorrect.
 
 ## Delivery levels
 
