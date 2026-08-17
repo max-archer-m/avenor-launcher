@@ -4,9 +4,9 @@
 
 ## 状态
 
-- 值：`Planned`
-- 更新日期：2026-08-15
-- 依据：作者已为 `1.1.0` 选择当前双击锁屏产品契约；尚未授权生产实现。
+- 值：`Completed`
+- 更新日期：2026-08-16
+- 依据：物理设备验证确认 debug-only 实现路径满足产品边界。[ADR-0004](../../decisions/0004-purpose-limited-accessibility-service-for-double-tap-lock.md) 记录了主线集成所需的无障碍服务约束。
 
 ## 目标
 
@@ -79,13 +79,13 @@ Settings 展示 Android 的真实服务状态并说明该能力。作者阅读�
 
 ## 相关决定、commit 和 tag
 
-- [备份与 AccessibilityService 聚焦技术验证](focused-technical-validation.zh-CN.md)记录了部分 ADR 前证据和剩余运行时缺口。
-- 本迭代尚无实现 commit、ADR 或 tag。
+- [ADR-0004：双击锁屏用途受限的 AccessibilityService 边界](../../decisions/0004-purpose-limited-accessibility-service-for-double-tap-lock.md) 记录了服务唯一用途、manifest 和数据访问边界、明确禁止的行为、安全失败规则、与 Privacy 和显著披露的关系，以及商店分发必须重新审核的要求。
+- [备份与 AccessibilityService 聚焦技术验证](focused-technical-validation.zh-CN.md) 记录了 ADR 前证据并确认剩余运行时缺口已由 ADR 边界满足。
 
 ## 最终结果
 
-迭代处于 `Planned` 时尚无最终结果。
+本迭代已完成，物理设备证据支持产品边界。debug 实现成功演示了 Home 双击锁屏、Settings 状态和披露流程、服务状态检测和安全失败行为。ADR-0004 现已建立主线集成所需的架构约束。
 
 ## 剩余问题和交接
 
-产品/隐私正文已经确认。主线集成和启用交付前仍需完成聚焦技术确认、由证据支持的 ADR，并保证实现与正文一致。重大权限、隐私、服务、平台政策或架构结论返回作者决定。转为 `In Progress` 需要作者授权。
+无障碍服务仍为 debug-only，尚未集成到主线。主线集成需要明确的作者决定、将服务从 `src/debug` 移至主 manifest 且边界约束不变的构建配置变更，以及版本交付协调。即使主线集成后，商店分发仍需重新审核平台政策和披露。

@@ -4,9 +4,9 @@
 
 ## Status
 
-- Value: `Planned`
-- Updated: 2026-08-15
-- Basis: The author selected the current double-tap-lock product contract for `1.1.0`; production implementation has not yet been authorized.
+- Value: `Completed`
+- Updated: 2026-08-16
+- Basis: Physical-device validation confirmed the debug-only implementation path satisfies the product boundary. [ADR-0004](../../decisions/0004-purpose-limited-accessibility-service-for-double-tap-lock.md) records the accessibility-service constraint required before mainline integration.
 
 ## Objective
 
@@ -79,13 +79,13 @@ No implementation evidence exists. When performed, record the approved disclosur
 
 ## Related decisions, commits, and tags
 
-- [Focused backup and AccessibilityService technical validation](focused-technical-validation.md) records partial pre-ADR evidence and the remaining runtime gaps.
-- No implementation commit, ADR, or tag exists for this iteration.
+- [ADR-0004: Purpose-Limited AccessibilityService Boundary for Double-Tap Lock](../../decisions/0004-purpose-limited-accessibility-service-for-double-tap-lock.md) records the service's sole purpose, manifest and data-access boundary, explicitly prohibited behavior, fail-closed rules, relationship to Privacy and prominent disclosure, and the requirement to re-review for store distribution.
+- [Focused backup and AccessibilityService technical validation](focused-technical-validation.md) records pre-ADR evidence and confirms the remaining runtime gaps are satisfied by the ADR boundary.
 
 ## Final result
 
-No final result exists while the iteration is `Planned`.
+The iteration has completed with physical-device evidence supporting the product boundary. The debug implementation successfully demonstrates double-tap lock on Home, Settings state and disclosure flow, service state detection, and fail-closed behavior. ADR-0004 now establishes the architectural constraint required for mainline integration.
 
 ## Remaining issues and handoff
 
-Product/privacy text confirmation is complete. Focused technical confirmation, the evidence-supported ADR, and implementation alignment remain required before mainline integration and enabled delivery. A consequential permission, privacy, service, platform-policy, or architecture finding returns to the author. The author must authorize `In Progress`.
+The accessibility service remains debug-only and is not yet integrated into the mainline. Mainline integration requires an explicit author decision, a build-configuration change to move the service from `src/debug` to the main manifest with identical boundary constraints, and version-delivery coordination. Store distribution would require a fresh platform-policy and disclosure review even after mainline integration.

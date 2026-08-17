@@ -33,4 +33,20 @@
     <string name="avenor_license_title">Avenor 许可证</string>
     <string name="project_repository">项目仓库</string>
     <string name="unable_to_open_project_link">无法打开项目链接</string>
+    <string name="double_tap_to_lock">双击锁屏</string>
+    <string name="capability_on">已开启</string>
+    <string name="capability_off">已关闭</string>
+    <string name="double_tap_lock_explanation">双击 Home 信息区中符合条件的空白位置，可请求一次 Android 系统锁屏操作。此可选服务不读取屏幕或窗口内容，不观察其他应用，不收集无障碍事件，也不执行后台自动化操作。服务是否启用由 Android 系统设置控制。</string>
+    <string name="open_accessibility_settings">打开无障碍设置</string>
+    <string name="unable_to_open_accessibility_settings">无法打开无障碍设置</string>
+    <string name="unable_to_lock_screen">无法锁定屏幕</string>
+    <string name="privacy">隐私</string>
+    <string name="privacy_statement">Avenor Launcher 的当前产品数据和处理均以保留在你的设备上为设计原则。\n\n在设备上使用的信息\n\nAvenor 会处理 Android 在当前 Launcher 角色和权限边界内向其暴露的应用条目，其中可能包括应用名称、图标、可启动组件、Android profile 身份、平台提供的 badge 和应用快捷操作。Avenor 使用这些信息展示应用、区分可启动身份、启动你选择的条目，以及展示适用的快捷操作。\n\n当你添加 Home 收藏时，Avenor 会在设备本地保存该可启动身份、所属收藏分组和你选择的顺序。不属于已保存收藏的应用清单及快捷操作信息仅按需处理，不会作为 Avenor 自有的应用使用历史保存。\n\nAvenor 还会读取界面与控制功能所需的当前系统信息，包括时间、日期、系统语言、默认 Launcher 状态，以及可选 Avenor 无障碍服务是否已经启用并连接。时间和日期不会作为历史记录保存，这些系统状态也不会用于行为分析。\n\n存储、备份与删除\n\n收藏保留在设备上，直到你将其移除或 Android 清除 Avenor 的应用数据。Avenor 当前不提供应用内一键清空、导出、恢复、云同步、云备份或设备到设备的数据迁移。根据当前产品契约，必须为 Avenor 自有收藏数据禁用 Android 云备份和设备迁移备份。\n\n如果已保存收藏数据无法可靠读取，Avenor 会保留原始不可读数据并禁止收藏变更，而不是静默替换为空列表。你可以重新尝试读取。通过 Android 系统设置清除 Avenor 应用数据或卸载 Avenor，会移除其本地保存的应用数据；当前产品此后不提供恢复功能。\n\n数据收集、共享与网络使用\n\nAvenor 不提供账号、广告、分析、崩溃报告上传、云服务或 Avenor 运营的服务器。Avenor 不会传输、出售或共享上述在本地处理的信息。Home、Drawer、应用启动和 Settings 核心功能在没有网络连接时仍然可用。\n\n点击 GitHub 链接时，Avenor 会请求 Android 使用系统浏览器或其他兼容应用打开固定 URL。Avenor 只把该 URL 交给所选处理程序；外部应用及其使用的网络服务遵循其各自的隐私规则。\n\n双击锁屏与无障碍访问\n\n双击锁屏是可选功能。只有你在 Android 系统设置中启用 Avenor 用途受限的无障碍服务后，该功能才会生效。Avenor 仅在你双击 Home 中符合条件的空白位置后，使用该服务请求一次系统锁屏操作。\n\n该服务不读取屏幕或窗口内容，不检查其他应用界面，不为分析收集无障碍事件，不观察应用使用情况，不执行后台自动化操作，也不发送或共享数据。除用户明确请求的锁屏外，它不执行其他全局操作。Avenor 不使用设备管理员作为回退方式。你可以随时在 Android 无障碍设置中关闭该服务，而不影响其他独立 Launcher 功能。\n\n权限与 Profile 边界\n\nAvenor 只使用当前产品契约所需的 Android 能力。它不申请 ACCESS_HIDDEN_PROFILES，不访问或展示必须依赖该权限的 Android Private Space 条目，也不提供 Private Space 管理能力。Android 在 Avenor 当前角色和最小权限边界内暴露普通、工作资料及应用分身条目时，这些条目可以显示。\n\n联系方式\n\n如有隐私问题，请打开 Avenor Launcher GitHub Issues 页面：</string>
+    <string name="privacy_contact_url">https://github.com/max-archer-m/avenor-launcher/issues</string>
+    <string name="unable_to_open_privacy_contact">无法打开隐私联系页面</string>
+    <string name="accessibility_disclosure_title">双击锁屏的无障碍访问</string>
+    <string name="privacy_contact_behavior">点击该地址时使用隐式系统浏览器操作。如果没有兼容的处理程序能够打开，Avenor 显示本地化短提示“无法打开隐私联系页面”，并保持 Privacy 展示不变。</string>
+    <string name="accessibility_disclosure_body">Avenor 仅使用 Android 无障碍服务，在你双击 Home 中符合条件的空白位置时锁定屏幕。该服务不访问或收集个人或敏感数据，不读取屏幕或窗口内容，不观察其他应用中的活动，不收集无障碍事件，也不发送或共享数据。双击锁屏是可选功能，你可以随时在 Android 设置中关闭该服务，而不会影响其他 Launcher 功能。</string>
+    <string name="cancel">取消</string>
+    <string name="agree_and_continue">同意并继续</string>
 </resources>

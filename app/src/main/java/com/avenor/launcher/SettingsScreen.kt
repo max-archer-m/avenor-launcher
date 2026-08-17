@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -25,7 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,17 +50,26 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 internal fun SettingsScreen(
     platform: SettingsPlatform,
     licenseText: String,
+    accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var isDefaultHome by remember(platform) { mutableStateOf(platform.isDefaultHome()) }
     var showLicense by remember { mutableStateOf(false) }
+    var showPrivacy by remember { mutableStateOf(false) }
+    var showDoubleTapExplanation by remember { mutableStateOf(false) }
+    var showProminentDisclosure by remember { mutableStateOf(false) }
+    var isAccessibilitySystemEnabled by remember(accessibilityLockController) {
+        mutableStateOf(accessibilityLockController.isSystemEnabled())
+    }
+    val isAccessibilityConnected by accessibilityLockController.connectionState.collectAsState()
 
-    DisposableEffect(lifecycleOwner, platform) {
+    DisposableEffect(lifecycleOwner, platform, accessibilityLockController) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 isDefaultHome = platform.isDefaultHome()
+                isAccessibilitySystemEnabled = accessibilityLockController.isSystemEnabled()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -98,6 +110,29 @@ internal fun SettingsScreen(
                         testTag = "settings_default_home",
                     )
                 }
+                if (accessibilityLockController.availableForValidation) {
+                    item(key = "double-tap-lock") {
+                        PrimarySettingsItem(
+                            title = stringResource(R.string.double_tap_to_lock),
+                            supportingText = stringResource(
+                                if (isAccessibilitySystemEnabled && isAccessibilityConnected) {
+                                    R.string.capability_on
+                                } else {
+                                    R.string.capability_off
+                                },
+                            ),
+                            onClick = { showDoubleTapExplanation = true },
+                            testTag = "settings_double_tap_lock",
+                        )
+                    }
+                    item(key = "privacy") {
+                        SecondarySettingsItem(
+                            text = stringResource(R.string.privacy),
+                            onClick = { showPrivacy = true },
+                            testTag = "settings_privacy",
+                        )
+                    }
+                }
                 item(key = "license") {
                     SecondarySettingsItem(
                         text = stringResource(R.string.avenor_license),
@@ -135,6 +170,60 @@ internal fun SettingsScreen(
         LicenseBottomSheet(
             licenseText = licenseText,
             onDismiss = { showLicense = false },
+        )
+    }
+
+    if (showPrivacy) {
+        PrivacyBottomSheet(
+            onOpenContact = {
+                if (!platform.openPrivacyContact()) {
+                    Toast.makeText(
+                        context,
+                        R.string.unable_to_open_privacy_contact,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            },
+            onDismiss = { showPrivacy = false },
+        )
+    }
+
+    if (showDoubleTapExplanation) {
+        DoubleTapLockExplanationSheet(
+            enabled = isAccessibilitySystemEnabled && isAccessibilityConnected,
+            onOpenAccessibilitySettings = {
+                val systemEnabled = accessibilityLockController.isSystemEnabled()
+                isAccessibilitySystemEnabled = systemEnabled
+                if (systemEnabled) {
+                    if (!accessibilityLockController.openAccessibilitySettings()) {
+                        Toast.makeText(
+                            context,
+                            R.string.unable_to_open_accessibility_settings,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                } else {
+                    showDoubleTapExplanation = false
+                    showProminentDisclosure = true
+                }
+            },
+            onDismiss = { showDoubleTapExplanation = false },
+        )
+    }
+
+    if (showProminentDisclosure) {
+        AccessibilityProminentDisclosure(
+            onCancel = { showProminentDisclosure = false },
+            onContinue = {
+                showProminentDisclosure = false
+                if (!accessibilityLockController.openAccessibilitySettings()) {
+                    Toast.makeText(
+                        context,
+                        R.string.unable_to_open_accessibility_settings,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            },
         )
     }
 }
@@ -242,6 +331,155 @@ private fun SecondarySettingsItem(
             style = MaterialTheme.typography.titleSmall,
         )
     }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun DoubleTapLockExplanationSheet(
+    enabled: Boolean,
+    onOpenAccessibilitySettings: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        scrimColor = MaterialTheme.colorScheme.scrim,
+        dragHandle = { SettingsModalDragHandle() },
+        modifier = Modifier.testTag("double_tap_lock_explanation_sheet"),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(dimensionResource(R.dimen.settings_horizontal_padding)),
+        ) {
+            Text(
+                text = stringResource(R.string.double_tap_to_lock),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = stringResource(
+                    if (enabled) R.string.capability_on else R.string.capability_off,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
+                text = stringResource(R.string.double_tap_lock_explanation),
+                modifier = Modifier.padding(
+                    vertical = dimensionResource(R.dimen.settings_modal_content_spacing),
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            TextButton(
+                onClick = onOpenAccessibilitySettings,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .testTag("open_accessibility_settings"),
+            ) {
+                Text(stringResource(R.string.open_accessibility_settings))
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun PrivacyBottomSheet(
+    onOpenContact: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        scrimColor = MaterialTheme.colorScheme.scrim,
+        dragHandle = { SettingsModalDragHandle() },
+        modifier = Modifier.testTag("privacy_sheet"),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = false)
+                .verticalScroll(rememberScrollState())
+                .padding(dimensionResource(R.dimen.settings_horizontal_padding)),
+        ) {
+            Text(
+                text = stringResource(R.string.privacy),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = stringResource(R.string.privacy_statement),
+                modifier = Modifier.padding(
+                    vertical = dimensionResource(R.dimen.settings_modal_content_spacing),
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+            TextButton(
+                onClick = onOpenContact,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .testTag("privacy_contact"),
+            ) {
+                Text(stringResource(R.string.privacy_contact_url))
+            }
+            Text(
+                text = stringResource(R.string.privacy_contact_behavior),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AccessibilityProminentDisclosure(
+    onCancel: () -> Unit,
+    onContinue: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.accessibility_disclosure_title)) },
+        text = { Text(stringResource(R.string.accessibility_disclosure_body)) },
+        dismissButton = {
+            TextButton(
+                onClick = onCancel,
+                modifier = Modifier.testTag("accessibility_disclosure_cancel"),
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onContinue,
+                modifier = Modifier.testTag("accessibility_disclosure_continue"),
+            ) {
+                Text(stringResource(R.string.agree_and_continue))
+            }
+        },
+        modifier = Modifier.testTag("accessibility_prominent_disclosure"),
+    )
+}
+
+@Composable
+private fun SettingsModalDragHandle() {
+    androidx.compose.foundation.layout.Box(
+        Modifier
+            .padding(vertical = dimensionResource(R.dimen.action_sheet_handle_padding))
+            .size(
+                width = dimensionResource(R.dimen.action_sheet_handle_width),
+                height = dimensionResource(R.dimen.action_sheet_handle_height),
+            )
+            .background(
+                color = MaterialTheme.colorScheme.onSurface,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                    dimensionResource(R.dimen.action_sheet_handle_height),
+                ),
+            ),
+    )
 }
 
 @Composable

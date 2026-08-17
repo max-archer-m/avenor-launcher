@@ -70,6 +70,16 @@ internal fun AvenorApp() {
     }
     val settingsPlatform = remember(context) { AndroidSettingsPlatform(context) }
     val licenseText = remember(context) { readAvenorLicense(context) }
+    val accessibilityLockController = remember(context) {
+        if (BuildConfig.DEBUG) {
+            AndroidAccessibilityLockController(
+                context = context,
+                serviceComponent = debugAccessibilityLockServiceComponent(context),
+            )
+        } else {
+            EmptyAccessibilityLockController
+        }
+    }
     AvenorApp(
         inventoryLoader = inventoryLoader,
         entryLauncher = entryLauncher,
@@ -78,6 +88,7 @@ internal fun AvenorApp() {
         shortcutController = shortcutController,
         settingsPlatform = settingsPlatform,
         licenseText = licenseText,
+        accessibilityLockController = accessibilityLockController,
     )
 }
 
@@ -90,6 +101,7 @@ internal fun AvenorApp(
     shortcutController: ApplicationShortcutController = EmptyApplicationShortcutController,
     settingsPlatform: SettingsPlatform = EmptySettingsPlatform,
     licenseText: String = "",
+    accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
 ) {
     val androidContext = LocalContext.current
     val density = LocalDensity.current
@@ -409,6 +421,7 @@ internal fun AvenorApp(
         ) {
             HomeScreen(
                 favoriteState = favoriteState,
+                accessibilityLockController = accessibilityLockController,
                 favoriteAvailability = favoriteAvailability,
                 marqueePaused = progress > 0f || selectedEntry != null,
                 editMode = homeEditMode,
@@ -526,6 +539,7 @@ internal fun AvenorApp(
             SettingsScreen(
                 platform = settingsPlatform,
                 licenseText = licenseText,
+                accessibilityLockController = accessibilityLockController,
                 onBack = { settingsOpen = false },
             )
         }

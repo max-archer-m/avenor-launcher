@@ -51,6 +51,7 @@
     <dimen name="settings_primary_one_line_min_height">56dp</dimen>
     <dimen name="settings_primary_two_line_min_height">72dp</dimen>
     <dimen name="settings_secondary_item_min_height">40dp</dimen>
+    <dimen name="settings_modal_content_spacing">16dp</dimen>
     <dimen name="settings_trailing_icon_size">24dp</dimen>
     <dimen name="settings_license_title_vertical_padding">12dp</dimen>
 </resources>

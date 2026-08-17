@@ -34,7 +34,7 @@ class AccessibilityLockProbeTest {
 
     @After
     fun disconnectProbe() {
-        AccessibilityLockProbeConnection.disconnected(fakePort)
+        AccessibilityLockConnection.disconnected(fakePort)
     }
 
     @Test
@@ -78,16 +78,16 @@ class AccessibilityLockProbeTest {
 
     @Test
     fun connectionBoundaryDistinguishesDisconnectedAndConnectedState() {
-        assertFalse(AccessibilityLockProbeConnection.isConnected)
+        assertFalse(AccessibilityLockConnection.connectionState.value)
         assertEquals(
             LockRequestResult.ServiceDisconnected,
-            AccessibilityLockProbeConnection.requestLock(),
+            AccessibilityLockConnection.requestLock(),
         )
 
-        AccessibilityLockProbeConnection.connected(fakePort)
+        AccessibilityLockConnection.connected(fakePort)
 
-        assertTrue(AccessibilityLockProbeConnection.isConnected)
-        assertEquals(LockRequestResult.Requested, AccessibilityLockProbeConnection.requestLock())
+        assertTrue(AccessibilityLockConnection.connectionState.value)
+        assertEquals(LockRequestResult.Requested, AccessibilityLockConnection.requestLock())
     }
 
     private val fakePort = LockRequestPort { LockRequestResult.Requested }

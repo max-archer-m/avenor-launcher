@@ -8,6 +8,7 @@ import android.net.Uri
 import android.provider.Settings
 
 internal interface SettingsPlatform {
+    fun openPrivacyContact(): Boolean = false
     fun isDefaultHome(): Boolean
     fun openDefaultHomeSettings(): Boolean
     fun openProjectRepository(): Boolean
@@ -15,6 +16,7 @@ internal interface SettingsPlatform {
 }
 
 internal object EmptySettingsPlatform : SettingsPlatform {
+    override fun openPrivacyContact() = false
     override fun isDefaultHome() = false
     override fun openDefaultHomeSettings() = false
     override fun openProjectRepository() = false
@@ -33,6 +35,10 @@ internal class AndroidSettingsPlatform(context: Context) : SettingsPlatform {
 
     override fun openDefaultHomeSettings(): Boolean = open(
         Intent(Settings.ACTION_HOME_SETTINGS),
+    )
+
+    override fun openPrivacyContact(): Boolean = open(
+        Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_CONTACT_URL)),
     )
 
     override fun openProjectRepository(): Boolean = open(
@@ -58,6 +64,7 @@ internal class AndroidSettingsPlatform(context: Context) : SettingsPlatform {
 
     private companion object {
         const val PROJECT_REPOSITORY_URL = "https://github.com/max-archer-m/avenor-launcher"
+        const val PRIVACY_CONTACT_URL = "https://github.com/max-archer-m/avenor-launcher/issues"
     }
 }
 

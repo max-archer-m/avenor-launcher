@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -945,6 +946,83 @@ class HomeScreenTest {
         composeRule.onNodeWithText("Apache License test content").assertIsDisplayed()
 
     }
+    @Test
+    fun disabledDoubleTapLockHasNoHomeAction() {
+        val controller = TestAccessibilityLockController(systemEnabled = false, connected = false)
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(accessibilityLockController = controller)
+            }
+        }
+
+        composeRule.onNodeWithTag("home_double_tap_lock_region")
+            .performTouchInput { doubleClick() }
+
+        composeRule.runOnIdle { assertEquals(0, controller.lockRequests) }
+    }
+
+    @Test
+    fun enabledDoubleTapLockRequestsOneActionFromEligibleBlankSpace() {
+        val controller = TestAccessibilityLockController(systemEnabled = true, connected = true)
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(accessibilityLockController = controller)
+            }
+        }
+
+        composeRule.onNodeWithTag("home_double_tap_lock_region")
+            .performTouchInput { doubleClick() }
+
+        composeRule.runOnIdle { assertEquals(1, controller.lockRequests) }
+    }
+
+    @Test
+    fun enableOrientedAccessibilityHandoffRequiresProminentDisclosure() {
+        val controller = TestAccessibilityLockController(systemEnabled = false, connected = false)
+        composeRule.setContent {
+            AvenorTheme {
+                SettingsScreen(
+                    platform = EmptySettingsPlatform,
+                    licenseText = "",
+                    accessibilityLockController = controller,
+                    onBack = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("settings_double_tap_lock").performClick()
+        composeRule.onNodeWithTag("double_tap_lock_explanation_sheet").assertIsDisplayed()
+        composeRule.onNodeWithTag("open_accessibility_settings").performClick()
+        composeRule.onNodeWithTag("accessibility_prominent_disclosure").assertIsDisplayed()
+        composeRule.runOnIdle { assertEquals(0, controller.settingsRequests) }
+
+        composeRule.onNodeWithTag("accessibility_disclosure_cancel").performClick()
+        composeRule.onNodeWithTag("accessibility_prominent_disclosure").assertDoesNotExist()
+        composeRule.runOnIdle { assertEquals(0, controller.settingsRequests) }
+    }
+
+    @Test
+    fun disclosureContinueOpensSystemSettingsWithoutRetainedToggle() {
+        val controller = TestAccessibilityLockController(systemEnabled = false, connected = false)
+        composeRule.setContent {
+            AvenorTheme {
+                SettingsScreen(
+                    platform = EmptySettingsPlatform,
+                    licenseText = "",
+                    accessibilityLockController = controller,
+                    onBack = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("settings_double_tap_lock").performClick()
+        composeRule.onNodeWithTag("open_accessibility_settings").performClick()
+        composeRule.onNodeWithTag("accessibility_disclosure_continue").performClick()
+
+        composeRule.runOnIdle { assertEquals(1, controller.settingsRequests) }
+        composeRule.onNodeWithTag("accessibility_prominent_disclosure").assertDoesNotExist()
+    }
+
 }
 
 private fun completeSnapshot(vararg entries: LaunchableEntry): LaunchableInventorySnapshot =
@@ -988,4 +1066,29 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
 
     fun readableIdentities(): List<LaunchableIdentity> =
         (state.value as FavoriteReadState.Readable).identities
+}
+
+private class TestAccessibilityLockController(
+    private var systemEnabled: Boolean,
+    connected: Boolean,
+) : AccessibilityLockController {
+    private val mutableConnectionState = MutableStateFlow(connected)
+    override val availableForValidation = true
+    override val connectionState: StateFlow<Boolean> = mutableConnectionState
+    var settingsRequests = 0
+        private set
+    var lockRequests = 0
+        private set
+
+    override fun isSystemEnabled() = systemEnabled
+
+    override fun openAccessibilitySettings(): Boolean {
+        settingsRequests += 1
+        return true
+    }
+
+    override fun requestLock(): LockRequestResult {
+        lockRequests += 1
+        return LockRequestResult.Requested
+    }
 }

@@ -5,12 +5,12 @@
 ## Status
 
 - Value: `Planned`
-- Updated: 2026-08-15
-- Basis: The author selected removal of the unnecessary application-name marquee and a dedicated `1.1.0` test exit; production implementation and version closure have not yet been authorized.
+- Updated: 2026-08-16
+- Basis: The author selected removal of the unnecessary application-name marquee, correction of the Home-to-Drawer gesture coverage to match the existing navigation contract, and a dedicated `1.1.0` test exit; production implementation and version closure have not yet been authorized.
 
 ## Objective
 
-Align application-name presentation with the current static single-line product contract, remove obsolete marquee behavior, and establish evidence that the complete selected `1.1.0` journey is an upgrade-safe author daily-use baseline.
+Align application-name presentation and Home-to-Drawer gesture coverage with their current product contracts, remove obsolete marquee behavior, and establish evidence that the complete selected `1.1.0` journey is an upgrade-safe author daily-use baseline.
 
 ## Product and version references
 
@@ -23,12 +23,14 @@ Align application-name presentation with the current static single-line product 
 
 ## Observable outcome
 
-Application names on Home and Drawer remain static, one line, and end-ellipsized when necessary, with no marquee start, pause, priority, or restart behavior. The accepted `1.1.0` APK preserves readable `1.0.0` favorite data and completes the selected Iterations 7-10 journey on the required baseline with exact source, build, version, signing-category, device, and known-gap evidence.
+Application names on Home and Drawer remain static, one line, and end-ellipsized when necessary, with no marquee start, pause, priority, or restart behavior. In normal Home mode, an upward gesture can begin across every Avenor-managed Home interaction region defined by the navigation contract, rather than only in blank space, while preserving the existing arbitration for favorite scrolling, selection, long-press, double-tap lock, edit mode, and system-reserved insets. The accepted `1.1.0` APK preserves readable `1.0.0` favorite data and completes the selected Iterations 7-10 journey on the required baseline with exact source, build, version, signing-category, device, and known-gap evidence.
 
 ## Included work
 
 - Remove Drawer application-name marquee motion and obsolete shared timing, active-entry priority, pause, restart, transition, and test state.
 - Confirm static one-line end-ellipsis presentation for Home primary favorites and Drawer application names across included locales and representative font scaling.
+- Correct Home-to-Drawer gesture ownership so an upward gesture may begin from every Avenor-managed Home interaction region allowed by the existing navigation contract, including time, date, favorite entries, blank space, Loading, Error, and Retry presentation.
+- Preserve the contracted gesture arbitration: a scrollable favorite group consumes movement until its end and transfers only remaining displacement from the same continuous gesture; an upward drag that takes transition ownership suppresses selection, long-press, Retry, and double-tap-lock activation; Home edit mode disables the transition; system-reserved insets remain governed by Android.
 - Run or collect the version-level validation required by [delivery.md](delivery.md), including upgrade, regression, offline, localization, gesture, identity/profile, Settings, double-tap lock, and failure-path evidence.
 - Inspect the current merged manifest and applicable Android backup configuration, including `android:allowBackup`, `android:dataExtractionRules`, and legacy or equivalent rules for the supported API range; record evidence that Avenor-owned favorite persistence files are excluded from Android cloud backup and device-transfer backup.
 - Confirm exact `applicationId`, `versionName`, next-unused `versionCode`, source commit, build stage, signing category, device/API/OEM observations, and available APK identity.
@@ -43,7 +45,7 @@ Application names on Home and Drawer remain static, one line, and end-ellipsized
 
 ## Technical change areas
 
-Drawer and shared application-name presentation state, obsolete marquee cleanup, focused UI/state tests, regression validation, upgrade installation, build/version identity, signing-category observation, APK traceability, and delivery evidence. A material issue found here returns to its owning iteration or to an explicitly authorized corrective task rather than being hidden inside closure.
+Drawer and shared application-name presentation state, obsolete marquee cleanup, Home gesture ownership and nested-scroll handoff, touch-action arbitration, focused UI/state tests, regression validation, upgrade installation, build/version identity, signing-category observation, APK traceability, and delivery evidence. Implementation structure remains a technical choice and must preserve the navigation contract's observable behavior. A material issue found here returns to its owning iteration or to an explicitly authorized corrective task rather than being hidden inside closure.
 
 ## Dependencies and sequence
 
@@ -51,7 +53,7 @@ Depends on completed and author-accepted Iterations 7-10 and their available evi
 
 ## Migration and compatibility impact
 
-Direct upgrade from accepted `1.0.0` must preserve every readable favorite and its order until the author changes that order. Removing marquee state must not change application identity, ordering, list position, selection, scrolling, Home/Drawer transition, or accessibility semantics. Downgrade is not supported.
+Direct upgrade from accepted `1.0.0` must preserve every readable favorite and its order until the author changes that order. Removing marquee state must not change application identity, ordering, list position, selection, scrolling, Home/Drawer transition, or accessibility semantics. Correcting gesture coverage must not make an upward drag also activate the touched Home element, bypass favorite scrolling, enable the transition during edit mode, or claim Android-reserved system gesture areas. Downgrade is not supported.
 
 ## Security, privacy, permission, and licensing impact
 
@@ -63,10 +65,11 @@ Closure verifies the recorded permission, service, manifest, dependency, signing
 - The mandatory primary-device evidence remains a version-completion gate until the author or an explicitly authorized agent performs it. Recommended API 31, additional API 36/API 37 device, and OEM/profile evidence may remain unavailable when recorded under the version rules.
 - The current Android backup configuration has not yet been assessed as passing; development must determine the exact project configuration and produce the required exclusion evidence.
 - The final `versionCode` remains provisional until all earlier traceable APK allocations are known at the accepted artifact boundary.
+- Broadening the gesture start region can expose conflicts among click, long-press, double-tap lock, favorite scrolling, Retry, and Home-to-Drawer recognition. A passing result requires the existing navigation ownership and continuous handoff rules, not merely recognition from more coordinates.
 
 ## Validation plan
 
-On the mandatory author-designated primary physical device, the version exit covers: upgrade from accepted `1.0.0`; zero/one/two/many primary favorites; edit visibility, surfaces, reorder, persistence, restart, and failures; application shortcuts from Home and Drawer for the exact identity/profile; Settings navigation, default-home state refresh, local content, repository, and version display; double-tap-lock disclosure, authorization, gesture exclusions, revocation, and failure; static application names during scrolling, updates, and Home/Drawer transitions; English, Simplified Chinese, and fallback resources; offline core paths; and regression of accepted `1.0.0` paths. The exit also requires project evidence that the Android backup configuration excludes Avenor-owned favorite persistence files from cloud backup and device transfer.
+On the mandatory author-designated primary physical device, the version exit covers: upgrade from accepted `1.0.0`; zero/one/two/many primary favorites; edit visibility, surfaces, reorder, persistence, restart, and failures; application shortcuts from Home and Drawer for the exact identity/profile; Settings navigation, default-home state refresh, local content, repository, and version display; double-tap-lock disclosure, authorization, gesture exclusions, revocation, and failure; static application names during scrolling, updates, and Home/Drawer transitions; English, Simplified Chinese, and fallback resources; offline core paths; and regression of accepted `1.0.0` paths. Home gesture coverage must be observed from time, date, each favorite group, blank space, Loading, Error, and Retry regions. It must also show that a transition-owning drag suppresses the touched element's action, a scrollable favorite group transfers only post-boundary displacement without requiring a lift, a non-overflowing or already-ended group enters the transition directly, edit mode keeps the transition disabled, and system-reserved insets remain unaffected. The exit also requires project evidence that the Android backup configuration excludes Avenor-owned favorite persistence files from cloud backup and device transfer.
 
 API 31, one additional API 36 or API 37 physical device, and additional OEM/profile coverage are recommended evidence. When not performed they must be recorded as `Unknown`, `Not run`, or `Unavailable`, and their absence alone does not block `1.1.0`. When performed, a failure on an included path must be resolved or returned for author disposition and cannot be ignored because the environment was recommended. Applicable commands, environments, procedures, and results must be recorded accurately.
 

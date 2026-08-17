@@ -16,14 +16,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -91,6 +94,7 @@ internal fun HomeScreen(
     onLaunchFavorite: (FavoriteAvailability) -> Unit = {},
     onLongPressFavorite: (LaunchableEntry) -> Unit = {},
     onReorderFavorites: (List<LaunchableIdentity>) -> Unit = {},
+    accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
 ) {
     val context = LocalContext.current
     var now by remember { mutableStateOf(clock()) }
@@ -112,47 +116,80 @@ internal fun HomeScreen(
                 vertical = dimensionResource(R.dimen.home_vertical_padding),
             ),
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(IntrinsicSize.Min)
                 .editSurface(editMode),
         ) {
-            Text(
-                text = HomeDateTimeFormatter.time(context, now),
+            Column {
+                Text(
+                    text = HomeDateTimeFormatter.time(context, now),
+                    modifier = Modifier
+                        .heightIn(min = dimensionResource(R.dimen.home_time_min_height))
+                        .testTag("home_time")
+                        .clickable(enabled = !editMode, role = Role.Button) {
+                            context.launchClockDestination()
+                        },
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = dimensionResource(R.dimen.home_time_text_size).value.sp,
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = dimensionResource(R.dimen.home_time_line_height).value.sp,
+                    textAlign = TextAlign.Start,
+                )
+                Text(
+                    text = HomeDateTimeFormatter.dateAndWeekday(context, now),
+                    modifier = Modifier
+                        .heightIn(min = dimensionResource(R.dimen.home_date_height))
+                        .testTag("home_date")
+                        .clickable(enabled = !editMode, role = Role.Button) {
+                            val calendarUri = CalendarContract.CONTENT_URI
+                                .buildUpon()
+                                .appendPath("time")
+                                .appendPath(now.toInstant().toEpochMilli().toString())
+                                .build()
+                            context.launchPlatformDestination(
+                                intent = Intent(Intent.ACTION_VIEW, calendarUri),
+                                failureMessage = R.string.calendar_unavailable,
+                            )
+                        }
+                        .wrapContentHeight(align = Alignment.CenterVertically),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = dimensionResource(R.dimen.home_date_text_size).value.sp,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = dimensionResource(R.dimen.home_date_line_height).value.sp,
+                    textAlign = TextAlign.Start,
+                )
+            }
+            Spacer(
                 modifier = Modifier
-                    .heightIn(min = dimensionResource(R.dimen.home_time_min_height))
-                    .testTag("home_time")
-                    .clickable(enabled = !editMode, role = Role.Button) {
-                        context.launchClockDestination()
-                    },
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = dimensionResource(R.dimen.home_time_text_size).value.sp,
-                fontWeight = FontWeight.Bold,
-                lineHeight = dimensionResource(R.dimen.home_time_line_height).value.sp,
-                textAlign = TextAlign.Start,
-            )
-            Text(
-                text = HomeDateTimeFormatter.dateAndWeekday(context, now),
-                modifier = Modifier
-                    .heightIn(min = dimensionResource(R.dimen.home_date_height))
-                    .testTag("home_date")
-                    .clickable(enabled = !editMode, role = Role.Button) {
-                        val calendarUri = CalendarContract.CONTENT_URI
-                            .buildUpon()
-                            .appendPath("time")
-                            .appendPath(now.toInstant().toEpochMilli().toString())
-                            .build()
-                        context.launchPlatformDestination(
-                            intent = Intent(Intent.ACTION_VIEW, calendarUri),
-                            failureMessage = R.string.calendar_unavailable,
-                        )
-                    }
-                    .wrapContentHeight(align = Alignment.CenterVertically),
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = dimensionResource(R.dimen.home_date_text_size).value.sp,
-                fontWeight = FontWeight.Normal,
-                lineHeight = dimensionResource(R.dimen.home_date_line_height).value.sp,
-                textAlign = TextAlign.Start,
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .then(
+                        if (accessibilityLockController.availableForValidation && !editMode) {
+                            Modifier.pointerInput(accessibilityLockController) {
+                                detectTapGestures(
+                                    onDoubleTap = {
+                                        if (!accessibilityLockController.isSystemEnabled()) {
+                                            return@detectTapGestures
+                                        }
+                                        if (accessibilityLockController.requestLock() !=
+                                            LockRequestResult.Requested
+                                        ) {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.unable_to_lock_screen,
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        }
+                                    },
+                                )
+                            }
+                        } else {
+                            Modifier
+                        },
+                    )
+                    .testTag("home_double_tap_lock_region"),
             )
         }
         Spacer(Modifier.height(dimensionResource(R.dimen.home_module_spacing)))
