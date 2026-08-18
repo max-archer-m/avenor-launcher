@@ -67,7 +67,7 @@ This iteration introduces an accessibility-service capability and therefore requ
 - Gesture recognition must not delay Clock or Calendar selection or conflict with Home-to-Drawer dragging, long press, edit surfaces, system insets, favorites, or other targets.
 - Implementation must reproduce the current author-approved Privacy and prominent-disclosure text without weakening, merging, or bypassing its separate presentation boundaries.
 - Future store distribution requires a fresh platform-policy and disclosure review even if the GitHub-distributed build is accepted.
-- The evidence-supported AccessibilityService ADR is required before mainline integration; no ADR exists yet, and this planned record does not claim that its technical evidence exists.
+- ADR-0004 now records the evidence-supported AccessibilityService boundary required before any mainline integration. The completed result remains debug-only and does not claim mainline integration.
 
 ## Validation plan
 
@@ -75,7 +75,7 @@ The iteration behavior must be accepted on the author-designated primary physica
 
 ## Acceptance evidence
 
-No implementation evidence exists. When performed, record the approved disclosure revision, manifest/service boundary, executor, source/build identity, device/API/OEM, initial and resulting service state, gesture location and outcome, system handoff, failure behavior, regressions, and skipped scenarios.
+The project author accepted the debug implementation on the designated primary physical device. The completion result records the accepted journey and device environment; the focused technical validation record contains the pre-ADR evidence and remaining recommended scenarios. The approved disclosure revision, manifest/service boundary, source/build identity, initial and resulting service state, gesture location and outcome, system handoff, failure behavior, regressions, and skipped scenarios remain the applicable evidence fields.
 
 ## Related decisions, commits, and tags
 

@@ -109,7 +109,7 @@ Use the source, signing, artifact, and synchronization rules for an `Author dail
 
 ## Completion result
 
-`1.1.0` completed its selected `Author daily-use baseline` scope. Iterations 7-11 are `Completed`. The accepted build uses `applicationId` `com.avenor.launcher`, `versionName` `1.1.0`, and `versionCode` `2`.
+`1.1.0` completed its selected `Author daily-use baseline` scope. Iterations 7-11 are `Completed`. The accepted build uses `applicationId` `com.avenor.launcher`, `versionName` `1.1.0`, and `versionCode` `2`. The accepted `1.1.0` build is represented by source commit `7ae840bcf3c35a1bed340d4ff99ffcfbaad86ab9`.
 
 The project author performed basic acceptance with a `debug` build signed by the author's local keystore file on a Samsung Galaxy S23 Ultra running Android 16 and One UI 8.5, using the personal profile on a device that also contains some app-clone instances. The accepted journey includes primary-favorite editing and reordering, application shortcuts, Settings, optional double-tap lock, static application-name presentation, and the corrected Home-to-Drawer gesture path.
 

@@ -15,7 +15,7 @@
 ## 产品与版本引用
 
 - [1.1.0 交付](delivery.zh-CN.md)
-- [Home 排序契约](../../product/surfaces/home.zh-CN.md#排序模式)
+- [Home 排序契约](../../product/surfaces/home.zh-CN.md#编辑模式)
 - [应用操作面板](../../product/surfaces/app-action-sheet.zh-CN.md#启动器操作)
 - [导航](../../product/navigation.zh-CN.md#home-到-drawer)
 - [设计基础约束](../../product/design-foundations.zh-CN.md#布局)

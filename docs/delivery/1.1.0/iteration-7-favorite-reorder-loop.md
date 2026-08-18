@@ -15,7 +15,7 @@ Let the author deliberately reorder two or more primary Home favorites and retai
 ## Product and version references
 
 - [1.1.0 delivery](delivery.md)
-- [Home reorder contract](../../product/surfaces/home.md#reorder-mode)
+- [Home edit-mode contract](../../product/surfaces/home.md#edit-mode)
 - [Application action sheet](../../product/surfaces/app-action-sheet.md#launcher-actions)
 - [Navigation](../../product/navigation.md#home-to-drawer)
 - [Design foundations](../../product/design-foundations.md#layout)

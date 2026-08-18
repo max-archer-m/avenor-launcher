@@ -109,7 +109,7 @@
 
 ## 完成结果
 
-`1.1.0` 已完成所选择的 `Author daily-use baseline` 范围。迭代 7-11 均为 `Completed`。获验收构建使用 `applicationId` `com.avenor.launcher`、`versionName` `1.1.0` 和 `versionCode` `2`。
+`1.1.0` 已完成所选择的 `Author daily-use baseline` 范围。迭代 7-11 均为 `Completed`。获验收构建使用 `applicationId` `com.avenor.launcher`、`versionName` `1.1.0` 和 `versionCode` `2`。获验收的 `1.1.0` 构建由源码 commit `7ae840bcf3c35a1bed340d4ff99ffcfbaad86ab9` 表示。
 
 项目作者使用由作者本地 keystore 文件签名的 `debug` 构建，在运行 Android 16 和 One UI 8.5 的 Samsung Galaxy S23 Ultra 上完成基本验收；使用个人 profile，设备同时存在部分应用分身。获验收路径包括主收藏编辑与排序、应用快捷操作、Settings、可选双击锁屏、静态应用名称呈现以及修正后的 Home→Drawer 手势路径。
 
