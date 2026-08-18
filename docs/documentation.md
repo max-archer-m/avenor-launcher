@@ -17,7 +17,7 @@ Repository documentation uses four practical categories. The category explains a
 | Project governance | How is project work routed, authorized, documented, and maintained? | `AGENTS.md`, this document, delivery formats |
 | Current facts and rules | What product behavior, technical configuration, development, validation, and release rules apply now? | `overview.md`, `docs/product/`, `development.md`, `validation.md`, `release.md` |
 | Decision rationale | Why does a consequential confirmed product or architecture direction exist? | Product decisions and ADRs |
-| Delivery records | What does a named version or iteration deliver, and what actually happened? | Stable version delivery directories and their iteration records |
+| Delivery records | What does a named version or iteration deliver, and what actually happened? | Stable version delivery directories, version delivery records, and iteration contracts |
 
 `LICENSE` remains the applicable legal instrument and does not need a documentation category. Temporary prompts, scratch notes, unchecked task lists, and conversation transcripts are working material, not authoritative project documentation.
 
@@ -33,8 +33,8 @@ Each durable fact has one primary location. Other documents link to or briefly i
 | Development environment and build entry points | `docs/development.md` |
 | Validation methods, evidence states, and execution authority | `docs/validation.md` |
 | Delivery levels, artifacts, signing, and release operations | `docs/release.md` |
-| Version scope, selected level, gates, and result | The version's `delivery.md` |
-| Iteration scope, status, evidence, and result | The applicable iteration record |
+| Version scope, selected level, gates, iteration status, evidence and results, and version result | The version's `delivery.md` |
+| Iteration objective, scope, constraints, acceptance conditions, and validation requirements | The applicable iteration contract |
 | Consequential technical rationale | The applicable active or superseded ADR |
 | Role authority | The Toolkit role definitions and authorization matrix |
 
@@ -44,7 +44,7 @@ When two authoritative documents state the same rule, select one owner and repla
 
 Current product documents describe the continuously maintained product contract and the intended product behavior. They are not claims that every historical or planned version already implements the complete contract.
 
-Version and iteration records describe the scope selected and authorized for that delivery at its applicable baseline. A completed delivery record is evaluated against its own selected scope, acceptance criteria, delivery level, and recorded evidence. Later changes to the current product contract do not retroactively change that historical result.
+Version delivery records describe selected scope and actual delivery history; iteration contracts describe the authorized boundary and acceptance conditions for each iteration. A completed result is evaluated from the version delivery record against the applicable iteration contract, selected version scope, delivery level, and recorded evidence. Later changes to the current product contract do not retroactively change that historical result.
 
 When a delivery record needs to explain a boundary, it should prefer positive selected scope and observable acceptance criteria. Record an exclusion only when it prevents a likely scope misunderstanding. Use `deferred` only when a later destination or future commitment has actually been confirmed; an unselected capability is not automatically deferred.
 
@@ -72,7 +72,7 @@ When a delivery record needs to explain a boundary, it should prefer positive se
 | Product glossary | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | Current facts and rules | Defines canonical product terms |
 | Version, artifact, and release governance | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | Current facts and rules | Defines delivery levels, application versions, completed records, APK artifacts, signing continuity, tags, and GitHub Releases |
 | Version-delivery format | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | Project governance | Defines the unified delivery directory, delivery-level selection, format, and migration exception |
-| Iteration-record format | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | Project governance | Defines iteration naming, required sections, evidence, and historical protection |
+| Iteration-contract format | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | Project governance | Defines iteration naming, required contract sections, acceptance boundaries, and historical protection |
 | 1.0.0 completed delivery | [`docs/delivery/1.0.0/delivery.md`](delivery/1.0.0/delivery.md) | [`docs/delivery/1.0.0/delivery.zh-CN.md`](delivery/1.0.0/delivery.zh-CN.md) | Delivery history | Records the completed author daily-use baseline, included iterations, evidence, and known gaps |
 | 1.1.0 completed delivery | [`docs/delivery/1.1.0/delivery.md`](delivery/1.1.0/delivery.md) | [`docs/delivery/1.1.0/delivery.zh-CN.md`](delivery/1.1.0/delivery.zh-CN.md) | Delivery history | Records the completed author daily-use baseline for full-width primary-favorite editing, application shortcuts, basic Settings, optional double-tap lock, static-name cleanup, and version closure |
 | Architecture decisions | [`docs/decisions/`](decisions/) | - | Decision rationale | Records consequential implemented and accepted architecture decisions; only an active ADR establishes its stated current architecture boundary |
@@ -111,7 +111,7 @@ Create interaction specifications only when the applicable behavior is ready to 
 
 Each specification is the authoritative current definition for its own responsibility. Classify it by its primary product responsibility rather than its implementation location: a feature may be triggered from one surface and still belong under `features/` when its independent boundary is the reason for the document. It may link to surface, feature, or shared component rules instead of duplicating them. It must not preserve a chronological history of every version or iteration; use product decisions, delivery records, and Git history for that purpose.
 
-When an iteration changes current behavior, record the before-and-after delivery scope in the iteration record, follow `docs/product-decisions.md` when the author has enabled decision records, and update the affected current product specification in the same change or before integrating the implementation.
+When an iteration changes current behavior, record the before-and-after delivery scope in the iteration contract, follow `docs/product-decisions.md` when the author has enabled decision records, and update the affected current product specification in the same change or before integrating the implementation.
 
 ## Roadmap, versions, iterations, milestones, and completed records
 
@@ -133,7 +133,7 @@ docs/delivery/<version>/
 - iteration-<number>-<title>.zh-CN.md
 ```
 
-Follow [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md). `delivery.md` contains the selected product scope, necessary technical conclusions, included iterations, validation, limitations, completion criteria, and result. Create a separate technical assessment only when an independent review is genuinely needed; after resolution, place durable conclusions in their single authoritative current or delivery source instead of maintaining a permanent duplicate.
+Follow [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md). `delivery.md` contains the selected product scope, necessary technical conclusions, included iterations, iteration status and delivery history, validation, limitations, completion criteria, and result. Create a separate technical assessment only when an independent review is genuinely needed; after resolution, place durable conclusions in their single authoritative current or delivery source instead of maintaining a permanent duplicate.
 
 The directory name and path do not encode lifecycle state. `delivery.md` records whether the version is incomplete or completed and the evidence supporting that result.
 
@@ -141,18 +141,20 @@ The directory name and path do not encode lifecycle state. `delivery.md` records
 
 For this project, a milestone is an exceptional baseline explicitly declared by the project author and represented by an approved Git tag. A GitHub Release is optional and exists only when the author also chooses an outward-facing publication. A formal version, iteration, unapproved tag, or approved tag not declared as a milestone does not become a milestone automatically. Milestones do not organize ordinary version delivery, and no `docs/milestones/` directory is used.
 
-### Iteration records
+### Iteration contracts
 
-Create iteration records beside `delivery.md` under `docs/delivery/<version>/` when implementation planning begins and an actual delivery iteration exists. Follow [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md).
+Create one separate iteration contract beside `delivery.md` under `docs/delivery/<version>/` when implementation planning begins and an actual delivery iteration exists. Follow [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md). Do not replace the contract with an embedded section in `delivery.md`.
 
 - Iteration identifiers use one project-wide, monotonically increasing positive-integer sequence starting with `1`, without leading zeroes.
 - Never renumber, reuse, or restart the sequence after a version completes.
 - An iteration is a reviewable delivery unit. Its boundary is decided from implementation difficulty, expected time, change breadth, dependencies, technical risk, and validation cost together, not solely from the product hierarchy or a fixed number of features.
 - An iteration may implement all or part of the current product definition, or combine tightly coupled work required to produce one verifiable result. It must not silently introduce scope absent from current product documents.
-- Each record should state the objective, product-document references, before-and-after behavior where applicable, in-scope work, exclusions, dependencies, risks, affected code areas at a durable level, validation plan and evidence, related decisions and ADRs, commits or tags, and final outcome.
-- Record detailed code evolution at the level of behavior, components, interfaces, data, architecture, build, migration, and validation consequences. Git commits and diffs remain authoritative for line-by-line source history.
+- Each contract should state the objective, product-document references, before-and-after behavior where applicable, in-scope work, exclusions, dependencies, risks, affected code areas at a durable level, acceptance conditions, validation requirements, and related durable decisions or assessments.
+- The contract identifies intended technical change areas and delivery consequences at a durable level. The version `delivery.md` records actual implementation evolution and evidence; Git commits and diffs remain authoritative for line-by-line source history.
 
-Iteration records define their delivery scope while active and preserve factual delivery history after completion. They are not permanent copies of product requirements or architecture. Their completion result applies to the recorded iteration scope and acceptance criteria, not to every behavior in the current product contract.
+Iteration contracts define a stable product-delivery boundary. They do not own `Planned`, `In Progress`, `Completed`, or `Cancelled` state, transition dates or bases, actual evidence, commits, tags, final results, or remaining delivery issues. The sibling version `delivery.md` is the single authoritative source for those project-delivery facts. A state transition normally changes only `delivery.md` and its maintained language counterpart; do not modify the iteration contract merely to mirror state.
+
+An authorized amendment may update an incomplete iteration contract when its scope or acceptance boundary changes. After `delivery.md` marks the iteration `Completed` or `Cancelled`, preserve the contract's historical meaning and limit later edits to identified factual, link, or translation corrections. Existing historical iteration records are not rewritten only to adopt this separation.
 
 ### Completed version records
 
@@ -160,10 +162,10 @@ When a version completes, retain its stable `docs/delivery/<version>/` path and 
 
 - The folder name remains the exact declared software version without a `v` prefix and follows [`docs/release.md`](release.md). Do not add lifecycle suffixes such as `-archived`. Tag presence is optional and does not determine whether a version is complete.
 - Do not create a second authoritative copy under an archive, completed, or status-specific directory.
-- The summary lists each included iteration as `<iteration identifier> - <title>` and links to the original iteration file in the same stable version directory.
+- The summary lists each included iteration as `<iteration identifier> - <title>`, links to the original iteration contract in the same stable version directory, and records its authoritative status, latest transition date, and basis.
 - The summary records the version outcome, included iteration range or explicit set, important product changes, implementation evolution, decisions, migrations, validation evidence, known limitations, related tag or release when one exists, and the reason the version boundary was declared.
 - Completion does not reset the project-wide iteration sequence. If one completed version contains iterations `iteration-7-...` through `iteration-10-...`, the next active iteration is `iteration-11-...`.
-- Do not rewrite completed iteration records to make later history appear cleaner. Correct factual errors explicitly and preserve their original delivery meaning.
+- Do not rewrite completed iteration contracts or historical records to make later history appear cleaner. Correct factual errors explicitly and preserve their original delivery meaning.
 - Every formal version contains one or more completed iterations.
 
 Do not create roadmap, version, or iteration files before their real planning or implementation inputs exist. Format documents may exist before individual delivery records because they govern how later records are created.
@@ -190,7 +192,7 @@ Do not create roadmap, version, or iteration files before their real planning or
 - Update ordinary guides and current-state documents in the same change as the affected boundary; do not retain obsolete content as narrative history.
 - Use append-only, zero-padded ADR names in the form `0001-<decision>.md`. Never renumber, reuse identifiers, or rewrite historical decisions. Apply the Toolkit ADR rule.
 - Keep Requirements Brief boundaries and acceptance criteria traceable. Record material scope changes explicitly rather than silently overwriting the current product definition.
-- Keep current product specifications current; preserve consequential rationale in product decisions and delivery history in version and iteration records.
+- Keep current product specifications current; preserve consequential rationale in product decisions, iteration boundaries in iteration contracts, and delivery history in version delivery records.
 - Product scope changes require an explicit decision from the project author and, when applicable, a technical impact assessment. A request becomes current product scope only when it is written into the applicable authoritative document.
 - Security, privacy, and release records must preserve their applicable scope, version or date, and required specialist-review evidence.
 - Move an obsolete document into historical storage only when it retains decision, audit, or migration value; otherwise delete it. Historical material must identify its replacement and must not be loaded as current guidance.

@@ -17,7 +17,7 @@
 | 项目治理 | 项目工作如何路由、授权、记录和维护？ | `AGENTS.md`、本文、交付格式 |
 | 当前事实与规则 | 当前适用哪些产品行为、技术配置、开发、验证和发布规则？ | `overview.md`、`docs/product/`、`development.md`、`validation.md`、`release.md` |
 | 决策理由 | 为什么存在某项已经确认的重大产品或架构方向？ | 产品决定和 ADR |
-| 交付记录 | 某个版本或迭代交付什么，实际发生了什么？ | 稳定版本交付目录及其迭代记录 |
+| 交付记录 | 某个版本或迭代交付什么，实际发生了什么？ | 稳定版本交付目录、版本交付记录和迭代契约 |
 
 `LICENSE` 继续作为适用法律文件，不需要归入文档类别。临时 prompt、草稿笔记、未核实任务清单和对话记录属于工作材料，不是权威项目文档。
 
@@ -33,8 +33,8 @@
 | 开发环境和构建入口 | `docs/development.md` |
 | 验证方法、证据状态和执行权限 | `docs/validation.md` |
 | 交付级别、制品、签名和发布操作 | `docs/release.md` |
-| 版本范围、所选级别、门禁和结果 | 该版本的 `delivery.md` |
-| 迭代范围、状态、证据和结果 | 对应迭代记录 |
+| 版本范围、所选级别、门禁、迭代状态、证据与结果，以及版本结果 | 该版本的 `delivery.md` |
+| 迭代目标、范围、约束、验收条件和验证要求 | 对应迭代契约 |
 | 重大技术理由 | 对应的 Active 或 Superseded ADR |
 | 角色权限 | Toolkit 角色定义和授权矩阵 |
 
@@ -44,7 +44,7 @@
 
 当前产品文档描述持续维护的产品契约和预期产品行为。它们不表示每个历史版本或计划版本都已经完整实现当前契约。
 
-版本和迭代记录描述该交付在适用基线下选择并获授权的范围。已完成交付记录应根据其自身的所选范围、验收标准、交付级别和记录证据进行判断。当前产品契约后续发生的变化不会追溯改变该历史结果。
+版本交付记录描述所选范围和实际交付历史；迭代契约描述每个迭代的获授权边界和验收条件。完成结果应从版本交付记录出发，根据适用迭代契约、所选版本范围、交付级别和记录证据进行判断。当前产品契约后续发生的变化不会追溯改变该历史结果。
 
 当交付记录需要解释边界时，应优先记录正向的所选范围和可观察验收标准。只有为了避免读者误解范围时才记录排除项。只有已经确认后续归属或未来承诺时才使用“延期”；未选中的能力不会自动成为延期能力。
 
@@ -72,7 +72,7 @@
 | 产品字典 | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | 当前事实与规则 | 定义规范产品术语 |
 | 版本、产物与发布治理 | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | 当前事实与规则 | 定义交付级别、应用版本、已完成记录、APK 产物、签名连续性、tag 与 GitHub Release |
 | 版本交付格式 | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | 项目治理 | 定义统一交付目录、交付级别选择、格式与迁移例外 |
-| 迭代记录格式 | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | 项目治理 | 定义迭代命名、必需章节、证据与历史保护 |
+| 迭代契约格式 | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | 项目治理 | 定义迭代命名、必需契约章节、验收边界与历史保护 |
 | 1.0.0 已完成交付 | [`docs/delivery/1.0.0/delivery.md`](delivery/1.0.0/delivery.md) | [`docs/delivery/1.0.0/delivery.zh-CN.md`](delivery/1.0.0/delivery.zh-CN.md) | 交付历史 | 记录已完成的作者日常使用基线、纳入迭代、证据和已知缺口 |
 | 1.1.0 已完成交付 | [`docs/delivery/1.1.0/delivery.md`](delivery/1.1.0/delivery.md) | [`docs/delivery/1.1.0/delivery.zh-CN.md`](delivery/1.1.0/delivery.zh-CN.md) | 交付历史 | 记录已完成的作者日常使用基线，包括全宽主收藏编辑、应用快捷操作、基础 Settings、可选双击锁屏、静态名称清理和版本收尾 |
 | 架构决定 | [`docs/decisions/`](decisions/) | - | 决策理由 | 记录重大、已实现且已接受的架构决定；只有 Active ADR 才建立其所述当前架构边界 |
@@ -111,7 +111,7 @@
 
 每份规格是其职责范围内的当前权威定义。应按主要产品责任而非实现位置分类：当独立边界正是建立该文档的原因时，一个从单一界面触发的功能仍可归入 `features/`。规格可以链接到界面表面、功能或公共组件规则，而不复制内容。交互规格不保留每个版本或迭代的时间顺序历史；该历史由产品决定、交付记录和 Git 历史承担。
 
-当迭代改变当前行为时，在迭代记录中记录交付前后的范围；当作者启用决策记录后，遵循 `docs/product-decisions.md`；并在同一变更中或接入实现前更新受影响的当前产品规格。
+当迭代改变当前行为时，在迭代契约中记录交付前后的范围；当作者启用决策记录后，遵循 `docs/product-decisions.md`；并在同一变更中或接入实现前更新受影响的当前产品规格。
 
 ## Roadmap、版本、迭代、里程碑与已完成记录
 
@@ -133,7 +133,7 @@ docs/delivery/<version>/
 - iteration-<number>-<title>.zh-CN.md
 ```
 
-遵循 [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md)。`delivery.md` 包含所选产品范围、必要技术结论、纳入迭代、验证、限制、完成条件和结果。只有确实需要独立评审时才创建单独技术评估；评估解决后，将持久结论写入其唯一的当前来源或交付来源，不长期维护重复文档。
+遵循 [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md)。`delivery.md` 包含所选产品范围、必要技术结论、纳入迭代、迭代状态与交付历史、验证、限制、完成条件和结果。只有确实需要独立评审时才创建单独技术评估；评估解决后，将持久结论写入其唯一的当前来源或交付来源，不长期维护重复文档。
 
 目录名称和路径不表达生命周期状态。`delivery.md` 记录版本尚未完成还是已经完成，以及支持该结果的证据。
 
@@ -141,18 +141,20 @@ docs/delivery/<version>/
 
 在本项目中，里程碑是由项目作者明确宣告，并具有获批 Git tag 的例外性基线。GitHub Release 可选，只有作者另行选择对外发布时才创建。正式版本、迭代、未获批 tag，或者虽已获批但未被作者宣告为里程碑的 tag，都不会自动构成里程碑。里程碑不组织普通版本交付，项目不使用 `docs/milestones/` 目录。
 
-### 迭代记录
+### 迭代契约
 
-当实现计划开始且存在真实迭代时，在 `docs/delivery/<version>/` 中与 `delivery.md` 同级创建迭代记录，并遵循 [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md)。
+当实现计划开始且存在真实迭代时，在 `docs/delivery/<version>/` 中与 `delivery.md` 同级为每个迭代创建一份独立迭代契约，并遵循 [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md)。不得用 `delivery.md` 中的内嵌章节替代该契约。
 
 - 迭代标识在全项目范围内使用一组从 `1` 开始、不带前导零且单调递增的正整数序列。
 - 版本完成后也不得重编号、复用或重新计数。
 - 迭代是可评审的交付单元。其边界由实现难度、预计时间、变更广度、依赖、技术风险和验证成本共同决定，不单纯依据产品层级或固定功能数量。
 - 一个迭代可实现当前产品定义的全部或一部分，也可合并产生一个可验证结果所必需的紧密耦合工作；但不得静默引入当前产品文档中不存在的范围。
-- 每份记录应包含目标、产品文档引用、适用时的变更前后行为、范围、非目标、依赖、风险、持久层级的受影响代码区域、验证计划与证据、相关决策与 ADR、commit 或 tag，以及最终结果。
-- 详细代码演进记录到行为、组件、接口、数据、架构、构建、迁移和验证影响层级。Git commit 和 diff 仍是逐行源码历史的权威来源。
+- 每份契约应包含目标、产品文档引用、适用时的变更前后行为、范围、非目标、依赖、风险、持久层级的受影响代码区域、验收条件、验证要求，以及相关持久决定或评估。
+- 契约在持久层级标识预期技术影响面和交付后果。版本 `delivery.md` 记录实际实现演进和证据；Git commit 和 diff 仍是逐行源码历史的权威来源。
 
-迭代记录在活动期间定义其交付范围，完成后保留事实性交付历史；它不是产品需求或架构的永久副本。其完成结果只适用于记录的迭代范围和验收标准，不代表当前产品契约中的所有行为均已完成。
+迭代契约定义稳定的产品交付边界，不负责 `Planned`、`In Progress`、`Completed` 或 `Cancelled` 状态、转换日期与依据、实际证据、commit、tag、最终结果或剩余交付问题。同目录的版本 `delivery.md` 是这些项目交付事实的唯一权威来源。状态转换通常只修改 `delivery.md` 及其持续维护的语言对应稿；不得仅为同步状态而修改迭代契约。
+
+迭代尚未完成时，获授权的修订可以更新其范围或验收边界。`delivery.md` 将迭代标为 `Completed` 或 `Cancelled` 后，应保留契约的历史含义，后续修改仅限已识别的事实、链接或翻译纠错。已有历史迭代记录不因采用该职责分离而重写。
 
 ### 已完成版本记录
 
@@ -160,10 +162,10 @@ docs/delivery/<version>/
 
 - 文件夹名始终使用不带 `v` 前缀的准确软件版本，并遵循 [`docs/release.md`](release.md)。不得添加 `-archived` 等生命周期后缀。是否存在 tag 不影响版本是否完成。
 - 不得在归档、完成或其他状态专用目录中创建第二份权威副本。
-- 总结使用 `<迭代标识> - <标题>` 列出每个纳入的迭代，并链接到同一稳定版本目录中的原始迭代文件。
+- 总结使用 `<迭代标识> - <标题>` 列出每个纳入的迭代，链接到同一稳定版本目录中的原始迭代契约，并记录其权威状态、最近转换日期和依据。
 - 总结记录版本结果、所含迭代范围或明确集合、重要产品变化、实现演进、决策、迁移、验证证据、已知限制、存在时的相关 tag 或 release，以及宣告该版本边界的理由。
 - 版本完成不会重置全项目迭代序列。若某个已完成版本包含迭代 `iteration-7-...` 至 `iteration-10-...`，下一活动迭代必须是 `iteration-11-...`。
-- 不得改写已完成迭代记录来让后续历史显得更整洁。如需修正事实错误，应显式修正并保留其原始交付含义。
+- 不得改写已完成迭代契约或历史记录来让后续历史显得更整洁。如需修正事实错误，应显式修正并保留其原始交付含义。
 - 每个正式版本包含一个或多个已完成迭代。
 
 在存在真实的计划或实现输入前，不创建空的 roadmap、版本或迭代文件。格式文档治理后续记录的创建方式，因此可以先于具体交付记录存在。
@@ -190,7 +192,7 @@ docs/delivery/<version>/
 - 普通指南和当前状态文档随相关变更在同一提交中更新，不保留失效内容作为正文历史。
 - ADR 使用 `0001-<decision>.md` 形式的四位递增编号，追加记录，不重编号、不复用编号、不改写历史决定。适用 Toolkit ADR 规则。
 - Requirements Brief 应保持边界和验收标准可追踪。范围发生实质变化时，应显式记录变更，不静默覆盖当前产品定义。
-- 保持当前产品规格为最新契约；在产品决定中保留重要理由，在版本和迭代记录中保留交付历史。
+- 保持当前产品规格为最新契约；在产品决定中保留重要理由，在迭代契约中保留迭代边界，在版本交付记录中保留交付历史。
 - 产品范围变更需要项目作者明确决定，并在适用时完成技术影响评估。一项请求只有写入适用的权威文档后，才成为当前产品范围。
 - 安全、隐私和发布记录应保留适用范围、版本或日期，以及必要的专业复核证据。
 - 仅当失效文档仍具有决策、审计或迁移价值时才移入历史存储；否则删除。历史材料必须说明替代文档，且不得作为当前规则加载。
