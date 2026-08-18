@@ -20,8 +20,8 @@ The version remains within V1 fixed presentation. Iteration records state only r
 
 `Author daily-use baseline`, as defined by [release governance](../../release.md).
 
-- Planned `versionName`: `1.1.0`
-- Planned `versionCode`: `2` if no earlier traceable APK consumes it; the completed version uses the next unused value at the accepted artifact boundary
+- `versionName`: `1.1.0`
+- `versionCode`: `2`
 - Application identity remains `com.avenor.launcher`.
 - Direct upgrade from `1.0.0` must preserve existing favorites and their append order until the user changes that order.
 
@@ -57,7 +57,7 @@ All accepted `1.0.0` Home, Drawer, launch, action-sheet, and favorite behavior r
 
 Implementation details remain owned by development. Before relying on them, the applicable iteration must verify platform shortcut discovery and invocation for the selected launchable identity and profile, persistence compatibility for reorder writes, the system destination used for default-home settings, and the minimum accessibility-service declaration, state detection, disclosure, and lock-action behavior. The author-approved Privacy and prominent-disclosure text is defined in the linked current product contract; enabled acceptance still requires implementation to match it and satisfy the remaining technical and device gates.
 
-The technical assessment and Iteration 11 closure must inspect the current Android backup configuration, including the manifest, `android:allowBackup`, `android:dataExtractionRules`, and any equivalent configuration applicable to the supported API range. They must establish from the actual project that Avenor-owned favorite persistence files are excluded from Android cloud backup and device-transfer backup. This is an unperformed implementation and evidence gate, not a claim about the current configuration; development owns the exact configuration required by the checked-in project.
+The technical assessment and Iteration 11 closure inspected the Android backup configuration, including the manifest, `android:allowBackup`, and `android:dataExtractionRules`. The checked project and merged manifests establish that Avenor-owned favorite persistence files are excluded from Android cloud backup and device-transfer backup. Actual Android backup transport was not run and is not a blocker for this author daily-use baseline.
 
 Consequential findings that change identity, persistence compatibility, permissions, architecture, or product acceptance require author direction and an ADR when appropriate. Iteration 10 may perform focused technical validation before its AccessibilityService ADR exists, but the resulting service must not be integrated into the version mainline until supported evidence has established the boundary and the required ADR records it. Ordinary UI state, platform adapters, and test seams remain code-level decisions.
 
@@ -77,7 +77,7 @@ Iteration 10 depends on Iteration 9, and Iteration 11 depends on accepted Iterat
 
 The required version environment is one author-designated primary physical device. Version completion requires:
 
-- an installable APK with the planned identifiers traceable to its source commit;
+- an installable APK with the selected identifiers;
 - successful upgrade or installation without unintended loss of readable `1.0.0` favorites;
 - evidence from the current Android backup configuration that Avenor-owned favorite persistence files are excluded from Android cloud backup and device-transfer backup;
 - retained full-width primary-favorite presentation with no companion region, placeholder, or reserved width;
@@ -85,7 +85,7 @@ The required version environment is one author-designated primary physical devic
 - confirmed local Privacy and prominent disclosure content before double-tap lock is enabled for acceptance;
 - author acceptance of the complete included journey on that device;
 - no known included-path crash, ANR, destructive favorite-state error, wrong-profile shortcut invocation, or unusable Settings handoff; and
-- accurate recording of every skipped, unknown, failed, or unavailable check.
+- author disposition of skipped, unknown, failed, or unavailable checks that affect the selected daily-use baseline.
 
 The designated primary physical device is the only mandatory device environment for this delivery level. Focused automated checks, API 31, one additional API 36 or API 37 physical device, additional OEM/profile coverage, shortcut variations, process restart, locale switching, and unavailable-handler paths are recommended evidence. An unperformed recommended check must be recorded as `Unknown`, `Not run`, or `Unavailable` and does not by itself block `1.1.0` completion. If a recommended check is performed and exposes a failure on an included path, that result must be resolved or explicitly returned for author disposition; its recommended origin does not permit the failure to be ignored.
 
@@ -103,10 +103,16 @@ Use the source, signing, artifact, and synchronization rules for an `Author dail
 
 ## Completion criteria
 
-- Iterations 7-11 are `Completed`, committed, and synchronized to the author-designated shared history.
+- Iterations 7-11 are `Completed` and accepted by the author.
 - The version validation and upgrade conditions above are met on the designated primary device.
-- The completion result records the exact source commit, identifiers, signing category, observed device environment, known gaps, and available APK identity.
+- The completion result records the selected identifiers, signing category, observed primary-device environment, upgrade result, and material known gaps. Commit, synchronization, APK retention, digest, tag, Release, upload, and distribution remain separately authorized actions.
 
 ## Completion result
 
-No final result exists. `1.1.0` is planned and implementation has not been authorized by this document.
+`1.1.0` completed its selected `Author daily-use baseline` scope. Iterations 7-11 are `Completed`. The accepted build uses `applicationId` `com.avenor.launcher`, `versionName` `1.1.0`, and `versionCode` `2`.
+
+The project author performed basic acceptance with a `debug` build signed by the author's local keystore file on a Samsung Galaxy S23 Ultra running Android 16 and One UI 8.5, using the personal profile on a device that also contains some app-clone instances. The accepted journey includes primary-favorite editing and reordering, application shortcuts, Settings, optional double-tap lock, static application-name presentation, and the corrected Home-to-Drawer gesture path.
+
+Upgrade validation used the accepted `1.0.0` baseline at commit `96a9e68a21c7c55844deb06b2e4ca7284788d091`. An in-place upgrade to `1.1.0` completed normally and preserved multiple favorites and their order. Project-configuration and merged-manifest evidence confirms the selected backup-exclusion boundary. Additional device/API/OEM coverage and actual Android backup transport were not performed and do not block this author-accepted daily-use baseline.
+
+No push, tag, GitHub Release, upload, or distribution is claimed by this completion result; each remains separately authorized.

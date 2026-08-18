@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.Orientation
@@ -34,8 +33,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,11 +41,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,7 +55,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -97,7 +91,6 @@ internal fun DrawerScreen(
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     active: Boolean = true,
-    marqueePaused: Boolean = false,
     onLongPress: (LaunchableEntry) -> Unit = {},
     onOpenSettings: () -> Unit = {},
 ) {
@@ -215,7 +208,6 @@ internal fun DrawerScreen(
             modifier = modifier,
             listState = listState,
             sections = currentState.snapshot.drawerSectionsFor(locale),
-            marqueePaused = marqueePaused || !active,
             onLaunch = { entry ->
                 if (activationGuard.tryAcquire() && !entryLauncher.launch(entry)) {
                     Toast.makeText(context, launchFailureMessage, Toast.LENGTH_SHORT).show()
@@ -278,7 +270,6 @@ private fun DrawerApplicationList(
     modifier: Modifier,
     listState: LazyListState,
     sections: List<DrawerSection>,
-    marqueePaused: Boolean,
     onLaunch: (LaunchableEntry) -> Unit,
     onLongPress: (LaunchableEntry) -> Unit,
     onOpenSettings: () -> Unit,
@@ -299,54 +290,6 @@ private fun DrawerApplicationList(
     val hapticFeedback = LocalHapticFeedback.current
     var activeIndexLabel by remember { mutableStateOf<String?>(null) }
     var indexJumpJob by remember { mutableStateOf<Job?>(null) }
-    val overflowingEntries = remember { mutableStateMapOf<String, Boolean>() }
-    var pressedEntryKey by remember { mutableStateOf<String?>(null) }
-    var focusedEntryKey by remember { mutableStateOf<String?>(null) }
-    val entryKeyByItemIndex = remember(sections) {
-        buildMap {
-            var itemIndex = 0
-            sections.forEach { section ->
-                itemIndex += 1
-                section.entries.forEach { entry ->
-                    put(itemIndex, entry.drawerEntryKey())
-                    itemIndex += 1
-                }
-            }
-        }
-    }
-    val centeredEntryKey by remember(listState, entryKeyByItemIndex) {
-        derivedStateOf {
-            if (listState.isScrollInProgress) {
-                null
-            } else {
-                val layoutInfo = listState.layoutInfo
-                val viewportCenter =
-                    (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2f
-                layoutInfo.visibleItemsInfo
-                    .mapNotNull { item ->
-                        val entryKey = entryKeyByItemIndex[item.index] ?: return@mapNotNull null
-                        if (overflowingEntries[entryKey] != true) return@mapNotNull null
-                        val itemCenter = item.offset + (item.size / 2f)
-                        entryKey to kotlin.math.abs(itemCenter - viewportCenter)
-                    }
-                    .minByOrNull { (_, distance) -> distance }
-                    ?.first
-            }
-        }
-    }
-    val activeMarqueeKey = selectActiveMarqueeKey(
-        paused = marqueePaused,
-        scrolling = listState.isScrollInProgress,
-        pressedKey = pressedEntryKey,
-        focusedKey = focusedEntryKey,
-        centeredKey = centeredEntryKey,
-        overflowingKeys = overflowingEntries.keys,
-    )
-    val marqueeMeasurementEnabled = !marqueePaused && !listState.isScrollInProgress
-    LaunchedEffect(marqueeMeasurementEnabled) {
-        if (!marqueeMeasurementEnabled) overflowingEntries.clear()
-    }
-
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -374,28 +317,8 @@ private fun DrawerApplicationList(
                             entry.identity.componentName.flattenToString()
                     },
                 ) { entry ->
-                    val entryKey = entry.drawerEntryKey()
                     DrawerApplicationRow(
                         entry = entry,
-                        marqueeEligible = activeMarqueeKey == entryKey,
-                        marqueeMeasurementEnabled = marqueeMeasurementEnabled,
-                        onOverflowChanged = { overflow ->
-                            if (overflow) {
-                                overflowingEntries[entryKey] = true
-                            } else {
-                                overflowingEntries.remove(entryKey)
-                            }
-                        },
-                        onPressedChanged = { pressed ->
-                            pressedEntryKey = if (pressed) entryKey else {
-                                pressedEntryKey.takeUnless { it == entryKey }
-                            }
-                        },
-                        onFocusedChanged = { focused ->
-                            focusedEntryKey = if (focused) entryKey else {
-                                focusedEntryKey.takeUnless { it == entryKey }
-                            }
-                        },
                         onLaunch = onLaunch,
                         onLongPress = onLongPress,
                     )
@@ -651,38 +574,18 @@ private fun DrawerSettingsRow(onClick: () -> Unit) {
 @Composable
 private fun DrawerApplicationRow(
     entry: LaunchableEntry,
-    marqueeEligible: Boolean,
-    marqueeMeasurementEnabled: Boolean,
-    onOverflowChanged: (Boolean) -> Unit,
-    onPressedChanged: (Boolean) -> Unit,
-    onFocusedChanged: (Boolean) -> Unit,
     onLaunch: (LaunchableEntry) -> Unit,
     onLongPress: (LaunchableEntry) -> Unit,
 ) {
     val iconSize = dimensionResource(R.dimen.drawer_application_icon_size)
     val iconSizePixels = with(LocalDensity.current) { iconSize.roundToPx() }
-    val interactionSource = remember(entry.identity) { MutableInteractionSource() }
-    val pressed by interactionSource.collectIsPressedAsState()
     val hapticFeedback = LocalHapticFeedback.current
-
-    LaunchedEffect(pressed) {
-        onPressedChanged(pressed)
-    }
-    DisposableEffect(entry.identity) {
-        onDispose {
-            onOverflowChanged(false)
-            onPressedChanged(false)
-            onFocusedChanged(false)
-        }
-    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = dimensionResource(R.dimen.drawer_application_row_min_height))
             .combinedClickable(
-                interactionSource = interactionSource,
-                indication = LocalIndication.current,
                 role = Role.Button,
                 onClick = { onLaunch(entry) },
                 onLongClick = {
@@ -690,34 +593,21 @@ private fun DrawerApplicationRow(
                     onLongPress(entry)
                 },
             )
-            .onFocusChanged { focusState -> onFocusedChanged(focusState.isFocused) }
             .testTag("drawer_application_row"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         DrawerApplicationIcon(entry.iconBitmap, entry.icon, iconSizePixels)
         Spacer(Modifier.width(dimensionResource(R.dimen.drawer_application_icon_label_gap)))
-        if (marqueeMeasurementEnabled) {
-            SharedMarqueeText(
-                text = entry.label,
-                eligible = marqueeEligible,
-                onOverflowChanged = onOverflowChanged,
-                modifier = Modifier.weight(1f),
-            )
-        } else {
-            Text(
-                text = entry.label,
-                modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        }
+        Text(
+            text = entry.label,
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyLarge,
+        )
     }
 }
-
-private fun LaunchableEntry.drawerEntryKey(): String =
-    "${identity.profileSerialNumber}:${identity.componentName.flattenToString()}"
 
 @Composable
 private fun DrawerApplicationIcon(

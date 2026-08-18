@@ -19,7 +19,6 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.Image
@@ -38,6 +37,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.height
@@ -47,12 +47,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -63,10 +61,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.integerResource
@@ -74,6 +73,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
@@ -88,7 +88,8 @@ internal fun HomeScreen(
     clock: () -> ZonedDateTime = { ZonedDateTime.now() },
     favoriteState: FavoriteReadState = FavoriteReadState.Readable(emptyList()),
     favoriteAvailability: Map<LaunchableIdentity, FavoriteAvailability> = emptyMap(),
-    marqueePaused: Boolean = false,
+    favoriteListState: LazyListState = rememberLazyListState(),
+    favoriteNestedScrollConnection: NestedScrollConnection? = null,
     editMode: Boolean = false,
     onRetryFavorites: () -> Unit = {},
     onLaunchFavorite: (FavoriteAvailability) -> Unit = {},
@@ -218,7 +219,8 @@ internal fun HomeScreen(
                     HomeFavoriteList(
                         identities = favoriteState.identities,
                         availabilityByIdentity = favoriteAvailability,
-                        marqueePaused = marqueePaused,
+                        listState = favoriteListState,
+                        nestedScrollConnection = favoriteNestedScrollConnection,
                         editMode = editMode,
                         onLaunchFavorite = onLaunchFavorite,
                         onLongPressFavorite = onLongPressFavorite,
@@ -234,13 +236,13 @@ internal fun HomeScreen(
 private fun HomeFavoriteList(
     identities: List<LaunchableIdentity>,
     availabilityByIdentity: Map<LaunchableIdentity, FavoriteAvailability>,
-    marqueePaused: Boolean,
+    listState: LazyListState,
+    nestedScrollConnection: NestedScrollConnection?,
     editMode: Boolean,
     onLaunchFavorite: (FavoriteAvailability) -> Unit,
     onLongPressFavorite: (LaunchableEntry) -> Unit,
     onReorderFavorites: (List<LaunchableIdentity>) -> Unit,
 ) {
-    val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val view = LocalView.current
     var displayedIdentities by remember { mutableStateOf(identities) }
@@ -252,41 +254,12 @@ private fun HomeFavoriteList(
     LaunchedEffect(identities, draggedIdentity) {
         if (draggedIdentity == null) displayedIdentities = identities
     }
-    val overflowingEntries = remember { mutableStateMapOf<String, Boolean>() }
-    var pressedEntryKey by remember { mutableStateOf<String?>(null) }
-    var focusedEntryKey by remember { mutableStateOf<String?>(null) }
-    val centeredEntryKey by remember(listState, displayedIdentities) {
-        derivedStateOf {
-            if (listState.isScrollInProgress) null else {
-                val layoutInfo = listState.layoutInfo
-                val viewportCenter =
-                    (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2f
-                layoutInfo.visibleItemsInfo
-                    .mapNotNull { item ->
-                        val identity = displayedIdentities.getOrNull(item.index)
-                            ?: return@mapNotNull null
-                        val key = identity.stableKey()
-                        if (overflowingEntries[key] != true) return@mapNotNull null
-                        val itemCenter = item.offset + item.size / 2f
-                        key to kotlin.math.abs(itemCenter - viewportCenter)
-                    }
-                    .minByOrNull { it.second }
-                    ?.first
-            }
-        }
-    }
-    val activeMarqueeKey = selectActiveMarqueeKey(
-        paused = marqueePaused || editMode,
-        scrolling = listState.isScrollInProgress,
-        pressedKey = pressedEntryKey,
-        focusedKey = focusedEntryKey,
-        centeredKey = centeredEntryKey,
-        overflowingKeys = overflowingEntries.keys,
-    )
-
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                nestedScrollConnection?.let { Modifier.nestedScroll(it) } ?: Modifier,
+            )
             .editSurface(editMode)
             .testTag("home_favorites"),
         state = listState,
@@ -298,25 +271,9 @@ private fun HomeFavoriteList(
             val availability = availabilityByIdentity[identity]
                 ?: FavoriteAvailability.Unknown(null)
             val entry = availability.presentationEntry
-            val entryKey = identity.stableKey()
             HomeFavoriteRow(
                 modifier = Modifier.animateItem(),
                 availability = availability,
-                marqueeEligible = activeMarqueeKey == entryKey,
-                onOverflowChanged = { overflow ->
-                    if (overflow) overflowingEntries[entryKey] = true
-                    else overflowingEntries.remove(entryKey)
-                },
-                onPressedChanged = { pressed ->
-                    pressedEntryKey = if (pressed) entryKey else {
-                        pressedEntryKey.takeUnless { it == entryKey }
-                    }
-                },
-                onFocusedChanged = { focused ->
-                    focusedEntryKey = if (focused) entryKey else {
-                        focusedEntryKey.takeUnless { it == entryKey }
-                    }
-                },
                 onClick = { onLaunchFavorite(availability) },
                 onLongClick = {
                     if (entry != null) onLongPressFavorite(entry)
@@ -406,10 +363,6 @@ private fun HomeFavoriteMessage(
 private fun HomeFavoriteRow(
     modifier: Modifier,
     availability: FavoriteAvailability,
-    marqueeEligible: Boolean,
-    onOverflowChanged: (Boolean) -> Unit,
-    onPressedChanged: (Boolean) -> Unit,
-    onFocusedChanged: (Boolean) -> Unit,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     editMode: Boolean,
@@ -425,8 +378,6 @@ private fun HomeFavoriteRow(
     val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
     val iconPixels = with(androidx.compose.ui.platform.LocalDensity.current) { iconSize.roundToPx() }
     val interactionSource = remember(entry?.identity) { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    LaunchedEffect(isPressed) { onPressedChanged(isPressed) }
     val hapticFeedback = LocalHapticFeedback.current
     val handleTargetSize = dimensionResource(R.dimen.home_reorder_handle_target_size)
     val dragElevation = with(androidx.compose.ui.platform.LocalDensity.current) {
@@ -455,7 +406,6 @@ private fun HomeFavoriteRow(
                     }
                 },
             )
-            .onFocusChanged { onFocusedChanged(it.isFocused) }
             .alpha(if (availability is FavoriteAvailability.Available) 1f else disabledAlpha)
             .graphicsLayer {
                 translationY = dragOffset
@@ -491,11 +441,13 @@ private fun HomeFavoriteRow(
             FavoriteAvailability.ConfirmedRemoved ->
                 stringResource(R.string.favorite_application_unavailable)
         }
-        SharedMarqueeText(
+        Text(
             text = displayText,
-            eligible = marqueeEligible,
-            onOverflowChanged = onOverflowChanged,
             modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyLarge,
         )
         if (editMode) {
             Icon(

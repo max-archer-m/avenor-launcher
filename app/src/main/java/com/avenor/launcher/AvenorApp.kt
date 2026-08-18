@@ -107,6 +107,7 @@ internal fun AvenorApp(
     val density = LocalDensity.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
+    val homeFavoriteListState = rememberLazyListState()
     val drawerListState = rememberLazyListState()
     val fullGestureDistancePx = with(density) {
         dimensionResource(R.dimen.drawer_transition_full_gesture_distance).toPx()
@@ -124,6 +125,7 @@ internal fun AvenorApp(
     var containerHeightPx by remember { mutableFloatStateOf(0f) }
     var gestureDisplacementPx by remember { mutableFloatStateOf(0f) }
     var drawerTransitionOwnsGesture by remember { mutableStateOf(false) }
+    var homeTransitionOwnsGesture by remember { mutableStateOf(false) }
     var settleJob by remember { mutableStateOf<Job?>(null) }
     val effectiveFavoriteStore = favoriteStore ?: remember { InMemoryFavoriteStore() }
     val favoriteState by effectiveFavoriteStore.state.collectAsState()
@@ -224,6 +226,7 @@ internal fun AvenorApp(
 
     fun settleTo(target: AvenorSurface) {
         drawerTransitionOwnsGesture = false
+        homeTransitionOwnsGesture = false
         settleJob?.cancel()
         settleJob = scope.launch {
             val startProgress = progress
@@ -380,6 +383,53 @@ internal fun AvenorApp(
         }
     }
 
+    val homeNestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (source != NestedScrollSource.UserInput || available.y >= 0f) {
+                    return Offset.Zero
+                }
+                if (!homeTransitionOwnsGesture && homeFavoriteListState.canScrollForward) {
+                    return Offset.Zero
+                }
+                if (!homeTransitionOwnsGesture) {
+                    beginGesture(AvenorSurface.Home)
+                    homeTransitionOwnsGesture = true
+                }
+                dragTowardTarget(AvenorSurface.Home, -available.y)
+                return Offset(x = 0f, y = available.y)
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (source != NestedScrollSource.UserInput || available.y >= 0f) {
+                    return Offset.Zero
+                }
+                if (!homeTransitionOwnsGesture) {
+                    beginGesture(AvenorSurface.Home)
+                    homeTransitionOwnsGesture = true
+                }
+                dragTowardTarget(AvenorSurface.Home, -available.y)
+                return Offset(x = 0f, y = available.y)
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                if (!homeTransitionOwnsGesture) return Velocity.Zero
+                finishGesture(AvenorSurface.Home, -available.y)
+                return Velocity(x = 0f, y = available.y)
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                if (!homeTransitionOwnsGesture) return Velocity.Zero
+                finishGesture(AvenorSurface.Home, -available.y)
+                return Velocity(x = 0f, y = available.y)
+            }
+        }
+    }
+
     val drawerPointerSafetyModifier = Modifier.pointerInput(Unit) {
         awaitEachGesture {
             awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
@@ -421,9 +471,11 @@ internal fun AvenorApp(
         ) {
             HomeScreen(
                 favoriteState = favoriteState,
+                favoriteListState = homeFavoriteListState,
+                favoriteNestedScrollConnection =
+                    homeNestedScrollConnection.takeUnless { homeEditMode },
                 accessibilityLockController = accessibilityLockController,
                 favoriteAvailability = favoriteAvailability,
-                marqueePaused = progress > 0f || selectedEntry != null,
                 editMode = homeEditMode,
                 onRetryFavorites = { scope.launch { effectiveFavoriteStore.load() } },
                 onLongPressFavorite = { entry ->
@@ -483,8 +535,6 @@ internal fun AvenorApp(
                     listState = drawerListState,
                     active = !settingsOpen &&
                         (settledSurface == AvenorSurface.Drawer || progress > 0f),
-                    marqueePaused = settingsOpen ||
-                        progress > 0f && progress < 1f || selectedEntry != null,
                     onLongPress = { entry ->
                         selectedEntryFromHome = false
                         selectedEntry = entry

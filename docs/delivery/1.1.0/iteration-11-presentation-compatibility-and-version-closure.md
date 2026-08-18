@@ -4,9 +4,9 @@
 
 ## Status
 
-- Value: `Planned`
-- Updated: 2026-08-16
-- Basis: The author selected removal of the unnecessary application-name marquee, correction of the Home-to-Drawer gesture coverage to match the existing navigation contract, and a dedicated `1.1.0` test exit; production implementation and version closure have not yet been authorized.
+- Value: `Completed`
+- Updated: 2026-08-18
+- Basis: The application-name presentation cleanup and Home-to-Drawer gesture ownership correction are complete, and the author completed basic acceptance and `1.0.0` upgrade validation on the designated daily-use device.
 
 ## Objective
 
@@ -63,8 +63,8 @@ Closure verifies the recorded permission, service, manifest, dependency, signing
 
 - A failed included-path check must be corrected or returned for explicit scope/acceptance direction; it cannot be relabeled as a harmless limitation to close the version.
 - The mandatory primary-device evidence remains a version-completion gate until the author or an explicitly authorized agent performs it. Recommended API 31, additional API 36/API 37 device, and OEM/profile evidence may remain unavailable when recorded under the version rules.
-- The current Android backup configuration has not yet been assessed as passing; development must determine the exact project configuration and produce the required exclusion evidence.
-- The final `versionCode` remains provisional until all earlier traceable APK allocations are known at the accepted artifact boundary.
+- The Android backup configuration has been checked at the project-configuration and merged-manifest levels; actual Android backup transport was not run and does not block the author's primary-device completion result.
+- The author confirmed that the current `applicationId`, `versionName`, and `versionCode` are set correctly; APK artifact traceability is not a blocker for this author's basic acceptance.
 - Broadening the gesture start region can expose conflicts among click, long-press, double-tap lock, favorite scrolling, Retry, and Home-to-Drawer recognition. A passing result requires the existing navigation ownership and continuous handoff rules, not merely recognition from more coordinates.
 
 ## Validation plan
@@ -75,18 +75,32 @@ API 31, one additional API 36 or API 37 physical device, and additional OEM/prof
 
 ## Acceptance evidence
 
-No closure evidence exists while this iteration is `Planned`. When performed, record exact commands or author-reported procedures, executor, source/build identity, APK identifiers, signing category, device/API/OEM, starting data, expected and observed results, failures, skipped checks, known gaps, and author disposition.
+The author reported the following closure evidence:
+
+- Executor: the project author.
+- Build: `debug`.
+- Signing: the author's local keystore file.
+- Device: Samsung Galaxy S23 Ultra.
+- System environment: Android 16, One UI 8.5.
+- Profile: personal profile; the device also contains some app-clone instances.
+- Fresh installation: `1.1.0` was directly installed and passed basic acceptance.
+- Upgrade validation: `1.0.0` was upgraded in place to `1.1.0`; multiple favorites and their order were preserved.
+- Upgrade baseline source: `1.0.0` used commit `96a9e68a21c7c55844deb06b2e4ca7284788d091`.
+- Version identity: the author confirmed that the current version settings are correct.
+- Result: the presentation cleanup, Home-to-Drawer gesture correction, and upgrade compatibility were basically accepted.
+
+Additional API/OEM coverage, actual Android backup transport, and other non-primary-device checks were not performed and are not treated as blockers for this iteration. The author did not require APK filename, hash, or more detailed device fields in this record.
 
 ## Related decisions, commits, and tags
 
 - [Focused backup and AccessibilityService technical validation](focused-technical-validation.md) records the current backup-configuration evidence and unperformed transport/device checks.
 - Historical `1.0.0` records retain the fact that a Drawer marquee foundation was implemented then; this iteration records its intentional removal for `1.1.0` rather than rewriting that history.
-- No implementation commit or tag exists for this iteration.
+- The `1.0.0` upgrade baseline is commit `96a9e68a21c7c55844deb06b2e4ca7284788d091`. This record does not claim a tag, GitHub Release, upload, or distribution for `1.1.0`.
 
 ## Final result
 
-No final result exists while the iteration is `Planned`.
+Iteration 11 completed the in-scope presentation cleanup and Home-to-Drawer gesture ownership correction. The author performed basic acceptance on a Samsung Galaxy S23 Ultra running Android 16 and One UI 8.5, using the personal profile, and confirmed that upgrading from `1.0.0` to `1.1.0` preserved multiple favorites and their order. The `1.0.0` upgrade baseline was commit `96a9e68a21c7c55844deb06b2e4ca7284788d091`; the current version settings are correct, and the `debug` build used the author's local keystore file.
 
 ## Remaining issues and handoff
 
-After observed acceptance, update this record and [delivery.md](delivery.md) with the same exact completion boundary. Commit, synchronization, signing, APK retention, tag, Release, upload, and distribution remain governed by their separate authorizations.
+This record now reflects the author's reported basic acceptance and upgrade result. Commit, synchronization, tag, Release, upload, and distribution remain governed by their separate authorizations.

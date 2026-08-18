@@ -657,32 +657,6 @@ class HomeScreenTest {
     }
 
     @Test
-    fun sharedMarqueePriorityAndPauseAreDeterministic() {
-        val overflowing = setOf("pressed", "focused", "centered")
-
-        assertEquals(
-            "pressed",
-            selectActiveMarqueeKey(false, false, "pressed", "focused", "centered", overflowing),
-        )
-        assertEquals(
-            "focused",
-            selectActiveMarqueeKey(false, false, null, "focused", "centered", overflowing),
-        )
-        assertEquals(
-            "centered",
-            selectActiveMarqueeKey(false, false, null, null, "centered", overflowing),
-        )
-        assertEquals(
-            null,
-            selectActiveMarqueeKey(true, false, "pressed", null, null, overflowing),
-        )
-        assertEquals(
-            null,
-            selectActiveMarqueeKey(false, true, "pressed", null, null, overflowing),
-        )
-    }
-
-    @Test
     fun homeFavoriteActionSheetOffersEditForTwoOrMoreFavorites() {
         val entry = LaunchableEntry(
             identity = LaunchableIdentity(

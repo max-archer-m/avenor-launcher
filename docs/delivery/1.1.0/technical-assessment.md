@@ -3,6 +3,8 @@
 > Semantic source: English. Chinese counterpart: [technical-assessment.zh-CN.md](technical-assessment.zh-CN.md).
 >
 > This assessment evaluates the feasibility and delivery constraints of the planned [1.1.0 delivery](delivery.md). It does not change product scope, authorize implementation or release activity, or establish a durable architecture decision. The project author retains decision authority.
+>
+> This document records the assessment as made against the pre-implementation baseline. Its baseline facts, planned work descriptions, and open gates are not updated as iterations complete. For the current disposition of the items assessed here, read [delivery.md](delivery.md) and the applicable iteration records; where they differ from this document, they are authoritative.
 
 ## Assessment conclusion
 
