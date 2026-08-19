@@ -12,7 +12,7 @@ Each language-neutral ASCII canvas is stored once under `docs/product/wireframes
 - `C` marks an illustrative companion-favorite item with a 32dp application icon, a default 48dp item height, and a `14sp/20sp` name.
 - The favorite composition has `8dp` internal padding and an `8dp` gap between its 55:45 groups. Each item uses `8dp` internal padding on all sides and a `16dp` icon-to-name gap.
 - Numbered entries illustrate placement and do not establish a fixed capacity. Each favorite group scrolls independently only when its content overflows.
-- Drawer additions enter primary favorites by default. In Home edit mode, a drag to an empty position in the other group moves the favorite; a drag to an occupied position swaps the two favorites.
+- Drawer additions enter primary favorites by default. In Home edit mode, a drag to a valid insertion position in the other group moves the favorite; a drag to an occupied position swaps the two favorites. The model has no predefined empty slots.
 - Application names remain one line and use end ellipsis when required.
 - Dot fills show allocated space and do not prescribe a visible texture, color, or additional layer.
 - A bottom secondary favorite module is absent and has zero height until applicable user-created content is defined. Unallocated transparent Home space is not that module.
