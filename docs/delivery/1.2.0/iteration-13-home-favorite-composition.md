@@ -19,17 +19,19 @@ Deliver the contracted Home basic-information alignment and a complete, directly
 
 ## Observable outcome
 
-The date text uses the contracted logical start inset while retaining its complete touch target. Home displays visually distinct primary and companion groups in their contracted composition; both groups launch and scroll independently. Edit mode supports immediate persistent in-group reorder, cross-group move, and occupied-position swap without losing, duplicating, or overwriting favorites.
+The date text uses the contracted logical start inset while retaining its complete touch target. Home displays visually distinct primary and companion groups in their contracted composition; both groups launch and scroll independently. Primary items use `40dp` icons in `56dp` rows, companion items use `32dp` icons in `48dp` rows, and the groups use a `16dp` inter-group gap. Edit mode preserves those item heights and supports persistent in-group reorder, cross-group insertion, and occupied-position swap without losing, duplicating, or overwriting favorites.
 
 ## Included work
 
 - Apply the contracted `8dp` logical start inset to visible date-and-weekday text without shrinking its complete `48dp` focusable touch target.
-- Present primary favorites in approximately 55% and companion favorites in approximately 45% of the shared composition width.
+- Present primary favorites in approximately 55% and companion favorites in approximately 45% of the shared composition width after the fixed `8dp` side padding and `16dp` inter-group gap are removed.
+- Keep normal-mode and edit-mode item heights identical; drag handles must remain inside the existing rows and must not stretch or compress either list.
 - Apply each group's contracted icon, target, typography, spacing, empty-space, and independent-scroll behavior.
 - Assign new Drawer favorites to primary by default without opening Home or edit mode.
 - Enter edit mode through the selected favorite's Launcher action and retain the contracted editing surfaces and Back-only exit.
-- Support in-group reorder, cross-group insertion, occupied-position swap, target-group preview, valid-drop feedback, invalid-drop restoration, and target-group edge auto-scroll.
-- Persist each completed reorder, move, or swap immediately.
+- Support in-group reorder, cross-group insertion, occupied-position swap, a `50%`-opacity full-safe-area drag preview, pointer-based insertion-line and swap-border feedback, invalid-drop restoration, and target-group edge auto-scroll. The preview may pass through all Home safe content, but only primary and companion favorite regions accept drops. The preview must not change the visible row height, viewport height, or list stretching.
+- Do not commit a cross-group mutation during dragging. Commit one move or swap only on release over a valid target; an occupied target uses a short synchronized confirmation animation without intermediate swaps.
+- Persist each completed reorder, move, or swap immediately. If persistence fails, restore the last successfully saved group assignments and order, do not present the operation as completed, and show the existing favorite-update failure feedback.
 - Preserve identity, order, disabled/unavailable behavior, inventory reconciliation, and the shared loading/error/retry composition.
 - Add or update proportionate tests and validation support for the selected behavior.
 
@@ -64,7 +66,7 @@ No new permission, network access, external service, dependency, user-data categ
 
 ## Risks and unresolved decisions
 
-- Cross-group drag, independent nested scrolling, and edge auto-scroll can conflict unless pointer ownership is explicit.
+- Cross-group drag, independent nested scrolling, and edge auto-scroll can conflict unless pointer ownership is explicit. A full-safe-area preview must remain separate from the narrower drop-target regions.
 - A persistence-format change can cause destructive loss or incorrect identity mapping if migration is not atomic and profile-aware.
 - The current product contract selects the observable 55/45 composition but does not prescribe a specific Compose layout architecture.
 - Consequential persistence or gesture architecture changes require author direction and an ADR when applicable.
@@ -72,17 +74,17 @@ No new permission, network access, external service, dependency, user-data categ
 ## Acceptance criteria
 
 - Date-and-weekday visible text has the contracted `8dp` logical start inset in both layout directions, and its complete row remains the `48dp` focusable touch target.
-- Home presents primary and companion regions with the contracted relative width, visual hierarchy, independent scroll positions, and preserved unused space.
+- Home presents primary and companion regions with the contracted relative width after spacing subtraction, shared viewport height, independent scroll positions, preserved unused space, and the contracted normal/edit item heights.
 - Both groups launch entries and expose applicable long-press actions.
 - Drawer additions append to primary and never silently assign to companion.
-- Edit mode supports in-group reorder, cross-group insertion, occupied-position swap, valid target preview, invalid-drop restoration, and edge auto-scroll for overflowing groups.
+- Edit mode supports in-group reorder, cross-group insertion, occupied-position swap, a full-safe-area `50%`-opacity drag preview, pointer-based valid target feedback, invalid-drop restoration, and edge auto-scroll for overflowing groups. The preview does not change row or viewport height.
 - Every completed mutation is saved once and survives the applicable reopen, process-recreation, or restart scenario.
 - Upgrade from readable existing favorite state preserves identity and order without loss or duplication; unreadable state remains preserved and mutation-disabled.
 - Inventory changes and disabled or temporarily unavailable favorites follow the current Home contract.
 
 ## Validation requirements
 
-Recommended focused scenarios cover zero favorites; only primary; only companion; both groups; each group independently overflowing; in-group reorder; move in both directions; occupied-position swap; invalid drop; edge auto-scroll; Back exit; process recreation; device restart; readable upgrade; unreadable persistence; install/remove/disable/rename/clone/profile changes; English, Chinese, fallback locale, RTL, and relevant font scaling.
+Recommended focused scenarios cover zero favorites; only primary; only companion; both groups; equal normal/edit row heights; each group independently overflowing; in-group reorder; move in both directions; occupied-position swap after release; full-safe-area drag preview; pointer-based insertion and swap feedback; invalid drop; edge auto-scroll; Back exit; process recreation; device restart; readable upgrade; unreadable persistence; install/remove/disable/rename/clone/profile changes; English, Chinese, fallback locale, RTL, and relevant font scaling.
 
 Relevant automated checks, an installable debug build, and author observation on the designated primary device are recommended. Actual results belong in `delivery.md`; no check is recorded as run by this contract.
 
