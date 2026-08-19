@@ -1,0 +1,124 @@
+# Avenor Launcher 1.2.0 Delivery
+
+> Semantic source: English. Chinese counterpart: [delivery.zh-CN.md](delivery.zh-CN.md).
+>
+> This delivery document plans selected behavior from the current product specifications. It does not authorize production implementation, a product or architecture change, signing, artifact movement, a commit, push, tag, GitHub Release, upload, publication, or distribution.
+
+## Version intent
+
+`1.2.0` strengthens the V1 fixed-presentation daily-use baseline through three currently planned increments: stable application-data loading and Home return behavior; the contracted Home basic-information alignment and editable primary/companion favorite composition; and continuous Home–Drawer navigation with stable transition and Drawer index-anchor behavior.
+
+Iterations 12-14 are the currently arranged iterations, not a declaration that the version's iteration set is final. The project author may add further bounded iterations to `1.2.0`; any addition must update this delivery record, add its separate iteration contract, define its dependency position, and preserve an achievable version boundary.
+
+## Delivery level
+
+`Author daily-use baseline`, as defined by [release governance](../../release.md).
+
+- Planned `versionName`: `1.2.0`.
+- `versionCode`: To be allocated as the next unused value at the applicable traceable-artifact boundary.
+- Application identity remains `com.avenor.launcher`.
+- Planning this version does not by itself change the Android build configuration or create a traceable APK.
+
+## Product references
+
+- [Product overview](../../../overview.md)
+- [Product foundation](../../requirements/product-foundation.md)
+- [Navigation](../../product/navigation.md)
+- [Home](../../product/surfaces/home.md)
+- [Drawer](../../product/surfaces/drawer.md)
+- [Design foundations](../../product/design-foundations.md)
+- [Privacy and data handling](../../product/features/privacy.md)
+- [Validation guide](../../validation.md)
+- [Release governance](../../release.md)
+
+## Included scope and user journey
+
+The current `1.2.0` plan lets the author return reliably to an already usable Home without unnecessary blocking reloads; use the contracted Home date alignment and directly access, scroll, launch, reorder, move, and swap favorites across the primary and companion groups; and move continuously between Home and Drawer while retaining the specified release thresholds, position/opacity path, scroll-to-transition handoff, and discrete Drawer index-anchor navigation.
+
+The accepted `1.1.0` Home, Drawer, application launch, action-sheet, Settings, and local-data behavior remains the compatibility baseline unless a listed iteration contract explicitly selects a current product-contract change.
+
+## Exclusions
+
+- Network, account, cloud sync, recommendation, analytics, AI, automatic favorite sorting, folders, backup, restore, or broader customization.
+- Android Private Space support or `ACCESS_HIDDEN_PROFILES`.
+- Moving the optional double-tap-lock accessibility service from its current build boundary into a formal mainline or release configuration.
+- A new Drawer grid, a new Settings capability, or a product behavior not selected by an included iteration contract.
+- Formal release artifact, public distribution, tag, milestone, GitHub Release, or store publication.
+- Treating Iterations 12-14 as a permanently closed version scope; later additions remain possible only through an explicit author-directed delivery update and a separate iteration contract.
+
+## Technical approach and risks
+
+Implementation details remain owned by development. Iteration 12 must distinguish process-start loading, same-process return, process recreation, explicit retry, and real inventory-change reconciliation without suppressing required refreshes. Iteration 13 must preserve readable `1.0.0` and `1.1.0` favorite identity and order while introducing group assignment, and must fail closed when stored state is unreadable. Iteration 14 must coordinate nested scrolling, pointer ownership, transition progress, opacity, endpoint settling, and index-driven list movement without accidental application actions or discontinuities.
+
+Consequential changes to persistence format, state ownership, navigation architecture, permissions, privacy, signing, or acceptance intent require author direction and an ADR or specialist review when applicable. Performance work must be supported by observable behavior or measured evidence and must not introduce speculative infrastructure.
+
+## Included iterations
+
+| Iteration | Status | Updated | Basis |
+| --- | --- | --- | --- |
+| [Iteration 12: Loading and Home return foundation](iteration-12-loading-and-home-return.md) | `Planned` | 2026-08-18 | The author selected duplicate-loading correction and system Home/external-return behavior as the first `1.2.0` foundation. |
+| [Iteration 13: Home information and editable favorite composition](iteration-13-home-favorite-composition.md) | `Planned` | 2026-08-18 | The author selected Home date alignment and complete primary/companion favorite presentation and editing as the second increment. |
+| [Iteration 14: Continuous Drawer navigation and anchors](iteration-14-continuous-drawer-navigation.md) | `Planned` | 2026-08-18 | The author selected continuous Drawer gestures, transition endpoints, and Drawer index-anchor behavior as the third increment. |
+
+These are the currently planned iterations. A later author decision may append another iteration without renumbering or rewriting Iterations 12-14; this table, the version scope, dependencies, validation, and completion criteria must then be updated together.
+
+## Iteration evidence and results
+
+### Iteration 12
+
+[Contract](iteration-12-loading-and-home-return.md). No implementation, validation, commit, artifact, or acceptance result is recorded. Status remains `Planned`.
+
+### Iteration 13
+
+[Contract](iteration-13-home-favorite-composition.md). No implementation, validation, commit, artifact, or acceptance result is recorded. Status remains `Planned`.
+
+### Iteration 14
+
+[Contract](iteration-14-continuous-drawer-navigation.md). No implementation, validation, commit, artifact, or acceptance result is recorded. Status remains `Planned`.
+
+## Dependencies and sequence
+
+The current intended order is Iteration 12, then Iteration 13, then Iteration 14.
+
+- Iteration 12 establishes the loading, return, and state-reuse behavior needed by later Home and Drawer work.
+- Iteration 13 follows Iteration 12 because the two-group favorite composition must use stable loading and restoration semantics.
+- Iteration 14 follows Iterations 12 and 13 because its gesture arbitration must cover loading/error controls and the final primary/companion scroll regions.
+
+This dependency order does not bind an iteration to a branch, terminal, contributor, start date, or forecast completion date. A later added iteration must declare where it depends on or can proceed independently from the current sequence.
+
+## Validation
+
+The required version environment is one author-designated primary physical device. Version completion requires:
+
+- an installable APK with the accepted `1.2.0` identifiers;
+- successful installation or in-place upgrade without unintended loss, duplication, reordering, or wrong-group assignment of readable existing favorites;
+- author acceptance of the complete included journey for every iteration listed at version-completion time;
+- same-process Home return without restoring an inappropriate transient surface or replacing usable Home content with blocking Loading;
+- complete primary/companion presentation and editing behavior, including persistence across the applicable restart scenarios;
+- continuous Home–Drawer position, opacity, nested-scroll handoff, release, rebound, and index-anchor behavior;
+- no known included-path crash, ANR, destructive favorite-state error, wrong application launch, or navigation dead end; and
+- accurate disposition of every skipped, unknown, failed, or unavailable check affecting the selected daily-use baseline.
+
+Focused automated checks and additional API, OEM, locale, profile, cloned-application, process-recreation, font-scale, and navigation-mode coverage are recommended evidence. They become mandatory only when the author or a later version-contract amendment explicitly promotes them.
+
+## Artifact and release requirements
+
+Use the source, signing, artifact, and synchronization rules for an `Author daily-use baseline`. The author-local signing identity must remain available for an in-place update from the accepted baseline. Allocate a `versionCode` only under the traceable-artifact rules in release governance, and record every allocation in this delivery evidence. No tag, upload, publication, or distribution is planned or authorized here.
+
+## Known limitations and legacy issues
+
+- The implementation approach and performance evidence for the three planned iterations have not yet been established.
+- Additional `1.2.0` iterations may be selected later; their absence from this initial plan is not a rejection or deferral decision.
+- Broader device, API, OEM, profile, clone, and accessibility coverage remains unknown until performed.
+- Formal-release evidence and public-distribution readiness are outside the selected delivery level.
+
+## Completion criteria
+
+- Every iteration listed in `Included iterations` at version-completion time is `Completed` and accepted by the author; completion is not limited automatically to Iterations 12-14 if the version plan later expands.
+- The version validation and upgrade conditions above are satisfied on the designated primary device.
+- Product documents, implementation, tests, and recorded evidence have no unresolved material contract mismatch within the selected scope.
+- The completion result records the accepted identifiers, source commit, signing category, device environment, upgrade result, included-journey result, material known gaps, and author decision.
+
+## Completion result
+
+No final result exists. `1.2.0` and Iterations 12-14 remain planned; this document records no production implementation authorization, build, test, installation, device acceptance, artifact, commit, push, tag, upload, publication, or distribution result.
