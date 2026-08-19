@@ -56,7 +56,7 @@
 
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
-| [迭代 12：加载与 Home 返回基础](iteration-12-loading-and-home-return.zh-CN.md) | `Planned` | 2026-08-18 | 作者选择将重复加载修正及系统 Home/外部应用返回行为作为 `1.2.0` 的第一个基础迭代。 |
+| [迭代 12：加载与 Home 返回基础](iteration-12-loading-and-home-return.zh-CN.md) | `Completed` | 2026-08-18 | 实现已完成，作者报告初步验收未发现问题。 |
 | [迭代 13：Home 信息与可编辑收藏组合](iteration-13-home-favorite-composition.zh-CN.md) | `Planned` | 2026-08-18 | 作者选择将 Home 日期对齐及完整的主收藏/伴随收藏呈现与编辑作为第二个增量。 |
 | [迭代 14：Drawer 连续导航与锚点](iteration-14-continuous-drawer-navigation.zh-CN.md) | `Planned` | 2026-08-18 | 作者选择将 Drawer 连续手势、过渡端点和 Drawer 索引锚点行为作为第三个增量。 |
 
@@ -66,7 +66,7 @@
 
 ### 迭代 12
 
-[契约](iteration-12-loading-and-home-return.zh-CN.md)。未记录实现、验证、commit、产物或验收结果。状态保持 `Planned`。
+[契约](iteration-12-loading-and-home-return.zh-CN.md)。实现已完成。作者报告初步验收未发现问题。开发角色未执行 Gradle 构建/测试，记为 `Not run`；详细设备和产物证据不在本次迭代收尾中补录。状态为 `Completed`。
 
 ### 迭代 13
 

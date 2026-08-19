@@ -92,6 +92,7 @@ internal fun DrawerScreen(
     listState: LazyListState = rememberLazyListState(),
     active: Boolean = true,
     onLongPress: (LaunchableEntry) -> Unit = {},
+    onExternalLaunch: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
 ) {
     var loadRequest by remember { mutableIntStateOf(0) }
@@ -103,6 +104,7 @@ internal fun DrawerScreen(
     val locale = LocalConfiguration.current.locales[0]
     val launchFailureMessage = stringResource(R.string.application_unable_to_open)
     val currentState by rememberUpdatedState(state)
+    var previousContent by remember { mutableStateOf<LaunchableInventorySnapshot?>(null) }
 
     LaunchedEffect(inventoryLoader, loadRequest) {
         if (loadRequest == 0 &&
@@ -139,8 +141,8 @@ internal fun DrawerScreen(
         }
     }
 
-    LaunchedEffect(inventoryLoader, active) {
-        if (active) {
+    LaunchedEffect(inventoryLoader, active, initialLoadHandledExternally) {
+        if (active && !initialLoadHandledExternally) {
             if (!hasBeenActive) {
                 hasBeenActive = true
                 return@LaunchedEffect
@@ -161,8 +163,30 @@ internal fun DrawerScreen(
         }
     }
 
-    DisposableEffect(inventoryLoader, active) {
-        val observation = if (active) {
+    LaunchedEffect(state, initialLoadHandledExternally) {
+        if (!initialLoadHandledExternally) return@LaunchedEffect
+        val content = state as? LaunchableInventoryState.Content ?: return@LaunchedEffect
+        val oldContent = previousContent
+        previousContent = content.snapshot
+        if (oldContent == null) return@LaunchedEffect
+        val position = captureDrawerListPosition(
+            sections = oldContent.drawerSectionsFor(locale),
+            firstVisibleItemIndex = listState.firstVisibleItemIndex,
+            firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+        ) ?: return@LaunchedEffect
+        val restorationTarget = resolveDrawerRestorationTarget(
+            position = position,
+            sections = content.snapshot.drawerSectionsFor(locale),
+        ) ?: return@LaunchedEffect
+        withFrameNanos { }
+        listState.scrollToItem(
+            index = restorationTarget.itemIndex,
+            scrollOffset = restorationTarget.scrollOffset,
+        )
+    }
+
+    DisposableEffect(inventoryLoader, active, initialLoadHandledExternally) {
+        val observation = if (active && !initialLoadHandledExternally) {
             inventoryCoordinator.observe {
                 if (currentState is LaunchableInventoryState.Content) {
                     loadTrigger = DrawerLoadTrigger.LiveUpdate
@@ -209,8 +233,12 @@ internal fun DrawerScreen(
             listState = listState,
             sections = currentState.snapshot.drawerSectionsFor(locale),
             onLaunch = { entry ->
-                if (activationGuard.tryAcquire() && !entryLauncher.launch(entry)) {
-                    Toast.makeText(context, launchFailureMessage, Toast.LENGTH_SHORT).show()
+                if (activationGuard.tryAcquire()) {
+                    if (entryLauncher.launch(entry)) {
+                        onExternalLaunch()
+                    } else {
+                        Toast.makeText(context, launchFailureMessage, Toast.LENGTH_SHORT).show()
+                    }
                 }
             },
             onLongPress = onLongPress,

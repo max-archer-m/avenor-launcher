@@ -1,5 +1,6 @@
 package com.avenor.launcher
 
+import android.content.Intent
 import android.app.role.RoleManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,8 +8,14 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 class MainActivity : ComponentActivity() {
+    private val systemHomeEvents = MutableSharedFlow<Unit>(
+        replay = 1,
+        extraBufferCapacity = 1,
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val transparentSystemBarColor = getColor(R.color.avenor_transparent)
@@ -19,8 +26,17 @@ class MainActivity : ComponentActivity() {
         installHomeBackBehavior()
         setContent {
             AvenorTheme {
-                AvenorApp()
+                AvenorApp(systemHomeEvents = systemHomeEvents)
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.action == Intent.ACTION_MAIN &&
+            intent.hasCategory(Intent.CATEGORY_HOME)
+        ) {
+            systemHomeEvents.tryEmit(Unit)
         }
     }
 

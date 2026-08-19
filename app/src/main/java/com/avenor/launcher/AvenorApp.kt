@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -55,7 +56,7 @@ private const val DRAWER_MOVEMENT_PER_GESTURE_DP = 1.5f
 private const val TARGET_FLING_THRESHOLD_DP_PER_SECOND = 1_000f
 
 @Composable
-internal fun AvenorApp() {
+internal fun AvenorApp(systemHomeEvents: Flow<Unit>? = null) {
     val context = LocalContext.current
     val inventoryLoader = remember(context) {
         AndroidLaunchableInventoryLoader(context)
@@ -81,6 +82,7 @@ internal fun AvenorApp() {
         }
     }
     AvenorApp(
+        systemHomeEvents = systemHomeEvents,
         inventoryLoader = inventoryLoader,
         entryLauncher = entryLauncher,
         favoriteStore = favoriteStore,
@@ -94,6 +96,7 @@ internal fun AvenorApp() {
 
 @Composable
 internal fun AvenorApp(
+    systemHomeEvents: Flow<Unit>? = null,
     inventoryLoader: LaunchableInventoryLoader,
     entryLauncher: LaunchableEntryLauncher = LaunchableEntryLauncher { false },
     favoriteStore: FavoriteStore? = null,
@@ -140,6 +143,7 @@ internal fun AvenorApp(
     var selectedEntryFromHome by remember { mutableStateOf(false) }
     var homeEditMode by remember { mutableStateOf(false) }
     var settingsOpen by remember { mutableStateOf(false) }
+    var externalLaunchPendingReturn by remember { mutableStateOf(false) }
     var shortcutOwner by remember { mutableStateOf<LaunchableIdentity?>(null) }
     var applicationShortcuts by remember { mutableStateOf(emptyList<ApplicationShortcut>()) }
     var editMembership by remember { mutableStateOf<Set<LaunchableIdentity>>(emptySet()) }
@@ -156,12 +160,6 @@ internal fun AvenorApp(
     LaunchedEffect(inventoryCoordinator) {
         inventoryCoordinator.load(showLoading = true)
     }
-
-    DisposableEffect(inventoryCoordinator) {
-        val cacheInvalidationObservation = inventoryCoordinator.observe { }
-        onDispose { cacheInvalidationObservation?.stop() }
-    }
-
 
     LaunchedEffect(selectedEntry, shortcutController) {
         shortcutOwner = null
@@ -210,18 +208,6 @@ internal fun AvenorApp(
         if (confirmedRemovedIdentities.isNotEmpty()) {
             effectiveFavoriteStore.removeAll(confirmedRemovedIdentities)
         }
-    }
-
-    DisposableEffect(lifecycleOwner, inventoryLoader) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                if (inventoryCoordinator.state.value is LaunchableInventoryState.Content) {
-                    scope.launch { inventoryCoordinator.load(showLoading = false) }
-                }
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     fun settleTo(target: AvenorSurface) {
@@ -283,6 +269,62 @@ internal fun AvenorApp(
             origin
         }
         settleTo(target)
+    }
+
+    fun returnToHome() {
+        settleJob?.cancel()
+        settledSurface = AvenorSurface.Home
+        drawerActivated = false
+        progress = 0f
+        drawerOffsetPx = containerHeightPx
+        gestureDisplacementPx = 0f
+        drawerTransitionOwnsGesture = false
+        homeTransitionOwnsGesture = false
+        selectedEntry = null
+        selectedEntryFromHome = false
+        settingsOpen = false
+        homeEditMode = false
+    }
+
+    LaunchedEffect(systemHomeEvents) {
+        systemHomeEvents?.collect {
+            returnToHome()
+        }
+    }
+
+    DisposableEffect(inventoryCoordinator) {
+        val cacheInvalidationObservation = inventoryCoordinator.observe {
+            scope.launch {
+                inventoryCoordinator.load(showLoading = false)
+            }
+        }
+        onDispose { cacheInvalidationObservation?.stop() }
+    }
+
+    DisposableEffect(lifecycleOwner, inventoryCoordinator) {
+        var hasResumed = false
+        var wasPaused = false
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> wasPaused = true
+                Lifecycle.Event.ON_RESUME -> {
+                    if (hasResumed && wasPaused && externalLaunchPendingReturn) {
+                        returnToHome()
+                        externalLaunchPendingReturn = false
+                        scope.launch {
+                            if (inventoryCoordinator.state.value is LaunchableInventoryState.Content) {
+                                inventoryCoordinator.load(showLoading = false)
+                            }
+                        }
+                    }
+                    hasResumed = true
+                    wasPaused = false
+                }
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     BackHandler(enabled = homeEditMode) {
@@ -503,14 +545,17 @@ internal fun AvenorApp(
                             ).show()
                         }
 
-                        homeActivationGuard.tryAcquire() &&
-                            !entryLauncher.launch(availability.entry) -> {
-                            Toast.makeText(
-                                androidContext,
-                                launchFailureMessage,
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                            scope.launch { inventoryCoordinator.load(showLoading = false) }
+                        homeActivationGuard.tryAcquire() -> {
+                            if (entryLauncher.launch(availability.entry)) {
+                                externalLaunchPendingReturn = true
+                            } else {
+                                Toast.makeText(
+                                    androidContext,
+                                    launchFailureMessage,
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                                scope.launch { inventoryCoordinator.load(showLoading = false) }
+                            }
                         }
                     }
                 },
@@ -531,6 +576,7 @@ internal fun AvenorApp(
                     inventoryCoordinator = inventoryCoordinator,
                     initialLoadHandledExternally = true,
                     entryLauncher = entryLauncher,
+                    onExternalLaunch = { externalLaunchPendingReturn = true },
                     modifier = Modifier.nestedScroll(drawerNestedScrollConnection),
                     listState = drawerListState,
                     active = !settingsOpen &&
@@ -578,7 +624,9 @@ internal fun AvenorApp(
                     shortcutOwner == entry.identity
                 }.orEmpty(),
                 onShortcut = { shortcut ->
-                    shortcutController.launch(shortcut)
+                    if (shortcutController.launch(shortcut)) {
+                        externalLaunchPendingReturn = true
+                    }
                     selectedEntry = null
                     selectedEntryFromHome = false
                 },

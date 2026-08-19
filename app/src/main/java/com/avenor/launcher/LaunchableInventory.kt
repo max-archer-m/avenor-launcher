@@ -26,7 +26,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 internal data class LaunchableIdentity(
@@ -128,6 +127,8 @@ internal class LaunchableInventoryCoordinator(
     private val loader: LaunchableInventoryLoader,
 ) {
     private val loadMutex = Mutex()
+    private var pendingLoad = false
+    private var pendingShowLoading = false
     private val mutableState = MutableStateFlow<LaunchableInventoryState>(
         LaunchableInventoryState.Loading,
     )
@@ -136,21 +137,36 @@ internal class LaunchableInventoryCoordinator(
 
     val state: StateFlow<LaunchableInventoryState> = mutableState
 
-    suspend fun load(showLoading: Boolean) = loadMutex.withLock {
-        if (showLoading) mutableState.value = LaunchableInventoryState.Loading
-        mutableState.value = try {
-            val snapshot = loader.load()
-            if (snapshot.entries.isEmpty()) {
-                LaunchableInventoryState.Error(lastSuccessfulSnapshot)
-            } else {
-                lastSuccessfulSnapshot = snapshot
-                snapshot.entries.forEach { lastTrustedEntries[it.identity] = it }
-                LaunchableInventoryState.Content(snapshot)
-            }
-        } catch (cancellation: CancellationException) {
-            throw cancellation
-        } catch (_: Exception) {
-            LaunchableInventoryState.Error(lastSuccessfulSnapshot)
+    suspend fun load(showLoading: Boolean) {
+        if (!loadMutex.tryLock()) {
+            pendingLoad = true
+            pendingShowLoading = pendingShowLoading || showLoading
+            return
+        }
+        try {
+            var shouldShowLoading = showLoading
+            do {
+                pendingLoad = false
+                if (shouldShowLoading) mutableState.value = LaunchableInventoryState.Loading
+                mutableState.value = try {
+                    val snapshot = loader.load()
+                    if (snapshot.entries.isEmpty()) {
+                        LaunchableInventoryState.Error(lastSuccessfulSnapshot)
+                    } else {
+                        lastSuccessfulSnapshot = snapshot
+                        snapshot.entries.forEach { lastTrustedEntries[it.identity] = it }
+                        LaunchableInventoryState.Content(snapshot)
+                    }
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: Exception) {
+                    LaunchableInventoryState.Error(lastSuccessfulSnapshot)
+                }
+                shouldShowLoading = pendingShowLoading
+                pendingShowLoading = false
+            } while (pendingLoad)
+        } finally {
+            loadMutex.unlock()
         }
     }
 
