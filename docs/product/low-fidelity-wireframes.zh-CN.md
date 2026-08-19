@@ -22,7 +22,7 @@
 
 - [Home](wireframes/home.txt) - 完整的 80 x 96 画布，表达内容驱动的纵向尺寸、55:45 收藏构图及未分配的透明空间。
 - [Home 编辑模式](wireframes/home-edit-mode.txt) - 完整的 80 x 96 画布，只为可见模块表达编辑表面，并展示收藏拖动柄和分组独立滚动。
-- [Drawer](wireframes/drawer.txt) - 完整的 80 x 96 Content 状态画布，表达单列应用列表、吸顶锚点、末尾设置分组和固定字母索引；全屏 Loading 与 Error 状态按 Drawer 契约隐藏该索引。
+- [Drawer](wireframes/drawer.txt) - 完整的 80 x 96 Content 状态画布，表达单列应用列表、与应用名称列对齐的非吸顶锚点、末尾设置分组和固定字母索引；全屏 Loading 与 Error 状态按 Drawer 契约隐藏该索引。
 - [应用操作面板](wireframes/app-action-sheet.txt) - 80 x 80 模态状态画布，表达被阻断的背景、遮罩和 BottomSheet 内容顺序。
 - [Settings](wireframes/settings.txt) - 完整的 80 x 96 画布，表达导航、默认 Launcher 状态和产品信息条目。
 

@@ -20,7 +20,7 @@ Home content uses `16dp` horizontal and vertical container padding. Adjacent vis
 
 - Time is left-aligned above the date and uses a `57sp` font size, `64sp` line height, and bold weight. It uses tabular numerals where the selected system font supports them so minute changes do not shift the clock width.
 - Time follows the system 12-hour or 24-hour preference and does not show seconds.
-- Date and weekday are left-aligned below time, use a `16sp` font size with `24sp` line height and normal weight, and follow the active locale, for example `Sat, Aug 15` in English.
+- Date and weekday are displayed below time with an `8dp` start inset relative to the time text, use a `16sp` font size with `24sp` line height and normal weight, and follow the active locale, for example `Sat, Aug 15` in English. The inset affects the visible text only; the complete date-and-weekday row remains its `48dp` focusable touch target. Use logical `start` alignment rather than a fixed physical left offset.
 - Selecting the visible time text opens the main surface of the system Clock application when it is exposed. Avenor does not hard-code a vendor Clock package. If the resolved Clock application does not expose a main launchable surface, Avenor falls back to its system alarm destination; if neither destination is available, it shows localized failure feedback without crashing.
 - Selecting the visible date-and-weekday text invokes an implicit system Calendar destination without targeting a package.
 - The time line is at least `64dp` high and does not require a separately enlarged target beyond its rendered line region.

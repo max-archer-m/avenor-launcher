@@ -22,7 +22,7 @@ Each language-neutral ASCII canvas is stored once under `docs/product/wireframes
 
 - [Home](wireframes/home.txt) - complete 80 x 96 canvas; shows content-driven vertical sizing, the 55:45 favorite composition, and unallocated transparent space.
 - [Home edit mode](wireframes/home-edit-mode.txt) - complete 80 x 96 canvas; shows editing surfaces only for visible modules, favorite drag handles, and independent group scrolling.
-- [Drawer](wireframes/drawer.txt) - complete 80 x 96 Content-state canvas; shows the single application list, sticky anchors, final Settings section, and fixed alphabet index. Full-surface Loading and Error states hide that index as defined by the Drawer contract.
+- [Drawer](wireframes/drawer.txt) - complete 80 x 96 Content-state canvas; shows the single application list, non-pinned anchors aligned with the application-name column, final Settings section, and fixed alphabet index. Full-surface Loading and Error states hide that index as defined by the Drawer contract.
 - [Application action sheet](wireframes/app-action-sheet.txt) - 80 x 80 modal-state canvas; shows the blocked background, scrim, and BottomSheet content order.
 - [Settings](wireframes/settings.txt) - complete 80 x 96 canvas; shows navigation, default-Launcher status, and product-information rows.
 

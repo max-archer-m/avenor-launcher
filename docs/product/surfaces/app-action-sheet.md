@@ -12,6 +12,7 @@ The application action sheet is a modal bottom sheet opened by long-pressing an 
 - Selecting the scrim, dragging the sheet to the bottom, or pressing Back dismisses it.
 - Until dismissal, the underlying application surface cannot receive clicks, long presses, or scrolling.
 - An action executes first; after invocation the sheet closes. Current product definition does not add separate success feedback.
+- Invoking the selected ordinary application from Home or Drawer closes the sheet and creates the external application excursion defined in [Navigation](../navigation.md#system-home-and-external-application-return). Returning in the same process displays Home without Loading rather than restoring Drawer.
 
 ## Content order
 

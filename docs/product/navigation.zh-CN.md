@@ -74,6 +74,14 @@ Home 与 Drawer 使用同一套可逆、跟手的直接操作过渡。以下术�
 - 应用操作面板上的 Back 关闭面板，并返回保持不变的底层界面。
 - 进程重建后从 Home 开始，不恢复 Drawer、Settings、应用操作面板、编辑模式及其临时位置。同一进程内返回 Home 时，分别保留两个收藏分组有意义的滚动位置；进程重建后两组均回到起始位置。
 
+## 系统 Home 与外部应用返回
+
+- 当 Avenor 被选为默认 Launcher 时，从任意 Avenor 界面（包括 Drawer 和 Settings）执行 Android 系统 Home 操作都显示 Avenor Home。这属于系统导航结果，不是 Avenor 的 Back 或 Drawer→Home 过渡；Avenor 不得将系统 Home 手势重新解释为 Back。
+- 从 Home 或 Drawer 启动普通应用会形成一次外部应用暂离。当 Avenor 在同一进程中返回时，显示 Home 而不是恢复 Drawer；在展示已有 Home 内容前，不显示 Loading，也不要求执行一次阻塞式新的初始读取。
+- 同一进程返回时，按照既有恢复规则保留 Home 收藏状态和两个收藏分组有意义的滚动位置。不恢复 Drawer、Settings、应用操作面板、编辑模式或进行中的 Drawer 位置。
+- 外部应用运行期间观察到的变化应在不将返回的 Home 替换为 Loading 的前提下协调。更新后的应用清单和收藏状态在下次展示 Drawer 或相关 Home 内容时可用，并遵循各界面的实时更新规则。
+- 如果外部应用运行期间 Launcher 进程被重建，则适用进程重建规则，不适用同一进程返回规则。
+
 ## 系统界面
 
 - Home 与 Drawer 显示系统状态栏。
@@ -92,4 +100,6 @@ Home 与 Drawer 使用同一套可逆、跟手的直接操作过渡。以下术�
 - 在 Home 正常模式下，上滑能够从每个由 Avenor 管理的 Home 元素上起始，且不得同时触发该元素的点击或长按。
 - Drawer 列表到达顶部前，下滑只滚动列表；到达顶部后，剩余偏移量在同一次手势中转交给退出过渡。
 - 打开或关闭 Drawer 时不得误触发应用点击、长按或列表滚动。
+- Avenor 作为默认 Launcher 时，从 Drawer 和 Settings 执行 Android 系统 Home 操作都显示 Home，不依赖 Avenor 的 Back 操作。
+- 同一进程从普通应用返回时显示 Home，不显示 Loading，也不恢复 Drawer。
 - 实现可以选择任何满足上述可观察行为的架构。

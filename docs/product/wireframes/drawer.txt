@@ -4,13 +4,13 @@
 |  ALL APPLICATIONS                                      A                     |
 |------------------------------------------------------------------------------|
 |                                                                              |
-|  #                                                        #                  |
+|                   #                                       #                  |
 |                                                                              |
 |     [40DP ICON]  1PASSWORD                                 A                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  A                                                        B                  |
+|                   A                                       B                  |
 |                                                                              |
 |     [40DP ICON]  APP ALPHA                                 C                 |
 |                                                                              |
@@ -20,13 +20,13 @@
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  B                                                        E                  |
+|                   B                                       E                  |
 |                                                                              |
 |     [40DP ICON]  BROWSER                                   F                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  C                                                        G                  |
+|                   C                                       G                  |
 |                                                                              |
 |     [40DP ICON]  CALENDAR                                  H                 |
 |                                                                              |
@@ -36,7 +36,7 @@
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  M                                                        J                  |
+|                   M                                       J                  |
 |                                                                              |
 |     [40DP ICON]  MAPS                                      K                 |
 |                                                                              |
@@ -46,25 +46,25 @@
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  P                                                        M                  |
+|                   P                                       M                  |
 |                                                                              |
 |     [40DP ICON]  PHOTOS                                    N                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  S                                                        O                  |
+|                   S                                       O                  |
 |                                                                              |
 |     [40DP ICON]  SYSTEM TOOL                               P                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  W                                                        R                  |
+|                   W                                       R                  |
 |                                                                              |
 |     [40DP ICON]  WORK APP                                  S                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  Z                                                        T                  |
+|                   Z                                       T                  |
 |                                                                              |
 |     [40DP ICON]  ZETA                                      U                 |
 |                                                                              |
@@ -78,19 +78,19 @@
 |                                                                              |
 |                                                           X                  |
 |                                                                              |
-|  ANCHOR HEADERS STICK WHILE THE LIST SCROLLS              Y                  |
-|                                                                              |
+|  ANCHOR HEADERS SCROLL WITH THE LIST                      Y                  |
+|  56DP START INSET ALIGNS HEADERS WITH APPLICATION NAMES                      |
 |                                                                              |
 |                                                                              |
 |                                                           Z                  |
 |                                                                              |
-|  SETTINGS                                           [11DP GEAR / 20DP SLOT]  |
+|                   SETTINGS                          [11DP GEAR / 20DP SLOT]  |
 |                                                                              |
 |     [SETTINGS GEAR]  SETTINGS                                                |
 |                                                                              |
 |  INDEX GEAR JUMPS HERE; ONLY THE ROW OPENS SETTINGS                          |
 |                                                                              |
-|  CONTENT INDEX CAPTURES TOUCH; LOADING / ERROR HIDES IT                      |
+|  INDEX DOWN DIRECT; NEW TOKEN SMOOTH-SCROLLS; NO SNAP ON RELEASE             |
 |                                                                              |
 |                               BOTTOM SAFE AREA                               |
 +------------------------------------------------------------------------------+

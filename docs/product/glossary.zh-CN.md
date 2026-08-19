@@ -12,7 +12,7 @@
 | Application shortcut | 应用快捷操作 | 应用通过平台暴露的操作 |
 | Launcher action | 启动器操作 | Avenor 提供的操作，例如收藏、编辑或卸载 |
 | Application action sheet | 应用操作面板 | 包含应用身份、应用快捷操作和启动器操作的模态 Bottom Sheet |
-| Section anchor | 分组锚点 | Drawer 中吸顶的分组标题，例如 A 或 `#` |
+| Section anchor | 分组锚点 | Drawer 中的分组标题，例如 A 或 `#`；它是索引跳转目标并随列表滚动，不保持吸顶 |
 | Alphabet index | 字母索引 | Drawer 右侧用于跳转到锚点的固定索引 |
 | Edit mode | 编辑模式 | Home 中显示模块边界，并允许收藏排序或跨组移动的状态 |
 | Double-tap lock | 双击锁屏 | 通过 Avenor 用途受限的无障碍服务请求一次 Android 系统锁屏操作的可选 Home 手势 |

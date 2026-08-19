@@ -74,6 +74,14 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 - On the application action sheet, Back dismisses the sheet and returns to the unchanged underlying surface.
 - Process restoration begins at Home. Drawer, Settings, an action sheet, edit mode, and their transient positions are not restored after process recreation. Within the same process, each favorite group's meaningful scroll position is preserved when returning to Home; process recreation resets both groups to their start positions.
 
+## System Home and external application return
+
+- When Avenor is the selected default Launcher, the Android system Home action from any Avenor surface, including Drawer and Settings, displays Avenor Home. This is a system navigation result, not an Avenor Back or Drawer-to-Home transition, and Avenor does not reinterpret the system Home gesture as Back.
+- Launching an ordinary application from Home or Drawer creates an external application excursion. When Avenor returns in the same process, it displays Home rather than restoring Drawer, and it does not show Loading or require a new blocking initial read before showing the existing Home content.
+- The same-process return preserves the Home favorite state and each favorite group's meaningful scroll position according to the existing restoration rule. It does not restore Drawer, Settings, an action sheet, edit mode, or an in-progress Drawer position.
+- Changes observed while the external application is active are reconciled without replacing the returning Home surface with Loading. The updated inventory and favorite state are available the next time Drawer or the relevant Home content is presented, subject to the live-update rules of those surfaces.
+- If the Launcher process was recreated while the external application was active, the process-restoration rules apply instead of the same-process return rules.
+
 ## System surfaces
 
 - Home and Drawer show the system status bar.
@@ -92,4 +100,6 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 - In normal Home mode, an upward drag can begin over every Avenor-managed Home element without also activating or long-pressing that element.
 - Drawer cannot be dismissed by a downward list gesture until its list has reached the top boundary; remaining displacement then transfers in the same gesture.
 - Opening or closing Drawer does not accidentally launch, long-press, or scroll an application entry.
+- With Avenor selected as the default Launcher, the Android system Home action from Drawer and Settings displays Home; it does not depend on the Avenor Back action.
+- Returning from an ordinary application in the same process displays Home without Loading and without restoring Drawer.
 - The implementation may choose any architecture that satisfies these observable behaviors.

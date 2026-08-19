@@ -9,7 +9,7 @@ Drawer presents every launchable application entry successfully read from the so
 “Every launchable application entry” is bounded by Avenor's current Android role and least-privilege permissions. It does not mean every installed package, hidden profile, or entry that could become visible only after adding another sensitive permission.
 
 - The application inventory is a single-column list; a future grid is an additive capability and is outside the current contract.
-- Each section anchor occupies its own row and remains pinned while its section is current.
+- Each section anchor occupies its own `32dp`-high row and scrolls with the application list; section anchors never remain pinned over later content. Its `14sp/20sp` medium-weight label uses a `56dp` start inset from the application-row content boundary so it aligns with the application-name column after the `40dp` icon and `16dp` icon-to-name gap. The inset applies only to the anchor label and does not add permanent margin to application rows.
 - Each application row is at least `56dp` high and displays a `40dp` platform icon, platform-provided badge when present, and application name, with `16dp` between icon and name.
 - An application name occupies exactly one static line. A name that does not fit uses end ellipsis as defined in [design-foundations.md](../design-foundations.md).
 - Selecting an application immediately launches it and suppresses duplicate rapid activation.
@@ -45,11 +45,12 @@ Drawer presents every launchable application entry successfully read from the so
 - Index labels use `11sp` medium-weight text in fixed `20dp` slots. The Settings gear graphic is `11dp` inside one complete `20dp` index slot; its slot and index interaction range must not be reduced to the graphic bounds. Non-empty entries are not stretched to redistribute unused height.
 - The maximum index model contains 28 slots: `#`, A–Z, and Settings. Its minimum complete available height is therefore `560dp`, calculated as `28 × 20dp` after excluding status-bar, navigation-bar, display-cutout, Drawer-padding, and system-gesture insets.
 - At `560dp` or more of available height, the index does not scroll. Below `560dp`, the index becomes an independently scrollable vertical region while the application list remains separately scrollable.
-- Selecting an index entry jumps immediately to its anchor and produces index-step haptic feedback.
-- Sliding across a different available entry changes the active anchor and produces one haptic response for that change; remaining on the same entry does not repeat it.
-- A magnified bubble displays only the active character using `32sp` medium-weight text inside a region at least `64dp × 64dp`. It remains visible while the pointer is held and disappears immediately on release or cancellation.
-- While the index owns the pointer, the application list does not scroll.
-- The Settings gear is an index anchor, not a control that opens Settings. Selecting it by tap or index sliding jumps only to the fixed Settings section at the end of the Drawer list and produces the same index-step haptic feedback as any other anchor change.
+- On initial pointer down over an available index entry, the application list jumps immediately and without animation to that entry's anchor, with the anchor heading positioned at the top of the visible list. This direct positioning does not wait for pointer release and produces index-step haptic feedback.
+- After the initial pointer down, entering a different available index entry starts a smooth scroll to that entry's anchor. Moving within the same index slot does not change the list position. A newly selected anchor cancels and replaces an unfinished smooth-scroll target; targets are never queued.
+- The final position is the last selected anchor position. On pointer release or cancellation, the current smooth scroll finishes at that anchor; the list does not derive a percentage position from the pointer, snap to another anchor, or play a completion animation.
+- A magnified bubble displays only the active character, or the Settings gear when that token is active, using `32sp` medium-weight text inside a region at least `64dp × 64dp`. It remains visible while the pointer is held and disappears immediately on release or cancellation.
+- While the index owns the pointer, the application list does not independently consume the gesture; index movement may drive the list only through the discrete anchor smooth-scroll behavior above.
+- The Settings gear is an index anchor, not a control that opens Settings. Selecting it by initial pointer down jumps immediately to the fixed Settings section; entering it during index movement smooth-scrolls to that section and produces the same index-step haptic feedback as any other anchor change.
 - The Settings row in that section is the only Drawer control that opens Settings.
 - Returning from Settings preserves the Drawer list position during the same process.
 - TalkBack semantics and an accessibility-specific alternate index interaction are outside the current personal-use scope.
@@ -57,11 +58,12 @@ Drawer presents every launchable application entry successfully read from the so
 ## Inventory changes and states
 
 - The inventory updates while Drawer is active when applications or cloned entries are added, removed, enabled, disabled, or renamed.
+- Inventory changes observed while an ordinary external application is active are reconciled without presenting a new Loading state on return to Home. When Drawer is next presented, it uses the reconciled inventory and applies the current anchor and position rules.
 - If a non-current ordinary, work-profile, or cloned profile read fails while another profile provides usable entries, Drawer presents those available entries as Content rather than blocking the entire surface. Entries from the failed profile may be absent, and the current product does not require a partial-read warning.
 - A partial profile failure must not crash Avenor, prevent available entries from launching, or be treated as confirmation that an unavailable entry was permanently removed. A failure that leaves no usable inventory follows the Error state below.
 - The intentional absence of Private Space entries under the current product boundary is not an inventory failure.
 - A routine live update preserves the current section anchor and the relative scroll position within that anchor whenever the anchor still exists.
-- If the current anchor disappears, move to the next existing application anchor in sort order and pin its heading at the top.
+- If the current anchor disappears, move to the next existing application anchor in sort order and position its heading at the top of the visible list without pinning it during later scrolling.
 - If no later application anchor exists, remain at the bottom of the application list without automatically moving into the Settings section. The Settings anchor is not an application anchor, and an inventory update never opens Settings.
 - An update never automatically launches an application or opens an application action sheet or Settings.
 
@@ -85,7 +87,8 @@ Drawer presents every launchable application entry successfully read from the so
 ## Acceptance intent
 
 - Every launchable entry returned by a successfully read source within Avenor's current role and least-privilege boundary appears once. Entries from an isolated failed non-current profile may be absent without blocking available Content. Primary, work-profile, and cloned entries follow the applicable platform identity treatment; Private Space entries requiring `ACCESS_HIDDEN_PROFILES` are intentionally absent. Primary and cloned entries remain distinguishable when the platform supplies a badge; Avenor-specific fallback distinction is outside the current scope.
-- Index navigation lands on the intended pinned anchor.
-- Index gestures do not simultaneously scroll the list.
+- Initial index contact lands immediately on the intended anchor with its heading positioned at the top of the visible list. Each later available-token change smooth-scrolls to that token's anchor without queuing targets.
+- Releasing or cancelling an index gesture leaves the application list at the last selected anchor; it does not preserve an arbitrary pointer-percentage position or snap elsewhere. The heading then scrolls normally with the list.
+- Index gestures do not independently scroll the list or trigger application-row actions.
 - Live inventory updates do not leave a removed application launchable from stale UI.
 - Repeated refreshes with unchanged input preserve application ordering and the current anchor-relative position.
