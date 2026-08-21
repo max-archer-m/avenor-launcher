@@ -74,8 +74,8 @@
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
 |  ^/v EDGE AUTO-SCROLL:::::::::::::::::::::|  ^/v AUTO-SCROLL:::::::::::::::::|
-|  50% PREVIEW / FIXED GRAB OFFSET / SOURCE PLACEHOLDER.........................|
-|  SWAP TARGETS UPDATE LIVE; INSERTION COMMITS ON RELEASE......................|
+|  OPAQUE PREVIEW / FIXED GRAB OFFSET / SOURCE PLACEHOLDER......................|
+|  SAME-GROUP SWAP LIVE; CROSS-GROUP FEEDBACK / RELEASE COMMIT..................|
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
 |.....................FAVORITE HEIGHT IS CONTENT-DRIVEN........................|
