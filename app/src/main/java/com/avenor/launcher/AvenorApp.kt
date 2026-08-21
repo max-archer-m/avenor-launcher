@@ -10,6 +10,7 @@ import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -111,6 +112,7 @@ internal fun AvenorApp(
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
     val homeFavoriteListState = rememberLazyListState()
+    val companionFavoriteListState = rememberLazyListState()
     val drawerListState = rememberLazyListState()
     val fullGestureDistancePx = with(density) {
         dimensionResource(R.dimen.drawer_transition_full_gesture_distance).toPx()
@@ -192,13 +194,20 @@ internal fun AvenorApp(
         }
     }
 
-    LaunchedEffect(favoriteState, inventoryState, effectiveFavoriteStore, inventoryCoordinator) {
-        val readableFavorites = favoriteState as? FavoriteReadState.Readable
-            ?: return@LaunchedEffect
+    val favoriteMembership = (favoriteState as? FavoriteReadState.Readable)?.identities?.toSet()
+    // Availability follows which favorites exist, not their order, so keying on membership keeps a
+    // reorder from rebuilding the map and refreshing every row instead of the moved positions.
+    LaunchedEffect(
+        favoriteMembership,
+        inventoryState,
+        effectiveFavoriteStore,
+        inventoryCoordinator,
+    ) {
+        val identities = favoriteMembership ?: return@LaunchedEffect
         val completeInventory = inventoryState as? LaunchableInventoryState.Content
             ?: return@LaunchedEffect
         val resolved = inventoryCoordinator.resolveFavorites(
-            identities = readableFavorites.identities,
+            identities = identities.toList(),
             snapshot = completeInventory.snapshot,
         )
         favoriteAvailability = resolved
@@ -425,13 +434,13 @@ internal fun AvenorApp(
         }
     }
 
-    val homeNestedScrollConnection = remember {
+    fun homeTransitionNestedScrollConnection(listState: LazyListState): NestedScrollConnection =
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (source != NestedScrollSource.UserInput || available.y >= 0f) {
                     return Offset.Zero
                 }
-                if (!homeTransitionOwnsGesture && homeFavoriteListState.canScrollForward) {
+                if (!homeTransitionOwnsGesture && listState.canScrollForward) {
                     return Offset.Zero
                 }
                 if (!homeTransitionOwnsGesture) {
@@ -470,6 +479,12 @@ internal fun AvenorApp(
                 return Velocity(x = 0f, y = available.y)
             }
         }
+
+    val homeNestedScrollConnection = remember(homeFavoriteListState) {
+        homeTransitionNestedScrollConnection(homeFavoriteListState)
+    }
+    val companionNestedScrollConnection = remember(companionFavoriteListState) {
+        homeTransitionNestedScrollConnection(companionFavoriteListState)
     }
 
     val drawerPointerSafetyModifier = Modifier.pointerInput(Unit) {
@@ -516,6 +531,9 @@ internal fun AvenorApp(
                 favoriteListState = homeFavoriteListState,
                 favoriteNestedScrollConnection =
                     homeNestedScrollConnection.takeUnless { homeEditMode },
+                companionFavoriteListState = companionFavoriteListState,
+                companionFavoriteNestedScrollConnection =
+                    companionNestedScrollConnection.takeUnless { homeEditMode },
                 accessibilityLockController = accessibilityLockController,
                 favoriteAvailability = favoriteAvailability,
                 editMode = homeEditMode,
@@ -524,9 +542,14 @@ internal fun AvenorApp(
                     selectedEntryFromHome = true
                     selectedEntry = entry
                 },
-                onReorderFavorites = { identities ->
+                onCommitFavoriteComposition = { primaryIdentities, companionIdentities ->
                     scope.launch {
-                        if (!effectiveFavoriteStore.replaceOrder(identities)) {
+                        if (
+                            !effectiveFavoriteStore.replaceComposition(
+                                primaryIdentities,
+                                companionIdentities,
+                            )
+                        ) {
                             Toast.makeText(
                                 androidContext,
                                 R.string.favorite_reorder_unavailable,
@@ -653,26 +676,50 @@ private class InMemoryFavoriteStore : FavoriteStore {
     override suspend fun add(identity: LaunchableIdentity): Boolean {
         val current = mutableState.value as FavoriteReadState.Readable
         if (identity !in current.identities) {
-            mutableState.value = FavoriteReadState.Readable(current.identities + identity)
+            mutableState.value = FavoriteReadState.Readable(
+                current.primaryIdentities + identity,
+                current.companionIdentities,
+            )
         }
         return true
     }
     override suspend fun remove(identity: LaunchableIdentity): Boolean {
         val current = mutableState.value as FavoriteReadState.Readable
-        mutableState.value = FavoriteReadState.Readable(current.identities - identity)
+        mutableState.value = FavoriteReadState.Readable(
+            current.primaryIdentities - identity,
+            current.companionIdentities - identity,
+        )
         return true
     }
     override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean {
         val current = mutableState.value as FavoriteReadState.Readable
         mutableState.value = FavoriteReadState.Readable(
-            current.identities.filterNot(identities::contains),
+            current.primaryIdentities.filterNot(identities::contains),
+            current.companionIdentities.filterNot(identities::contains),
         )
         return true
     }
     override suspend fun replaceOrder(identities: List<LaunchableIdentity>): Boolean {
         val current = mutableState.value as? FavoriteReadState.Readable ?: return false
-        if (!isValidReplacement(current.identities, identities)) return false
-        mutableState.value = FavoriteReadState.Readable(identities)
+        if (!isValidReplacement(current.primaryIdentities, identities)) return false
+        mutableState.value = FavoriteReadState.Readable(
+            identities,
+            current.companionIdentities,
+        )
+        return true
+    }
+
+    override suspend fun replaceComposition(
+        primaryIdentities: List<LaunchableIdentity>,
+        companionIdentities: List<LaunchableIdentity>,
+    ): Boolean {
+        val current = mutableState.value as? FavoriteReadState.Readable ?: return false
+        val replacement = primaryIdentities + companionIdentities
+        if (!isValidReplacement(current.identities, replacement)) return false
+        mutableState.value = FavoriteReadState.Readable(
+            primaryIdentities,
+            companionIdentities,
+        )
         return true
     }
 }

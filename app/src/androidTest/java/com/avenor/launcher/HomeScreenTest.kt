@@ -1017,7 +1017,10 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
     override suspend fun add(identity: LaunchableIdentity): Boolean {
         val readable = mutableState.value as FavoriteReadState.Readable
         if (identity !in readable.identities) {
-            mutableState.value = FavoriteReadState.Readable(readable.identities + identity)
+            mutableState.value = FavoriteReadState.Readable(
+                readable.primaryIdentities + identity,
+                readable.companionIdentities,
+            )
         }
         return true
     }
@@ -1026,15 +1029,33 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
     override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean {
         val readable = mutableState.value as FavoriteReadState.Readable
         mutableState.value = FavoriteReadState.Readable(
-            readable.identities.filterNot(identities::contains),
+            readable.primaryIdentities.filterNot(identities::contains),
+            readable.companionIdentities.filterNot(identities::contains),
         )
         return true
     }
 
     override suspend fun replaceOrder(identities: List<LaunchableIdentity>): Boolean {
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
-        if (!isValidReplacement(readable.identities, identities)) return false
-        mutableState.value = FavoriteReadState.Readable(identities)
+        if (!isValidReplacement(readable.primaryIdentities, identities)) return false
+        mutableState.value = FavoriteReadState.Readable(
+            identities,
+            readable.companionIdentities,
+        )
+        return true
+    }
+
+    override suspend fun replaceComposition(
+        primaryIdentities: List<LaunchableIdentity>,
+        companionIdentities: List<LaunchableIdentity>,
+    ): Boolean {
+        val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
+        val replacement = primaryIdentities + companionIdentities
+        if (!isValidReplacement(readable.identities, replacement)) return false
+        mutableState.value = FavoriteReadState.Readable(
+            primaryIdentities,
+            companionIdentities,
+        )
         return true
     }
 

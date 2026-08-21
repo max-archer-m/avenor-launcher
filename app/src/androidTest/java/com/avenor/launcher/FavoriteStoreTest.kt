@@ -118,6 +118,52 @@ class FavoriteStoreTest {
         file.delete()
     }
 
+    @Test
+    fun legacySchemaMigratesFavoritesToPrimaryInOriginalOrder() = runBlocking {
+        val file = temporaryFavoriteFile()
+        val first = identity(1, "com.example.first", "Main")
+        val second = identity(2, "com.example.second", "Main")
+        DataOutputStream(file.outputStream()).use { output ->
+            output.writeInt(0x4156454E)
+            output.writeInt(1)
+            output.writeInt(2)
+            listOf(first, second).forEach {
+                output.writeLong(it.profileSerialNumber)
+                output.writeUTF(it.componentName.flattenToString())
+            }
+        }
+
+        val store = AtomicFileFavoriteStore(file)
+        store.load()
+
+        val readable = store.state.value as FavoriteReadState.Readable
+        assertEquals(listOf(first, second), readable.primaryIdentities)
+        assertEquals(emptyList<LaunchableIdentity>(), readable.companionIdentities)
+        file.delete()
+    }
+
+    @Test
+    fun replaceCompositionPersistsBothGroups() = runBlocking {
+        val file = temporaryFavoriteFile()
+        val first = identity(1, "com.example.first", "Main")
+        val second = identity(1, "com.example.second", "Main")
+        val third = identity(2, "com.example.third", "Main")
+        val store = AtomicFileFavoriteStore(file)
+        store.load()
+        store.add(first)
+        store.add(second)
+        store.add(third)
+
+        assertTrue(store.replaceComposition(listOf(second), listOf(third, first)))
+
+        val reloadedStore = AtomicFileFavoriteStore(file)
+        reloadedStore.load()
+        val readable = reloadedStore.state.value as FavoriteReadState.Readable
+        assertEquals(listOf(second), readable.primaryIdentities)
+        assertEquals(listOf(third, first), readable.companionIdentities)
+        file.delete()
+    }
+
     private fun temporaryFavoriteFile() = ApplicationProvider.getApplicationContext<android.content.Context>()
         .cacheDir
         .resolve("favorites-${UUID.randomUUID()}.bin")

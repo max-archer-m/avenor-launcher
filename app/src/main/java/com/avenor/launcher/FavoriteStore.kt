@@ -18,7 +18,13 @@ import kotlinx.coroutines.withContext
 
 internal sealed interface FavoriteReadState {
     data object Loading : FavoriteReadState
-    data class Readable(val identities: List<LaunchableIdentity>) : FavoriteReadState
+    data class Readable(
+        val primaryIdentities: List<LaunchableIdentity>,
+        val companionIdentities: List<LaunchableIdentity> = emptyList(),
+    ) : FavoriteReadState {
+        val identities: List<LaunchableIdentity>
+            get() = primaryIdentities + companionIdentities
+    }
     data object ReadFailure : FavoriteReadState
 }
 
@@ -29,6 +35,10 @@ internal interface FavoriteStore {
     suspend fun remove(identity: LaunchableIdentity): Boolean
     suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean
     suspend fun replaceOrder(identities: List<LaunchableIdentity>): Boolean
+    suspend fun replaceComposition(
+        primaryIdentities: List<LaunchableIdentity>,
+        companionIdentities: List<LaunchableIdentity>,
+    ): Boolean
 }
 
 internal class AtomicFileFavoriteStore private constructor(
@@ -48,7 +58,24 @@ internal class AtomicFileFavoriteStore private constructor(
                 FavoriteReadState.Readable(emptyList())
             } else {
                 try {
-                    FavoriteReadState.Readable(readDocument())
+                    val document = readDocument()
+                    val state = FavoriteReadState.Readable(
+                        document.primaryIdentities,
+                        document.companionIdentities,
+                    )
+                    if (document.schemaVersion == LEGACY_SCHEMA_VERSION) {
+                        // Favorites that were read successfully stay readable even when the
+                        // upgrade write fails; the legacy document remains on disk and the next
+                        // load retries the migration.
+                        try {
+                            writeDocument(state.primaryIdentities, state.companionIdentities)
+                        } catch (cancellation: CancellationException) {
+                            throw cancellation
+                        } catch (_: Exception) {
+                            // Keep the readable state read from the legacy document.
+                        }
+                    }
+                    state
                 } catch (cancellation: CancellationException) {
                     throw cancellation
                 } catch (_: Exception) {
@@ -61,10 +88,10 @@ internal class AtomicFileFavoriteStore private constructor(
     override suspend fun add(identity: LaunchableIdentity): Boolean = mutationMutex.withLock {
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         if (identity in readable.identities) return true
-        val updated = readable.identities + identity
+        val updated = readable.primaryIdentities + identity
         val writeSucceeded = withContext(Dispatchers.IO) {
             try {
-                writeDocument(updated)
+                writeDocument(updated, readable.companionIdentities)
                 true
             } catch (cancellation: CancellationException) {
                 throw cancellation
@@ -72,7 +99,12 @@ internal class AtomicFileFavoriteStore private constructor(
                 false
             }
         }
-        if (writeSucceeded) mutableState.value = FavoriteReadState.Readable(updated)
+        if (writeSucceeded) {
+            mutableState.value = FavoriteReadState.Readable(
+                updated,
+                readable.companionIdentities,
+            )
+        }
         writeSucceeded
     }
 
@@ -80,10 +112,11 @@ internal class AtomicFileFavoriteStore private constructor(
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         if (identity !in readable.identities) return true
 
-        val updated = readable.identities - identity
+        val updatedPrimary = readable.primaryIdentities - identity
+        val updatedCompanion = readable.companionIdentities - identity
         val writeSucceeded = withContext(Dispatchers.IO) {
             try {
-                writeDocument(updated)
+                writeDocument(updatedPrimary, updatedCompanion)
                 true
             } catch (cancellation: CancellationException) {
                 throw cancellation
@@ -91,19 +124,24 @@ internal class AtomicFileFavoriteStore private constructor(
                 false
             }
         }
-        if (writeSucceeded) mutableState.value = FavoriteReadState.Readable(updated)
+        if (writeSucceeded) {
+            mutableState.value = FavoriteReadState.Readable(updatedPrimary, updatedCompanion)
+        }
         writeSucceeded
     }
 
     override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean =
         mutationMutex.withLock {
             val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
-            val updated = readable.identities.filterNot(identities::contains)
-            if (updated.size == readable.identities.size) return true
+            val updatedPrimary = readable.primaryIdentities.filterNot(identities::contains)
+            val updatedCompanion = readable.companionIdentities.filterNot(identities::contains)
+            if (updatedPrimary.size == readable.primaryIdentities.size &&
+                updatedCompanion.size == readable.companionIdentities.size
+            ) return true
 
             val writeSucceeded = withContext(Dispatchers.IO) {
                 try {
-                    writeDocument(updated)
+                    writeDocument(updatedPrimary, updatedCompanion)
                     true
                 } catch (cancellation: CancellationException) {
                     throw cancellation
@@ -111,19 +149,24 @@ internal class AtomicFileFavoriteStore private constructor(
                     false
                 }
             }
-            if (writeSucceeded) mutableState.value = FavoriteReadState.Readable(updated)
+            if (writeSucceeded) {
+                mutableState.value = FavoriteReadState.Readable(
+                    updatedPrimary,
+                    updatedCompanion,
+                )
+            }
             writeSucceeded
         }
 
     override suspend fun replaceOrder(identities: List<LaunchableIdentity>): Boolean =
         mutationMutex.withLock {
             val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
-            if (!isValidReplacement(readable.identities, identities)) return false
-            if (identities == readable.identities) return true
+            if (!isValidReplacement(readable.primaryIdentities, identities)) return false
+            if (identities == readable.primaryIdentities) return true
 
             val writeSucceeded = withContext(Dispatchers.IO) {
                 try {
-                    writeDocument(identities)
+                    writeDocument(identities, readable.companionIdentities)
                     true
                 } catch (cancellation: CancellationException) {
                     throw cancellation
@@ -131,17 +174,66 @@ internal class AtomicFileFavoriteStore private constructor(
                     false
                 }
             }
-            if (writeSucceeded) mutableState.value = FavoriteReadState.Readable(identities)
+            if (writeSucceeded) {
+                mutableState.value = FavoriteReadState.Readable(
+                    identities,
+                    readable.companionIdentities,
+                )
+            }
             writeSucceeded
         }
 
-    private fun readDocument(): List<LaunchableIdentity> =
+    override suspend fun replaceComposition(
+        primaryIdentities: List<LaunchableIdentity>,
+        companionIdentities: List<LaunchableIdentity>,
+    ): Boolean = mutationMutex.withLock {
+        val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
+        val replacement = primaryIdentities + companionIdentities
+        if (!isValidReplacement(readable.identities, replacement)) return false
+        if (primaryIdentities == readable.primaryIdentities &&
+            companionIdentities == readable.companionIdentities
+        ) return true
+
+        // Publish the new composition before the write so readers never fall back to the previous
+        // composition while the file is being written; restore it when the write does not succeed.
+        mutableState.value = FavoriteReadState.Readable(primaryIdentities, companionIdentities)
+        val writeSucceeded = try {
+            withContext(Dispatchers.IO) {
+                try {
+                    writeDocument(primaryIdentities, companionIdentities)
+                    true
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: Exception) {
+                    false
+                }
+            }
+        } catch (cancellation: CancellationException) {
+            mutableState.value = readable
+            throw cancellation
+        }
+        if (!writeSucceeded) {
+            mutableState.value = readable
+        }
+        writeSucceeded
+    }
+
+    private data class FavoriteDocument(
+        val schemaVersion: Int,
+        val primaryIdentities: List<LaunchableIdentity>,
+        val companionIdentities: List<LaunchableIdentity>,
+    )
+
+    private fun readDocument(): FavoriteDocument =
         DataInputStream(BufferedInputStream(atomicFile.openRead())).use { input ->
             require(input.readInt() == MAGIC) { "Unrecognized favorites document" }
-            require(input.readInt() == SCHEMA_VERSION) { "Unsupported favorites schema" }
+            val schemaVersion = input.readInt()
+            require(
+                schemaVersion == LEGACY_SCHEMA_VERSION || schemaVersion == SCHEMA_VERSION,
+            ) { "Unsupported favorites schema" }
             val count = input.readInt()
             require(count >= 0) { "Invalid favorite count" }
-            val identities = buildList {
+            fun readIdentities(count: Int): List<LaunchableIdentity> = buildList {
                 repeat(count) {
                     val serial = input.readLong()
                     val flattenedComponent = input.readUTF()
@@ -150,21 +242,38 @@ internal class AtomicFileFavoriteStore private constructor(
                     add(LaunchableIdentity(serial, component))
                 }
             }
+            val primaryIdentities = readIdentities(count)
+            val companionIdentities = if (schemaVersion == SCHEMA_VERSION) {
+                val companionCount = input.readInt()
+                require(companionCount >= 0) { "Invalid companion favorite count" }
+                readIdentities(companionCount)
+            } else {
+                emptyList()
+            }
+            val identities = primaryIdentities + companionIdentities
             require(identities.distinct().size == identities.size) {
                 "Duplicate favorite identity"
             }
             if (input.read() != -1) throw IllegalArgumentException("Trailing favorite data")
-            identities
+            FavoriteDocument(schemaVersion, primaryIdentities, companionIdentities)
         }
 
-    private fun writeDocument(identities: List<LaunchableIdentity>) {
+    private fun writeDocument(
+        primaryIdentities: List<LaunchableIdentity>,
+        companionIdentities: List<LaunchableIdentity>,
+    ) {
         var output: FileOutputStream? = atomicFile.startWrite()
         try {
             val data = DataOutputStream(BufferedOutputStream(checkNotNull(output)))
             data.writeInt(MAGIC)
             data.writeInt(SCHEMA_VERSION)
-            data.writeInt(identities.size)
-            identities.forEach { identity ->
+            data.writeInt(primaryIdentities.size)
+            primaryIdentities.forEach { identity ->
+                data.writeLong(identity.profileSerialNumber)
+                data.writeUTF(identity.componentName.flattenToString())
+            }
+            data.writeInt(companionIdentities.size)
+            companionIdentities.forEach { identity ->
                 data.writeLong(identity.profileSerialNumber)
                 data.writeUTF(identity.componentName.flattenToString())
             }
@@ -180,7 +289,8 @@ internal class AtomicFileFavoriteStore private constructor(
     private companion object {
         const val FILE_NAME = "favorites.bin"
         const val MAGIC = 0x4156454E
-        const val SCHEMA_VERSION = 1
+        const val LEGACY_SCHEMA_VERSION = 1
+        const val SCHEMA_VERSION = 2
     }
 }
 

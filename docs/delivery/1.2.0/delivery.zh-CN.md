@@ -57,7 +57,7 @@
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
 | [迭代 12：加载与 Home 返回基础](iteration-12-loading-and-home-return.zh-CN.md) | `Completed` | 2026-08-18 | 实现已完成，作者报告初步验收未发现问题。 |
-| [迭代 13：Home 信息与可编辑收藏组合](iteration-13-home-favorite-composition.zh-CN.md) | `Planned` | 2026-08-18 | 作者选择将 Home 日期对齐及完整的主收藏/伴随收藏呈现与编辑作为第二个增量。 |
+| [迭代 13：Home 信息与可编辑收藏组合](iteration-13-home-favorite-composition.zh-CN.md) | `Completed` | 2026-08-20 | 实现已纳入本次 amend 后的本地交付提交；作者报告验收基本无问题。 |
 | [迭代 14：Drawer 连续导航与锚点](iteration-14-continuous-drawer-navigation.zh-CN.md) | `Planned` | 2026-08-18 | 作者选择将 Drawer 连续手势、过渡端点和 Drawer 索引锚点行为作为第三个增量。 |
 
 以上是当前规划的迭代。作者后续决定可以追加其他迭代，而无需重新编号或改写迭代 12–14；届时必须同步更新本表、版本范围、依赖、验证和完成条件。
@@ -70,7 +70,7 @@
 
 ### 迭代 13
 
-[契约](iteration-13-home-favorite-composition.zh-CN.md)。未记录实现、验证、commit、产物或验收结果。状态保持 `Planned`。
+[契约](iteration-13-home-favorite-composition.zh-CN.md)。实现和聚焦审查已完成。`git diff --check` 及变更实现代码行宽扫描为 `Passed`；Gradle 构建和 Android instrumented tests 为 `Not run`。作者报告设备验收基本无问题。未创建 APK、release 产物、tag、push 或发布。状态为 `Completed`。
 
 ### 迭代 14
 

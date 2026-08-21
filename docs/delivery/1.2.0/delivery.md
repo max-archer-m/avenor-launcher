@@ -57,7 +57,7 @@ Consequential changes to persistence format, state ownership, navigation archite
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
 | [Iteration 12: Loading and Home return foundation](iteration-12-loading-and-home-return.md) | `Completed` | 2026-08-18 | The implementation was completed and the author reported preliminary acceptance without observed issues. |
-| [Iteration 13: Home information and editable favorite composition](iteration-13-home-favorite-composition.md) | `Planned` | 2026-08-18 | The author selected Home date alignment and complete primary/companion favorite presentation and editing as the second increment. |
+| [Iteration 13: Home information and editable favorite composition](iteration-13-home-favorite-composition.md) | `Completed` | 2026-08-20 | Implementation is included in the amended local delivery commit; the author reported acceptance with no material issues. |
 | [Iteration 14: Continuous Drawer navigation and anchors](iteration-14-continuous-drawer-navigation.md) | `Planned` | 2026-08-18 | The author selected continuous Drawer gestures, transition endpoints, and Drawer index-anchor behavior as the third increment. |
 
 These are the currently planned iterations. A later author decision may append another iteration without renumbering or rewriting Iterations 12-14; this table, the version scope, dependencies, validation, and completion criteria must then be updated together.
@@ -70,7 +70,7 @@ These are the currently planned iterations. A later author decision may append a
 
 ### Iteration 13
 
-[Contract](iteration-13-home-favorite-composition.md). No implementation, validation, commit, artifact, or acceptance result is recorded. Status remains `Planned`.
+[Contract](iteration-13-home-favorite-composition.md). Implementation and focused review are complete. `git diff --check` and the changed implementation line-width sweep are `Passed`; Gradle build and instrumented tests are `Not run`. The author reported device acceptance with no material issues. No APK, release artifact, tag, push, or publication was created. Status is `Completed`.
 
 ### Iteration 14
 
