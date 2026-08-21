@@ -56,9 +56,9 @@
 
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
-| [迭代 12：加载与 Home 返回基础](iteration-12-loading-and-home-return.zh-CN.md) | `Completed` | 2026-08-18 | 实现已完成，作者报告初步验收未发现问题。 |
-| [迭代 13：Home 信息与可编辑收藏组合](iteration-13-home-favorite-composition.zh-CN.md) | `Completed` | 2026-08-20 | 实现已纳入本次 amend 后的本地交付提交；作者报告验收基本无问题。 |
-| [迭代 14：Drawer 连续导航与锚点](iteration-14-continuous-drawer-navigation.zh-CN.md) | `Planned` | 2026-08-18 | 作者选择将 Drawer 连续手势、过渡端点和 Drawer 索引锚点行为作为第三个增量。 |
+| [迭代 12：加载与 Home 返回基础](iteration-12-loading-and-home-return.zh-CN.md) | `Completed` | 2026-08-18 | 实现已完成；作者报告设备验收通过。 |
+| [迭代 13：Home 信息与可编辑收藏组合](iteration-13-home-favorite-composition.zh-CN.md) | `Completed` | 2026-08-20 | 实现已纳入本次 amend 后的本地交付提交；作者报告设备验收通过。 |
+| [迭代 14：Drawer 连续导航与锚点](iteration-14-continuous-drawer-navigation.zh-CN.md) | `Completed` | 2026-08-21 | 实现已存在于本地工作区；作者报告打包与设备验收通过。 |
 
 以上是当前规划的迭代。作者后续决定可以追加其他迭代，而无需重新编号或改写迭代 12–14；届时必须同步更新本表、版本范围、依赖、验证和完成条件。
 
@@ -66,15 +66,15 @@
 
 ### 迭代 12
 
-[契约](iteration-12-loading-and-home-return.zh-CN.md)。实现已完成。作者报告初步验收未发现问题。开发角色未执行 Gradle 构建/测试，记为 `Not run`；详细设备和产物证据不在本次迭代收尾中补录。状态为 `Completed`。
+[契约](iteration-12-loading-and-home-return.zh-CN.md)。实现已完成。作者报告设备验收通过。开发角色未执行 Gradle 构建/测试，记为 `Not run`；详细设备和产物证据不在本次迭代收尾中补录。状态为 `Completed`。
 
 ### 迭代 13
 
-[契约](iteration-13-home-favorite-composition.zh-CN.md)。实现和聚焦审查已完成。`git diff --check` 及变更实现代码行宽扫描为 `Passed`；Gradle 构建和 Android instrumented tests 为 `Not run`。作者报告设备验收基本无问题。未创建 APK、release 产物、tag、push 或发布。状态为 `Completed`。
+[契约](iteration-13-home-favorite-composition.zh-CN.md)。实现和聚焦审查已完成。`git diff --check` 及变更实现代码行宽扫描为 `Passed`；Gradle 构建和 Android instrumented tests 为 `Not run`。作者报告设备验收通过。未创建 APK、release 产物、tag、push 或发布。状态为 `Completed`。
 
 ### 迭代 14
 
-[契约](iteration-14-continuous-drawer-navigation.zh-CN.md)。未记录实现、验证、commit、产物或验收结果。状态保持 `Planned`。
+[契约](iteration-14-continuous-drawer-navigation.zh-CN.md)。实现和聚焦审查已完成。`git diff --check` 及变更实现代码行宽扫描为 `Passed`。在作者授权下，`assembleDebug` 与 `assembleDebugAndroidTest` 为 `Passed`。一次 instrumented tests 运行执行 52 个用例、3 个失败，均为测试代码缺陷而非产品行为问题：其中两个属于迭代 14 的测试夹具已修正，另一组 `FavoriteStoreTest` 非 void 声明属于既有缺陷，已在迭代 14 范围外修正。修正后的验证复跑因作者中断，记为 `Not run`。作者报告打包与设备验收通过。授权构建产生了本地 debug APK；未创建 release 产物、tag、push 或发布。状态为 `Completed`。
 
 ## 依赖与顺序
 
@@ -107,7 +107,7 @@
 
 ## 已知限制与遗留问题
 
-- 三个已规划迭代的实现方式和性能证据尚未建立。
+- 迭代 12–14 的性能证据仅限作者设备观察，未记录测量数据。
 - 后续可能选择更多 `1.2.0` 迭代；它们未出现在本次初始计划中，不代表拒绝或延期决定。
 - 更广泛的设备、API、OEM、profile、克隆应用和无障碍覆盖在执行前保持未知。
 - 正式发布证据和公开分发准备度不属于所选交付级别。
@@ -121,4 +121,4 @@
 
 ## 完成结果
 
-当前没有最终结果。`1.2.0` 和迭代 12–14 保持规划状态；本文件未记录生产实现授权、构建、测试、安装、设备验收、产物、commit、push、tag、上传、发布或分发结果。
+当前没有最终版本结果。迭代 12–14 均为 `Completed`，且作者报告每个迭代的设备验收通过。`1.2.0` 本身仍未收口：本文件未记录作者的版本完成决定、签名基线产物、`versionCode` 分配、在指定主要设备上从已接受基线原地升级的结果，以及 commit、push、tag、上传、发布或分发结果。

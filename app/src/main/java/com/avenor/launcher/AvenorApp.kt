@@ -56,6 +56,30 @@ internal enum class AvenorSurface {
 private const val DRAWER_MOVEMENT_PER_GESTURE_DP = 1.5f
 private const val TARGET_FLING_THRESHOLD_DP_PER_SECOND = 1_000f
 
+internal fun drawerGestureProgress(
+    displacementPx: Float,
+    fullGestureDistancePx: Float,
+): Float = (displacementPx / fullGestureDistancePx).coerceIn(0f, 1f)
+
+internal fun drawerInteractiveDisplacement(gestureDisplacementPx: Float): Float =
+    gestureDisplacementPx * DRAWER_MOVEMENT_PER_GESTURE_DP
+
+internal fun transitionTarget(
+    origin: AvenorSurface,
+    gestureDisplacementPx: Float,
+    completionThresholdPx: Float,
+    targetVelocity: Float,
+    targetFlingThresholdPx: Float,
+): AvenorSurface {
+    val completes = gestureDisplacementPx >= completionThresholdPx ||
+        targetVelocity >= targetFlingThresholdPx
+    return if (completes) {
+        if (origin == AvenorSurface.Home) AvenorSurface.Drawer else AvenorSurface.Home
+    } else {
+        origin
+    }
+}
+
 @Composable
 internal fun AvenorApp(systemHomeEvents: Flow<Unit>? = null) {
     val context = LocalContext.current
@@ -257,26 +281,28 @@ internal fun AvenorApp(
         gestureDisplacementPx =
             (gestureDisplacementPx + targetDisplacement).coerceAtLeast(0f)
         val consumedTargetDisplacement = gestureDisplacementPx - previousDisplacement
-        val gestureProgress =
-            (gestureDisplacementPx / fullGestureDistancePx).coerceIn(0f, 1f)
+        val gestureProgress = drawerGestureProgress(
+            gestureDisplacementPx,
+            fullGestureDistancePx,
+        )
         progress = if (origin == AvenorSurface.Home) gestureProgress else 1f - gestureProgress
         drawerOffsetPx = if (origin == AvenorSurface.Home) {
-            (drawerOffsetPx - (consumedTargetDisplacement * DRAWER_MOVEMENT_PER_GESTURE_DP))
+            (drawerOffsetPx - drawerInteractiveDisplacement(consumedTargetDisplacement))
                 .coerceIn(0f, containerHeightPx)
         } else {
-            (drawerOffsetPx + (consumedTargetDisplacement * DRAWER_MOVEMENT_PER_GESTURE_DP))
+            (drawerOffsetPx + drawerInteractiveDisplacement(consumedTargetDisplacement))
                 .coerceIn(0f, containerHeightPx)
         }
     }
 
     fun finishGesture(origin: AvenorSurface, targetVelocity: Float) {
-        val completedByDistance = gestureDisplacementPx >= completionThresholdPx
-        val completedByFling = targetVelocity >= targetFlingThresholdPx
-        val target = if (completedByDistance || completedByFling) {
-            if (origin == AvenorSurface.Home) AvenorSurface.Drawer else AvenorSurface.Home
-        } else {
-            origin
-        }
+        val target = transitionTarget(
+            origin = origin,
+            gestureDisplacementPx = gestureDisplacementPx,
+            completionThresholdPx = completionThresholdPx,
+            targetVelocity = targetVelocity,
+            targetFlingThresholdPx = targetFlingThresholdPx,
+        )
         settleTo(target)
     }
 
@@ -437,7 +463,9 @@ internal fun AvenorApp(
     fun homeTransitionNestedScrollConnection(listState: LazyListState): NestedScrollConnection =
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (source != NestedScrollSource.UserInput || available.y >= 0f) {
+                if (source != NestedScrollSource.UserInput ||
+                    (!homeTransitionOwnsGesture && available.y >= 0f)
+                ) {
                     return Offset.Zero
                 }
                 if (!homeTransitionOwnsGesture && listState.canScrollForward) {
@@ -505,6 +533,24 @@ internal fun AvenorApp(
             } while (pointersRemainPressed)
         }
     }
+    val homePointerSafetyModifier = Modifier.pointerInput(Unit) {
+        awaitEachGesture {
+            awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+            var multiplePointersDetected = false
+            var pointersRemainPressed: Boolean
+            do {
+                val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                if (!multiplePointersDetected && event.changes.count { it.pressed } > 1) {
+                    multiplePointersDetected = true
+                    settleTo(AvenorSurface.Home)
+                }
+                if (multiplePointersDetected) {
+                    event.changes.forEach { change -> change.consume() }
+                }
+                pointersRemainPressed = event.changes.any { it.pressed }
+            } while (pointersRemainPressed)
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -523,6 +569,7 @@ internal fun AvenorApp(
             modifier = Modifier
                 .fillMaxSize()
                 .alpha((1f - (2f * progress)).coerceIn(0f, 1f))
+                .then(homePointerSafetyModifier)
                 .then(if (homeEditMode) Modifier else gestureModifier)
                 .testTag("home_surface"),
         ) {

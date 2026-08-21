@@ -70,12 +70,16 @@ internal fun buildDrawerSections(
     }
 
     return buildList {
-        add(
-            DrawerSection(
-                label = "#",
-                entries = entriesBySection["#"].orEmpty().map(NormalizedDrawerEntry::entry),
-            ),
-        )
+        entriesBySection["#"]
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { sectionEntries ->
+                add(
+                    DrawerSection(
+                        label = "#",
+                        entries = sectionEntries.map(NormalizedDrawerEntry::entry),
+                    ),
+                )
+            }
         for (sectionCharacter in 'A'..'Z') {
             val label = sectionCharacter.toString()
             val sectionEntries = entriesBySection[label].orEmpty()

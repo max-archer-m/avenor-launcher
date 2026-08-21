@@ -58,6 +58,7 @@
     <dimen name="action_sheet_shortcut_icon_label_gap">16dp</dimen>
     <dimen name="action_sheet_shortcut_row_min_height">48dp</dimen>
     <dimen name="drawer_index_settings_icon_size">11dp</dimen>
+    <dimen name="drawer_index_bubble_settings_icon_size">32dp</dimen>
     <dimen name="settings_top_bar_min_height">56dp</dimen>
     <dimen name="settings_horizontal_padding">16dp</dimen>
     <dimen name="settings_primary_one_line_min_height">56dp</dimen>

@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Process
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -17,6 +16,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.awaitCancellation
@@ -368,6 +368,130 @@ class HomeScreenTest {
     }
 
     @Test
+    fun upwardSwipeOverDateOpensDrawerWithoutActivatingDate() {
+        composeRule.setContent {
+            AvenorTheme {
+                AvenorApp(
+                    inventoryLoader = LaunchableInventoryLoader { awaitCancellation() },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home_date").performTouchInput {
+            swipeUp(startY = centerY, endY = centerY - HOME_DRAWER_SWIPE_DISTANCE_PX)
+        }
+
+        composeRule.onNodeWithTag("drawer_loading").assertIsDisplayed()
+    }
+
+    @Test
+    fun editModeKeepsHomeDrawerGestureDisabled() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.edit", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Editable favorite",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val companion = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.edit.companion", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Companion favorite",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                AvenorApp(
+                    inventoryLoader = LaunchableInventoryLoader {
+                        completeSnapshot(entry, companion)
+                    },
+                    favoriteStore = TestFavoriteStore(
+                        listOf(entry.identity, companion.identity),
+                    ),
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Editable favorite").performTouchInput { longClick() }
+        composeRule.onNodeWithTag("edit_favorites_action").performClick()
+        composeRule.onNodeWithTag("favorite_reorder_handle").assertIsDisplayed()
+        composeRule.onNodeWithTag("home_surface").performTouchInput { swipeUp() }
+
+        composeRule.onNodeWithTag("drawer_surface").assertDoesNotExist()
+        composeRule.onNodeWithTag("favorite_reorder_handle").assertIsDisplayed()
+    }
+
+    @Test
+    fun downwardDrawerSwipeDoesNotLaunchApplication() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.drawer", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Drawer swipe target",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        var launches = 0
+        composeRule.setContent {
+            AvenorTheme {
+                AvenorApp(
+                    inventoryLoader = LaunchableInventoryLoader { completeSnapshot(entry) },
+                    entryLauncher = LaunchableEntryLauncher {
+                        launches += 1
+                        true
+                    },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home_surface").performTouchInput { swipeUp() }
+        composeRule.onNodeWithText("Drawer swipe target").performTouchInput { swipeDown() }
+
+        composeRule.runOnIdle { assertEquals(0, launches) }
+        composeRule.onNodeWithTag("home_time").assertIsDisplayed()
+    }
+
+    @Test
+    fun drawerTransitionUsesContractedProgressAndDisplacement() {
+        assertEquals(0.5f, drawerGestureProgress(100f, 200f), 0.001f)
+        assertEquals(150f, drawerInteractiveDisplacement(100f), 0.001f)
+    }
+
+    @Test
+    fun drawerTransitionReleaseUsesDistanceAndFlingBoundaries() {
+        assertEquals(
+            AvenorSurface.Home,
+            transitionTarget(AvenorSurface.Home, 119f, 120f, 0f, 1_000f),
+        )
+        assertEquals(
+            AvenorSurface.Drawer,
+            transitionTarget(AvenorSurface.Home, 120f, 120f, 0f, 1_000f),
+        )
+        assertEquals(
+            AvenorSurface.Drawer,
+            transitionTarget(AvenorSurface.Home, 80f, 120f, 1_001f, 1_000f),
+        )
+        assertEquals(
+            AvenorSurface.Home,
+            transitionTarget(AvenorSurface.Home, 80f, 120f, -1_001f, 1_000f),
+        )
+        assertEquals(
+            AvenorSurface.Home,
+            transitionTarget(AvenorSurface.Drawer, 120f, 120f, 0f, 1_000f),
+        )
+        assertEquals(
+            AvenorSurface.Drawer,
+            transitionTarget(AvenorSurface.Drawer, 80f, 120f, -1_001f, 1_000f),
+        )
+    }
+
+    @Test
     fun firstDrawerEntryDoesNotRepeatTheApplicationOwnedInitialLoad() {
         var loadCount = 0
         val entry = LaunchableEntry(
@@ -560,6 +684,26 @@ class HomeScreenTest {
 
         assertEquals(listOf("#", "A", "B", "E", "W"), sections.map(DrawerSection::label))
         assertEquals(listOf("2FAS"), sections.first().entries.map(LaunchableEntry::label))
+    }
+
+    @Test
+    fun drawerSectionsOmitTheNumericSectionWhenNoEntryFallsIntoIt() {
+        val labels = listOf("Amazon", "百度", "Chrome")
+        val entries = labels.mapIndexed { index, label ->
+            LaunchableEntry(
+                identity = LaunchableIdentity(
+                    profileSerialNumber = 0,
+                    componentName = ComponentName("com.example.numeric.$index", "MainActivity"),
+                ),
+                user = Process.myUserHandle(),
+                label = label,
+                icon = ColorDrawable(Color.TRANSPARENT),
+            )
+        }
+
+        val sections = buildDrawerSections(entries, Locale.SIMPLIFIED_CHINESE)
+
+        assertEquals(listOf("A", "B", "C"), sections.map(DrawerSection::label))
     }
 
     @Test
@@ -998,6 +1142,9 @@ class HomeScreenTest {
     }
 
 }
+
+// Exceeds the Home-Drawer completion distance even when the gesture starts on a short node.
+private const val HOME_DRAWER_SWIPE_DISTANCE_PX = 900f
 
 private fun completeSnapshot(vararg entries: LaunchableEntry): LaunchableInventorySnapshot =
     LaunchableInventorySnapshot(

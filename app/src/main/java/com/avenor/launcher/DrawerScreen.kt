@@ -69,6 +69,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Job
@@ -79,6 +80,8 @@ private enum class DrawerLoadTrigger {
     ManualRetry,
     LiveUpdate,
 }
+
+private const val SETTINGS_INDEX_ENTRY = "settings"
 
 @Composable
 internal fun DrawerScreen(
@@ -335,7 +338,7 @@ private fun DrawerApplicationList(
             state = listState,
         ) {
             sections.forEach { section ->
-                stickyHeader(key = "section:${section.label}") {
+                item(key = "section:${section.label}") {
                     DrawerSectionHeader(section.label)
                 }
                 items(
@@ -352,7 +355,7 @@ private fun DrawerApplicationList(
                     )
                 }
             }
-            stickyHeader(key = "section:settings") {
+            item(key = "section:settings") {
                 DrawerSectionHeader(
                     label = stringResource(R.string.settings),
                     modifier = Modifier.testTag("drawer_settings_anchor"),
@@ -368,20 +371,28 @@ private fun DrawerApplicationList(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .windowInsetsPadding(WindowInsets.safeDrawing),
-            onSelect = { label ->
+            onSelect = { label, immediate ->
                 val anchor = sectionAnchors.getValue(label)
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
                 indexJumpJob?.cancel()
                 indexJumpJob = coroutineScope.launch {
-                    listState.scrollToItem(anchor)
+                    if (immediate) {
+                        listState.scrollToItem(anchor)
+                    } else {
+                        listState.animateScrollToItem(anchor)
+                    }
                 }
             },
             onActiveLabelChange = { label -> activeIndexLabel = label },
-            onSelectSettings = {
+            onSelectSettings = { immediate ->
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
                 indexJumpJob?.cancel()
                 indexJumpJob = coroutineScope.launch {
-                    listState.scrollToItem(settingsAnchor)
+                    if (immediate) {
+                        listState.scrollToItem(settingsAnchor)
+                    } else {
+                        listState.animateScrollToItem(settingsAnchor)
+                    }
                 }
             },
         )
@@ -404,15 +415,14 @@ private fun DrawerApplicationList(
 private fun DrawerAlphabetIndex(
     labels: List<String>,
     modifier: Modifier = Modifier,
-    onSelect: (String) -> Unit,
+    onSelect: (String, Boolean) -> Unit,
     onActiveLabelChange: (String?) -> Unit,
-    onSelectSettings: () -> Unit,
+    onSelectSettings: (Boolean) -> Unit,
 ) {
     val slotHeight = dimensionResource(R.dimen.drawer_index_slot_height)
     val density = LocalDensity.current
     val indexState = rememberLazyListState()
-    val settingsIndexEntry = "settings"
-    val indexEntries = remember(labels) { labels + settingsIndexEntry }
+    val indexEntries = remember(labels) { labels + SETTINGS_INDEX_ENTRY }
     LazyColumn(
         modifier = modifier
             .heightIn(max = dimensionResource(R.dimen.drawer_index_complete_height))
@@ -431,20 +441,20 @@ private fun DrawerAlphabetIndex(
                         var selectedLabel: String? = null
                         var multiplePointersDetected = false
 
-                        fun select(entry: String?) {
+                        fun select(entry: String?, immediate: Boolean) {
                             if (entry == null || entry == selectedLabel) return
                             selectedLabel = entry
-                            if (entry == settingsIndexEntry) {
-                                onActiveLabelChange(null)
-                                onSelectSettings()
+                            if (entry == SETTINGS_INDEX_ENTRY) {
+                                onActiveLabelChange(SETTINGS_INDEX_ENTRY)
+                                onSelectSettings(immediate)
                             } else {
                                 onActiveLabelChange(entry)
-                                onSelect(entry)
+                                onSelect(entry, immediate)
                             }
                         }
 
                         down.consume()
-                        select(entryAt(down.position.y))
+                        select(entryAt(down.position.y), immediate = true)
                         var pointersRemainPressed: Boolean
                         do {
                             val event = awaitPointerEvent()
@@ -466,7 +476,7 @@ private fun DrawerAlphabetIndex(
                                         indexState.dispatchRawDelta(edgeThresholdPx)
                                     }
                                 }
-                                select(entryAt(activeChange.position.y))
+                                select(entryAt(activeChange.position.y), immediate = false)
                             }
                             pointersRemainPressed = event.changes.any { it.pressed }
                         } while (pointersRemainPressed)
@@ -491,7 +501,7 @@ private fun DrawerAlphabetIndex(
                     .semantics {
                         role = Role.Button
                         onClick {
-                            onSelect(label)
+                            onSelect(label, true)
                             true
                         }
                     }
@@ -514,7 +524,7 @@ private fun DrawerAlphabetIndex(
                     .semantics {
                         role = Role.Button
                         onClick {
-                            onSelectSettings()
+                            onSelectSettings(true)
                             true
                         }
                     }
@@ -545,12 +555,23 @@ private fun DrawerIndexBubble(
             .testTag("drawer_index_bubble"),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = dimensionResource(R.dimen.drawer_index_bubble_text_size).value.sp,
-            fontWeight = FontWeight.Medium,
-        )
+        if (label == SETTINGS_INDEX_ENTRY) {
+            Icon(
+                painter = painterResource(R.drawable.ic_settings),
+                contentDescription = stringResource(R.string.settings),
+                modifier = Modifier.size(
+                    dimensionResource(R.dimen.drawer_index_bubble_settings_icon_size),
+                ),
+                tint = MaterialTheme.colorScheme.onBackground,
+            )
+        } else {
+            Text(
+                text = label,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = dimensionResource(R.dimen.drawer_index_bubble_text_size).value.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
     }
 }
 
@@ -624,7 +645,7 @@ private fun DrawerApplicationRow(
             .testTag("drawer_application_row"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        DrawerApplicationIcon(entry.iconBitmap, entry.icon, iconSizePixels)
+        DrawerApplicationIcon(entry.iconBitmap, entry.icon, iconSize, iconSizePixels)
         Spacer(Modifier.width(dimensionResource(R.dimen.drawer_application_icon_label_gap)))
         Text(
             text = entry.label,
@@ -641,15 +662,19 @@ private fun DrawerApplicationRow(
 private fun DrawerApplicationIcon(
     preparedBitmap: Bitmap?,
     icon: Drawable,
+    iconSize: Dp,
     iconSizePixels: Int,
 ) {
-    val bitmap = preparedBitmap?.asImageBitmap() ?: remember(icon, iconSizePixels) {
-        icon.toBitmap(width = iconSizePixels, height = iconSizePixels).asImageBitmap()
+    // Keep the ImageBitmap wrapper across recompositions so scrolling a long
+    // distance does not reallocate one per row it passes.
+    val bitmap = remember(preparedBitmap, icon, iconSizePixels) {
+        preparedBitmap?.asImageBitmap()
+            ?: icon.toBitmap(width = iconSizePixels, height = iconSizePixels).asImageBitmap()
     }
 
     Image(
         bitmap = bitmap,
         contentDescription = null,
-        modifier = Modifier.size(dimensionResource(R.dimen.drawer_application_icon_size)),
+        modifier = Modifier.size(iconSize),
     )
 }

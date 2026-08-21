@@ -36,7 +36,7 @@ class FavoriteStoreTest {
     }
 
     @Test
-    fun addDeduplicateRemoveAndBatchRemovePreserveOrder() = runBlocking {
+    fun addDeduplicateRemoveAndBatchRemovePreserveOrder(): Unit = runBlocking {
         val file = temporaryFavoriteFile()
         val store = AtomicFileFavoriteStore(file)
         val first = identity(1, "com.example.first", "Main")
@@ -61,7 +61,7 @@ class FavoriteStoreTest {
     }
 
     @Test
-    fun damagedDocumentPublishesFailureAndMutationsStayDisabled() = runBlocking {
+    fun damagedDocumentPublishesFailureAndMutationsStayDisabled(): Unit = runBlocking {
         val file = temporaryFavoriteFile()
         DataOutputStream(file.outputStream()).use { output ->
             output.writeInt(0)
@@ -82,7 +82,7 @@ class FavoriteStoreTest {
     }
 
     @Test
-    fun failedWriteKeepsLastReadableState() = runBlocking {
+    fun failedWriteKeepsLastReadableState(): Unit = runBlocking {
         val file = temporaryFavoriteFile()
         val store = AtomicFileFavoriteStore(file)
         val identity = identity(1, "com.example", "Main")
@@ -96,7 +96,7 @@ class FavoriteStoreTest {
     }
 
     @Test
-    fun replaceOrderPersistsOnlyACompletePermutation() = runBlocking {
+    fun replaceOrderPersistsOnlyACompletePermutation(): Unit = runBlocking {
         val file = temporaryFavoriteFile()
         val store = AtomicFileFavoriteStore(file)
         val first = identity(1, "com.example.first", "Main")
@@ -119,7 +119,7 @@ class FavoriteStoreTest {
     }
 
     @Test
-    fun legacySchemaMigratesFavoritesToPrimaryInOriginalOrder() = runBlocking {
+    fun legacySchemaMigratesFavoritesToPrimaryInOriginalOrder(): Unit = runBlocking {
         val file = temporaryFavoriteFile()
         val first = identity(1, "com.example.first", "Main")
         val second = identity(2, "com.example.second", "Main")
@@ -143,7 +143,7 @@ class FavoriteStoreTest {
     }
 
     @Test
-    fun replaceCompositionPersistsBothGroups() = runBlocking {
+    fun replaceCompositionPersistsBothGroups(): Unit = runBlocking {
         val file = temporaryFavoriteFile()
         val first = identity(1, "com.example.first", "Main")
         val second = identity(1, "com.example.second", "Main")

@@ -56,9 +56,9 @@ Consequential changes to persistence format, state ownership, navigation archite
 
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
-| [Iteration 12: Loading and Home return foundation](iteration-12-loading-and-home-return.md) | `Completed` | 2026-08-18 | The implementation was completed and the author reported preliminary acceptance without observed issues. |
-| [Iteration 13: Home information and editable favorite composition](iteration-13-home-favorite-composition.md) | `Completed` | 2026-08-20 | Implementation is included in the amended local delivery commit; the author reported acceptance with no material issues. |
-| [Iteration 14: Continuous Drawer navigation and anchors](iteration-14-continuous-drawer-navigation.md) | `Planned` | 2026-08-18 | The author selected continuous Drawer gestures, transition endpoints, and Drawer index-anchor behavior as the third increment. |
+| [Iteration 12: Loading and Home return foundation](iteration-12-loading-and-home-return.md) | `Completed` | 2026-08-18 | Implementation is complete; the author reported that device acceptance passed. |
+| [Iteration 13: Home information and editable favorite composition](iteration-13-home-favorite-composition.md) | `Completed` | 2026-08-20 | Implementation is included in the amended local delivery commit; the author reported that device acceptance passed. |
+| [Iteration 14: Continuous Drawer navigation and anchors](iteration-14-continuous-drawer-navigation.md) | `Completed` | 2026-08-21 | Implementation is present in the local working tree; the author reported that packaging and device acceptance passed. |
 
 These are the currently planned iterations. A later author decision may append another iteration without renumbering or rewriting Iterations 12-14; this table, the version scope, dependencies, validation, and completion criteria must then be updated together.
 
@@ -66,15 +66,15 @@ These are the currently planned iterations. A later author decision may append a
 
 ### Iteration 12
 
-[Contract](iteration-12-loading-and-home-return.md). Implementation is complete. The author reported preliminary acceptance without observed issues. Gradle build/test execution by development is `Not run`; detailed device and artifact evidence remains outside this iteration closure. Status is `Completed`.
+[Contract](iteration-12-loading-and-home-return.md). Implementation is complete. The author reported that device acceptance passed. Gradle build/test execution by development is `Not run`; detailed device and artifact evidence remains outside this iteration closure. Status is `Completed`.
 
 ### Iteration 13
 
-[Contract](iteration-13-home-favorite-composition.md). Implementation and focused review are complete. `git diff --check` and the changed implementation line-width sweep are `Passed`; Gradle build and instrumented tests are `Not run`. The author reported device acceptance with no material issues. No APK, release artifact, tag, push, or publication was created. Status is `Completed`.
+[Contract](iteration-13-home-favorite-composition.md). Implementation and focused review are complete. `git diff --check` and the changed implementation line-width sweep are `Passed`; Gradle build and instrumented tests are `Not run`. The author reported that device acceptance passed. No APK, release artifact, tag, push, or publication was created. Status is `Completed`.
 
 ### Iteration 14
 
-[Contract](iteration-14-continuous-drawer-navigation.md). No implementation, validation, commit, artifact, or acceptance result is recorded. Status remains `Planned`.
+[Contract](iteration-14-continuous-drawer-navigation.md). Implementation and focused review are complete. `git diff --check` and the changed implementation line-width sweep are `Passed`. Under author authorization, `assembleDebug` and `assembleDebugAndroidTest` are `Passed`. One instrumented-test run executed 52 tests with 3 failures, all of them defects in test code rather than product behavior: two iteration-14 test fixtures were corrected, and one pre-existing non-void `FavoriteStoreTest` declaration set was corrected outside iteration-14 scope. The verification re-run after those corrections is `Not run` because the author interrupted it. The author reported that packaging and device acceptance passed. A local debug APK was produced by the authorized build; no release artifact, tag, push, or publication was created. Status is `Completed`.
 
 ## Dependencies and sequence
 
@@ -107,7 +107,7 @@ Use the source, signing, artifact, and synchronization rules for an `Author dail
 
 ## Known limitations and legacy issues
 
-- The implementation approach and performance evidence for the three planned iterations have not yet been established.
+- Performance evidence for Iterations 12-14 is limited to author device observation; no measured data is recorded.
 - Additional `1.2.0` iterations may be selected later; their absence from this initial plan is not a rejection or deferral decision.
 - Broader device, API, OEM, profile, clone, and accessibility coverage remains unknown until performed.
 - Formal-release evidence and public-distribution readiness are outside the selected delivery level.
@@ -121,4 +121,4 @@ Use the source, signing, artifact, and synchronization rules for an `Author dail
 
 ## Completion result
 
-No final result exists. `1.2.0` and Iterations 12-14 remain planned; this document records no production implementation authorization, build, test, installation, device acceptance, artifact, commit, push, tag, upload, publication, or distribution result.
+No final version result exists. Iterations 12-14 are `Completed`, and the author reported that device acceptance passed for each of them. `1.2.0` itself remains open: this document records no author version-completion decision, signed baseline artifact, `versionCode` allocation, in-place upgrade result from the accepted baseline on the designated primary device, commit, push, tag, upload, publication, or distribution result.
