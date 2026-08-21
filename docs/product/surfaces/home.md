@@ -8,9 +8,9 @@ Home is the Launcher primary surface. It is one fixed, non-pageable, non-collaps
 
 1. Basic information region: time, then date and weekday.
 2. Middle favorite composition: primary favorites and companion favorites, containing every accepted saved launchable entry.
-3. Bottom secondary region: a conditional later favorite capability that has no current content and therefore occupies no space.
+3. Secondary favorites area: a conditional module below the primary favorites area.
 
-Home uses content-driven vertical sizing rather than fixed proportional regions. The basic-information region wraps its required content and interaction targets. The middle favorite composition grows with its content up to the remaining safe available height; content beyond that bound scrolls inside the applicable favorite group, while Home itself never scrolls. The bottom secondary region has zero height while it contains no user-created favorite content. Any remaining screen space is unallocated transparent Home space, not a persistent product region.
+Home uses content-driven vertical sizing rather than fixed proportional regions. The basic-information region wraps its required content and interaction targets. The primary favorites area grows with its content up to the remaining safe available height; content beyond that bound scrolls inside the applicable favorite group, while Home itself never scrolls. The secondary favorites area appears below the primary favorites area with `16dp` vertical spacing, uses the full available Home content width, and has zero height when it has no content. It does not participate in Home vertical scrolling; when its content exceeds its visible width, only the area scrolls horizontally. Any remaining screen space is unallocated transparent Home space, not a persistent product region.
 
 Within the middle favorite composition, the primary-favorite area uses approximately the left 55% and the companion-favorite area the right 45% of the available horizontal space. The composition uses `8dp` internal padding on each side and a `16dp` gap between the two groups; the 55:45 split applies to the remaining width after those fixed spaces. This is a compositional hierarchy, not a user-adjustable divider. “Calm” and “restrained” do not impose a deliberately low favorite count; they constrain distraction and avoidable operations. Both groups share one favorite-composition viewport height, which grows to the larger content requirement of the two groups up to the remaining safe available height, and independently scroll their content only when it exceeds that shared viewport.
 
@@ -70,7 +70,7 @@ Home content uses `16dp` horizontal and vertical container padding. Adjacent vis
 ## Edit mode
 
 - Edit mode is entered from the selected favorite's Launcher actions and is available whenever that action sheet can open for a favorite. The action is labeled as editing rather than ordering because the mode supports both ordering and group assignment.
-- In edit mode, every favorite displays a drag handle. Each visible Home module receives the shared translucent light-gray, small-rounded-corner editing surface defined in [design-foundations.md](../design-foundations.md). In the current product this means the basic-information and favorite-composition modules; a zero-height bottom secondary region has no surface. These surfaces communicate module boundaries and do not imply that the basic-information module is editable.
+- In edit mode, every favorite displays a drag handle. Each currently defined editable Home module receives the shared translucent light-gray, small-rounded-corner editing surface defined in [design-foundations.md](../design-foundations.md). In the current product this means the basic-information and primary-favorites-area modules; the secondary favorites area's editing surface is not defined by this contract. These surfaces communicate module boundaries and do not imply that the basic-information module is editable.
 - Edit mode preserves the normal-mode favorite item heights: primary items remain `56dp` high and companion items remain `48dp` high. Both groups use the same `24dp` drag-handle graphic. Each handle's hit region is `24dp` wide plus `12dp` horizontal padding on each side (`48dp` total) and follows the current item's full height (`56dp` for primary, `48dp` for companion). The graphic has no additional right margin; visible spacing comes from the item's existing padding. Handles are contained within those rows and must not increase row height or stretch, compress, or remeasure either group's list.
 - A handle drag uses an independent follow-pointer preview. The preview preserves the grab offset and moves continuously across the complete Home safe content area, including both groups and the space between them. Only the primary and companion regions accept a drop; other Home areas allow the preview to pass through but do not accept it. The dragged favorite does not participate in list-position animation, and target changes or other-item animations must not move, jump, or rebound the preview.
 - The source favorite's original layout slot remains stable for the entire drag and preserves the source row height, so the list does not shrink, the shared viewport does not change, and other favorites do not shift because the source was temporarily removed. Before an exchange target is selected, the slot may retain an inert representation of the source; when an in-group exchange target moves there, that target replaces or covers the inert source representation. The slot never contains two interactive favorites. In-group exchange may update visible list positions during the drag; cross-group exchange and insertion show target feedback without changing either group's visible list until release. Saved state is finalized only when the current valid operation is released.
@@ -86,12 +86,16 @@ Home content uses `16dp` horizontal and vertical container padding. Adjacent vis
 - Releasing a dragged favorite finalizes the current in-group exchange, cross-group exchange, or cross-group insertion when the current target is valid, then immediately saves it. Cross-group release follows the mutually exclusive target, preview, invalid-drop, and save rules above.
 - Edit mode disables Home-to-Drawer dragging. Item dragging, group scrolling, and automatic edge scrolling retain exclusive ownership until edit mode ends.
 
-## Bottom secondary region
+## Secondary favorites area
 
-- The bottom secondary region is a product-definition boundary for a later favorite capability, not a persistent empty container.
-- It exists and occupies height only when the user has created applicable favorite content. Because the current product defines no such content or creation behavior, its current height is zero.
-- Unallocated transparent space below the visible modules is not the bottom secondary region and receives no module behavior or edit-mode surface.
-- Content, selection, scrolling, ribbon, paging, sizing, and creation behavior require a later author decision and updates to the applicable Home and navigation contracts before this region can appear.
+- The secondary favorites area is a conditional Home module below the primary favorites area, separated from it by `16dp` vertical spacing.
+- It uses the full available Home content width rather than the primary-and-companion 55:45 split.
+- It has zero height when it has no content and does not reserve an empty placeholder.
+- Home itself does not scroll vertically because of this area. When the area's content exceeds its visible width, the area scrolls horizontally without moving other Home regions.
+- The area does not classify content into product-defined types and does not display a title for an individual item. Its content is user-defined and consists of launchable application entries, matching the current favorite-entry model.
+- Selecting a secondary favorite entry immediately launches its application. Long-pressing it produces long-press haptic feedback and opens the application action sheet defined in [app-action-sheet.md](app-action-sheet.md).
+- Each secondary favorites item is a finite horizontal list with an explicit first and last entry. It does not wrap from the last entry to the first or otherwise scroll cyclically.
+- Unallocated transparent space below the visible modules is not the secondary favorites area.
 
 ### Inventory changes during edit mode
 
@@ -117,6 +121,7 @@ Any inventory event that ends edit mode also cancels an active drag, removes its
 ## Acceptance intent
 
 - Empty and populated favorite states preserve the same fixed Home structure. Primary and companion favorites remain part of one middle-screen composition and approximately follow the 55:45 horizontal hierarchy after the composition padding and inter-group gap. A group stays stationary when its content fits and scrolls independently when its content overflows.
+- The secondary favorites area appears below the primary favorites area only when it has content, uses the full available Home content width, and remains a finite, user-defined collection of untitled launchable application entries. It scrolls horizontally only when its content overflows; reaching its last entry does not wrap to the first. Selecting an entry launches its application, and long-pressing it opens the existing application action sheet.
 - Loading, unreadable, and fully empty favorite states are presented once across the complete favorite composition; a single empty group does not replace the other group's readable content with a shared empty state.
 - Outside edit mode, Home-to-Drawer dragging remains available from the favorite region according to its scroll-boundary handoff and from every other Avenor-managed Home element without producing the element's click or long-press action.
 - Primary and cloned entries remain visibly distinguishable when the platform supplies a badge; Avenor-specific fallback distinction is outside the current scope.

@@ -17,7 +17,8 @@ Each language-neutral ASCII canvas is stored once under `docs/product/wireframes
 - Only the two favorite groups accept a drop. Target feedback and edge auto-scroll use the finger touch point. Same-group exchange updates during the drag; cross-group exchange and insertion update only on release. The current operation is finalized and saved on release.
 - Application names remain one line and use end ellipsis when required.
 - Dot fills show allocated space and do not prescribe a visible texture, color, or additional layer.
-- A bottom secondary favorite module is absent and has zero height until applicable user-created content is defined. Unallocated transparent Home space is not that module.
+- The secondary favorites area sits below the primary favorites area with `16dp` vertical spacing, uses the full available Home content width, has zero height without content, and scrolls horizontally only when its content exceeds its visible width. Home itself does not scroll vertically because of this area. Unallocated transparent Home space is not that module.
+- Secondary favorites content is user-defined, has no product-defined type grouping or per-item title, and consists of launchable application entries. Each horizontal item list is finite with an explicit first and last entry; it does not scroll cyclically. Selecting an entry launches its application, while long-pressing it opens the existing application action sheet.
 - The Home basic-information label marks eligible blank space only; time and date targets are excluded from double-tap locking.
 
 ## Wireframe index
