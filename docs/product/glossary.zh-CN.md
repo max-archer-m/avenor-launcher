@@ -8,9 +8,9 @@
 | Drawer | 应用列表 | 平台暴露的全部可启动应用条目的带索引列表 |
 | Settings | 设置 | Avenor 配置与产品信息界面 |
 | Launchable entry | 可启动应用条目 | Avenor 可以启动的一个平台目标；主应用与分身是不同条目 |
-| Favorite | 收藏应用 | 保存到 Home 的可启动应用条目 |
+| Favorite | 收藏应用 | 只保存到一个 Home 收藏分组的可启动应用条目；同一稳定条目身份不得跨分组重复 |
 | Primary favorites area | 主要收藏区 | 由主收藏和伴收藏共同组成的 Home 模块 |
-| Secondary favorites area | 次级收藏区 | 位于主收藏与伴收藏下方的条件性 Home 模块，用于后续由用户创建的收藏内容；它不同于伴收藏 |
+| Secondary favorites area | 次级收藏区 | 位于主要收藏区下方、最多包含五条由用户定义收藏条目横向织带的条件性 Home 模块；它不同于伴收藏 |
 | Application shortcut | 应用快捷操作 | 应用通过平台暴露的操作 |
 | Launcher action | 启动器操作 | Avenor 提供的操作，例如收藏、编辑或卸载 |
 | Application action sheet | 应用操作面板 | 包含应用身份、应用快捷操作和启动器操作的模态 Bottom Sheet |

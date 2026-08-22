@@ -8,9 +8,9 @@
 | Drawer | 应用列表 | The full indexed list of platform-exposed launchable entries |
 | Settings | 设置 | Avenor configuration and product-information surface |
 | Launchable entry | 可启动应用条目 | One platform-exposed target that Avenor can launch; a primary app and clone are separate entries |
-| Favorite | 收藏应用 | A launchable entry saved to Home |
+| Favorite | 收藏应用 | A launchable entry saved to exactly one Home favorite group; one stable entry identity cannot be duplicated across groups |
 | Primary favorites area | 主要收藏区 | The Home module composed of primary favorites and companion favorites |
-| Secondary favorites area | 次级收藏区 | The conditional Home module below the primary and companion favorites, reserved for later user-created favorite content; it is distinct from companion favorites |
+| Secondary favorites area | 次级收藏区 | The conditional Home module below the primary favorites area, containing up to five horizontal ribbons of user-defined favorite entries; it is distinct from companion favorites |
 | Application shortcut | 应用快捷操作 | An action exposed by the application through the platform |
 | Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, edit, or uninstall |
 | Application action sheet | 应用操作面板 | The modal Bottom Sheet containing application identity, application shortcuts, and Launcher actions |
