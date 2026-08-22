@@ -13,6 +13,8 @@
 | Favorite-list area | 收藏列表区 | 最多包含两个地位相同纵向收藏列表的 Home 模块；一个列表使用全宽，两个列表平均分配可用宽度 |
 | Favorite size | 收藏尺寸 | 统一作用于某个纵向收藏列表全部条目的“大／中／小”列表级呈现；当前产品以“中”新建和迁移所有列表，且不提供尺寸选择交互 |
 | Secondary favorites area | 次级收藏区 | 收藏列表区下方、最多包含五条由用户定义收藏条目横向织带的条件性 Home 模块 |
+| Favorite container | 收藏容器 | 某个纵向收藏列表或某条次级织带；同容器应用拖动即时交换，跨容器拖动在松手时交换或插入 |
+| Ribbon controls | 织带控件 | 位于织带滚动应用视口之外的固定编辑模式控件：逻辑 start 删除整条织带，逻辑 end 调整织带顺序 |
 | Application shortcut | 应用快捷操作 | 应用通过平台暴露的操作 |
 | Launcher action | 启动器操作 | Avenor 提供的操作，例如收藏、编辑或卸载 |
 | Application action sheet | 应用操作面板 | 包含应用身份、应用快捷操作和启动器操作的模态 Bottom Sheet |

@@ -13,6 +13,8 @@
 | Favorite-list area | 收藏列表区 | The Home module containing at most two equal-status vertical favorite lists; one list uses full width and two divide available width equally |
 | Favorite size | 收藏尺寸 | A large, medium, or small list-level presentation applied uniformly to every entry in one vertical favorite list; the current product creates and migrates every list at medium and exposes no size-selection interaction |
 | Secondary favorites area | 次级收藏区 | The conditional Home module below the favorite-list area, containing up to five horizontal ribbons of user-defined favorite entries |
+| Favorite container | 收藏容器 | One vertical favorite list or one secondary ribbon; same-container application drags exchange immediately, while cross-container drags use release-time exchange or insertion |
+| Ribbon controls | 织带控件 | Fixed edit-mode controls outside a ribbon's scrolling application viewport: remove the complete ribbon at logical start and reorder the ribbon at logical end |
 | Application shortcut | 应用快捷操作 | An action exposed by the application through the platform |
 | Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, edit, or uninstall |
 | Application action sheet | 应用操作面板 | The modal Bottom Sheet containing application identity, application shortcuts, and Launcher actions |
