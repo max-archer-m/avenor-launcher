@@ -4,19 +4,22 @@
 
 | Canonical English term | Chinese working term | Meaning |
 | --- | --- | --- |
-| Home | 主页面 | The Launcher primary surface containing time, date, weekday, and favorites |
+| Home | 主页面 | The Avenor Launcher primary surface containing time, date, weekday, and favorites; unqualified `Home` never means the Android platform navigation action |
+| Android system Home action | Android 系统 Home 操作 | The platform action that requests display of the selected default Launcher, regardless of whether it originates from gesture navigation, a navigation button, a physical key, or another system entry |
 | Drawer | 应用列表 | The full indexed list of platform-exposed launchable entries |
 | Settings | 设置 | Avenor configuration and product-information surface |
 | Launchable entry | 可启动应用条目 | One platform-exposed target that Avenor can launch; a primary app and clone are separate entries |
-| Favorite | 收藏应用 | A launchable entry saved to exactly one Home favorite group; one stable entry identity cannot be duplicated across groups |
-| Primary favorites area | 主要收藏区 | The Home module composed of primary favorites and companion favorites |
-| Secondary favorites area | 次级收藏区 | The conditional Home module below the primary favorites area, containing up to five horizontal ribbons of user-defined favorite entries; it is distinct from companion favorites |
+| Favorite | 收藏应用 | A launchable entry saved to exactly one Home favorite destination; one stable entry identity cannot be duplicated across lists or ribbons |
+| Favorite-list area | 收藏列表区 | The Home module containing at most two equal-status vertical favorite lists; one list uses full width and two divide available width equally |
+| Favorite size | 收藏尺寸 | A large, medium, or small list-level presentation applied uniformly to every entry in one vertical favorite list; the current product creates and migrates every list at medium and exposes no size-selection interaction |
+| Secondary favorites area | 次级收藏区 | The conditional Home module below the favorite-list area, containing up to five horizontal ribbons of user-defined favorite entries |
 | Application shortcut | 应用快捷操作 | An action exposed by the application through the platform |
 | Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, edit, or uninstall |
 | Application action sheet | 应用操作面板 | The modal Bottom Sheet containing application identity, application shortcuts, and Launcher actions |
 | Section anchor | 分组锚点 | A Drawer section heading such as A or `#`; it is an index destination and scrolls with the list rather than remaining pinned |
 | Alphabet index | 字母索引 | The fixed right-side Drawer index used to jump between anchors |
-| Edit mode | 编辑模式 | The Home state that exposes module boundaries and allows favorites to be reordered or moved between groups |
+| Edit mode | 编辑模式 | The Home state entered from a favorite action or eligible basic-information blank-space long-press, exposing module boundaries, favorite movement, and destination-targeted add controls |
+| Favorite multi-selection | 收藏多选 | The temporary Drawer mode that collects an ordered set of previously unfavorited applications for one captured Home favorite destination |
 | Double-tap lock | 双击锁屏 | The optional Home gesture that requests one Android system lock action through Avenor's narrowly scoped accessibility service |
 | Privacy statement | 隐私声明 | The offline Settings presentation describing Avenor's current data handling, storage, deletion, permission, and external-link boundaries |
 | Prominent disclosure | 显著披露 | The separate in-app explanation and affirmative choice shown immediately before an enable-oriented accessibility-settings handoff; it is not replaced by the Privacy statement |

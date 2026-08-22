@@ -47,12 +47,12 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 
 ## Home to Drawer
 
-- An upward drag on Home is the only current entry into Drawer.
+- In normal Home mode, an upward drag is the only user-gesture entry into ordinary Drawer. A Home edit-mode add control may programmatically complete the same upward transition into Drawer favorite multi-selection mode; this does not enable Home-to-Drawer dragging during edit mode.
 - In normal Home mode, the drag may begin anywhere inside Avenor's Home interaction area, including over the time, date, favorite entries, empty state, loading state, error state, and Retry control. System-reserved inset gestures remain governed by Android.
-- An upward drag beginning outside a favorite group enters the Home-to-Drawer transition directly. Inside either favorite group, that group first consumes upward displacement while it can scroll toward its end. The primary and companion groups arbitrate independently.
-- If the touched group does not overflow, it consumes no scroll displacement and the upward drag enters the transition directly. If it overflows, reaching its end boundary transfers the remaining displacement from the same continuous gesture into the Home-to-Drawer transition without requiring the user to lift. Transition progress begins from the displacement transferred after the boundary, not from distance already consumed as list scrolling.
-- Downward dragging inside an overflowing favorite group scrolls that group toward its start and does not initiate a Home surface transition. The other favorite group's position remains unchanged.
-- Home-to-Drawer dragging is disabled while Home edit mode is active. Handle drags own item movement; other vertical drags inside an overflowing favorite group scroll that group until edit mode ends.
+- An upward drag beginning outside a vertical favorite list enters the Home-to-Drawer transition directly. Inside a favorite list, that list first consumes upward displacement while it can scroll toward its end. Visible lists arbitrate independently.
+- If the touched list does not overflow, it consumes no scroll displacement and the upward drag enters the transition directly. If it overflows, reaching its end boundary transfers the remaining displacement from the same continuous gesture into the Home-to-Drawer transition without requiring the user to lift. Transition progress begins from the displacement transferred after the boundary, not from distance already consumed as list scrolling.
+- Downward dragging inside an overflowing favorite list scrolls that list toward its start and does not initiate a Home surface transition. Another favorite list's position remains unchanged.
+- Home-to-Drawer dragging is disabled while Home edit mode is active. Handle drags own item movement; other vertical drags inside an overflowing favorite list scroll that list until edit mode ends.
 - A pointer sequence can resolve to only one Home action. Before an interactive element's selection or long-press action has been committed, recognition of an upward drag transfers ownership to the Home-to-Drawer transition and suppresses that element's selection, long-press, and haptic response.
 - In eligible basic-information blank space, two taps may resolve to the lock gesture defined in [double-tap-lock.md](features/double-tap-lock.md). Any drag that takes transition ownership cancels that recognition. Time, date-and-weekday, favorites, and other interactive targets never participate in double-tap locking.
 - Selection is committed only when the pointer is released without the sequence becoming an upward drag or a long-press. Once a long-press has been recognized and its action has opened, the same pointer sequence does not also begin the Drawer transition.
@@ -61,6 +61,7 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 ## Drawer to Home
 
 - System Back returns Drawer to Home using the completion path of the reverse transition.
+- Drawer's ordinary-mode top-app-bar Back arrow returns to Home through that same completion path.
 - Downward dragging first scrolls the application list toward its top boundary.
 - While list scroll offset is greater than zero, the list exclusively consumes downward displacement and Drawer does not begin to leave.
 - When the list reaches offset zero during the same continuous gesture, remaining downward displacement transfers immediately into the Drawer-to-Home transition; the user does not need to lift and drag again.
@@ -72,13 +73,14 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 - On Drawer, Back returns to Home.
 - On Settings, Back returns to the previous Avenor surface, currently Drawer.
 - On the application action sheet, Back dismisses the sheet and returns to the unchanged underlying surface.
-- Process restoration begins at Home. Drawer, Settings, an action sheet, edit mode, and their transient positions are not restored after process recreation. Within the same process, each favorite group's meaningful scroll position is preserved when returning to Home; process recreation resets both groups to their start positions.
+- In Home edit mode, Back exits to normal Home. In Drawer favorite multi-selection mode, Back first cancels the complete unconfirmed selection and returns through the reverse transition to Home edit mode; it does not also exit edit mode.
+- Process restoration begins at Home. Drawer, Settings, an action sheet, edit mode, and their transient positions are not restored after process recreation. Within the same process, each favorite list's meaningful scroll position is preserved when returning to Home; process recreation resets every list to its start position.
 
-## System Home and external application return
+## Android system Home action and external application return
 
-- When Avenor is the selected default Launcher, the Android system Home action from any Avenor surface, including Drawer and Settings, displays Avenor Home. This is a system navigation result, not an Avenor Back or Drawer-to-Home transition, and Avenor does not reinterpret the system Home gesture as Back.
+- When Avenor is the selected default Launcher, the Android system Home action from any Avenor surface, including Home edit mode, Drawer, Drawer favorite multi-selection mode, and Settings, displays normal Avenor Home. An active favorite multi-selection is cancelled and edit mode is exited. This is a system navigation result, not an Avenor Back or Drawer-to-Home transition, and Avenor does not reinterpret the Android system Home action as Back. Unqualified `Home` in this contract means the Avenor product surface, never this platform action.
 - Launching an ordinary application from Home or Drawer creates an external application excursion. When Avenor returns in the same process, it displays Home rather than restoring Drawer, and it does not show Loading or require a new blocking initial read before showing the existing Home content.
-- The same-process return preserves the Home favorite state and each favorite group's meaningful scroll position according to the existing restoration rule. It does not restore Drawer, Settings, an action sheet, edit mode, or an in-progress Drawer position.
+- The same-process return preserves the Home favorite state and each favorite list's meaningful scroll position according to the existing restoration rule. It does not restore Drawer, Settings, an action sheet, edit mode, or an in-progress Drawer position.
 - Changes observed while the external application is active are reconciled without replacing the returning Home surface with Loading. The updated inventory and favorite state are available the next time Drawer or the relevant Home content is presented, subject to the live-update rules of those surfaces.
 - If the Launcher process was recreated while the external application was active, the process-restoration rules apply instead of the same-process return rules.
 

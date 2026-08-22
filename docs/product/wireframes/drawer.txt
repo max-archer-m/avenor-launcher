@@ -1,8 +1,8 @@
 +------------------------------------------------------------------------------+
-|                            DRAWER / LOW FIDELITY                             |
+|                    DRAWER / ORDINARY + MULTI-SELECT                          |
+|  [BACK 24/48]       EMPTY FUTURE SEARCH SLOT                                 |
+|-------------------56DP TRANSPARENT TOP APP BAR-------------------------------|
 |                                                                              |
-|  ALL APPLICATIONS                                      A                     |
-|------------------------------------------------------------------------------|
 |                                                                              |
 |                   #                                       #                  |
 |                                                                              |
@@ -72,14 +72,14 @@
 |                                                                              |
 |                                                           V                  |
 |                                                                              |
-|  APPLICATION NAMES: ONE LINE / END ELLIPSIS              W                   |
+|  MULTI: CANCEL | TARGET | CONFIRM; NO SETTINGS            W                  |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                                                           X                  |
 |                                                                              |
-|  ANCHOR HEADERS SCROLL WITH THE LIST                      Y                  |
-|  56DP START INSET ALIGNS HEADERS WITH APPLICATION NAMES                      |
+|  MULTI: ORDER SLOT LEFT OF ICON; CONFIRM ALONE SAVES      Y                  |
+|  ORDINARY: ANCHORS SCROLL; 56DP LABEL INSET                                  |
 |                                                                              |
 |                                                                              |
 |                                                           Z                  |

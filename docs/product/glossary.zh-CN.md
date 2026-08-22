@@ -4,19 +4,22 @@
 
 | 规范英文术语 | 中文工作术语 | 含义 |
 | --- | --- | --- |
-| Home | 主页面 | 包含时间、日期、星期和收藏应用的 Launcher 主界面 |
+| Home | 主页面 | 包含时间、日期、星期和收藏应用的 Avenor Launcher 主界面；未加限定的 `Home` 永远不表示 Android 平台导航操作 |
+| Android system Home action | Android 系统 Home 操作 | 请求显示当前默认 Launcher 的平台操作，无论它来自手势导航、导航按钮、物理按键还是其他系统入口 |
 | Drawer | 应用列表 | 平台暴露的全部可启动应用条目的带索引列表 |
 | Settings | 设置 | Avenor 配置与产品信息界面 |
 | Launchable entry | 可启动应用条目 | Avenor 可以启动的一个平台目标；主应用与分身是不同条目 |
-| Favorite | 收藏应用 | 只保存到一个 Home 收藏分组的可启动应用条目；同一稳定条目身份不得跨分组重复 |
-| Primary favorites area | 主要收藏区 | 由主收藏和伴收藏共同组成的 Home 模块 |
-| Secondary favorites area | 次级收藏区 | 位于主要收藏区下方、最多包含五条由用户定义收藏条目横向织带的条件性 Home 模块；它不同于伴收藏 |
+| Favorite | 收藏应用 | 只保存到一个 Home 收藏目标的可启动应用条目；同一稳定条目身份不得跨列表或织带重复 |
+| Favorite-list area | 收藏列表区 | 最多包含两个地位相同纵向收藏列表的 Home 模块；一个列表使用全宽，两个列表平均分配可用宽度 |
+| Favorite size | 收藏尺寸 | 统一作用于某个纵向收藏列表全部条目的“大／中／小”列表级呈现；当前产品以“中”新建和迁移所有列表，且不提供尺寸选择交互 |
+| Secondary favorites area | 次级收藏区 | 收藏列表区下方、最多包含五条由用户定义收藏条目横向织带的条件性 Home 模块 |
 | Application shortcut | 应用快捷操作 | 应用通过平台暴露的操作 |
 | Launcher action | 启动器操作 | Avenor 提供的操作，例如收藏、编辑或卸载 |
 | Application action sheet | 应用操作面板 | 包含应用身份、应用快捷操作和启动器操作的模态 Bottom Sheet |
 | Section anchor | 分组锚点 | Drawer 中的分组标题，例如 A 或 `#`；它是索引跳转目标并随列表滚动，不保持吸顶 |
 | Alphabet index | 字母索引 | Drawer 右侧用于跳转到锚点的固定索引 |
-| Edit mode | 编辑模式 | Home 中显示模块边界，并允许收藏排序或跨组移动的状态 |
+| Edit mode | 编辑模式 | 从收藏操作或基础信息区符合条件的空白位置长按进入，在 Home 中显示模块边界、收藏移动能力和面向明确目标的新增控件的状态 |
+| Favorite multi-selection | 收藏多选 | Drawer 的临时模式，为一个已记录的 Home 收藏目标收集一组有顺序且此前未收藏的应用 |
 | Double-tap lock | 双击锁屏 | 通过 Avenor 用途受限的无障碍服务请求一次 Android 系统锁屏操作的可选 Home 手势 |
 | Privacy statement | 隐私声明 | Settings 中可离线阅读的内容，用于说明 Avenor 当前的数据处理、存储、删除、权限和外部链接边界 |
 | Prominent disclosure | 显著披露 | 以启用为目的跳转无障碍设置前单独展示的应用内说明与明确选择；Privacy 正文不能替代它 |

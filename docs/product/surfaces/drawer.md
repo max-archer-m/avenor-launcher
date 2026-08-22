@@ -15,6 +15,23 @@ Drawer presents every launchable application entry successfully read from the so
 - Selecting an application immediately launches it and suppresses duplicate rapid activation.
 - Long-pressing an application produces long-press haptic feedback and opens the application action sheet.
 
+## Top app bar
+
+- Drawer always reserves one fixed `56dp`-high top app bar below the status-bar safe inset. It remains fixed while the application list scrolls, uses the transparent Drawer surface, and does not introduce a visible bar background.
+- In ordinary mode, the left side contains a standard `24dp` Back arrow in a `48dp` interaction target. Selecting it completes the same downward Drawer-to-Home transition as system Back. The center is an empty, non-interactive slot reserved for a future search field; no title, search affordance, placeholder, or unavailable control is currently displayed. The right side is visually empty and has no interaction target.
+- The application list and AlphabetIndex begin below the top app bar and remain clear of its controls. The fixed bar height participates in the available-height calculation for the index.
+
+## Favorite multi-selection mode
+
+- Selecting an edit-mode add control on Home opens the existing Drawer surface in favorite multi-selection mode and captures that control's persisted-list, provisional-list, existing-ribbon, or provisional-ribbon target. The Drawer completes its upward transition programmatically rather than requiring another user drag.
+- The same inventory, locale-aware ordering, application rows, section anchors, and AlphabetIndex are reused. The fixed Settings section and Settings index token are hidden because Settings is not a selectable application target.
+- The top app bar replaces its ordinary contents with `Cancel` on the left, a localized description of the captured destination in the center, and `Confirm` on the right. Confirm is disabled while nothing is selected.
+- Selecting an available application toggles its selection instead of launching it. Long-press actions and the application action sheet are disabled in this mode. Every row reserves the same leading selection-order region to the left of the application icon so row content does not shift; a selected row displays its one-based selection number there.
+- Selection order is the order in which entries were selected. Deselecting an entry immediately closes the numbering gap, and confirming appends the remaining entries to the captured destination in the displayed number order.
+- An identity already assigned to any vertical favorite list or secondary ribbon remains visible but unavailable for selection. Primary, cloned, and work-profile entries continue to use their distinct stable identities when this state is evaluated.
+- Selecting Confirm saves the complete current selection once, then completes the downward transition and returns to the same Home edit mode. Selecting Cancel, system Back, or a valid downward Drawer dismissal discards the complete unconfirmed selection, completes the downward transition, and returns to Home edit mode.
+- The Android system Home action also discards the complete unconfirmed selection but exits Home edit mode and resolves directly to normal Home. No cancellation path persists a partial selection, and the downward animation itself never implies confirmation.
+
 ## Profile and Private Space boundary
 
 - Ordinary, work-profile, and cloned launchable entries follow the existing inventory, identity, sorting, launch, favorite, and refresh rules when Android normally exposes them to Avenor without hidden-profile access.
@@ -86,6 +103,8 @@ Drawer presents every launchable application entry successfully read from the so
 
 ## Acceptance intent
 
+- Ordinary Drawer keeps the transparent top app bar fixed while content scrolls; its Back arrow returns through the normal downward transition, and its empty center and right regions expose no inactive controls.
+- Favorite multi-selection preserves selection order visibly, never launches or long-presses an application, never exposes Settings, and saves only the complete selection through Confirm. Every cancellation path discards all unconfirmed entries.
 - Every launchable entry returned by a successfully read source within Avenor's current role and least-privilege boundary appears once. Entries from an isolated failed non-current profile may be absent without blocking available Content. Primary, work-profile, and cloned entries follow the applicable platform identity treatment; Private Space entries requiring `ACCESS_HIDDEN_PROFILES` are intentionally absent. Primary and cloned entries remain distinguishable when the platform supplies a badge; Avenor-specific fallback distinction is outside the current scope.
 - Initial index contact lands immediately on the intended anchor with its heading positioned at the top of the visible list. Each later available-token change smooth-scrolls to that token's anchor without queuing targets.
 - Releasing or cancelling an index gesture leaves the application list at the last selected anchor; it does not preserve an arbitrary pointer-percentage position or snap elsewhere. The heading then scrolls normally with the list.

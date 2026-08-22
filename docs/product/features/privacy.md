@@ -20,7 +20,7 @@ Avenor Launcher is designed to keep its current product data and processing on y
 
 Avenor processes the application entries that Android exposes to it under the current Launcher role and permission boundary. This can include application names, icons, launchable components, Android profile identities, platform-provided badges, and application shortcuts. Avenor uses this information to show applications, distinguish launchable identities, launch the entry you select, and present applicable shortcuts.
 
-When you add a Home favorite, Avenor stores that launchable identity, its favorite group, and your chosen order locally on the device. Application inventory and shortcut information that is not part of a saved favorite is processed as needed and is not retained as Avenor-owned application-usage history.
+When you add a Home favorite, Avenor stores that launchable identity, its favorite-list or ribbon destination, its order, and applicable list-level presentation setting locally on the device. Application inventory and shortcut information that is not part of a saved favorite is processed as needed and is not retained as Avenor-owned application-usage history.
 
 Avenor also reads current system information needed for its interface and controls, including time, date, system language, default-Launcher state, and whether the optional Avenor accessibility service is enabled and connected. Time and date are not retained as history, and these system states are not used for behavioral analytics.
 
