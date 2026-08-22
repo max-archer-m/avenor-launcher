@@ -208,7 +208,7 @@ Do not create roadmap, version, or iteration files before their real planning or
 
 ## Git and task workflow
 
-- The project currently follows one development line and does not maintain a multi-branch or multi-contributor workflow. Branching and collaboration conventions should be defined only if the author later introduces that need.
+- The project may use multiple short-lived, scope-based branches and isolated worktrees under the authoritative coordination rules in [`AGENTS.md`](../AGENTS.md). Branches are execution isolation, not durable project status or an alternative authority to `main`.
 - Treat each independently reviewable operation as one task. Complete it, report the result and evidence, and wait for author confirmation before beginning the next task.
 - Modifying files does not authorize committing them; committing does not authorize pushing them. An Agent may perform modify, commit, and push in one uninterrupted sequence only when the project author explicitly authorizes that serial continuation.
 - A broad objective does not by itself authorize every later mutation in its delivery chain. Read-only inspection and validation needed to report the current task remain part of that task.
