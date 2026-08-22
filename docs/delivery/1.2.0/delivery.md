@@ -2,22 +2,22 @@
 
 > Semantic source: English. Chinese counterpart: [delivery.zh-CN.md](delivery.zh-CN.md).
 >
-> This delivery document plans selected behavior from the current product specifications. It does not authorize production implementation, a product or architecture change, signing, artifact movement, a commit, push, tag, GitHub Release, upload, publication, or distribution.
+> This delivery record defines and closes the behavior selected for `1.2.0`. It does not authorize a later product or architecture change, signing-secret movement, a tag, GitHub Release, upload, publication, or distribution.
 
 ## Version intent
 
-`1.2.0` strengthens the V1 fixed-presentation daily-use baseline through three currently planned increments: stable application-data loading and Home return behavior; the contracted Home basic-information alignment and editable primary/companion favorite composition; and continuous Home–Drawer navigation with stable transition and Drawer index-anchor behavior.
+`1.2.0` strengthens the V1 fixed-presentation daily-use baseline through three delivered increments: stable application-data loading and Home return behavior; the contracted Home basic-information alignment and editable primary/companion favorite composition; and continuous Home–Drawer navigation with stable transition and Drawer index-anchor behavior.
 
-Iterations 12-14 are the currently arranged iterations, not a declaration that the version's iteration set is final. The project author may add further bounded iterations to `1.2.0`; any addition must update this delivery record, add its separate iteration contract, define its dependency position, and preserve an achievable version boundary.
+Iterations 12-14 are the final `1.2.0` iteration set. Product-contract changes committed after the Iteration 14 implementation boundary are not retroactively included in this version and require selection by a later delivery contract.
 
 ## Delivery level
 
 `Author daily-use baseline`, as defined by [release governance](../../release.md).
 
-- Planned `versionName`: `1.2.0`.
-- `versionCode`: To be allocated as the next unused value at the applicable traceable-artifact boundary.
+- `versionName`: `1.2.0`.
+- `versionCode`: `3`.
 - Application identity remains `com.avenor.launcher`.
-- Planning this version does not by itself change the Android build configuration or create a traceable APK.
+- Source commit `b119aadbdff04284f02c106fd93a59121641dbea` applies these identifiers and produced the traceable local debug APK recorded below.
 
 ## Product references
 
@@ -44,7 +44,7 @@ The accepted `1.1.0` Home, Drawer, application launch, action-sheet, Settings, a
 - Moving the optional double-tap-lock accessibility service from its current build boundary into a formal mainline or release configuration.
 - A new Drawer grid, a new Settings capability, or a product behavior not selected by an included iteration contract.
 - Formal release artifact, public distribution, tag, milestone, GitHub Release, or store publication.
-- Treating Iterations 12-14 as a permanently closed version scope; later additions remain possible only through an explicit author-directed delivery update and a separate iteration contract.
+- Favorite-list, secondary-ribbon, and Drawer multi-selection behavior defined after the Iteration 14 implementation boundary; those product-contract changes belong to a later delivery selection.
 
 ## Technical approach and risks
 
@@ -58,9 +58,9 @@ Consequential changes to persistence format, state ownership, navigation archite
 | --- | --- | --- | --- |
 | [Iteration 12: Loading and Home return foundation](iteration-12-loading-and-home-return.md) | `Completed` | 2026-08-18 | Implementation is complete; the author reported that device acceptance passed. |
 | [Iteration 13: Home information and editable favorite composition](iteration-13-home-favorite-composition.md) | `Completed` | 2026-08-20 | Implementation is included in the amended local delivery commit; the author reported that device acceptance passed. |
-| [Iteration 14: Continuous Drawer navigation and anchors](iteration-14-continuous-drawer-navigation.md) | `Completed` | 2026-08-21 | Implementation is present in the local working tree; the author reported that packaging and device acceptance passed. |
+| [Iteration 14: Continuous Drawer navigation and anchors](iteration-14-continuous-drawer-navigation.md) | `Completed` | 2026-08-21 | Implementation is present in source commit `5e86d6dcc2f7b3cca5a6f669ed5b591f1249e365`; the author reported that packaging and device acceptance passed. |
 
-These are the currently planned iterations. A later author decision may append another iteration without renumbering or rewriting Iterations 12-14; this table, the version scope, dependencies, validation, and completion criteria must then be updated together.
+These are the final iterations selected for `1.2.0`. Later product-contract changes do not alter this protected delivery boundary.
 
 ## Iteration evidence and results
 
@@ -78,7 +78,7 @@ These are the currently planned iterations. A later author decision may append a
 
 ## Dependencies and sequence
 
-The current intended order is Iteration 12, then Iteration 13, then Iteration 14.
+The delivered dependency order was Iteration 12, then Iteration 13, then Iteration 14.
 
 - Iteration 12 establishes the loading, return, and state-reuse behavior needed by later Home and Drawer work.
 - Iteration 13 follows Iteration 12 because the two-group favorite composition must use stable loading and restoration semantics.
@@ -103,22 +103,22 @@ Focused automated checks and additional API, OEM, locale, profile, cloned-applic
 
 ## Artifact and release requirements
 
-Use the source, signing, artifact, and synchronization rules for an `Author daily-use baseline`. The author-local signing identity must remain available for an in-place update from the accepted baseline. Allocate a `versionCode` only under the traceable-artifact rules in release governance, and record every allocation in this delivery evidence. No tag, upload, publication, or distribution is planned or authorized here.
+The local debug APK built from source commit `b119aadbdff04284f02c106fd93a59121641dbea` uses `applicationId` `com.avenor.launcher`, `versionName` `1.2.0`, and allocated `versionCode` `3`. Its SHA-256 is `6E9B607A84A874C0EE4888945308647FCF82455A1F958ED22B9A7ABC62C8C70F`, and its signing category is debug. The APK is not designated a formal release artifact and no tag, upload, publication, or distribution is authorized by this record.
 
 ## Known limitations and legacy issues
 
 - Performance evidence for Iterations 12-14 is limited to author device observation; no measured data is recorded.
-- Additional `1.2.0` iterations may be selected later; their absence from this initial plan is not a rejection or deferral decision.
+- Product-contract changes made after the Iteration 14 implementation boundary are intentionally deferred to a later version selection.
 - Broader device, API, OEM, profile, clone, and accessibility coverage remains unknown until performed.
 - Formal-release evidence and public-distribution readiness are outside the selected delivery level.
 
 ## Completion criteria
 
-- Every iteration listed in `Included iterations` at version-completion time is `Completed` and accepted by the author; completion is not limited automatically to Iterations 12-14 if the version plan later expands.
+- Iterations 12-14 are `Completed` and accepted by the author.
 - The version validation and upgrade conditions above are satisfied on the designated primary device.
 - Product documents, implementation, tests, and recorded evidence have no unresolved material contract mismatch within the selected scope.
 - The completion result records the accepted identifiers, source commit, signing category, device environment, upgrade result, included-journey result, material known gaps, and author decision.
 
 ## Completion result
 
-No final version result exists. Iterations 12-14 are `Completed`, and the author reported that device acceptance passed for each of them. `1.2.0` itself remains open: this document records no author version-completion decision, signed baseline artifact, `versionCode` allocation, in-place upgrade result from the accepted baseline on the designated primary device, commit, push, tag, upload, publication, or distribution result.
+`1.2.0` is closed as the author-directed historical boundary for Iterations 12-14. The author previously reported packaging and designated-device acceptance for their included journeys. Source commit `b119aadbdff04284f02c106fd93a59121641dbea` sets `versionName` `1.2.0` and `versionCode` `3`; after one failed attempt caused by locked generated output, a clean `assembleDebug --no-daemon` run on 2026-08-22 passed and produced the debug APK identified above. Installing that exact identifier build and performing an in-place upgrade from the accepted `1.1.0` baseline are `Not run`; the author explicitly directed version closure with those gaps visible rather than treating them as passed. No tag, GitHub Release, upload, publication, or distribution occurred.

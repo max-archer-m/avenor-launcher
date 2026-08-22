@@ -75,7 +75,7 @@
 | 迭代契约格式 | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | 项目治理 | 定义迭代命名、必需契约章节、验收边界与历史保护 |
 | 1.0.0 已完成交付 | [`docs/delivery/1.0.0/delivery.md`](delivery/1.0.0/delivery.md) | [`docs/delivery/1.0.0/delivery.zh-CN.md`](delivery/1.0.0/delivery.zh-CN.md) | 交付历史 | 记录已完成的作者日常使用基线、纳入迭代、证据和已知缺口 |
 | 1.1.0 已完成交付 | [`docs/delivery/1.1.0/delivery.md`](delivery/1.1.0/delivery.md) | [`docs/delivery/1.1.0/delivery.zh-CN.md`](delivery/1.1.0/delivery.zh-CN.md) | 交付历史 | 记录已完成的作者日常使用基线，包括全宽主收藏编辑、应用快捷操作、基础 Settings、可选双击锁屏、静态名称清理和版本收尾 |
-| 1.2.0 规划交付 | [`docs/delivery/1.2.0/delivery.md`](delivery/1.2.0/delivery.md) | [`docs/delivery/1.2.0/delivery.zh-CN.md`](delivery/1.2.0/delivery.zh-CN.md) | 交付记录 | 记录当前已选择的版本范围、纳入迭代状态、证据、依赖、验证和最终结果；后续可增加经作者确认的迭代 |
+| 1.2.0 已完成交付 | [`docs/delivery/1.2.0/delivery.md`](delivery/1.2.0/delivery.md) | [`docs/delivery/1.2.0/delivery.zh-CN.md`](delivery/1.2.0/delivery.zh-CN.md) | 交付历史 | 记录已关闭的迭代 12–14 边界、版本标识、可用产物证据、验证缺口和作者处置 |
 | 架构决定 | [`docs/decisions/`](decisions/) | - | 决策理由 | 记录重大、已实现且已接受的架构决定；只有 Active ADR 才建立其所述当前架构边界 |
 | 许可证 | [`LICENSE`](../LICENSE) | - | 法律文件 | 包含 Apache License 2.0 原文 |
 
