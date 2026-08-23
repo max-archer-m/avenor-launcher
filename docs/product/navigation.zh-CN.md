@@ -74,13 +74,13 @@ Home 与 Drawer 使用同一套可逆、跟手的直接操作过渡。以下术�
 - Settings 上的 Back 返回进入前的 Avenor 界面，当前即 Drawer。
 - 应用操作面板上的 Back 关闭面板，并返回保持不变的底层界面。
 - Home 编辑模式中，Back 退出到普通 Home。Drawer 收藏多选模式中，Back 先取消全部未确认选择并通过反向过渡返回 Home 编辑模式，不会同时退出编辑模式。
-- 进程重建后从 Home 开始，不恢复 Drawer、Settings、应用操作面板、编辑模式及其临时位置。同一进程内返回 Home 时，保留每个收藏列表有意义的滚动位置；进程重建后所有列表均回到起始位置。
+- 进程重建后从 Home 开始，不恢复 Drawer、Settings、应用操作面板、编辑模式及其临时位置。同一进程内通过 Back 或其他普通 Avenor 界面往返回到 Home 时，保留每个纵向收藏列表有意义的纵向位置和每条收藏栏有意义的横向位置。退出编辑模式并移除编辑控件后继续保留这些位置。进程重建后，每个纵向列表和收藏栏均回到内容起点。
 
 ## Android 系统 Home 操作与外部应用返回
 
-- 当 Avenor 被选为默认 Launcher 时，从任意 Avenor 界面（包括 Home 编辑模式、Drawer、Drawer 收藏多选模式和 Settings）执行 Android 系统 Home 操作都会显示普通 Avenor Home。活动中的收藏多选会被取消，编辑模式也会退出。这属于系统导航结果，不是 Avenor 的 Back 或 Drawer→Home 过渡；Avenor 不得将 Android 系统 Home 操作重新解释为 Back。本契约中未加限定的 `Home` 只表示 Avenor 产品界面，永远不表示该平台操作。
+- 当 Avenor 被选为默认 Launcher 时，从任意 Avenor 界面（包括 Home 编辑模式、Drawer、Drawer 收藏多选模式和 Settings）执行 Android 系统 Home 操作都会显示普通 Avenor Home。活动中的收藏多选会被取消，编辑模式也会退出。同一进程内，普通 Home 保留最近一次成功完成的滚动或编辑所形成的纵向列表与收藏栏有意义位置；取消尚未完成的手势不会产生新位置。这属于系统导航结果，不是 Avenor 的 Back 或 Drawer→Home 过渡；Avenor 不得将 Android 系统 Home 操作重新解释为 Back。本契约中未加限定的 `Home` 只表示 Avenor 产品界面，永远不表示该平台操作。
 - 从 Home 或 Drawer 启动普通应用会形成一次外部应用暂离。当 Avenor 在同一进程中返回时，显示 Home 而不是恢复 Drawer；在展示已有 Home 内容前，不显示 Loading，也不要求执行一次阻塞式新的初始读取。
-- 同一进程返回时，按照既有恢复规则保留 Home 收藏状态和每个收藏列表有意义的滚动位置。不恢复 Drawer、Settings、应用操作面板、编辑模式或进行中的 Drawer 位置。
+- 同一进程返回时，按照既有恢复规则保留 Home 收藏状态、每个纵向收藏列表有意义的纵向位置和每条收藏栏有意义的横向位置。不恢复 Drawer、Settings、应用操作面板、编辑模式或进行中的 Drawer 位置。
 - 外部应用运行期间观察到的变化应在不将返回的 Home 替换为 Loading 的前提下协调。更新后的应用清单和收藏状态在下次展示 Drawer 或相关 Home 内容时可用，并遵循各界面的实时更新规则。
 - 如果外部应用运行期间 Launcher 进程被重建，则适用进程重建规则，不适用同一进程返回规则。
 
