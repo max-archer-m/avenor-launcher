@@ -83,11 +83,11 @@
 |.....................FAVORITE HEIGHT IS CONTENT-DRIVEN........................|
 |..............................................................................|
 |......................16DP MODULE SPACING.....................................|
-|..............SECONDARY EDIT SURFACE / MAX 5 OUTLINED RIBBONS.................|
-|  R1 [X RIBBON]|(X)[APP][H] ...|[H RIBBON IF 2+]..............................|
-|  FIXED 48DP RAILS; ONE RIBBON HIDES H; PROVISIONAL ADD ONLY..................|
-|  REORDER PREVIEW = FROZEN COMPLETE VISIBLE RIBBON WINDOW.....................|
-|  REMOVE RIBBON: DEFAULT DIALOG -> RIBBON REMOVED / UNDO......................|
+|..............SECONDARY EDIT SURFACE / MAX 5 FAVORITE BARS....................|
+|..R1 [X BAR]|(X)[APP][H] ...|[H BAR IF 2+]....................................|
+|..FIXED 48DP RAILS; ONE BAR HIDES H; PROVISIONAL ADD ONLY.....................|
+|..REORDER PREVIEW = FROZEN COMPLETE VISIBLE FAVORITE BAR......................|
+|..REMOVE FAVORITE BAR: DEFAULT DIALOG -> REMOVED / UNDO.......................|
 |  FIXED MEDIUM / 128DP ITEMS / NO TITLE OR SIZE CONTROL.......................|
 |..............................................................................|
 |.......................UNALLOCATED TRANSPARENT HOME SPACE.....................|

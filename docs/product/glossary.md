@@ -9,13 +9,13 @@
 | Drawer | 应用列表 | The full indexed list of platform-exposed launchable entries |
 | Settings | 设置 | Avenor configuration and product-information surface |
 | Launchable entry | 可启动应用条目 | One platform-exposed target that Avenor can launch; a primary app and clone are separate entries |
-| Favorite | 收藏应用 | A launchable entry saved to exactly one Home favorite destination; one stable entry identity cannot be duplicated across lists or ribbons |
+| Favorite | 收藏应用 | A launchable entry saved to exactly one Home favorite destination; one stable entry identity cannot be duplicated across lists or favorite bars |
 | Favorite-list area | 收藏列表区 | The Home module containing a physical left-to-right horizontal sequence of at most two equal-status vertical favorite lists; one list uses full width and two divide available width equally |
 | Favorite size | 收藏尺寸 | A persisted large, medium, or small list-level presentation applied uniformly to every entry in one vertical favorite list; every list starts at medium and can be changed independently in edit mode |
-| Secondary favorites area | 次级收藏区 | The conditional Home module below the favorite-list area, containing up to five untitled horizontal ribbons of fixed-medium user-defined favorite entries |
-| Favorite container | 收藏容器 | One vertical favorite list or one secondary ribbon; same-container application drags exchange immediately, while cross-container drags use release-time exchange or insertion |
+| Secondary favorites area | 次级收藏区 | The conditional Home module below the favorite-list area, containing up to five untitled horizontal favorite bars of fixed-medium user-defined favorite entries |
+| Favorite container | 收藏容器 | One vertical favorite list or one favorite bar; same-container application drags exchange immediately, while cross-container drags use release-time exchange or insertion |
 | Vertical-list controls | 纵向列表控件 | The fixed edit-mode top bar for a persisted vertical list: physical-left remove, center current-size selection, and physical-right reorder when two lists exist |
-| Ribbon controls | 织带控件 | Fixed edit-mode rails outside a persisted ribbon's scrolling application viewport: confirm complete-ribbon removal at logical start and, when at least two persisted ribbons exist, reorder at logical end |
+| Favorite bar controls | 收藏栏控件 | Fixed edit-mode rails outside a persisted favorite bar's scrolling application viewport: confirm complete-favorite-bar removal at logical start and, when at least two persisted favorite bars exist, reorder at logical end |
 | Application shortcut | 应用快捷操作 | An action exposed by the application through the platform |
 | Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, edit, or uninstall |
 | Application action sheet | 应用操作面板 | The modal Bottom Sheet containing application identity, application shortcuts, and Launcher actions |
