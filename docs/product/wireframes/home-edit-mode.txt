@@ -21,8 +21,10 @@
 |  FAVORITE COMPOSITION EDIT SURFACE::::::::|  SAME EDIT SURFACE:::::::::::::::|
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
 |  LEFT LIST / EQUAL WIDTH / SCROLL.........|  RIGHT LIST OR PROVISIONAL.......|
-| [X LIST] [SIZE HIDDEN] [H LIST]...........| PERSISTED: SAME 3-SLOT BAR.......|
+| [X LIST] [M SIZE] [H LIST]................| PERSISTED: SAME 3-SLOT BAR.......|
 |  48DP BAR / 40DP CIRCLES / 24DP ICONS / NO RIPPLE............................|
+|  SIZE MENU @ BUTTON XY / 4DP BELOW / FLIP OR CLAMP 8DP.......................|
+|  (O)[48 APP] LARGE / (*)[40 APP] MEDIUM / (O)[32 APP] SMALL..................|
 |  PROVISIONAL LIST HAS NO BAR; ONE LIST HIDES REORDER.........................|
 |  SHARED VIEWPORT / INDEPENDENT SCROLL........................................|
 |  LIST DRAG: STATIC VISIBLE-VIEWPORT PREVIEW / BODY SWAP SAVES................|
@@ -82,11 +84,11 @@
 |..............................................................................|
 |......................16DP MODULE SPACING.....................................|
 |..............SECONDARY EDIT SURFACE / MAX 5 OUTLINED RIBBONS.................|
-|  R1 [X RIBBON]|(X)[APP][H] 8DP (X)[APP][H] [+]|[H RIBBON]....................|
-|  FIXED 48DP RAILS |<-- 128DP APPS SCROLL -->| FIXED 48DP RAILS...............|
-|  R2 [X RIBBON]|(X)[APP][H] ... EDGE FADE ...|[H RIBBON]......................|
-|  PROVISIONAL RIBBON WHEN COUNT < 5: [+ ADD] / EMPTY UNTIL CONFIRM............|
-|  [SNACKBAR: RIBBON REMOVED                              UNDO]................|
+|  R1 [X RIBBON]|(X)[APP][H] ...|[H RIBBON IF 2+]..............................|
+|  FIXED 48DP RAILS; ONE RIBBON HIDES H; PROVISIONAL ADD ONLY..................|
+|  REORDER PREVIEW = FROZEN COMPLETE VISIBLE RIBBON WINDOW.....................|
+|  REMOVE RIBBON: DEFAULT DIALOG -> RIBBON REMOVED / UNDO......................|
+|  FIXED MEDIUM / 128DP ITEMS / NO TITLE OR SIZE CONTROL.......................|
 |..............................................................................|
 |.......................UNALLOCATED TRANSPARENT HOME SPACE.....................|
 |..............................................................................|
