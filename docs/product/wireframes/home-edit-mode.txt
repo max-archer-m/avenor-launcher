@@ -20,13 +20,13 @@
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
 |  FAVORITE COMPOSITION EDIT SURFACE::::::::|  SAME EDIT SURFACE:::::::::::::::|
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
-|  LIST 1 / EQUAL WIDTH / SCROLL::::::::::::|  LIST 2 OR PROVISIONAL:::::::::::|
-| ONE LIST FULL WIDTH; EDIT PREVIEWS SECOND LIST AT EQUAL WIDTH................|
+|  LEFT LIST / EQUAL WIDTH / SCROLL.........|  RIGHT LIST OR PROVISIONAL.......|
+| [X LIST] [SIZE HIDDEN] [H LIST]...........| PERSISTED: SAME 3-SLOT BAR.......|
+|  48DP BAR / 40DP CIRCLES / 24DP ICONS / NO RIPPLE............................|
+|  PROVISIONAL LIST HAS NO BAR; ONE LIST HIDES REORDER.........................|
 |  SHARED VIEWPORT / INDEPENDENT SCROLL........................................|
-|:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
-|:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
-|:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
-|:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
+|  LIST DRAG: STATIC VISIBLE-VIEWPORT PREVIEW / BODY SWAP SAVES................|
+|  REMOVE LIST: DEFAULT DIALOG -> LIST REMOVED / UNDO..........................|
 |  (X)[L1-1 40DP] APP [H24/W48 HANDLE]::::::|::::::::::::::::::::::::::::::::::|
 |:::::::::::::::::::::::::::::::::::::::::::|  (X)[L2-1] APP [H24/W48 HANDLE]::|
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|

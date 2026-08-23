@@ -10,10 +10,11 @@
 | Settings | 设置 | Avenor configuration and product-information surface |
 | Launchable entry | 可启动应用条目 | One platform-exposed target that Avenor can launch; a primary app and clone are separate entries |
 | Favorite | 收藏应用 | A launchable entry saved to exactly one Home favorite destination; one stable entry identity cannot be duplicated across lists or ribbons |
-| Favorite-list area | 收藏列表区 | The Home module containing at most two equal-status vertical favorite lists; one list uses full width and two divide available width equally |
+| Favorite-list area | 收藏列表区 | The Home module containing a physical left-to-right horizontal sequence of at most two equal-status vertical favorite lists; one list uses full width and two divide available width equally |
 | Favorite size | 收藏尺寸 | A large, medium, or small list-level presentation applied uniformly to every entry in one vertical favorite list; the current product creates and migrates every list at medium and exposes no size-selection interaction |
 | Secondary favorites area | 次级收藏区 | The conditional Home module below the favorite-list area, containing up to five horizontal ribbons of user-defined favorite entries |
 | Favorite container | 收藏容器 | One vertical favorite list or one secondary ribbon; same-container application drags exchange immediately, while cross-container drags use release-time exchange or insertion |
+| Vertical-list controls | 纵向列表控件 | The fixed edit-mode top bar for a persisted vertical list: physical-left remove, hidden reserved center size slot, and physical-right reorder when two lists exist |
 | Ribbon controls | 织带控件 | Fixed edit-mode controls outside a ribbon's scrolling application viewport: remove the complete ribbon at logical start and reorder the ribbon at logical end |
 | Application shortcut | 应用快捷操作 | An action exposed by the application through the platform |
 | Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, edit, or uninstall |
