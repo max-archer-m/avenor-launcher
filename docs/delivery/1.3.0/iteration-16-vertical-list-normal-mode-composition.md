@@ -68,3 +68,7 @@ Recommended scenarios cover zero/one/two lists, all size combinations, overflow 
 ## Related decisions and technical assessments
 
 No new decision is selected. Escalate only if evidence requires a consequential layout, navigation, or state-ownership change.
+
+## Author-directed amendment
+
+On 2026-08-24, the author accepted retaining the already implemented edit-session drag compatibility in this iteration so the current work branch can be completed without reverting device-accepted behavior. The previous boundary excluded edit mode and new drag behavior; the amended boundary keeps the normal-mode composition outcome as the primary result and records edit persistence as compatibility work only. The amendment requires complete aggregate persistence, including existing container IDs, list sizes, and favorite bars, and does not add list controls, new-list creation, favorite-bar management, or new drag semantics.

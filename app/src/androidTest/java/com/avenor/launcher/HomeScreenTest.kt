@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Process
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performScrollTo
@@ -65,6 +66,103 @@ class HomeScreenTest {
 
         composeRule.onNodeWithTag("home_favorite_row").assertIsDisplayed()
         composeRule.onNodeWithText("Application unavailable").assertIsDisplayed()
+    }
+
+    @Test
+    fun oneVerticalListUsesOneFullWidthComposition() {
+        val identity = LaunchableIdentity(
+            profileSerialNumber = 42,
+            componentName = ComponentName("com.example.single", "MainActivity"),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        FavoriteAggregate(
+                            verticalLists = listOf(
+                                FavoriteContainer(
+                                    id = "vertical-list-custom-1",
+                                    type = FavoriteContainerType.VerticalList,
+                                    identities = listOf(identity),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home_favorite_list_0").assertIsDisplayed()
+        composeRule.onNodeWithTag("home_favorite_list_1").assertDoesNotExist()
+    }
+
+    @Test
+    fun twoVerticalListsUseTwoIndependentCompositionSlots() {
+        val first = LaunchableIdentity(
+            profileSerialNumber = 42,
+            componentName = ComponentName("com.example.first", "MainActivity"),
+        )
+        val second = LaunchableIdentity(
+            profileSerialNumber = 43,
+            componentName = ComponentName("com.example.second", "MainActivity"),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        FavoriteAggregate(
+                            verticalLists = listOf(
+                                FavoriteContainer(
+                                    id = "vertical-list-custom-1",
+                                    type = FavoriteContainerType.VerticalList,
+                                    identities = listOf(first),
+                                    listSize = FavoriteListSize.Large,
+                                ),
+                                FavoriteContainer(
+                                    id = "vertical-list-custom-2",
+                                    type = FavoriteContainerType.VerticalList,
+                                    identities = listOf(second),
+                                    listSize = FavoriteListSize.Small,
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home_favorite_list_0").assertIsDisplayed()
+        composeRule.onNodeWithTag("home_favorite_list_1").assertIsDisplayed()
+    }
+
+    @Test
+    fun editModeKeepsThePersistedListComposition() {
+        val identity = LaunchableIdentity(
+            profileSerialNumber = 42,
+            componentName = ComponentName("com.example.edit", "MainActivity"),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        FavoriteAggregate(
+                            verticalLists = listOf(
+                                FavoriteContainer(
+                                    id = "vertical-list-edit-custom",
+                                    type = FavoriteContainerType.VerticalList,
+                                    identities = listOf(identity),
+                                    listSize = FavoriteListSize.Large,
+                                ),
+                            ),
+                        ),
+                    ),
+                    editMode = true,
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home_favorites").assertIsDisplayed()
+        composeRule.onNodeWithTag("home_companion_favorites").assertDoesNotExist()
     }
 
     @Test
@@ -1165,8 +1263,10 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
         val readable = mutableState.value as FavoriteReadState.Readable
         if (identity !in readable.identities) {
             mutableState.value = FavoriteReadState.Readable(
-                readable.primaryIdentities + identity,
-                readable.companionIdentities,
+                readable.aggregate.replaceVerticalList(
+                    id = PRIMARY_LIST_ID,
+                    identities = readable.primaryIdentities + identity,
+                ),
             )
         }
         return true
@@ -1176,8 +1276,7 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
     override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean {
         val readable = mutableState.value as FavoriteReadState.Readable
         mutableState.value = FavoriteReadState.Readable(
-            readable.primaryIdentities.filterNot(identities::contains),
-            readable.companionIdentities.filterNot(identities::contains),
+            readable.aggregate.removeIdentities(identities),
         )
         return true
     }
@@ -1186,8 +1285,10 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         if (!isValidReplacement(readable.primaryIdentities, identities)) return false
         mutableState.value = FavoriteReadState.Readable(
-            identities,
-            readable.companionIdentities,
+            readable.aggregate.replaceVerticalList(
+                id = PRIMARY_LIST_ID,
+                identities = identities,
+            ),
         )
         return true
     }
@@ -1198,11 +1299,21 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
     ): Boolean {
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         val replacement = primaryIdentities + companionIdentities
-        if (!isValidReplacement(readable.identities, replacement)) return false
+        val currentVerticalIdentities =
+            readable.aggregate.verticalLists.flatMap(FavoriteContainer::identities)
+        if (!isValidReplacement(currentVerticalIdentities, replacement)) return false
         mutableState.value = FavoriteReadState.Readable(
-            primaryIdentities,
-            companionIdentities,
+            readable.aggregate.replaceVerticalComposition(
+                primaryIdentities,
+                companionIdentities,
+            ),
         )
+        return true
+    }
+
+    override suspend fun replaceAggregate(aggregate: FavoriteAggregate): Boolean {
+        if (!isValidAggregate(aggregate)) return false
+        mutableState.value = FavoriteReadState.Readable(aggregate)
         return true
     }
 

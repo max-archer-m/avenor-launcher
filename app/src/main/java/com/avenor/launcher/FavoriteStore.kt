@@ -16,14 +16,63 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+internal enum class FavoriteContainerType {
+    VerticalList,
+    FavoriteBar,
+}
+
+internal enum class FavoriteListSize {
+    Large,
+    Medium,
+    Small,
+}
+
+internal data class FavoriteContainer(
+    val id: String,
+    val type: FavoriteContainerType,
+    val identities: List<LaunchableIdentity>,
+    val listSize: FavoriteListSize = FavoriteListSize.Medium,
+)
+
+internal data class FavoriteAggregate(
+    val verticalLists: List<FavoriteContainer> = emptyList(),
+    val favoriteBars: List<FavoriteContainer> = emptyList(),
+) {
+    val identities: List<LaunchableIdentity>
+        get() = (verticalLists + favoriteBars).flatMap(FavoriteContainer::identities)
+}
+
 internal sealed interface FavoriteReadState {
     data object Loading : FavoriteReadState
     data class Readable(
-        val primaryIdentities: List<LaunchableIdentity>,
-        val companionIdentities: List<LaunchableIdentity> = emptyList(),
+        val aggregate: FavoriteAggregate,
     ) : FavoriteReadState {
+        constructor(
+            primaryIdentities: List<LaunchableIdentity>,
+            companionIdentities: List<LaunchableIdentity> = emptyList(),
+        ) : this(
+            aggregate = FavoriteAggregate(
+                verticalLists = legacyVerticalLists(
+                    primaryIdentities,
+                    companionIdentities,
+                ),
+            ),
+        )
+
+        val primaryIdentities: List<LaunchableIdentity>
+            get() = aggregate.verticalLists
+                .firstOrNull { it.id == PRIMARY_LIST_ID }
+                ?.identities
+                .orEmpty()
+
+        val companionIdentities: List<LaunchableIdentity>
+            get() = aggregate.verticalLists
+                .firstOrNull { it.id == COMPANION_LIST_ID }
+                ?.identities
+                .orEmpty()
+
         val identities: List<LaunchableIdentity>
-            get() = primaryIdentities + companionIdentities
+            get() = aggregate.identities
     }
     data object ReadFailure : FavoriteReadState
 }
@@ -39,6 +88,7 @@ internal interface FavoriteStore {
         primaryIdentities: List<LaunchableIdentity>,
         companionIdentities: List<LaunchableIdentity>,
     ): Boolean
+    suspend fun replaceAggregate(aggregate: FavoriteAggregate): Boolean
 }
 
 internal class AtomicFileFavoriteStore private constructor(
@@ -59,16 +109,15 @@ internal class AtomicFileFavoriteStore private constructor(
             } else {
                 try {
                     val document = readDocument()
-                    val state = FavoriteReadState.Readable(
-                        document.primaryIdentities,
-                        document.companionIdentities,
-                    )
-                    if (document.schemaVersion == LEGACY_SCHEMA_VERSION) {
+                    val state = FavoriteReadState.Readable(document.aggregate)
+                    if (document.schemaVersion == LEGACY_SCHEMA_VERSION ||
+                        document.schemaVersion == LEGACY_COMPOSITION_SCHEMA_VERSION
+                    ) {
                         // Favorites that were read successfully stay readable even when the
                         // upgrade write fails; the legacy document remains on disk and the next
                         // load retries the migration.
                         try {
-                            writeDocument(state.primaryIdentities, state.companionIdentities)
+                            writeDocument(state.aggregate)
                         } catch (cancellation: CancellationException) {
                             throw cancellation
                         } catch (_: Exception) {
@@ -88,10 +137,26 @@ internal class AtomicFileFavoriteStore private constructor(
     override suspend fun add(identity: LaunchableIdentity): Boolean = mutationMutex.withLock {
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         if (identity in readable.identities) return true
-        val updated = readable.primaryIdentities + identity
+        val primary = readable.aggregate.verticalLists
+            .firstOrNull { it.id == PRIMARY_LIST_ID }
+        val verticalLists = if (primary == null) {
+            listOf(
+                FavoriteContainer(
+                    id = PRIMARY_LIST_ID,
+                    type = FavoriteContainerType.VerticalList,
+                    identities = listOf(identity),
+                ),
+            ) + readable.aggregate.verticalLists
+        } else {
+            readable.aggregate.verticalLists.replaceContainer(
+                id = PRIMARY_LIST_ID,
+                value = primary.copy(identities = primary.identities + identity),
+            )
+        }
+        val updated = readable.aggregate.copy(verticalLists = verticalLists)
         val writeSucceeded = withContext(Dispatchers.IO) {
             try {
-                writeDocument(updated, readable.companionIdentities)
+                writeDocument(updated)
                 true
             } catch (cancellation: CancellationException) {
                 throw cancellation
@@ -100,10 +165,7 @@ internal class AtomicFileFavoriteStore private constructor(
             }
         }
         if (writeSucceeded) {
-            mutableState.value = FavoriteReadState.Readable(
-                updated,
-                readable.companionIdentities,
-            )
+            mutableState.value = FavoriteReadState.Readable(updated)
         }
         writeSucceeded
     }
@@ -112,11 +174,10 @@ internal class AtomicFileFavoriteStore private constructor(
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         if (identity !in readable.identities) return true
 
-        val updatedPrimary = readable.primaryIdentities - identity
-        val updatedCompanion = readable.companionIdentities - identity
+        val updated = readable.aggregate.removeIdentity(identity)
         val writeSucceeded = withContext(Dispatchers.IO) {
             try {
-                writeDocument(updatedPrimary, updatedCompanion)
+                writeDocument(updated)
                 true
             } catch (cancellation: CancellationException) {
                 throw cancellation
@@ -125,7 +186,7 @@ internal class AtomicFileFavoriteStore private constructor(
             }
         }
         if (writeSucceeded) {
-            mutableState.value = FavoriteReadState.Readable(updatedPrimary, updatedCompanion)
+            mutableState.value = FavoriteReadState.Readable(updated)
         }
         writeSucceeded
     }
@@ -133,15 +194,12 @@ internal class AtomicFileFavoriteStore private constructor(
     override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean =
         mutationMutex.withLock {
             val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
-            val updatedPrimary = readable.primaryIdentities.filterNot(identities::contains)
-            val updatedCompanion = readable.companionIdentities.filterNot(identities::contains)
-            if (updatedPrimary.size == readable.primaryIdentities.size &&
-                updatedCompanion.size == readable.companionIdentities.size
-            ) return true
+            val updated = readable.aggregate.removeIdentities(identities)
+            if (updated == readable.aggregate) return true
 
             val writeSucceeded = withContext(Dispatchers.IO) {
                 try {
-                    writeDocument(updatedPrimary, updatedCompanion)
+                    writeDocument(updated)
                     true
                 } catch (cancellation: CancellationException) {
                     throw cancellation
@@ -150,10 +208,7 @@ internal class AtomicFileFavoriteStore private constructor(
                 }
             }
             if (writeSucceeded) {
-                mutableState.value = FavoriteReadState.Readable(
-                    updatedPrimary,
-                    updatedCompanion,
-                )
+                mutableState.value = FavoriteReadState.Readable(updated)
             }
             writeSucceeded
         }
@@ -164,9 +219,13 @@ internal class AtomicFileFavoriteStore private constructor(
             if (!isValidReplacement(readable.primaryIdentities, identities)) return false
             if (identities == readable.primaryIdentities) return true
 
+            val updated = readable.aggregate.replaceVerticalList(
+                id = PRIMARY_LIST_ID,
+                identities = identities,
+            )
             val writeSucceeded = withContext(Dispatchers.IO) {
                 try {
-                    writeDocument(identities, readable.companionIdentities)
+                    writeDocument(updated)
                     true
                 } catch (cancellation: CancellationException) {
                     throw cancellation
@@ -175,10 +234,7 @@ internal class AtomicFileFavoriteStore private constructor(
                 }
             }
             if (writeSucceeded) {
-                mutableState.value = FavoriteReadState.Readable(
-                    identities,
-                    readable.companionIdentities,
-                )
+                mutableState.value = FavoriteReadState.Readable(updated)
             }
             writeSucceeded
         }
@@ -189,18 +245,21 @@ internal class AtomicFileFavoriteStore private constructor(
     ): Boolean = mutationMutex.withLock {
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         val replacement = primaryIdentities + companionIdentities
-        if (!isValidReplacement(readable.identities, replacement)) return false
-        if (primaryIdentities == readable.primaryIdentities &&
-            companionIdentities == readable.companionIdentities
-        ) return true
+        val currentVerticalIdentities =
+            readable.aggregate.verticalLists.flatMap(FavoriteContainer::identities)
+        if (!isValidReplacement(currentVerticalIdentities, replacement)) {
+            return false
+        }
+        val updated = readable.aggregate.replaceVerticalComposition(
+            primaryIdentities,
+            companionIdentities,
+        )
+        if (updated == readable.aggregate) return true
 
-        // Publish the new composition before the write so readers never fall back to the previous
-        // composition while the file is being written; restore it when the write does not succeed.
-        mutableState.value = FavoriteReadState.Readable(primaryIdentities, companionIdentities)
         val writeSucceeded = try {
             withContext(Dispatchers.IO) {
                 try {
-                    writeDocument(primaryIdentities, companionIdentities)
+                    writeDocument(updated)
                     true
                 } catch (cancellation: CancellationException) {
                     throw cancellation
@@ -209,19 +268,38 @@ internal class AtomicFileFavoriteStore private constructor(
                 }
             }
         } catch (cancellation: CancellationException) {
-            mutableState.value = readable
             throw cancellation
         }
-        if (!writeSucceeded) {
-            mutableState.value = readable
+        if (writeSucceeded) {
+            mutableState.value = FavoriteReadState.Readable(updated)
         }
         writeSucceeded
     }
 
+    override suspend fun replaceAggregate(aggregate: FavoriteAggregate): Boolean =
+        mutationMutex.withLock {
+            val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
+            if (!isValidAggregate(aggregate)) return false
+            if (aggregate == readable.aggregate) return true
+            val writeSucceeded = withContext(Dispatchers.IO) {
+                try {
+                    writeDocument(aggregate)
+                    true
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: Exception) {
+                    false
+                }
+            }
+            if (writeSucceeded) {
+                mutableState.value = FavoriteReadState.Readable(aggregate)
+            }
+            writeSucceeded
+        }
+
     private data class FavoriteDocument(
         val schemaVersion: Int,
-        val primaryIdentities: List<LaunchableIdentity>,
-        val companionIdentities: List<LaunchableIdentity>,
+        val aggregate: FavoriteAggregate,
     )
 
     private fun readDocument(): FavoriteDocument =
@@ -229,10 +307,10 @@ internal class AtomicFileFavoriteStore private constructor(
             require(input.readInt() == MAGIC) { "Unrecognized favorites document" }
             val schemaVersion = input.readInt()
             require(
-                schemaVersion == LEGACY_SCHEMA_VERSION || schemaVersion == SCHEMA_VERSION,
+                schemaVersion == LEGACY_SCHEMA_VERSION ||
+                    schemaVersion == LEGACY_COMPOSITION_SCHEMA_VERSION ||
+                    schemaVersion == SCHEMA_VERSION,
             ) { "Unsupported favorites schema" }
-            val count = input.readInt()
-            require(count >= 0) { "Invalid favorite count" }
             fun readIdentities(count: Int): List<LaunchableIdentity> = buildList {
                 repeat(count) {
                     val serial = input.readLong()
@@ -242,40 +320,77 @@ internal class AtomicFileFavoriteStore private constructor(
                     add(LaunchableIdentity(serial, component))
                 }
             }
-            val primaryIdentities = readIdentities(count)
-            val companionIdentities = if (schemaVersion == SCHEMA_VERSION) {
-                val companionCount = input.readInt()
-                require(companionCount >= 0) { "Invalid companion favorite count" }
-                readIdentities(companionCount)
+            val aggregate = if (schemaVersion == LEGACY_SCHEMA_VERSION ||
+                schemaVersion == LEGACY_COMPOSITION_SCHEMA_VERSION
+            ) {
+                val primaryCount = input.readInt()
+                require(primaryCount >= 0) { "Invalid primary favorite count" }
+                val primary = readIdentities(primaryCount)
+                val companion = if (schemaVersion == LEGACY_COMPOSITION_SCHEMA_VERSION) {
+                    val companionCount = input.readInt()
+                    require(companionCount >= 0) { "Invalid companion favorite count" }
+                    readIdentities(companionCount)
+                } else {
+                    emptyList()
+                }
+                FavoriteAggregate(
+                    verticalLists = legacyVerticalLists(primary, companion),
+                )
             } else {
-                emptyList()
-            }
-            val identities = primaryIdentities + companionIdentities
-            require(identities.distinct().size == identities.size) {
-                "Duplicate favorite identity"
+                require(schemaVersion == SCHEMA_VERSION) { "Unsupported favorites schema" }
+                val containerCount = input.readInt()
+                require(containerCount >= 0) { "Invalid favorite container count" }
+                buildList {
+                    repeat(containerCount) {
+                        val id = input.readUTF()
+                        val type = FavoriteContainerType.values().getOrNull(input.readInt())
+                            ?: throw IllegalArgumentException("Invalid favorite container type")
+                        val listSize = FavoriteListSize.values().getOrNull(input.readInt())
+                            ?: throw IllegalArgumentException("Invalid favorite list size")
+                        val identityCount = input.readInt()
+                        require(identityCount > 0) { "Empty favorite container" }
+                        add(
+                            FavoriteContainer(
+                                id = id,
+                                type = type,
+                                identities = readIdentities(identityCount),
+                                listSize = listSize,
+                            ),
+                        )
+                    }
+                }.let { containers ->
+                    FavoriteAggregate(
+                        verticalLists = containers.filter {
+                            it.type == FavoriteContainerType.VerticalList
+                        },
+                        favoriteBars = containers.filter {
+                            it.type == FavoriteContainerType.FavoriteBar
+                        },
+                    )
+                }
             }
             if (input.read() != -1) throw IllegalArgumentException("Trailing favorite data")
-            FavoriteDocument(schemaVersion, primaryIdentities, companionIdentities)
+            require(isValidAggregate(aggregate)) { "Invalid favorite aggregate" }
+            FavoriteDocument(schemaVersion, aggregate)
         }
 
-    private fun writeDocument(
-        primaryIdentities: List<LaunchableIdentity>,
-        companionIdentities: List<LaunchableIdentity>,
-    ) {
+    private fun writeDocument(aggregate: FavoriteAggregate) {
         var output: FileOutputStream? = atomicFile.startWrite()
         try {
             val data = DataOutputStream(BufferedOutputStream(checkNotNull(output)))
             data.writeInt(MAGIC)
             data.writeInt(SCHEMA_VERSION)
-            data.writeInt(primaryIdentities.size)
-            primaryIdentities.forEach { identity ->
-                data.writeLong(identity.profileSerialNumber)
-                data.writeUTF(identity.componentName.flattenToString())
-            }
-            data.writeInt(companionIdentities.size)
-            companionIdentities.forEach { identity ->
-                data.writeLong(identity.profileSerialNumber)
-                data.writeUTF(identity.componentName.flattenToString())
+            val containers = aggregate.verticalLists + aggregate.favoriteBars
+            data.writeInt(containers.size)
+            containers.forEach { container ->
+                data.writeUTF(container.id)
+                data.writeInt(container.type.ordinal)
+                data.writeInt(container.listSize.ordinal)
+                data.writeInt(container.identities.size)
+                container.identities.forEach { identity ->
+                    data.writeLong(identity.profileSerialNumber)
+                    data.writeUTF(identity.componentName.flattenToString())
+                }
             }
             data.flush()
             atomicFile.finishWrite(output)
@@ -290,8 +405,127 @@ internal class AtomicFileFavoriteStore private constructor(
         const val FILE_NAME = "favorites.bin"
         const val MAGIC = 0x4156454E
         const val LEGACY_SCHEMA_VERSION = 1
-        const val SCHEMA_VERSION = 2
+        const val LEGACY_COMPOSITION_SCHEMA_VERSION = 2
+        const val SCHEMA_VERSION = 3
     }
+}
+
+internal const val PRIMARY_LIST_ID = "vertical-list-1"
+internal const val COMPANION_LIST_ID = "vertical-list-2"
+
+private fun legacyVerticalLists(
+    primaryIdentities: List<LaunchableIdentity>,
+    companionIdentities: List<LaunchableIdentity>,
+): List<FavoriteContainer> = buildList {
+    if (primaryIdentities.isNotEmpty()) {
+        add(
+            FavoriteContainer(
+                id = PRIMARY_LIST_ID,
+                type = FavoriteContainerType.VerticalList,
+                identities = primaryIdentities,
+            ),
+        )
+    }
+    if (companionIdentities.isNotEmpty()) {
+        add(
+            FavoriteContainer(
+                id = COMPANION_LIST_ID,
+                type = FavoriteContainerType.VerticalList,
+                identities = companionIdentities,
+            ),
+        )
+    }
+}
+
+private fun List<FavoriteContainer>.replaceContainer(
+    id: String,
+    value: FavoriteContainer,
+): List<FavoriteContainer> = map { container ->
+    if (container.id == id) value else container
+}
+
+internal fun FavoriteAggregate.removeIdentity(identity: LaunchableIdentity): FavoriteAggregate =
+    copy(
+        verticalLists = verticalLists.mapNotNull { container ->
+            container.copy(identities = container.identities - identity)
+                .takeIf { it.identities.isNotEmpty() }
+        },
+        favoriteBars = favoriteBars.mapNotNull { container ->
+            container.copy(identities = container.identities - identity)
+                .takeIf { it.identities.isNotEmpty() }
+        },
+    )
+
+internal fun FavoriteAggregate.removeIdentities(
+    identities: Set<LaunchableIdentity>,
+): FavoriteAggregate = copy(
+    verticalLists = verticalLists.mapNotNull { container ->
+        container.copy(identities = container.identities.filterNot(identities::contains))
+            .takeIf { it.identities.isNotEmpty() }
+    },
+    favoriteBars = favoriteBars.mapNotNull { container ->
+        container.copy(identities = container.identities.filterNot(identities::contains))
+            .takeIf { it.identities.isNotEmpty() }
+    },
+)
+
+internal fun FavoriteAggregate.replaceVerticalList(
+    id: String,
+    identities: List<LaunchableIdentity>,
+): FavoriteAggregate {
+    if (identities.isEmpty()) {
+        return copy(
+            verticalLists = verticalLists.filterNot { it.id == id },
+        )
+    }
+    val existing = verticalLists.firstOrNull { it.id == id }
+    val replacement = existing?.copy(identities = identities) ?: FavoriteContainer(
+        id = id,
+        type = FavoriteContainerType.VerticalList,
+        identities = identities,
+    )
+    return if (existing == null) {
+        val updated = if (id == PRIMARY_LIST_ID) {
+            listOf(replacement) + verticalLists
+        } else {
+            verticalLists + replacement
+        }
+        copy(verticalLists = updated)
+    } else {
+        copy(verticalLists = verticalLists.replaceContainer(id, replacement))
+    }
+}
+
+internal fun FavoriteAggregate.replaceVerticalComposition(
+    primaryIdentities: List<LaunchableIdentity>,
+    companionIdentities: List<LaunchableIdentity>,
+): FavoriteAggregate = copy(
+    verticalLists = verticalLists.mapIndexedNotNull { index, container ->
+        val identities = when (index) {
+            0 -> primaryIdentities
+            1 -> companionIdentities
+            else -> container.identities
+        }
+        container.copy(identities = identities).takeIf { it.identities.isNotEmpty() }
+    },
+)
+
+internal fun isValidAggregate(aggregate: FavoriteAggregate): Boolean {
+    val containers = aggregate.verticalLists + aggregate.favoriteBars
+    if (aggregate.verticalLists.size > 2 || aggregate.favoriteBars.size > 5) return false
+    if (containers.any { it.identities.isEmpty() || it.id.isBlank() }) return false
+    if (containers.map(FavoriteContainer::id).distinct().size != containers.size) return false
+    val identities = containers.flatMap(FavoriteContainer::identities)
+    return identities.distinct().size == identities.size &&
+        aggregate.verticalLists.all { it.type == FavoriteContainerType.VerticalList } &&
+        aggregate.favoriteBars.all { it.type == FavoriteContainerType.FavoriteBar } &&
+        containers.all { container ->
+            when (container.type) {
+                FavoriteContainerType.VerticalList ->
+                    container.listSize in FavoriteListSize.values()
+                FavoriteContainerType.FavoriteBar -> container.listSize == FavoriteListSize.Medium
+            }
+        }
 }
 
 internal fun isValidReplacement(
