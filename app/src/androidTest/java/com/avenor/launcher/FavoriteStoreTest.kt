@@ -143,6 +143,121 @@ class FavoriteStoreTest {
     }
 
     @Test
+    fun legacyCompositionMigratesPrimaryAndCompanionToMediumLists(): Unit = runBlocking {
+        val file = temporaryFavoriteFile()
+        val first = identity(1, "com.example.first", "Main")
+        val second = identity(2, "com.example.second", "Main")
+        DataOutputStream(file.outputStream()).use { output ->
+            output.writeInt(0x4156454E)
+            output.writeInt(2)
+            output.writeInt(1)
+            writeIdentity(output, first)
+            output.writeInt(1)
+            writeIdentity(output, second)
+        }
+
+        val store = AtomicFileFavoriteStore(file)
+        store.load()
+
+        val readable = store.state.value as FavoriteReadState.Readable
+        assertEquals(
+            listOf(
+                FavoriteContainer(
+                    id = "vertical-list-1",
+                    type = FavoriteContainerType.VerticalList,
+                    identities = listOf(first),
+                ),
+                FavoriteContainer(
+                    id = "vertical-list-2",
+                    type = FavoriteContainerType.VerticalList,
+                    identities = listOf(second),
+                ),
+            ),
+            readable.aggregate.verticalLists,
+        )
+        assertTrue(readable.aggregate.favoriteBars.isEmpty())
+        file.delete()
+    }
+
+    @Test
+    fun aggregateRoundTripsContainerPropertiesAndOrder(): Unit = runBlocking {
+        val file = temporaryFavoriteFile()
+        val first = identity(1, "com.example.first", "Main")
+        val second = identity(1, "com.example.second", "Main")
+        val aggregate = FavoriteAggregate(
+            verticalLists = listOf(
+                FavoriteContainer(
+                    id = "vertical-list-1",
+                    type = FavoriteContainerType.VerticalList,
+                    identities = listOf(first),
+                    listSize = FavoriteListSize.Large,
+                ),
+            ),
+            favoriteBars = listOf(
+                FavoriteContainer(
+                    id = "favorite-bar-1",
+                    type = FavoriteContainerType.FavoriteBar,
+                    identities = listOf(second),
+                ),
+            ),
+        )
+        val store = AtomicFileFavoriteStore(file)
+        store.load()
+
+        assertTrue(store.replaceAggregate(aggregate))
+
+        val reloadedStore = AtomicFileFavoriteStore(file)
+        reloadedStore.load()
+        assertEquals(
+            aggregate,
+            (reloadedStore.state.value as FavoriteReadState.Readable).aggregate,
+        )
+        file.delete()
+    }
+
+    @Test
+    fun invalidAggregateRejectsDuplicateIdentityAndEmptyContainer(): Unit = runBlocking {
+        val file = temporaryFavoriteFile()
+        val identity = identity(1, "com.example", "Main")
+        val store = AtomicFileFavoriteStore(file)
+        store.load()
+
+        assertFalse(
+            store.replaceAggregate(
+                FavoriteAggregate(
+                    verticalLists = listOf(
+                        FavoriteContainer(
+                            id = "vertical-list-1",
+                            type = FavoriteContainerType.VerticalList,
+                            identities = listOf(identity),
+                        ),
+                        FavoriteContainer(
+                            id = "vertical-list-2",
+                            type = FavoriteContainerType.VerticalList,
+                            identities = listOf(identity),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        assertFalse(
+            store.replaceAggregate(
+                FavoriteAggregate(
+                    favoriteBars = listOf(
+                        FavoriteContainer(
+                            id = "favorite-bar-1",
+                            type = FavoriteContainerType.FavoriteBar,
+                            identities = emptyList(),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        assertTrue((store.state.value as FavoriteReadState.Readable).aggregate.identities.isEmpty())
+        file.delete()
+    }
+
+    @Test
     fun replaceCompositionPersistsBothGroups(): Unit = runBlocking {
         val file = temporaryFavoriteFile()
         val first = identity(1, "com.example.first", "Main")
@@ -170,6 +285,11 @@ class FavoriteStoreTest {
 
     private fun identity(serial: Long, packageName: String, className: String) =
         LaunchableIdentity(serial, ComponentName(packageName, className))
+
+    private fun writeIdentity(output: DataOutputStream, identity: LaunchableIdentity) {
+        output.writeLong(identity.profileSerialNumber)
+        output.writeUTF(identity.componentName.flattenToString())
+    }
 
     private fun FavoriteStore.readableIdentities(): List<LaunchableIdentity> =
         (state.value as FavoriteReadState.Readable).identities

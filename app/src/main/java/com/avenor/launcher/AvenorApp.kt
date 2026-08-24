@@ -769,4 +769,10 @@ private class InMemoryFavoriteStore : FavoriteStore {
         )
         return true
     }
+
+    override suspend fun replaceAggregate(aggregate: FavoriteAggregate): Boolean {
+        if (!isValidAggregate(aggregate)) return false
+        mutableState.value = FavoriteReadState.Readable(aggregate)
+        return true
+    }
 }

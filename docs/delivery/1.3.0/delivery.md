@@ -1,4 +1,4 @@
-﻿# Avenor Launcher 1.3.0 Delivery
+# Avenor Launcher 1.3.0 Delivery
 
 > Semantic source: English. Chinese counterpart: [delivery.zh-CN.md](delivery.zh-CN.md).
 >
@@ -52,7 +52,7 @@ Material changes to persistence architecture, state ownership, permissions, priv
 
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
-| [Iteration 15: Unified Favorite Aggregation and Compatible Migration](iteration-15-unified-favorite-aggregation-and-migration.md) | `Planned` | 2026-08-23 | Author approved the `1.3.0` direction and technical assessment reported no known planning blocker. |
+| [Iteration 15: Unified Favorite Aggregation and Compatible Migration](iteration-15-unified-favorite-aggregation-and-migration.md) | `Completed` | 2026-08-23 | Implementation is complete; the author reported that compilation, upgrade, favorite-data, and remaining acceptance passed with no material issue. |
 | [Iteration 16: Vertical-List Normal-Mode Composition](iteration-16-vertical-list-normal-mode-composition.md) | `Planned` | 2026-08-23 | Read-only presentation depends on the unified persisted model. |
 | [Iteration 17: Home Edit Session and Vertical-List Management](iteration-17-home-edit-session-and-vertical-list-management.md) | `Planned` | 2026-08-23 | Editing and list management depend on accepted normal-mode list composition. |
 | [Iteration 18: Drawer Targeted Multi-Selection and Vertical-List Addition](iteration-18-drawer-targeted-multiselection-and-list-creation.md) | `Planned` | 2026-08-23 | Technical assessment recommended completing the reusable destination-targeted addition flow before favorite bars. |
@@ -64,7 +64,7 @@ Material changes to persistence architecture, state ownership, permissions, priv
 
 ### Iteration 15
 
-[Contract](iteration-15-unified-favorite-aggregation-and-migration.md). Status is `Planned`; no implementation, command, evidence, artifact, result, commit, or tag is recorded.
+[Contract](iteration-15-unified-favorite-aggregation-and-migration.md). The unified aggregate, schema-1/schema-2 migration, container and identity invariants, AtomicFile persistence, aggregate reconciliation, compatibility projections, and focused test coverage are implemented. `git diff --check` and the changed implementation line-width sweep are `Passed`. Agent-run Gradle and instrumented tests are `Not run`; the author reported that Gradle compilation, the `1.2.0` upgrade, favorite data, and the remaining acceptance checks passed with no material issue. The retained `1.2.0` 45:55 composition and asymmetric visible item sizes are presentation behavior outside this iteration and remain assigned to Iteration 16. No push, tag, publication, or release occurred. Status is `Completed`.
 
 ### Iteration 16
 

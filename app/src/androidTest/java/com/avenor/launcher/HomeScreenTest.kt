@@ -1206,6 +1206,12 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
         return true
     }
 
+    override suspend fun replaceAggregate(aggregate: FavoriteAggregate): Boolean {
+        if (!isValidAggregate(aggregate)) return false
+        mutableState.value = FavoriteReadState.Readable(aggregate)
+        return true
+    }
+
     fun readableIdentities(): List<LaunchableIdentity> =
         (state.value as FavoriteReadState.Readable).identities
 }

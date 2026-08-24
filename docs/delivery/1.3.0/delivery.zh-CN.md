@@ -1,4 +1,4 @@
-﻿# Avenor Launcher 1.3.0 交付
+# Avenor Launcher 1.3.0 交付
 
 > 英文语义源：[delivery.md](delivery.md)。
 >
@@ -52,7 +52,7 @@
 
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
-| [迭代 15：统一收藏聚合与兼容迁移](iteration-15-unified-favorite-aggregation-and-migration.zh-CN.md) | `Planned` | 2026-08-23 | 作者批准 `1.3.0` 方向，技术评估未报告已知规划阻塞。 |
+| [迭代 15：统一收藏聚合与兼容迁移](iteration-15-unified-favorite-aggregation-and-migration.zh-CN.md) | `Completed` | 2026-08-23 | 实现已完成；作者报告编译、升级、收藏数据及剩余验收均通过，未发现重大问题。 |
 | [迭代 16：纵向列表普通模式构图](iteration-16-vertical-list-normal-mode-composition.zh-CN.md) | `Planned` | 2026-08-23 | 只读呈现依赖统一持久化模型。 |
 | [迭代 17：Home 编辑会话与纵向列表管理](iteration-17-home-edit-session-and-vertical-list-management.zh-CN.md) | `Planned` | 2026-08-23 | 编辑与列表管理依赖已接受的普通模式列表构图。 |
 | [迭代 18：Drawer 目标化收藏多选与纵向新增](iteration-18-drawer-targeted-multiselection-and-list-creation.zh-CN.md) | `Planned` | 2026-08-23 | 技术评估建议在收藏栏之前完成可复用的目标化新增流程。 |
@@ -64,7 +64,7 @@
 
 ### 迭代 15
 
-[契约](iteration-15-unified-favorite-aggregation-and-migration.zh-CN.md)。状态为 `Planned`；未记录实现、命令、证据、制品、结果、commit 或 tag。
+[契约](iteration-15-unified-favorite-aggregation-and-migration.zh-CN.md)。统一聚合、schema 1/schema 2 迁移、容器与身份不变量、AtomicFile 持久化、聚合清单协调、兼容投影和聚焦测试覆盖均已实现。`git diff --check` 及变更实现代码行宽扫描为 `Passed`。Agent 执行的 Gradle 与 instrumented tests 为 `Not run`；作者报告 Gradle 编译、从 `1.2.0` 升级、收藏数据及剩余验收均通过，未发现重大问题。继续保留的 `1.2.0` 45:55 构图和可见条目大小不对称属于本迭代范围外的呈现行为，仍归迭代 16 处理。未发生 push、tag、发布或 Release。状态为 `Completed`。
 
 ### 迭代 16
 
