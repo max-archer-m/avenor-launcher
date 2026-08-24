@@ -53,7 +53,7 @@
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
 | [迭代 15：统一收藏聚合与兼容迁移](iteration-15-unified-favorite-aggregation-and-migration.zh-CN.md) | `Completed` | 2026-08-23 | 实现已完成；作者报告编译、升级、收藏数据及剩余验收均通过，未发现重大问题。 |
-| [迭代 16：纵向列表普通模式构图](iteration-16-vertical-list-normal-mode-composition.zh-CN.md) | `Planned` | 2026-08-23 | 只读呈现依赖统一持久化模型。 |
+| [迭代 16：纵向列表普通模式构图](iteration-16-vertical-list-normal-mode-composition.zh-CN.md) | `Completed` | 2026-08-24 | 普通 Home 构图及 P1 聚合持久化修复已实现；作者报告当前可验证行为基本验收通过。 |
 | [迭代 17：Home 编辑会话与纵向列表管理](iteration-17-home-edit-session-and-vertical-list-management.zh-CN.md) | `Planned` | 2026-08-23 | 编辑与列表管理依赖已接受的普通模式列表构图。 |
 | [迭代 18：Drawer 目标化收藏多选与纵向新增](iteration-18-drawer-targeted-multiselection-and-list-creation.zh-CN.md) | `Planned` | 2026-08-23 | 技术评估建议在收藏栏之前完成可复用的目标化新增流程。 |
 | [迭代 19：收藏栏呈现、创建和管理](iteration-19-favorite-bar-presentation-creation-and-management.zh-CN.md) | `Planned` | 2026-08-23 | 收藏栏复用已接受的编辑会话和目标化 Drawer 新增流程。 |
@@ -68,7 +68,7 @@
 
 ### 迭代 16
 
-[契约](iteration-16-vertical-list-normal-mode-composition.zh-CN.md)。状态为 `Planned`；未记录实现、命令、证据、制品、结果、commit 或 tag。
+[契约](iteration-16-vertical-list-normal-mode-composition.zh-CN.md)。普通 Home 现在根据持久化聚合呈现零、一个或两个纵向列表，使用各自列表级尺寸、等地位布局、独立列表状态以及统一 Loading/Error/空状态处理。P1 修复保证拖动持久化保留纵向容器 ID 和列表尺寸、保留收藏栏、将异步完成结果绑定到当前拖动代次，并应用契约要求的列表内部条目间距。作者报告当前可验证行为基本验收通过。Agent 执行的 Gradle 与 instrumented tests 为 `Not run`；`git diff --check` 和变更实现代码行宽扫描为 `Passed`。根据作者指示，保留编辑会话拖动兼容行为，但不扩展列表控件、新列表创建、收藏栏管理或新的拖动语义。状态为 `Completed`；不声明 commit、push、tag、发布或 Release。
 
 ### 迭代 17
 

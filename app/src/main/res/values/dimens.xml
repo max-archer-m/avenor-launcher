@@ -26,6 +26,10 @@
     <dimen name="drawer_error_icon_size">48dp</dimen>
     <dimen name="home_favorite_row_min_height">56dp</dimen>
     <dimen name="home_favorite_icon_size">40dp</dimen>
+    <dimen name="home_favorite_large_row_min_height">64dp</dimen>
+    <dimen name="home_favorite_large_icon_size">48dp</dimen>
+    <dimen name="home_favorite_large_text_size">18sp</dimen>
+    <dimen name="home_favorite_large_line_height">28sp</dimen>
     <dimen name="home_companion_favorite_row_min_height">48dp</dimen>
     <dimen name="home_companion_favorite_icon_size">32dp</dimen>
     <dimen name="home_favorite_text_size">16sp</dimen>
@@ -33,6 +37,7 @@
     <dimen name="home_companion_favorite_text_size">14sp</dimen>
     <dimen name="home_companion_favorite_line_height">20sp</dimen>
     <dimen name="home_favorite_icon_label_gap">16dp</dimen>
+    <dimen name="home_favorite_item_padding">8dp</dimen>
     <dimen name="home_favorite_error_icon_size">48dp</dimen>
     <dimen name="home_module_spacing">16dp</dimen>
     <dimen name="home_favorite_group_spacing">16dp</dimen>

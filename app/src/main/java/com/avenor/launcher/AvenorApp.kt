@@ -589,20 +589,24 @@ internal fun AvenorApp(
                     selectedEntryFromHome = true
                     selectedEntry = entry
                 },
-                onCommitFavoriteComposition = { primaryIdentities, companionIdentities ->
+                onCommitFavoriteComposition = {
+                    aggregate,
+                    onComplete,
+                ->
                     scope.launch {
-                        if (
-                            !effectiveFavoriteStore.replaceComposition(
-                                primaryIdentities,
-                                companionIdentities,
-                            )
+                        val succeeded = if (
+                            !effectiveFavoriteStore.replaceAggregate(aggregate)
                         ) {
                             Toast.makeText(
                                 androidContext,
                                 R.string.favorite_reorder_unavailable,
                                 Toast.LENGTH_SHORT,
                             ).show()
+                            false
+                        } else {
+                            true
                         }
+                        onComplete(succeeded)
                     }
                 },
                 onLaunchFavorite = { availability ->
@@ -764,9 +768,13 @@ private class InMemoryFavoriteStore : FavoriteStore {
     ): Boolean {
         val current = mutableState.value as? FavoriteReadState.Readable ?: return false
         val replacement = primaryIdentities + companionIdentities
-        if (!isValidReplacement(current.identities, replacement)) return false
+        val currentVerticalIdentities =
+            current.aggregate.verticalLists.flatMap(FavoriteContainer::identities)
+        if (!isValidReplacement(currentVerticalIdentities, replacement)) {
+            return false
+        }
         mutableState.value = FavoriteReadState.Readable(
-            current.aggregate.replaceLegacyComposition(
+            current.aggregate.replaceVerticalComposition(
                 primaryIdentities,
                 companionIdentities,
             ),

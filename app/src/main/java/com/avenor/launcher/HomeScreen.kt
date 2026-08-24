@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import android.provider.AlarmClock
 import android.provider.CalendarContract
 import android.widget.Toast
@@ -40,6 +41,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -55,6 +58,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -103,6 +107,8 @@ import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 
+private const val FAVORITE_DRAG_LOG_TAG = "AvenorFavoriteDrag"
+
 @Composable
 internal fun HomeScreen(
     clock: () -> ZonedDateTime = { ZonedDateTime.now() },
@@ -117,14 +123,15 @@ internal fun HomeScreen(
     onLaunchFavorite: (FavoriteAvailability) -> Unit = {},
     onLongPressFavorite: (LaunchableEntry) -> Unit = {},
     onCommitFavoriteComposition: (
-        primaryIdentities: List<LaunchableIdentity>,
-        companionIdentities: List<LaunchableIdentity>,
-    ) -> Unit = { _, _ -> },
+        aggregate: FavoriteAggregate,
+        onComplete: (Boolean) -> Unit,
+    ) -> Unit = { _, onComplete -> onComplete(true) },
     accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
 ) {
     val context = LocalContext.current
     var now by remember { mutableStateOf(clock()) }
     var dragSession by remember { mutableStateOf<FavoriteDragSession?>(null) }
+    var dragGeneration by remember { mutableIntStateOf(0) }
     var dragRootOriginInWindow by remember { mutableStateOf(Offset.Zero) }
     var primaryListBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
     var companionListBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
@@ -310,24 +317,42 @@ internal fun HomeScreen(
                 )
 
                 is FavoriteReadState.Readable -> {
-                    if (favoriteState.identities.isEmpty()) {
+                    if (favoriteState.aggregate.verticalLists.isEmpty()) {
                         Text(
                             text = stringResource(R.string.home_empty_favorites),
                             color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.testTag("home_favorites_empty"),
                         )
+                    } else if (!editMode) {
+                        HomeFavoriteComposition(
+                            verticalLists = favoriteState.aggregate.verticalLists,
+                            availabilityByIdentity = favoriteAvailability,
+                            favoriteListState = favoriteListState,
+                            favoriteNestedScrollConnection = favoriteNestedScrollConnection,
+                            companionFavoriteListState = companionFavoriteListState,
+                            companionFavoriteNestedScrollConnection =
+                                companionFavoriteNestedScrollConnection,
+                            onLaunchFavorite = onLaunchFavorite,
+                            onLongPressFavorite = onLongPressFavorite,
+                        )
                     } else {
+                        val primaryContainer = favoriteState.aggregate.verticalLists.getOrNull(0)
+                        val companionContainer = favoriteState.aggregate.verticalLists.getOrNull(1)
+                        val primaryIdentities = primaryContainer?.identities.orEmpty()
+                        val companionIdentities = companionContainer?.identities.orEmpty()
                         val activeSession = dragSession?.takeIf { it.hasInGroupExchange }
+                        val activeDraggedIdentity = dragSession
+                            ?.takeUnless { it.released }
+                            ?.identity
                         val primaryDisplayed = activeSession?.displayedPrimary
-                            ?: favoriteState.primaryIdentities
+                            ?: primaryIdentities
                         val companionDisplayed = activeSession?.displayedCompanion
-                            ?: favoriteState.companionIdentities
+                            ?: companionIdentities
                         // A release completes the current exchange or insertion when the touch
                         // point is inside either group; any other area restores the saved state.
                         val endDrag: () -> Unit = {
                             val session = dragSession
-                            dragSession = null
                             if (session != null && session.hasPendingChange &&
                                 (
                                     primaryListBoundsInWindow.contains(session.touchInWindow) ||
@@ -336,19 +361,36 @@ internal fun HomeScreen(
                                     )
                             ) {
                                 val committed = session.committedComposition()
-                                onCommitFavoriteComposition(committed.first, committed.second)
+                                val committedAggregate =
+                                    favoriteState.aggregate.replaceVerticalComposition(
+                                        committed.first,
+                                        committed.second,
+                                    )
+                                val generation = session.generation
+                                dragSession = session.copy(released = true)
+                                onCommitFavoriteComposition(
+                                    committedAggregate,
+                                ) { _ ->
+                                    if (dragSession?.generation == generation) {
+                                        dragSession = null
+                                    }
+                                }
+                            } else {
+                                dragSession = null
                             }
                         }
                         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                            val primaryRowHeight = dimensionResource(
-                                R.dimen.home_favorite_row_min_height,
-                            )
-                            val companionRowHeight = dimensionResource(
-                                R.dimen.home_companion_favorite_row_min_height,
-                            )
+                            val primaryContentHeight = primaryContainer?.let { container ->
+                                dimensionResource(container.listSize.rowHeightResource()) *
+                                    container.identities.size
+                            } ?: 0.dp
+                            val companionContentHeight = companionContainer?.let { container ->
+                                dimensionResource(container.listSize.rowHeightResource()) *
+                                    container.identities.size
+                            } ?: 0.dp
                             val contentHeight = maxOf(
-                                primaryRowHeight * favoriteState.primaryIdentities.size,
-                                companionRowHeight * favoriteState.companionIdentities.size,
+                                primaryContentHeight,
+                                companionContentHeight,
                             ).coerceAtMost(maxHeight)
                             Row(
                                 modifier = Modifier
@@ -358,73 +400,101 @@ internal fun HomeScreen(
                                     dimensionResource(R.dimen.home_favorite_group_spacing),
                                 ),
                             ) {
-                                HomeFavoriteList(
-                                    modifier = Modifier
-                                        .weight(55f)
-                                        .fillMaxHeight(),
-                                    identities = primaryDisplayed,
-                                    availabilityByIdentity = favoriteAvailability,
-                                    listState = favoriteListState,
-                                    nestedScrollConnection = favoriteNestedScrollConnection,
-                                    editMode = editMode,
-                                    compact = false,
-                                    draggedIdentity = dragSession?.identity,
-                                    exchangeTargetIdentity = dragSession?.crossGroupTarget,
-                                    insertionBoundaryIndex = dragSession?.insertionBoundaryIn(
-                                        companion = false,
-                                    ),
-                                    onBoundsInWindow = { primaryListBoundsInWindow = it },
-                                    onLaunchFavorite = onLaunchFavorite,
-                                    onLongPressFavorite = onLongPressFavorite,
-                                    onDragStart = { identity, origin, size, touch ->
-                                        dragSession = FavoriteDragSession(
-                                            identity = identity,
-                                            fromCompanion = false,
-                                            originInWindow = origin,
-                                            size = size,
-                                            touchStartInWindow = touch,
-                                            displayedPrimary = favoriteState.primaryIdentities,
-                                            displayedCompanion = favoriteState.companionIdentities,
-                                        )
-                                    },
-                                    onDrag = advanceDrag,
-                                    onDragEnd = endDrag,
-                                    onDragCancel = { dragSession = null },
-                                )
-                                HomeFavoriteList(
-                                    modifier = Modifier
-                                        .weight(45f)
-                                        .fillMaxHeight(),
-                                    identities = companionDisplayed,
-                                    availabilityByIdentity = favoriteAvailability,
-                                    listState = companionFavoriteListState,
-                                    nestedScrollConnection =
-                                        companionFavoriteNestedScrollConnection,
-                                    editMode = editMode,
-                                    compact = true,
-                                    draggedIdentity = dragSession?.identity,
-                                    exchangeTargetIdentity = dragSession?.crossGroupTarget,
-                                    insertionBoundaryIndex = dragSession?.insertionBoundaryIn(
-                                        companion = true,
-                                    ),
-                                    onBoundsInWindow = { companionListBoundsInWindow = it },
-                                    onLaunchFavorite = onLaunchFavorite,
-                                    onLongPressFavorite = onLongPressFavorite,
-                                    onDragStart = { identity, origin, size, touch ->
-                                        dragSession = FavoriteDragSession(
-                                            identity = identity,
-                                            fromCompanion = true,
-                                            originInWindow = origin,
-                                            size = size,
-                                            touchStartInWindow = touch,
-                                            displayedPrimary = favoriteState.primaryIdentities,
-                                            displayedCompanion = favoriteState.companionIdentities,
-                                        )
-                                    },
-                                    onDrag = advanceDrag,
-                                    onDragEnd = endDrag,
-                                    onDragCancel = { dragSession = null },
-                                )
+                                if (primaryContainer != null) {
+                                    HomeFavoriteList(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight(),
+                                        identities = primaryDisplayed,
+                                        availabilityByIdentity = favoriteAvailability,
+                                        listState = favoriteListState,
+                                        nestedScrollConnection = favoriteNestedScrollConnection,
+                                        editMode = editMode,
+                                        compact = false,
+                                        listSize = primaryContainer.listSize,
+                                        draggedIdentity = activeDraggedIdentity,
+                                        exchangeTargetIdentity = dragSession?.crossGroupTarget,
+                                        insertionBoundaryIndex = dragSession?.insertionBoundaryIn(
+                                            companion = false,
+                                        ),
+                                        onBoundsInWindow = { primaryListBoundsInWindow = it },
+                                        onLaunchFavorite = onLaunchFavorite,
+                                        onLongPressFavorite = onLongPressFavorite,
+                                        onDragStart = { identity, origin, size, touch ->
+                                            Log.d(
+                                                FAVORITE_DRAG_LOG_TAG,
+                                                "source container=${primaryContainer.id} " +
+                                                    "listSize=${primaryContainer.listSize} " +
+                                                    "rowPx=${size.width}x${size.height} " +
+                                                    "identity=${identity.stableKey()}",
+                                            )
+                                            dragGeneration += 1
+                                            dragSession = FavoriteDragSession(
+                                                generation = dragGeneration,
+                                                identity = identity,
+                                                listSize = primaryContainer.listSize,
+                                                originInWindow = origin,
+                                                size = size,
+                                                touchStartInWindow = touch,
+                                                displayedPrimary =
+                                                    primaryIdentities,
+                                                displayedCompanion =
+                                                    companionIdentities,
+                                            )
+                                        },
+                                        onDrag = advanceDrag,
+                                        onDragEnd = endDrag,
+                                        onDragCancel = { dragSession = null },
+                                    )
+                                }
+                                if (companionContainer != null) {
+                                    HomeFavoriteList(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight(),
+                                        identities = companionDisplayed,
+                                        availabilityByIdentity = favoriteAvailability,
+                                        listState = companionFavoriteListState,
+                                        nestedScrollConnection =
+                                            companionFavoriteNestedScrollConnection,
+                                        editMode = editMode,
+                                        compact = false,
+                                        listSize = companionContainer.listSize,
+                                        draggedIdentity = activeDraggedIdentity,
+                                        exchangeTargetIdentity = dragSession?.crossGroupTarget,
+                                        insertionBoundaryIndex = dragSession?.insertionBoundaryIn(
+                                            companion = true,
+                                        ),
+                                        onBoundsInWindow = { companionListBoundsInWindow = it },
+                                        onLaunchFavorite = onLaunchFavorite,
+                                        onLongPressFavorite = onLongPressFavorite,
+                                        onDragStart = { identity, origin, size, touch ->
+                                            Log.d(
+                                                FAVORITE_DRAG_LOG_TAG,
+                                                "source container=${companionContainer.id} " +
+                                                    "listSize=${companionContainer.listSize} " +
+                                                    "rowPx=${size.width}x${size.height} " +
+                                                    "identity=${identity.stableKey()}",
+                                            )
+                                            dragGeneration += 1
+                                            dragSession = FavoriteDragSession(
+                                                generation = dragGeneration,
+                                                identity = identity,
+                                                listSize = companionContainer.listSize,
+                                                originInWindow = origin,
+                                                size = size,
+                                                touchStartInWindow = touch,
+                                                displayedPrimary =
+                                                    primaryIdentities,
+                                                displayedCompanion =
+                                                    companionIdentities,
+                                            )
+                                        },
+                                        onDrag = advanceDrag,
+                                        onDragEnd = endDrag,
+                                        onDragCancel = { dragSession = null },
+                                    )
+                                }
                             }
                         }
                     }
@@ -432,25 +502,28 @@ internal fun HomeScreen(
             }
         }
         dragSession?.let { session ->
-            HomeFavoriteDragPreview(
-                session = session,
-                availability = favoriteAvailability[session.identity]
-                    ?: FavoriteAvailability.Unknown(null),
-                rootOriginInWindow = dragRootOriginInWindow,
-            )
+            if (!session.released) {
+                HomeFavoriteDragPreview(
+                    session = session,
+                    availability = favoriteAvailability[session.identity]
+                        ?: FavoriteAvailability.Unknown(null),
+                    rootOriginInWindow = dragRootOriginInWindow,
+                )
+            }
         }
     }
 }
 
 /**
  * State of an active favorite drag: the source geometry, the accumulated pointer delta, the touch
- * point that started the gesture, and the live visible order of both groups. Only an in-group
- * exchange changes a visible order during the drag; a cross-group target and an insertion boundary
- * stay pure feedback until the release, so merely moving across the other group changes nothing.
+ * point that started the gesture, and the live visible order of both groups. In-group exchanges
+ * change the visible order during the drag; a released session keeps that order visible until the
+ * persistence callback completes.
  */
 private data class FavoriteDragSession(
+    val generation: Int,
     val identity: LaunchableIdentity,
-    val fromCompanion: Boolean,
+    val listSize: FavoriteListSize,
     val originInWindow: Offset,
     val size: IntSize,
     val touchStartInWindow: Offset,
@@ -458,6 +531,7 @@ private data class FavoriteDragSession(
     val displayedCompanion: List<LaunchableIdentity>,
     val delta: Offset = Offset.Zero,
     val hasInGroupExchange: Boolean = false,
+    val released: Boolean = false,
     val crossGroupTarget: LaunchableIdentity? = null,
     val insertion: FavoriteInsertionTarget? = null,
 ) {
@@ -537,10 +611,8 @@ private fun FavoriteDragSession.committedComposition():
  * Applies a pointer movement and resolves the target under the touch point. A favorite body in the
  * dragged favorite's own group exchanges positions immediately. In the other group, a favorite body
  * only marks a cross-group exchange and a gap only marks a cross-group insertion; both stay pure
- * feedback that a release performs, so moving the finger across the other group never changes the
- * lists on its own. Leaving a valid target drops that feedback again. The slot is compared with the
- * source's current visible index, so the dragged favorite, the source slot, and invalid areas
- * produce no in-group exchange.
+ * feedback that a release performs. The slot is compared with the source's current visible index,
+ * so the dragged favorite, the source slot, and invalid areas produce no in-group exchange.
  */
 private fun FavoriteDragSession.advanced(
     amount: Offset,
@@ -730,12 +802,22 @@ private fun HomeFavoriteDragPreview(
     rootOriginInWindow: Offset,
 ) {
     val density = LocalDensity.current
+    LaunchedEffect(session.identity, session.listSize, session.size) {
+        Log.d(
+            FAVORITE_DRAG_LOG_TAG,
+            "preview listSize=${session.listSize} " +
+                "sessionPx=${session.size.width}x${session.size.height} " +
+                "sessionDp=${session.size.width / density.density}x" +
+                "${session.size.height / density.density} " +
+                "identity=${session.identity.stableKey()}",
+        )
+    }
     val previewAlpha = integerResource(R.integer.home_drag_preview_alpha_percent) / 100f
     val previewElevation = with(density) {
         dimensionResource(R.dimen.home_reorder_drag_elevation).toPx()
     }
     val topLeft = session.originInWindow + session.delta - rootOriginInWindow
-    HomeFavoriteRow(
+    Box(
         modifier = Modifier
             .offset { IntOffset(topLeft.x.roundToInt(), topLeft.y.roundToInt()) }
             .size(
@@ -743,17 +825,72 @@ private fun HomeFavoriteDragPreview(
                 height = with(density) { session.size.height.toDp() },
             )
             .alpha(previewAlpha)
-            .graphicsLayer { shadowElevation = previewElevation }
             .testTag("home_favorite_drag_preview"),
-        availability = availability,
-        onClick = {},
-        onLongClick = {},
-        editMode = true,
-        compact = session.fromCompanion,
-        exchangeHighlight = false,
-        onRowBoundsInWindow = { _, _ -> },
-        onHandleBoundsInWindow = {},
-    )
+    ) {
+        HomeFavoritePreviewContent(
+            availability = availability,
+            listSize = session.listSize,
+            maxWidth = with(density) { session.size.width.toDp() },
+            shadowElevation = previewElevation,
+        )
+    }
+}
+
+@Composable
+private fun HomeFavoritePreviewContent(
+    availability: FavoriteAvailability,
+    listSize: FavoriteListSize,
+    maxWidth: androidx.compose.ui.unit.Dp,
+    shadowElevation: Float,
+) {
+    val entry = availability.presentationEntry
+    val iconSize = dimensionResource(listSize.iconSizeResource())
+    val iconPixels = with(LocalDensity.current) { iconSize.roundToPx() }
+    val displayText = when (availability) {
+        is FavoriteAvailability.Available -> availability.entry.label
+        is FavoriteAvailability.Disabled -> entry?.let {
+            stringResource(R.string.favorite_disabled_format, it.label)
+        } ?: stringResource(R.string.favorite_application_disabled)
+        is FavoriteAvailability.TemporarilyUnavailable,
+        is FavoriteAvailability.Unknown,
+        -> entry?.let {
+            stringResource(R.string.favorite_unavailable_format, it.label)
+        } ?: stringResource(R.string.favorite_application_unavailable)
+        FavoriteAvailability.ConfirmedRemoved ->
+            stringResource(R.string.favorite_application_unavailable)
+    }
+    Row(
+        modifier = Modifier
+            .widthIn(max = maxWidth)
+            .wrapContentWidth()
+            .padding(dimensionResource(R.dimen.home_favorite_item_padding))
+            .graphicsLayer { this.shadowElevation = shadowElevation },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (entry == null) {
+            Icon(
+                painter = painterResource(R.drawable.ic_inventory_error),
+                contentDescription = null,
+                modifier = Modifier.size(iconSize),
+                tint = MaterialTheme.colorScheme.onBackground,
+            )
+        } else {
+            val bitmap = entry.iconBitmap?.asImageBitmap() ?: remember(entry.icon, iconPixels) {
+                entry.icon.toBitmap(iconPixels, iconPixels).asImageBitmap()
+            }
+            Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(iconSize))
+        }
+        Spacer(Modifier.width(dimensionResource(R.dimen.home_favorite_icon_label_gap)))
+        Text(
+            text = displayText,
+            modifier = Modifier.widthIn(max = maxWidth),
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            fontSize = dimensionResource(listSize.textSizeResource()).value.sp,
+            lineHeight = dimensionResource(listSize.lineHeightResource()).value.sp,
+        )
+    }
 }
 
 @Composable
@@ -765,6 +902,7 @@ private fun HomeFavoriteList(
     nestedScrollConnection: NestedScrollConnection?,
     editMode: Boolean,
     compact: Boolean,
+    listSize: FavoriteListSize? = null,
     draggedIdentity: LaunchableIdentity?,
     exchangeTargetIdentity: LaunchableIdentity?,
     insertionBoundaryIndex: Int?,
@@ -775,6 +913,7 @@ private fun HomeFavoriteList(
     onDrag: (Offset) -> Unit,
     onDragEnd: () -> Unit,
     onDragCancel: () -> Unit,
+    testTag: String? = null,
 ) {
     val sourceSlotAlpha = integerResource(R.integer.home_drag_source_slot_alpha_percent) / 100f
     val insertionLineColor = colorResource(R.color.home_favorite_insertion_line)
@@ -850,7 +989,7 @@ private fun HomeFavoriteList(
                     }
                 },
             )
-            .testTag(if (compact) "home_companion_favorites" else "home_favorites"),
+            .testTag(testTag ?: if (compact) "home_companion_favorites" else "home_favorites"),
         state = listState,
     ) {
         itemsIndexed(
@@ -907,6 +1046,7 @@ private fun HomeFavoriteList(
                 },
                 editMode = editMode,
                 compact = compact,
+                listSize = listSize,
                 exchangeHighlight = identity == exchangeTargetIdentity,
                 onRowBoundsInWindow = { origin, size ->
                     dragAnchors[anchorKey] =
@@ -1040,6 +1180,87 @@ private fun HomeFavoriteMessage(
 }
 
 @Composable
+private fun HomeFavoriteComposition(
+    verticalLists: List<FavoriteContainer>,
+    availabilityByIdentity: Map<LaunchableIdentity, FavoriteAvailability>,
+    favoriteListState: LazyListState,
+    favoriteNestedScrollConnection: NestedScrollConnection?,
+    companionFavoriteListState: LazyListState,
+    companionFavoriteNestedScrollConnection: NestedScrollConnection?,
+    onLaunchFavorite: (FavoriteAvailability) -> Unit,
+    onLongPressFavorite: (LaunchableEntry) -> Unit,
+) {
+    LaunchedEffect(verticalLists) {
+        Log.d(
+            FAVORITE_DRAG_LOG_TAG,
+            "composition " + verticalLists.joinToString { container ->
+                "${container.id}:${container.listSize}:${container.identities.size}"
+            },
+        )
+    }
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val listStates = remember {
+            mutableMapOf<String, LazyListState>()
+        }
+        val contentHeight = verticalLists
+            .maxOf { container ->
+                dimensionResource(container.listSize.rowHeightResource()) *
+                    container.identities.size
+            }
+            .coerceAtMost(maxHeight)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(contentHeight),
+            horizontalArrangement = Arrangement.spacedBy(
+                dimensionResource(R.dimen.home_favorite_group_spacing),
+            ),
+        ) {
+            verticalLists.forEachIndexed { index, container ->
+                val listState = listStates.getOrPut(container.id) {
+                    when (index) {
+                        0 -> favoriteListState
+                        1 -> companionFavoriteListState
+                        else -> LazyListState()
+                    }
+                }
+                val nestedScrollConnection = when (index) {
+                    0 -> favoriteNestedScrollConnection
+                    1 -> companionFavoriteNestedScrollConnection
+                    else -> null
+                }
+                HomeFavoriteList(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .padding(
+                            horizontal = dimensionResource(R.dimen.home_favorite_item_padding),
+                        ),
+                    identities = container.identities,
+                    availabilityByIdentity = availabilityByIdentity,
+                    listState = listState,
+                    nestedScrollConnection = nestedScrollConnection,
+                    editMode = false,
+                    compact = false,
+                    listSize = container.listSize,
+                    draggedIdentity = null,
+                    exchangeTargetIdentity = null,
+                    insertionBoundaryIndex = null,
+                    onBoundsInWindow = {},
+                    onLaunchFavorite = onLaunchFavorite,
+                    onLongPressFavorite = onLongPressFavorite,
+                    onDragStart = { _, _, _, _ -> },
+                    onDrag = {},
+                    onDragEnd = {},
+                    onDragCancel = {},
+                    testTag = "home_favorite_list_$index",
+                )
+            }
+        }
+    }
+}
+
+@Composable
 @OptIn(ExperimentalFoundationApi::class)
 private fun HomeFavoriteRow(
     modifier: Modifier,
@@ -1048,14 +1269,16 @@ private fun HomeFavoriteRow(
     onLongClick: () -> Unit,
     editMode: Boolean,
     compact: Boolean,
+    listSize: FavoriteListSize? = null,
     exchangeHighlight: Boolean,
     onRowBoundsInWindow: (Offset, IntSize) -> Unit,
     onHandleBoundsInWindow: (Rect) -> Unit,
 ) {
     val entry = availability.presentationEntry
     val iconSize = dimensionResource(
-        if (compact) R.dimen.home_companion_favorite_icon_size
-        else R.dimen.home_favorite_icon_size,
+        listSize?.iconSizeResource()
+            ?: if (compact) R.dimen.home_companion_favorite_icon_size
+            else R.dimen.home_favorite_icon_size,
     )
     val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
     val iconPixels = with(LocalDensity.current) { iconSize.roundToPx() }
@@ -1065,11 +1288,31 @@ private fun HomeFavoriteRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(
-                min = dimensionResource(
-                    if (compact) R.dimen.home_companion_favorite_row_min_height
-                    else R.dimen.home_favorite_row_min_height,
-                ),
+            .then(
+                if (listSize == null) {
+                    Modifier.heightIn(
+                        min = if (compact) {
+                            dimensionResource(R.dimen.home_companion_favorite_row_min_height)
+                        } else {
+                            dimensionResource(R.dimen.home_favorite_row_min_height)
+                        },
+                    )
+                } else {
+                    Modifier.height(dimensionResource(listSize.rowHeightResource()))
+                },
+            )
+            .onGloballyPositioned {
+                onRowBoundsInWindow(it.positionInWindow(), it.size)
+            }
+            .then(
+                if (listSize == null) {
+                    Modifier
+                } else {
+                    Modifier.padding(
+                        horizontal = dimensionResource(R.dimen.home_favorite_item_padding),
+                        vertical = dimensionResource(R.dimen.home_favorite_item_padding),
+                    )
+                },
             )
             .then(
                 // A cross-group exchange marks its target favorite with a border; a group gap keeps
@@ -1102,9 +1345,6 @@ private fun HomeFavoriteRow(
                 },
             )
             .alpha(if (availability is FavoriteAvailability.Available) 1f else disabledAlpha)
-            .onGloballyPositioned {
-                onRowBoundsInWindow(it.positionInWindow(), it.size)
-            }
             .testTag("home_favorite_row"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -1142,12 +1382,14 @@ private fun HomeFavoriteRow(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontSize = dimensionResource(
-                if (compact) R.dimen.home_companion_favorite_text_size
-                else R.dimen.home_favorite_text_size,
+                listSize?.textSizeResource()
+                    ?: if (compact) R.dimen.home_companion_favorite_text_size
+                    else R.dimen.home_favorite_text_size,
             ).value.sp,
             lineHeight = dimensionResource(
-                if (compact) R.dimen.home_companion_favorite_line_height
-                else R.dimen.home_favorite_line_height,
+                listSize?.lineHeightResource()
+                    ?: if (compact) R.dimen.home_companion_favorite_line_height
+                    else R.dimen.home_favorite_line_height,
             ).value.sp,
         )
         if (editMode) {
@@ -1184,6 +1426,30 @@ private fun Modifier.editSurface(enabled: Boolean): Modifier = if (!enabled) thi
 
 private fun LaunchableIdentity.stableKey(): String =
     "$profileSerialNumber:${componentName.flattenToString()}"
+
+private fun FavoriteListSize.iconSizeResource(): Int = when (this) {
+    FavoriteListSize.Large -> R.dimen.home_favorite_large_icon_size
+    FavoriteListSize.Medium -> R.dimen.home_favorite_icon_size
+    FavoriteListSize.Small -> R.dimen.home_companion_favorite_icon_size
+}
+
+private fun FavoriteListSize.rowHeightResource(): Int = when (this) {
+    FavoriteListSize.Large -> R.dimen.home_favorite_large_row_min_height
+    FavoriteListSize.Medium -> R.dimen.home_favorite_row_min_height
+    FavoriteListSize.Small -> R.dimen.home_companion_favorite_row_min_height
+}
+
+private fun FavoriteListSize.textSizeResource(): Int = when (this) {
+    FavoriteListSize.Large -> R.dimen.home_favorite_large_text_size
+    FavoriteListSize.Medium -> R.dimen.home_favorite_text_size
+    FavoriteListSize.Small -> R.dimen.home_companion_favorite_text_size
+}
+
+private fun FavoriteListSize.lineHeightResource(): Int = when (this) {
+    FavoriteListSize.Large -> R.dimen.home_favorite_large_line_height
+    FavoriteListSize.Medium -> R.dimen.home_favorite_line_height
+    FavoriteListSize.Small -> R.dimen.home_companion_favorite_line_height
+}
 
 private fun Context.launchClockDestination() {
     val alarmIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)

@@ -53,7 +53,7 @@ Material changes to persistence architecture, state ownership, permissions, priv
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
 | [Iteration 15: Unified Favorite Aggregation and Compatible Migration](iteration-15-unified-favorite-aggregation-and-migration.md) | `Completed` | 2026-08-23 | Implementation is complete; the author reported that compilation, upgrade, favorite-data, and remaining acceptance passed with no material issue. |
-| [Iteration 16: Vertical-List Normal-Mode Composition](iteration-16-vertical-list-normal-mode-composition.md) | `Planned` | 2026-08-23 | Read-only presentation depends on the unified persisted model. |
+| [Iteration 16: Vertical-List Normal-Mode Composition](iteration-16-vertical-list-normal-mode-composition.md) | `Completed` | 2026-08-24 | Normal Home composition and P1 aggregate-persistence fixes are implemented; the author reported that the currently verifiable behavior was basically accepted. |
 | [Iteration 17: Home Edit Session and Vertical-List Management](iteration-17-home-edit-session-and-vertical-list-management.md) | `Planned` | 2026-08-23 | Editing and list management depend on accepted normal-mode list composition. |
 | [Iteration 18: Drawer Targeted Multi-Selection and Vertical-List Addition](iteration-18-drawer-targeted-multiselection-and-list-creation.md) | `Planned` | 2026-08-23 | Technical assessment recommended completing the reusable destination-targeted addition flow before favorite bars. |
 | [Iteration 19: Favorite-Bar Presentation, Creation, and Management](iteration-19-favorite-bar-presentation-creation-and-management.md) | `Planned` | 2026-08-23 | Favorite bars reuse the accepted edit session and targeted Drawer addition flow. |
@@ -68,7 +68,7 @@ Material changes to persistence architecture, state ownership, permissions, priv
 
 ### Iteration 16
 
-[Contract](iteration-16-vertical-list-normal-mode-composition.md). Status is `Planned`; no implementation, command, evidence, artifact, result, commit, or tag is recorded.
+[Contract](iteration-16-vertical-list-normal-mode-composition.md). The normal Home composition now renders zero, one, or two persisted vertical lists with per-list size, equal-status layout, independent list state, and shared loading/error/empty handling. P1 fixes preserve vertical-container IDs and list sizes during drag persistence, retain favorite bars, bind asynchronous completion to the active drag generation, and apply the contracted internal item padding. The author reported that the currently verifiable behavior was basically accepted. Agent-run Gradle and instrumented tests are `Not run`; `git diff --check` and the changed implementation line-width sweep are `Passed`. The author-directed contract amendment retains edit-session drag compatibility as compatibility work without expanding list controls, new-list creation, favorite-bar management, or new drag semantics. Status is `Completed`; no commit, push, tag, publication, or release is claimed.
 
 ### Iteration 17
 

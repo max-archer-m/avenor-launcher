@@ -245,8 +245,12 @@ internal class AtomicFileFavoriteStore private constructor(
     ): Boolean = mutationMutex.withLock {
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         val replacement = primaryIdentities + companionIdentities
-        if (!isValidReplacement(readable.identities, replacement)) return false
-        val updated = readable.aggregate.replaceLegacyComposition(
+        val currentVerticalIdentities =
+            readable.aggregate.verticalLists.flatMap(FavoriteContainer::identities)
+        if (!isValidReplacement(currentVerticalIdentities, replacement)) {
+            return false
+        }
+        val updated = readable.aggregate.replaceVerticalComposition(
             primaryIdentities,
             companionIdentities,
         )
@@ -492,14 +496,18 @@ internal fun FavoriteAggregate.replaceVerticalList(
     }
 }
 
-internal fun FavoriteAggregate.replaceLegacyComposition(
+internal fun FavoriteAggregate.replaceVerticalComposition(
     primaryIdentities: List<LaunchableIdentity>,
     companionIdentities: List<LaunchableIdentity>,
 ): FavoriteAggregate = copy(
-    verticalLists = legacyVerticalLists(
-        primaryIdentities,
-        companionIdentities,
-    ),
+    verticalLists = verticalLists.mapIndexedNotNull { index, container ->
+        val identities = when (index) {
+            0 -> primaryIdentities
+            1 -> companionIdentities
+            else -> container.identities
+        }
+        container.copy(identities = identities).takeIf { it.identities.isNotEmpty() }
+    },
 )
 
 internal fun isValidAggregate(aggregate: FavoriteAggregate): Boolean {
