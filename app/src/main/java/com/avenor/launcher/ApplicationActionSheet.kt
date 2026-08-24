@@ -93,7 +93,7 @@ internal fun ApplicationActionSheet(
     val showsEdit = canEditFavorites &&
         favoriteState is FavoriteReadState.Readable &&
         entry.identity in favoriteState.identities &&
-        favoriteState.identities.size >= 2
+        favoriteState.identities.isNotEmpty()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,

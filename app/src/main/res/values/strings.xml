@@ -11,7 +11,26 @@
     <string name="add_favorite">Add favorite</string>
     <string name="remove_favorite">Remove favorite</string>
     <string name="edit_favorites">Edit</string>
+    <string name="favorite_list_size">Size</string>
+    <string name="favorite_list_large">Large</string>
+    <string name="favorite_list_medium">Medium</string>
+    <string name="favorite_list_small">Small</string>
+    <string name="favorite_list_large_short">L</string>
+    <string name="favorite_list_medium_short">M</string>
+    <string name="favorite_list_small_short">S</string>
+    <string name="favorite_list_size_format">Favorite list size, %1$s</string>
+    <string name="remove_favorite_list">Remove list</string>
+    <string name="remove_favorite_list_title">Remove favorite list?</string>
+    <string name="remove_list">All applications in this list will be removed from
+        favorites.</string>
+    <string name="remove">Remove</string>
+    <string name="remove_favorite_item">Remove favorite</string>
+    <string name="favorite_removed">Removed from favorites</string>
+    <string name="favorite_list_removed">Favorite list removed</string>
+    <string name="undo">Undo</string>
+    <string name="favorite_undo_unavailable">Unable to restore favorite</string>
     <string name="favorite_reorder_handle">Move favorite</string>
+    <string name="favorite_list_reorder_handle">Move favorite list</string>
     <string name="favorite_reorder_unavailable">Unable to save favorite order</string>
     <string name="favorites_changed_edit_ended">Favorite applications changed. Edit mode ended</string>
     <string name="inventory_update_failed_edit_ended">Unable to update application state. Edit mode ended</string>

@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 
-internal data class LaunchableIdentity(
+data class LaunchableIdentity(
     val profileSerialNumber: Long,
     val componentName: ComponentName,
 )

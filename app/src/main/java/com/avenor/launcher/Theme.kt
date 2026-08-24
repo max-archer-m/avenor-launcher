@@ -11,9 +11,11 @@ internal fun AvenorTheme(content: @Composable () -> Unit) {
     val foreground = colorResource(R.color.avenor_foreground)
     val sheetSurface = colorResource(R.color.avenor_sheet_surface)
     val sheetScrim = colorResource(R.color.avenor_sheet_scrim)
+    val error = colorResource(R.color.avenor_error)
     MaterialTheme(
         colorScheme = darkColorScheme(
             background = transparent,
+            error = error,
             surface = sheetSurface,
             onBackground = foreground,
             onSurface = foreground,

@@ -11,6 +11,7 @@ import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
@@ -931,6 +932,110 @@ class HomeScreenTest {
 
         composeRule.onNodeWithTag("edit_favorites_action").performClick()
         composeRule.runOnIdle { assertEquals(true, editRequested) }
+    }
+
+    @Test
+    fun homeFavoriteActionSheetOffersEditForOneFavorite() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.only", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Only favorite",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    favoriteState = FavoriteReadState.Readable(listOf(entry.identity)),
+                    onDismiss = {},
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    onEditFavorites = {},
+                    canEditFavorites = true,
+                    informationLauncher = ApplicationInformationLauncher { true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("edit_favorites_action").assertIsDisplayed()
+    }
+
+    @Test
+    fun editModeShowsListManagementControls() {
+        val identity = LaunchableIdentity(
+            profileSerialNumber = 0,
+            componentName = ComponentName("com.example.edit-controls", "MainActivity"),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(listOf(identity)),
+                    editMode = true,
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("favorite_list_control_bar_0").assertIsDisplayed()
+        composeRule.onNodeWithTag("reorder_favorite_list_0").assertDoesNotExist()
+        composeRule.onNodeWithTag("favorite_list_size_0").assertIsDisplayed()
+        composeRule.onNodeWithTag("favorite_list_size_0").performClick()
+        composeRule.onNodeWithTag("favorite_list_size_menu_0").assertIsDisplayed()
+        composeRule.onNodeWithText("Large").assertIsDisplayed()
+        composeRule.onNodeWithTag("favorite_list_size_0").performClick()
+        composeRule.onNodeWithTag("remove_favorite_list_0").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Remove list").assertIsDisplayed()
+        composeRule.onNodeWithText("Remove list").assertDoesNotExist()
+        composeRule.onNodeWithTag("remove_favorite_list_0").performClick()
+        composeRule.onNodeWithText("Remove favorite list?").assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "All applications in this list will be removed from favorites.",
+        ).assertIsDisplayed()
+        composeRule.onNodeWithTag("cancel_remove_favorite_list_0").performClick()
+        composeRule.onNodeWithText("Remove favorite list?").assertDoesNotExist()
+        composeRule.onNodeWithTag("remove_favorite_item").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Remove favorite").assertIsDisplayed()
+        composeRule.onNodeWithText("Remove favorite").assertDoesNotExist()
+    }
+
+    @Test
+    fun editModeShowsListReorderHandlesOnlyForTwoLists() {
+        val first = LaunchableIdentity(
+            profileSerialNumber = 0,
+            componentName = ComponentName("com.example.list-one", "MainActivity"),
+        )
+        val second = LaunchableIdentity(
+            profileSerialNumber = 0,
+            componentName = ComponentName("com.example.list-two", "MainActivity"),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        FavoriteAggregate(
+                            verticalLists = listOf(
+                                FavoriteContainer(
+                                    id = "list-one",
+                                    type = FavoriteContainerType.VerticalList,
+                                    identities = listOf(first),
+                                ),
+                                FavoriteContainer(
+                                    id = "list-two",
+                                    type = FavoriteContainerType.VerticalList,
+                                    identities = listOf(second),
+                                ),
+                            ),
+                        ),
+                    ),
+                    editMode = true,
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("reorder_favorite_list_0").assertIsDisplayed()
+        composeRule.onNodeWithTag("reorder_favorite_list_1").assertIsDisplayed()
     }
 
     @Test

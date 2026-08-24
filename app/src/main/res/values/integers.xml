@@ -2,5 +2,6 @@
     <integer name="disabled_content_alpha_percent">38</integer>
     <integer name="home_drag_preview_alpha_percent">100</integer>
     <integer name="home_drag_source_slot_alpha_percent">0</integer>
-    <integer name="home_favorite_edge_scroll_dp_per_second">240</integer>
+    <integer name="home_favorite_edge_scroll_dp_per_second">120</integer>
+    <integer name="home_favorite_remove_badge_alpha_percent">24</integer>
 </resources>

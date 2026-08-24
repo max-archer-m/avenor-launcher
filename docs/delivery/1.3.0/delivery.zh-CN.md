@@ -54,7 +54,7 @@
 | --- | --- | --- | --- |
 | [迭代 15：统一收藏聚合与兼容迁移](iteration-15-unified-favorite-aggregation-and-migration.zh-CN.md) | `Completed` | 2026-08-23 | 实现已完成；作者报告编译、升级、收藏数据及剩余验收均通过，未发现重大问题。 |
 | [迭代 16：纵向列表普通模式构图](iteration-16-vertical-list-normal-mode-composition.zh-CN.md) | `Completed` | 2026-08-24 | 普通 Home 构图及 P1 聚合持久化修复已实现；作者报告当前可验证行为基本验收通过。 |
-| [迭代 17：Home 编辑会话与纵向列表管理](iteration-17-home-edit-session-and-vertical-list-management.zh-CN.md) | `Planned` | 2026-08-23 | 编辑与列表管理依赖已接受的普通模式列表构图。 |
+| [迭代 17：Home 编辑会话与纵向列表管理](iteration-17-home-edit-session-and-vertical-list-management.zh-CN.md) | `Completed` | 2026-08-25 | 实现已完成；作者报告编译、安装及当前可验证行为基本验收通过。 |
 | [迭代 18：Drawer 目标化收藏多选与纵向新增](iteration-18-drawer-targeted-multiselection-and-list-creation.zh-CN.md) | `Planned` | 2026-08-23 | 技术评估建议在收藏栏之前完成可复用的目标化新增流程。 |
 | [迭代 19：收藏栏呈现、创建和管理](iteration-19-favorite-bar-presentation-creation-and-management.zh-CN.md) | `Planned` | 2026-08-23 | 收藏栏复用已接受的编辑会话和目标化 Drawer 新增流程。 |
 | [迭代 20：跨容器应用拖动与两轴自动滚动](iteration-20-cross-container-drag-and-two-axis-auto-scroll.zh-CN.md) | `Planned` | 2026-08-23 | 跨容器移动依赖所有目标类型及其本地管理行为。 |
@@ -72,7 +72,7 @@
 
 ### 迭代 17
 
-[契约](iteration-17-home-edit-session-and-vertical-list-management.zh-CN.md)。状态为 `Planned`；未记录实现、命令、证据、制品、结果、commit 或 tag。
+[契约](iteration-17-home-edit-session-and-vertical-list-management.zh-CN.md)。Home 编辑会话、列表尺寸与删除控件、同列表应用交换、完整列表拖动排序、最新删除 Undo、拖动所有权、边缘自动滚动、冻结预览、源位置占位、目标反馈、持久化、本地化反馈及基础 UI 测试覆盖均已实现。作者报告编译、安装及当前可验证行为基本验收通过。Agent 执行的 Gradle 与 instrumented tests 为 `Not run`；Kotlin 分隔符检查、受影响 XML 解析、生产日志与残留标记搜索、`git diff --check` 和 `git diff --cached --check` 均为 `Passed`。不声明 push、tag、发布或 Release。根据作者 2026-08-25 的决定，状态为 `Completed`。
 
 ### 迭代 18
 

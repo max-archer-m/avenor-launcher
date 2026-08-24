@@ -585,6 +585,13 @@ internal fun AvenorApp(
                 favoriteAvailability = favoriteAvailability,
                 editMode = homeEditMode,
                 onRetryFavorites = { scope.launch { effectiveFavoriteStore.load() } },
+                onRequestEditMode = {
+                    editMembership = (favoriteState as? FavoriteReadState.Readable)
+                        ?.identities
+                        ?.toSet()
+                        .orEmpty()
+                    homeEditMode = true
+                },
                 onLongPressFavorite = { entry ->
                     selectedEntryFromHome = true
                     selectedEntry = entry
@@ -604,6 +611,9 @@ internal fun AvenorApp(
                             ).show()
                             false
                         } else {
+                            if (homeEditMode) {
+                                editMembership = aggregate.identities.toSet()
+                            }
                             true
                         }
                         onComplete(succeeded)

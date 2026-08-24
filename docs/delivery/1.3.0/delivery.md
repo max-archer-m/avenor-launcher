@@ -54,7 +54,7 @@ Material changes to persistence architecture, state ownership, permissions, priv
 | --- | --- | --- | --- |
 | [Iteration 15: Unified Favorite Aggregation and Compatible Migration](iteration-15-unified-favorite-aggregation-and-migration.md) | `Completed` | 2026-08-23 | Implementation is complete; the author reported that compilation, upgrade, favorite-data, and remaining acceptance passed with no material issue. |
 | [Iteration 16: Vertical-List Normal-Mode Composition](iteration-16-vertical-list-normal-mode-composition.md) | `Completed` | 2026-08-24 | Normal Home composition and P1 aggregate-persistence fixes are implemented; the author reported that the currently verifiable behavior was basically accepted. |
-| [Iteration 17: Home Edit Session and Vertical-List Management](iteration-17-home-edit-session-and-vertical-list-management.md) | `Planned` | 2026-08-23 | Editing and list management depend on accepted normal-mode list composition. |
+| [Iteration 17: Home Edit Session and Vertical-List Management](iteration-17-home-edit-session-and-vertical-list-management.md) | `Completed` | 2026-08-25 | Implementation is complete; the author reported that compilation, installation, and the currently verifiable behavior were basically accepted. |
 | [Iteration 18: Drawer Targeted Multi-Selection and Vertical-List Addition](iteration-18-drawer-targeted-multiselection-and-list-creation.md) | `Planned` | 2026-08-23 | Technical assessment recommended completing the reusable destination-targeted addition flow before favorite bars. |
 | [Iteration 19: Favorite-Bar Presentation, Creation, and Management](iteration-19-favorite-bar-presentation-creation-and-management.md) | `Planned` | 2026-08-23 | Favorite bars reuse the accepted edit session and targeted Drawer addition flow. |
 | [Iteration 20: Cross-Container Application Drag and Two-Axis Auto-Scroll](iteration-20-cross-container-drag-and-two-axis-auto-scroll.md) | `Planned` | 2026-08-23 | Cross-container movement requires all destination types and their local management behavior. |
@@ -72,7 +72,7 @@ Material changes to persistence architecture, state ownership, permissions, priv
 
 ### Iteration 17
 
-[Contract](iteration-17-home-edit-session-and-vertical-list-management.md). Status is `Planned`; no implementation, command, evidence, artifact, result, commit, or tag is recorded.
+[Contract](iteration-17-home-edit-session-and-vertical-list-management.md). The Home edit session, list-size and removal controls, same-list application exchange, complete-list drag reorder, latest-removal Undo, drag ownership, edge auto-scroll, frozen previews, source placeholders, target feedback, persistence, localized feedback, and baseline UI-test coverage are implemented. The author reported that compilation, installation, and the currently verifiable behavior were basically accepted. Agent-run Gradle and instrumented tests are `Not run`; Kotlin delimiter inspection, affected XML parsing, residual production-log and marker searches, `git diff --check`, and `git diff --cached --check` were `Passed`. No push, tag, publication, or release is claimed. Status is `Completed` by author decision on 2026-08-25.
 
 ### Iteration 18
 

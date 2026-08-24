@@ -16,25 +16,25 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-internal enum class FavoriteContainerType {
+enum class FavoriteContainerType {
     VerticalList,
     FavoriteBar,
 }
 
-internal enum class FavoriteListSize {
+enum class FavoriteListSize {
     Large,
     Medium,
     Small,
 }
 
-internal data class FavoriteContainer(
+data class FavoriteContainer(
     val id: String,
     val type: FavoriteContainerType,
     val identities: List<LaunchableIdentity>,
     val listSize: FavoriteListSize = FavoriteListSize.Medium,
 )
 
-internal data class FavoriteAggregate(
+data class FavoriteAggregate(
     val verticalLists: List<FavoriteContainer> = emptyList(),
     val favoriteBars: List<FavoriteContainer> = emptyList(),
 ) {
@@ -140,13 +140,11 @@ internal class AtomicFileFavoriteStore private constructor(
         val primary = readable.aggregate.verticalLists
             .firstOrNull { it.id == PRIMARY_LIST_ID }
         val verticalLists = if (primary == null) {
-            listOf(
-                FavoriteContainer(
-                    id = PRIMARY_LIST_ID,
-                    type = FavoriteContainerType.VerticalList,
-                    identities = listOf(identity),
-                ),
-            ) + readable.aggregate.verticalLists
+            readable.aggregate.verticalLists + FavoriteContainer(
+                id = PRIMARY_LIST_ID,
+                type = FavoriteContainerType.VerticalList,
+                identities = listOf(identity),
+            )
         } else {
             readable.aggregate.verticalLists.replaceContainer(
                 id = PRIMARY_LIST_ID,
@@ -245,12 +243,8 @@ internal class AtomicFileFavoriteStore private constructor(
     ): Boolean = mutationMutex.withLock {
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         val replacement = primaryIdentities + companionIdentities
-        val currentVerticalIdentities =
-            readable.aggregate.verticalLists.flatMap(FavoriteContainer::identities)
-        if (!isValidReplacement(currentVerticalIdentities, replacement)) {
-            return false
-        }
-        val updated = readable.aggregate.replaceVerticalComposition(
+        if (!isValidReplacement(readable.identities, replacement)) return false
+        val updated = readable.aggregate.replaceLegacyComposition(
             primaryIdentities,
             companionIdentities,
         )
@@ -410,8 +404,8 @@ internal class AtomicFileFavoriteStore private constructor(
     }
 }
 
-internal const val PRIMARY_LIST_ID = "vertical-list-1"
-internal const val COMPANION_LIST_ID = "vertical-list-2"
+const val PRIMARY_LIST_ID = "vertical-list-1"
+private const val COMPANION_LIST_ID = "vertical-list-2"
 
 private fun legacyVerticalLists(
     primaryIdentities: List<LaunchableIdentity>,
@@ -444,7 +438,7 @@ private fun List<FavoriteContainer>.replaceContainer(
     if (container.id == id) value else container
 }
 
-internal fun FavoriteAggregate.removeIdentity(identity: LaunchableIdentity): FavoriteAggregate =
+fun FavoriteAggregate.removeIdentity(identity: LaunchableIdentity): FavoriteAggregate =
     copy(
         verticalLists = verticalLists.mapNotNull { container ->
             container.copy(identities = container.identities - identity)
@@ -456,7 +450,7 @@ internal fun FavoriteAggregate.removeIdentity(identity: LaunchableIdentity): Fav
         },
     )
 
-internal fun FavoriteAggregate.removeIdentities(
+fun FavoriteAggregate.removeIdentities(
     identities: Set<LaunchableIdentity>,
 ): FavoriteAggregate = copy(
     verticalLists = verticalLists.mapNotNull { container ->
@@ -469,7 +463,7 @@ internal fun FavoriteAggregate.removeIdentities(
     },
 )
 
-internal fun FavoriteAggregate.replaceVerticalList(
+fun FavoriteAggregate.replaceVerticalList(
     id: String,
     identities: List<LaunchableIdentity>,
 ): FavoriteAggregate {
@@ -485,12 +479,7 @@ internal fun FavoriteAggregate.replaceVerticalList(
         identities = identities,
     )
     return if (existing == null) {
-        val updated = if (id == PRIMARY_LIST_ID) {
-            listOf(replacement) + verticalLists
-        } else {
-            verticalLists + replacement
-        }
-        copy(verticalLists = updated)
+        copy(verticalLists = verticalLists + replacement)
     } else {
         copy(verticalLists = verticalLists.replaceContainer(id, replacement))
     }
@@ -499,15 +488,52 @@ internal fun FavoriteAggregate.replaceVerticalList(
 internal fun FavoriteAggregate.replaceVerticalComposition(
     primaryIdentities: List<LaunchableIdentity>,
     companionIdentities: List<LaunchableIdentity>,
-): FavoriteAggregate = copy(
-    verticalLists = verticalLists.mapIndexedNotNull { index, container ->
-        val identities = when (index) {
-            0 -> primaryIdentities
-            1 -> companionIdentities
-            else -> container.identities
+): FavoriteAggregate {
+    val replacementIdentities = listOf(primaryIdentities, companionIdentities)
+    val updatedLists = replacementIdentities.mapIndexedNotNull { index, identities ->
+        if (identities.isEmpty()) {
+            null
+        } else {
+            verticalLists.getOrNull(index)?.copy(identities = identities)
+                ?: FavoriteContainer(
+                    id = if (index == 0) PRIMARY_LIST_ID else COMPANION_LIST_ID,
+                    type = FavoriteContainerType.VerticalList,
+                    identities = identities,
+                )
         }
-        container.copy(identities = identities).takeIf { it.identities.isNotEmpty() }
+    }
+    return copy(verticalLists = updatedLists)
+}
+
+internal fun FavoriteAggregate.updateVerticalList(
+    id: String,
+    transform: (FavoriteContainer) -> FavoriteContainer?,
+): FavoriteAggregate = copy(
+    verticalLists = verticalLists.mapNotNull { container ->
+        if (container.id == id) transform(container) else container
     },
+)
+
+internal fun FavoriteAggregate.moveVerticalList(
+    fromIndex: Int,
+    toIndex: Int,
+): FavoriteAggregate {
+    if (fromIndex !in verticalLists.indices || toIndex !in verticalLists.indices) return this
+    if (fromIndex == toIndex) return this
+    val reordered = verticalLists.toMutableList()
+    val moved = reordered.removeAt(fromIndex)
+    reordered.add(toIndex, moved)
+    return copy(verticalLists = reordered)
+}
+
+private fun FavoriteAggregate.replaceLegacyComposition(
+    primaryIdentities: List<LaunchableIdentity>,
+    companionIdentities: List<LaunchableIdentity>,
+): FavoriteAggregate = copy(
+    verticalLists = legacyVerticalLists(
+        primaryIdentities,
+        companionIdentities,
+    ),
 )
 
 internal fun isValidAggregate(aggregate: FavoriteAggregate): Boolean {
