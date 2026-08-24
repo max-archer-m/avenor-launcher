@@ -1165,8 +1165,10 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
         val readable = mutableState.value as FavoriteReadState.Readable
         if (identity !in readable.identities) {
             mutableState.value = FavoriteReadState.Readable(
-                readable.primaryIdentities + identity,
-                readable.companionIdentities,
+                readable.aggregate.replaceVerticalList(
+                    id = PRIMARY_LIST_ID,
+                    identities = readable.primaryIdentities + identity,
+                ),
             )
         }
         return true
@@ -1176,8 +1178,7 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
     override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean {
         val readable = mutableState.value as FavoriteReadState.Readable
         mutableState.value = FavoriteReadState.Readable(
-            readable.primaryIdentities.filterNot(identities::contains),
-            readable.companionIdentities.filterNot(identities::contains),
+            readable.aggregate.removeIdentities(identities),
         )
         return true
     }
@@ -1186,8 +1187,10 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
         val readable = mutableState.value as? FavoriteReadState.Readable ?: return false
         if (!isValidReplacement(readable.primaryIdentities, identities)) return false
         mutableState.value = FavoriteReadState.Readable(
-            identities,
-            readable.companionIdentities,
+            readable.aggregate.replaceVerticalList(
+                id = PRIMARY_LIST_ID,
+                identities = identities,
+            ),
         )
         return true
     }
@@ -1200,8 +1203,10 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
         val replacement = primaryIdentities + companionIdentities
         if (!isValidReplacement(readable.identities, replacement)) return false
         mutableState.value = FavoriteReadState.Readable(
-            primaryIdentities,
-            companionIdentities,
+            readable.aggregate.replaceLegacyComposition(
+                primaryIdentities,
+                companionIdentities,
+            ),
         )
         return true
     }

@@ -724,8 +724,10 @@ private class InMemoryFavoriteStore : FavoriteStore {
         val current = mutableState.value as FavoriteReadState.Readable
         if (identity !in current.identities) {
             mutableState.value = FavoriteReadState.Readable(
-                current.primaryIdentities + identity,
-                current.companionIdentities,
+                current.aggregate.replaceVerticalList(
+                    id = PRIMARY_LIST_ID,
+                    identities = current.primaryIdentities + identity,
+                ),
             )
         }
         return true
@@ -733,16 +735,14 @@ private class InMemoryFavoriteStore : FavoriteStore {
     override suspend fun remove(identity: LaunchableIdentity): Boolean {
         val current = mutableState.value as FavoriteReadState.Readable
         mutableState.value = FavoriteReadState.Readable(
-            current.primaryIdentities - identity,
-            current.companionIdentities - identity,
+            current.aggregate.removeIdentity(identity),
         )
         return true
     }
     override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean {
         val current = mutableState.value as FavoriteReadState.Readable
         mutableState.value = FavoriteReadState.Readable(
-            current.primaryIdentities.filterNot(identities::contains),
-            current.companionIdentities.filterNot(identities::contains),
+            current.aggregate.removeIdentities(identities),
         )
         return true
     }
@@ -750,8 +750,10 @@ private class InMemoryFavoriteStore : FavoriteStore {
         val current = mutableState.value as? FavoriteReadState.Readable ?: return false
         if (!isValidReplacement(current.primaryIdentities, identities)) return false
         mutableState.value = FavoriteReadState.Readable(
-            identities,
-            current.companionIdentities,
+            current.aggregate.replaceVerticalList(
+                id = PRIMARY_LIST_ID,
+                identities = identities,
+            ),
         )
         return true
     }
@@ -764,8 +766,10 @@ private class InMemoryFavoriteStore : FavoriteStore {
         val replacement = primaryIdentities + companionIdentities
         if (!isValidReplacement(current.identities, replacement)) return false
         mutableState.value = FavoriteReadState.Readable(
-            primaryIdentities,
-            companionIdentities,
+            current.aggregate.replaceLegacyComposition(
+                primaryIdentities,
+                companionIdentities,
+            ),
         )
         return true
     }

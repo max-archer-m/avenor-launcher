@@ -120,4 +120,6 @@ The eventual artifact must retain `applicationId` `com.avenor.launcher`, use the
 
 ## Completion result
 
-No completion result exists. `1.3.0` and Iterations 15-21 remain `Planned`; no implementation, artifact, device acceptance, tag, publication, or release is claimed.
+No version completion result exists. Iteration 15 is `Completed`; Iterations 16-21 remain
+`Planned`, so `1.3.0` remains incomplete. No version artifact, tag, publication, or release is
+claimed.
