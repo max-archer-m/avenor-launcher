@@ -7,6 +7,8 @@
     <color name="home_edit_surface">#33FFFFFF</color>
     <color name="home_favorite_ripple">#1FFFFFFF</color>
     <color name="home_favorite_size_control_background">#1FFFFFFF</color>
+    <color name="drawer_selection_background">#14FFFFFF</color>
+    <color name="drawer_selection_indicator_content">#FF000000</color>
     <color name="home_favorite_exchange_border">#CCFFFFFF</color>
     <color name="home_favorite_insertion_line">#FFFFFFFF</color>
 </resources>

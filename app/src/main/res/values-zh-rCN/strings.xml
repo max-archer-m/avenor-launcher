@@ -37,6 +37,15 @@
     <string name="loading_favorites">正在加载收藏…</string>
     <string name="unable_to_load_favorites">无法加载收藏</string>
     <string name="home_empty_favorites">从抽屉添加应用</string>
+    <string name="add_favorites_to_list">向列表添加应用</string>
+    <string name="drawer_select_favorites">选择应用</string>
+    <string name="drawer_selection_cancel">取消</string>
+    <string name="drawer_selection_confirm">确认</string>
+    <string name="drawer_selection_add_to_list">添加到列表</string>
+    <string name="drawer_selection_create_list">创建列表</string>
+    <string name="drawer_selection_order_format">已选择，第 %1$d 项</string>
+    <string name="drawer_selection_not_selected">未选择</string>
+    <string name="drawer_selection_already_favorite_unavailable">已在收藏中，无法选择</string>
     <string name="favorite_application_unavailable">应用暂不可用</string>
     <string name="favorite_application_disabled">应用已停用</string>
     <string name="favorite_disabled_format">%1$s — 已停用</string>

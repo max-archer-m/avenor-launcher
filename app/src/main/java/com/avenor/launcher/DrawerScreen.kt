@@ -8,6 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.Orientation
@@ -33,6 +35,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +56,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -61,6 +66,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -97,6 +104,13 @@ internal fun DrawerScreen(
     onLongPress: (LaunchableEntry) -> Unit = {},
     onExternalLaunch: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    favoriteSelectionTarget: String? = null,
+    favoriteSelection: List<LaunchableIdentity> = emptyList(),
+    favoriteMembership: Set<LaunchableIdentity> = emptySet(),
+    favoriteSelectionSaving: Boolean = false,
+    onToggleFavoriteSelection: (LaunchableIdentity) -> Unit = {},
+    onCancelFavoriteSelection: () -> Unit = {},
+    onConfirmFavoriteSelection: () -> Unit = {},
 ) {
     var loadRequest by remember { mutableIntStateOf(0) }
     var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
@@ -205,48 +219,94 @@ internal fun DrawerScreen(
     }
 
     when (val currentState = state) {
-        LaunchableInventoryState.Loading -> DrawerMessage(
-            modifier = modifier,
-            message = stringResource(R.string.drawer_loading_applications),
-            showProgress = true,
-            action = null,
-            testTag = "drawer_loading",
-        )
+        LaunchableInventoryState.Loading -> if (favoriteSelectionTarget == null) {
+            DrawerMessage(
+                modifier = modifier,
+                message = stringResource(R.string.drawer_loading_applications),
+                showProgress = true,
+                action = null,
+                testTag = "drawer_loading",
+            )
+        } else {
+            DrawerSelectionMessage(
+                modifier = modifier,
+                target = favoriteSelectionTarget,
+                message = stringResource(R.string.drawer_loading_applications),
+                showProgress = true,
+                retry = null,
+                selection = favoriteSelection,
+                saving = favoriteSelectionSaving,
+                onCancel = onCancelFavoriteSelection,
+                onConfirm = onConfirmFavoriteSelection,
+            )
+        }
 
-        is LaunchableInventoryState.Error -> DrawerMessage(
-            modifier = modifier,
-            message = stringResource(R.string.drawer_unable_to_load_applications),
-            showProgress = false,
-            showErrorIcon = true,
-            action = {
-                TextButton(
-                    onClick = {
-                        loadTrigger = DrawerLoadTrigger.ManualRetry
-                        loadRequest += 1
-                    },
-                ) {
-                    Text(stringResource(R.string.retry))
-                }
-            },
-            testTag = "drawer_error",
-        )
-
-        is LaunchableInventoryState.Content -> DrawerApplicationList(
-            modifier = modifier,
-            listState = listState,
-            sections = currentState.snapshot.drawerSectionsFor(locale),
-            onLaunch = { entry ->
-                if (activationGuard.tryAcquire()) {
-                    if (entryLauncher.launch(entry)) {
-                        onExternalLaunch()
-                    } else {
-                        Toast.makeText(context, launchFailureMessage, Toast.LENGTH_SHORT).show()
+        is LaunchableInventoryState.Error -> if (favoriteSelectionTarget == null) {
+            DrawerMessage(
+                modifier = modifier,
+                message = stringResource(R.string.drawer_unable_to_load_applications),
+                showProgress = false,
+                showErrorIcon = true,
+                action = {
+                    TextButton(
+                        onClick = {
+                            loadTrigger = DrawerLoadTrigger.ManualRetry
+                            loadRequest += 1
+                        },
+                    ) {
+                        Text(stringResource(R.string.retry))
                     }
-                }
-            },
-            onLongPress = onLongPress,
-            onOpenSettings = onOpenSettings,
-        )
+                },
+                testTag = "drawer_error",
+            )
+        } else {
+            DrawerSelectionMessage(
+                modifier = modifier,
+                target = favoriteSelectionTarget,
+                message = stringResource(R.string.drawer_unable_to_load_applications),
+                showProgress = false,
+                retry = {
+                    loadTrigger = DrawerLoadTrigger.ManualRetry
+                    loadRequest += 1
+                },
+                selection = favoriteSelection,
+                saving = favoriteSelectionSaving,
+                onCancel = onCancelFavoriteSelection,
+                onConfirm = onConfirmFavoriteSelection,
+            )
+        }
+
+        is LaunchableInventoryState.Content -> if (favoriteSelectionTarget == null) {
+            DrawerApplicationList(
+                modifier = modifier,
+                listState = listState,
+                sections = currentState.snapshot.drawerSectionsFor(locale),
+                onLaunch = { entry ->
+                    if (activationGuard.tryAcquire()) {
+                        if (entryLauncher.launch(entry)) {
+                            onExternalLaunch()
+                        } else {
+                            Toast.makeText(context, launchFailureMessage, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
+                onLongPress = onLongPress,
+                onOpenSettings = onOpenSettings,
+            )
+        } else {
+            DrawerFavoriteSelectionList(
+                modifier = modifier,
+                listState = listState,
+                sections = currentState.snapshot.drawerSectionsFor(locale),
+                target = favoriteSelectionTarget,
+                selection = favoriteSelection,
+                favoriteMembership = favoriteMembership,
+                saving = favoriteSelectionSaving,
+                onToggle = onToggleFavoriteSelection,
+                onCancel = onCancelFavoriteSelection,
+                onConfirm = onConfirmFavoriteSelection,
+            )
+        }
     }
 }
 
@@ -292,6 +352,257 @@ private fun DrawerMessage(
             style = MaterialTheme.typography.bodyLarge,
         )
         action?.invoke()
+    }
+}
+
+@Composable
+private fun DrawerSelectionMessage(
+    modifier: Modifier,
+    target: String,
+    message: String,
+    showProgress: Boolean,
+    retry: (() -> Unit)?,
+    selection: List<LaunchableIdentity>,
+    saving: Boolean,
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing),
+    ) {
+        DrawerSelectionHeader(
+            target = target,
+            selectionSize = selection.size,
+            saving = saving,
+            onCancel = onCancel,
+            onConfirm = onConfirm,
+        )
+        DrawerMessage(
+            modifier = Modifier.weight(1f),
+            message = message,
+            showProgress = showProgress,
+            showErrorIcon = !showProgress,
+            action = retry?.let { retryAction ->
+                {
+                    TextButton(onClick = retryAction, enabled = !saving) {
+                        Text(stringResource(R.string.retry))
+                    }
+                }
+            },
+            testTag = "drawer_selection_message",
+        )
+    }
+}
+
+@Composable
+private fun DrawerFavoriteSelectionList(
+    modifier: Modifier,
+    listState: LazyListState,
+    sections: List<DrawerSection>,
+    target: String,
+    selection: List<LaunchableIdentity>,
+    favoriteMembership: Set<LaunchableIdentity>,
+    saving: Boolean,
+    onToggle: (LaunchableIdentity) -> Unit,
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing),
+    ) {
+        DrawerSelectionHeader(
+            target = target,
+            selectionSize = selection.size,
+            saving = saving,
+            onCancel = onCancel,
+            onConfirm = onConfirm,
+        )
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .testTag("drawer_favorite_selection_list"),
+            contentPadding = PaddingValues(
+                start = dimensionResource(R.dimen.drawer_horizontal_padding),
+                end = dimensionResource(R.dimen.drawer_horizontal_padding),
+            ),
+            state = listState,
+        ) {
+            sections.forEach { section ->
+                item(key = "selection_section:${section.label}") {
+                    DrawerSectionHeader(section.label)
+                }
+                items(
+                    items = section.entries,
+                    key = { entry ->
+                        "selection:${entry.identity.profileSerialNumber}:" +
+                            entry.identity.componentName.flattenToString()
+                    },
+                ) { entry ->
+                    val alreadyFavorite = entry.identity in favoriteMembership
+                    val order = selection.indexOf(entry.identity)
+                    DrawerFavoriteSelectionRow(
+                        entry = entry,
+                        order = order.takeIf { it >= 0 }?.plus(1),
+                        alreadyFavorite = alreadyFavorite,
+                        enabled = !saving && !alreadyFavorite,
+                        onClick = { onToggle(entry.identity) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DrawerSelectionHeader(
+    target: String,
+    selectionSize: Int,
+    saving: Boolean,
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(R.dimen.drawer_top_app_bar_height))
+            .padding(horizontal = dimensionResource(R.dimen.drawer_horizontal_padding))
+            .testTag("drawer_favorite_selection_header"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            TextButton(
+                onClick = onCancel,
+                enabled = !saving,
+                modifier = Modifier.testTag("drawer_favorite_selection_cancel"),
+            ) {
+                Text(stringResource(R.string.drawer_selection_cancel))
+            }
+        }
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = target,
+                modifier = Modifier.testTag("drawer_favorite_selection_title"),
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            TextButton(
+                onClick = onConfirm,
+                enabled = !saving && selectionSize > 0,
+                modifier = Modifier.testTag("drawer_favorite_selection_confirm"),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = colorResource(R.color.avenor_foreground),
+                ),
+            ) {
+                Text(stringResource(R.string.drawer_selection_confirm))
+            }
+        }
+    }
+}
+
+@Composable
+private fun DrawerFavoriteSelectionRow(
+    entry: LaunchableEntry,
+    order: Int?,
+    alreadyFavorite: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val selected = order != null
+    val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = dimensionResource(R.dimen.drawer_application_row_min_height))
+            .then(
+                if (selected) {
+                    Modifier.background(colorResource(R.color.drawer_selection_background))
+                } else {
+                    Modifier
+                },
+            )
+            .alpha(if (alreadyFavorite) disabledAlpha else 1f)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .testTag("drawer_favorite_selection_row"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .width(dimensionResource(R.dimen.drawer_selection_indicator_region_width))
+                .height(dimensionResource(R.dimen.drawer_application_row_min_height)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(dimensionResource(R.dimen.drawer_selection_indicator_size))
+                    .testTag("drawer_favorite_selection_indicator")
+                    .then(
+                        if (selected) {
+                            Modifier.background(
+                                color = MaterialTheme.colorScheme.onBackground,
+                                shape = CircleShape,
+                            )
+                        } else {
+                            Modifier.border(
+                                width = dimensionResource(
+                                    R.dimen.drawer_selection_indicator_border_width,
+                                ),
+                                color = MaterialTheme.colorScheme.onBackground,
+                                shape = CircleShape,
+                            )
+                        },
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (order != null) {
+                    Text(
+                        text = order.toString(),
+                        color = colorResource(
+                            R.color.drawer_selection_indicator_content,
+                        ),
+                        modifier = Modifier.testTag(
+                            "drawer_favorite_selection_number",
+                        ),
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+            }
+        }
+        DrawerApplicationIcon(
+            preparedBitmap = entry.iconBitmap,
+            icon = entry.icon,
+            iconSize = dimensionResource(R.dimen.drawer_application_icon_size),
+            iconSizePixels = with(LocalDensity.current) {
+                dimensionResource(R.dimen.drawer_application_icon_size).roundToPx()
+            },
+        )
+        Spacer(Modifier.width(dimensionResource(R.dimen.drawer_application_icon_label_gap)))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = entry.label,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
     }
 }
 

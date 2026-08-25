@@ -969,16 +969,21 @@ class HomeScreenTest {
             profileSerialNumber = 0,
             componentName = ComponentName("com.example.edit-controls", "MainActivity"),
         )
+        var addTarget: String? = null
         composeRule.setContent {
             AvenorTheme {
                 HomeScreen(
                     favoriteState = FavoriteReadState.Readable(listOf(identity)),
                     editMode = true,
+                    onAddFavoritesToList = { addTarget = it },
                 )
             }
         }
 
         composeRule.onNodeWithTag("favorite_list_control_bar_0").assertIsDisplayed()
+        composeRule.onNodeWithTag("favorite_add_0").assertIsDisplayed()
+        composeRule.onNodeWithTag("favorite_add_0").performClick()
+        composeRule.runOnIdle { assertEquals(PRIMARY_LIST_ID, addTarget) }
         composeRule.onNodeWithTag("reorder_favorite_list_0").assertDoesNotExist()
         composeRule.onNodeWithTag("favorite_list_size_0").assertIsDisplayed()
         composeRule.onNodeWithTag("favorite_list_size_0").performClick()
@@ -998,6 +1003,21 @@ class HomeScreenTest {
         composeRule.onNodeWithTag("remove_favorite_item").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Remove favorite").assertIsDisplayed()
         composeRule.onNodeWithText("Remove favorite").assertDoesNotExist()
+    }
+
+    @Test
+    fun editModeShowsProvisionalListWhenFavoritesAreEmpty() {
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(FavoriteAggregate()),
+                    editMode = true,
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("favorite_provisional_add_0").assertIsDisplayed()
+        composeRule.onNodeWithTag("home_favorites_empty").assertDoesNotExist()
     }
 
     @Test

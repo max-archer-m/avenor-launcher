@@ -21,7 +21,9 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
@@ -52,6 +54,17 @@ internal enum class AvenorSurface {
     Home,
     Drawer,
 }
+
+private data class FavoriteAddTarget(
+    val containerId: String?,
+    val label: String,
+    val provisional: Boolean,
+)
+
+private data class FavoriteRevealRequest(
+    val containerId: String,
+    val identity: LaunchableIdentity,
+)
 
 private const val DRAWER_MOVEMENT_PER_GESTURE_DP = 1.5f
 private const val TARGET_FLING_THRESHOLD_DP_PER_SECOND = 1_000f
@@ -168,6 +181,10 @@ internal fun AvenorApp(
     var selectedEntry by remember { mutableStateOf<LaunchableEntry?>(null) }
     var selectedEntryFromHome by remember { mutableStateOf(false) }
     var homeEditMode by remember { mutableStateOf(false) }
+    var favoriteAddTarget by remember { mutableStateOf<FavoriteAddTarget?>(null) }
+    var favoriteSelection by remember { mutableStateOf<List<LaunchableIdentity>>(emptyList()) }
+    var favoriteSelectionSaving by remember { mutableStateOf(false) }
+    var favoriteRevealRequest by remember { mutableStateOf<FavoriteRevealRequest?>(null) }
     var settingsOpen by remember { mutableStateOf(false) }
     var externalLaunchPendingReturn by remember { mutableStateOf(false) }
     var shortcutOwner by remember { mutableStateOf<LaunchableIdentity?>(null) }
@@ -178,6 +195,8 @@ internal fun AvenorApp(
     val launchFailureMessage = stringResource(R.string.application_unable_to_open)
     val favoritesChangedMessage = stringResource(R.string.favorites_changed_edit_ended)
     val inventoryFailureMessage = stringResource(R.string.inventory_update_failed_edit_ended)
+    val addToListLabel = stringResource(R.string.drawer_selection_add_to_list)
+    val createListLabel = stringResource(R.string.drawer_selection_create_list)
 
     LaunchedEffect(effectiveFavoriteStore) {
         effectiveFavoriteStore.load()
@@ -198,9 +217,10 @@ internal fun AvenorApp(
         }
     }
     LaunchedEffect(favoriteState) {
-        if (favoriteState !is FavoriteReadState.Readable) selectedEntry = null
+        val state = favoriteState
+        if (state !is FavoriteReadState.Readable) selectedEntry = null
         if (homeEditMode) {
-            val readable = favoriteState as? FavoriteReadState.Readable
+            val readable = state as? FavoriteReadState.Readable
             if (readable == null) {
                 homeEditMode = false
                 Toast.makeText(androidContext, inventoryFailureMessage, Toast.LENGTH_SHORT).show()
@@ -216,6 +236,48 @@ internal fun AvenorApp(
             homeEditMode = false
             Toast.makeText(androidContext, inventoryFailureMessage, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    LaunchedEffect(inventoryState, favoriteAddTarget, favoriteSelectionSaving) {
+        if (favoriteAddTarget == null || favoriteSelectionSaving) return@LaunchedEffect
+        val content = inventoryState as? LaunchableInventoryState.Content
+            ?: return@LaunchedEffect
+        val availableIdentities = content.snapshot.entries
+            .mapTo(mutableSetOf(), LaunchableEntry::identity)
+        favoriteSelection = favoriteSelection.filter { it in availableIdentities }
+    }
+
+    LaunchedEffect(favoriteRevealRequest, favoriteState, settledSurface, homeEditMode) {
+        val request = favoriteRevealRequest ?: return@LaunchedEffect
+        if (settledSurface != AvenorSurface.Home || !homeEditMode) return@LaunchedEffect
+        val readable = favoriteState as? FavoriteReadState.Readable ?: return@LaunchedEffect
+        val containerIndex = readable.aggregate.verticalLists.indexOfFirst {
+            it.id == request.containerId
+        }
+        val container = readable.aggregate.verticalLists.getOrNull(containerIndex)
+            ?: return@LaunchedEffect
+        val itemIndex = container.identities.indexOf(request.identity)
+        if (itemIndex < 0) {
+            favoriteRevealRequest = null
+            return@LaunchedEffect
+        }
+        val listState = when (containerIndex) {
+            0 -> homeFavoriteListState
+            1 -> companionFavoriteListState
+            else -> null
+        }
+        if (listState == null) {
+            favoriteRevealRequest = null
+            return@LaunchedEffect
+        }
+        withFrameNanos { }
+        val isVisible = listState.layoutInfo.visibleItemsInfo.any {
+            it.index == itemIndex
+        }
+        if (!isVisible) {
+            listState.scrollToItem(itemIndex)
+        }
+        favoriteRevealRequest = null
     }
 
     val favoriteMembership = (favoriteState as? FavoriteReadState.Readable)?.identities?.toSet()
@@ -303,6 +365,13 @@ internal fun AvenorApp(
             targetVelocity = targetVelocity,
             targetFlingThresholdPx = targetFlingThresholdPx,
         )
+        if (target == AvenorSurface.Home &&
+            favoriteAddTarget != null &&
+            !favoriteSelectionSaving
+        ) {
+            favoriteAddTarget = null
+            favoriteSelection = emptyList()
+        }
         settleTo(target)
     }
 
@@ -319,6 +388,130 @@ internal fun AvenorApp(
         selectedEntryFromHome = false
         settingsOpen = false
         homeEditMode = false
+        favoriteRevealRequest = null
+        if (!favoriteSelectionSaving) {
+            favoriteAddTarget = null
+            favoriteSelection = emptyList()
+        }
+    }
+
+    fun closeFavoriteSelection() {
+        favoriteAddTarget = null
+        favoriteSelection = emptyList()
+        favoriteSelectionSaving = false
+        settleTo(AvenorSurface.Home)
+    }
+
+    fun openFavoriteSelection(containerId: String) {
+        val readable = favoriteState as? FavoriteReadState.Readable ?: return
+        val index = readable.aggregate.verticalLists.indexOfFirst { it.id == containerId }
+        if (index < 0) return
+        favoriteAddTarget = FavoriteAddTarget(
+            containerId = containerId,
+            label = addToListLabel,
+            provisional = false,
+        )
+        favoriteSelection = emptyList()
+        favoriteSelectionSaving = false
+        drawerActivated = true
+        settleTo(AvenorSurface.Drawer)
+    }
+
+    fun openProvisionalFavoriteSelection() {
+        val state = favoriteState
+        if (state !is FavoriteReadState.Readable ||
+            state.aggregate.verticalLists.size >= 2
+        ) {
+            return
+        }
+        favoriteAddTarget = FavoriteAddTarget(
+            containerId = null,
+            label = createListLabel,
+            provisional = true,
+        )
+        favoriteSelection = emptyList()
+        favoriteSelectionSaving = false
+        drawerActivated = true
+        settleTo(AvenorSurface.Drawer)
+    }
+
+    fun confirmFavoriteSelection() {
+        val target = favoriteAddTarget ?: return
+        val selected = favoriteSelection
+        if (selected.isEmpty() || favoriteSelectionSaving) return
+        favoriteSelectionSaving = true
+        scope.launch {
+            val readable = effectiveFavoriteStore.state.value as? FavoriteReadState.Readable
+            val inventorySnapshot = (inventoryCoordinator.state.value
+                as? LaunchableInventoryState.Content)?.snapshot
+            val container = target.containerId?.let { containerId ->
+                readable?.aggregate?.verticalLists
+                    ?.firstOrNull { it.id == containerId }
+            }
+            val currentIdentities = readable?.aggregate?.identities?.toSet().orEmpty()
+            val currentInventoryIdentities = inventorySnapshot?.entries
+                ?.mapTo(mutableSetOf(), LaunchableEntry::identity)
+                .orEmpty()
+            val appendable = selected.filter { identity ->
+                identity in currentInventoryIdentities && identity !in currentIdentities
+            }
+            val updated = when {
+                readable == null || inventorySnapshot == null || appendable.isEmpty() -> null
+                target.provisional -> {
+                    val newId = "vertical-list-${readable.aggregate.verticalLists.size + 1}"
+                    readable.aggregate.copy(
+                        verticalLists = readable.aggregate.verticalLists + FavoriteContainer(
+                            id = newId,
+                            type = FavoriteContainerType.VerticalList,
+                            identities = appendable,
+                            listSize = FavoriteListSize.Medium,
+                        ),
+                    )
+                }
+                container != null -> readable.aggregate.updateVerticalList(container.id) {
+                    existing ->
+                        existing.copy(identities = existing.identities + appendable)
+                }
+                else -> null
+            }
+            val succeeded = when {
+                updated == null -> false
+                else -> effectiveFavoriteStore.replaceAggregate(updated)
+            }
+            if (succeeded) {
+                updated?.let { editMembership = it.identities.toSet() }
+                updated?.let { aggregate ->
+                    val targetContainerId = target.containerId
+                        ?: aggregate.verticalLists.lastOrNull()?.id
+                    val revealedIdentity = selected.firstOrNull { identity ->
+                        targetContainerId?.let { containerId ->
+                            aggregate.verticalLists
+                                .firstOrNull { it.id == containerId }
+                                ?.identities
+                                ?.contains(identity) == true
+                        } == true
+                    }
+                    if (targetContainerId != null && revealedIdentity != null) {
+                        favoriteRevealRequest = FavoriteRevealRequest(
+                            containerId = targetContainerId,
+                            identity = revealedIdentity,
+                        )
+                    }
+                }
+                closeFavoriteSelection()
+            } else {
+                favoriteSelectionSaving = false
+                if (!homeEditMode) {
+                    favoriteAddTarget = null
+                    favoriteSelection = emptyList()
+                }
+                Toast.makeText(
+                    androidContext,
+                    R.string.favorite_reorder_unavailable,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        }
     }
 
     LaunchedEffect(systemHomeEvents) {
@@ -362,7 +555,13 @@ internal fun AvenorApp(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    BackHandler(enabled = homeEditMode) {
+    BackHandler(enabled = favoriteAddTarget != null && !favoriteSelectionSaving) {
+        closeFavoriteSelection()
+    }
+
+    BackHandler(enabled = favoriteAddTarget != null && favoriteSelectionSaving) {}
+
+    BackHandler(enabled = homeEditMode && favoriteAddTarget == null) {
         homeEditMode = false
     }
 
@@ -415,10 +614,17 @@ internal fun AvenorApp(
         )
     }
 
+    val currentFavoriteSelectionSaving by rememberUpdatedState(
+        favoriteSelectionSaving,
+    )
     val drawerNestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (source != NestedScrollSource.UserInput) return Offset.Zero
+                if (source != NestedScrollSource.UserInput ||
+                    currentFavoriteSelectionSaving
+                ) {
+                    return Offset.Zero
+                }
                 val shouldTakeOwnership = drawerTransitionOwnsGesture ||
                     (available.y > 0f && !drawerListState.canScrollBackward)
                 if (!shouldTakeOwnership) return Offset.Zero
@@ -435,7 +641,10 @@ internal fun AvenorApp(
                 available: Offset,
                 source: NestedScrollSource,
             ): Offset {
-                if (source != NestedScrollSource.UserInput || available.y <= 0f) {
+                if (source != NestedScrollSource.UserInput ||
+                    available.y <= 0f ||
+                    currentFavoriteSelectionSaving
+                ) {
                     return Offset.Zero
                 }
                 if (!drawerTransitionOwnsGesture) {
@@ -447,12 +656,14 @@ internal fun AvenorApp(
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
+                if (currentFavoriteSelectionSaving) return Velocity.Zero
                 if (!drawerTransitionOwnsGesture) return Velocity.Zero
                 finishGesture(AvenorSurface.Drawer, available.y)
                 return Velocity(x = 0f, y = available.y)
             }
 
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                if (currentFavoriteSelectionSaving) return Velocity.Zero
                 if (!drawerTransitionOwnsGesture) return Velocity.Zero
                 finishGesture(AvenorSurface.Drawer, available.y)
                 return Velocity(x = 0f, y = available.y)
@@ -596,6 +807,8 @@ internal fun AvenorApp(
                     selectedEntryFromHome = true
                     selectedEntry = entry
                 },
+                onAddFavoritesToList = ::openFavoriteSelection,
+                onAddProvisionalFavorites = ::openProvisionalFavoriteSelection,
                 onCommitFavoriteComposition = {
                     aggregate,
                     onComplete,
@@ -665,6 +878,23 @@ internal fun AvenorApp(
                     listState = drawerListState,
                     active = !settingsOpen &&
                         (settledSurface == AvenorSurface.Drawer || progress > 0f),
+                    favoriteSelectionTarget = favoriteAddTarget?.label,
+                    favoriteSelection = favoriteSelection,
+                    favoriteMembership = favoriteMembership.orEmpty(),
+                    favoriteSelectionSaving = favoriteSelectionSaving,
+                    onToggleFavoriteSelection = { identity ->
+                        if (identity !in favoriteMembership.orEmpty() &&
+                            !favoriteSelectionSaving
+                        ) {
+                            favoriteSelection = if (identity in favoriteSelection) {
+                                favoriteSelection - identity
+                            } else {
+                                favoriteSelection + identity
+                            }
+                        }
+                    },
+                    onCancelFavoriteSelection = ::closeFavoriteSelection,
+                    onConfirmFavoriteSelection = ::confirmFavoriteSelection,
                     onLongPress = { entry ->
                         selectedEntryFromHome = false
                         selectedEntry = entry

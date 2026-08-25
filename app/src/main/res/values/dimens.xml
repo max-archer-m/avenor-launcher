@@ -49,6 +49,10 @@
     <dimen name="home_favorite_list_size_menu_corner_radius">8dp</dimen>
     <dimen name="home_favorite_list_size_menu_indicator_icon_gap">8dp</dimen>
     <dimen name="home_favorite_list_control_bar_height">48dp</dimen>
+    <dimen name="drawer_top_app_bar_height">56dp</dimen>
+    <dimen name="drawer_selection_indicator_region_width">40dp</dimen>
+    <dimen name="drawer_selection_indicator_size">24dp</dimen>
+    <dimen name="drawer_selection_indicator_border_width">1dp</dimen>
     <dimen name="home_module_spacing">16dp</dimen>
     <dimen name="home_favorite_group_spacing">16dp</dimen>
     <dimen name="home_edit_surface_radius">8dp</dimen>

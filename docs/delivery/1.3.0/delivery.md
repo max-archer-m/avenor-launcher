@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [delivery.zh-CN.md](delivery.zh-CN.md).
 >
-> This record plans the behavior selected for `1.3.0`. `Planned` does not authorize production implementation, a version change, build, commit, push, tag, publication, or release.
+> This record tracks the behavior selected for `1.3.0`. Status and evidence do not authorize a version change, commit, push, tag, publication, or release.
 
 ## Version intent
 
@@ -55,7 +55,7 @@ Material changes to persistence architecture, state ownership, permissions, priv
 | [Iteration 15: Unified Favorite Aggregation and Compatible Migration](iteration-15-unified-favorite-aggregation-and-migration.md) | `Completed` | 2026-08-23 | Implementation is complete; the author reported that compilation, upgrade, favorite-data, and remaining acceptance passed with no material issue. |
 | [Iteration 16: Vertical-List Normal-Mode Composition](iteration-16-vertical-list-normal-mode-composition.md) | `Completed` | 2026-08-24 | Normal Home composition and P1 aggregate-persistence fixes are implemented; the author reported that the currently verifiable behavior was basically accepted. |
 | [Iteration 17: Home Edit Session and Vertical-List Management](iteration-17-home-edit-session-and-vertical-list-management.md) | `Completed` | 2026-08-25 | Implementation is complete; the author reported that compilation, installation, and the currently verifiable behavior were basically accepted. |
-| [Iteration 18: Drawer Targeted Multi-Selection and Vertical-List Addition](iteration-18-drawer-targeted-multiselection-and-list-creation.md) | `Planned` | 2026-08-23 | Technical assessment recommended completing the reusable destination-targeted addition flow before favorite bars. |
+| [Iteration 18: Drawer Targeted Multi-Selection and Vertical-List Addition](iteration-18-drawer-targeted-multiselection-and-list-creation.md) | `Completed` | 2026-08-25 | The implementation is complete; the author reported that code-level acceptance and the basic device acceptance passed with no current functional issue. |
 | [Iteration 19: Favorite-Bar Presentation, Creation, and Management](iteration-19-favorite-bar-presentation-creation-and-management.md) | `Planned` | 2026-08-23 | Favorite bars reuse the accepted edit session and targeted Drawer addition flow. |
 | [Iteration 20: Cross-Container Application Drag and Two-Axis Auto-Scroll](iteration-20-cross-container-drag-and-two-axis-auto-scroll.md) | `Planned` | 2026-08-23 | Cross-container movement requires all destination types and their local management behavior. |
 | [Iteration 21: Upgrade, Regression, and Version Closure](iteration-21-upgrade-regression-and-version-closure.md) | `Planned` | 2026-08-23 | Final closure follows acceptance of Iterations 15-20 and the required version evidence. |
@@ -76,7 +76,9 @@ Material changes to persistence architecture, state ownership, permissions, priv
 
 ### Iteration 18
 
-[Contract](iteration-18-drawer-targeted-multiselection-and-list-creation.md). Status is `Planned`; no implementation, command, evidence, artifact, result, commit, or tag is recorded.
+[Contract](iteration-18-drawer-targeted-multiselection-and-list-creation.md). The implementation presents persisted and provisional vertical-list add controls, captures the exact target, opens the Drawer selection mode, preserves ordered selection with circular numeric indicators, disables already-favorited identities, freezes applicable interaction during save, revalidates selected identities against the current inventory, protects provisional creation from zero valid identities, restores the Home target position, and supports atomic aggregate append or medium provisional-list creation. The Home edit surface also includes the accepted list-level drag exchange behavior. The author reported that code-level acceptance and basic device acceptance passed with no current functional issue; a minor exchange-time pause remains a performance observation rather than a functional failure.
+
+The following local checks are `Passed`: `git diff --check`, staged-diff whitespace check, affected XML parsing, and the implementation line-width sweep. Agent-run Gradle and instrumented tests are `Not run`; broader API, OEM, profile, clone, process-recreation, accessibility, and performance scenarios remain `Not run` or `Unknown`. These are recorded evidence gaps, not reported failures for the author-accepted iteration scope. Status is `Completed` by author decision on 2026-08-25; no commit, push, tag, publication, artifact, or release is claimed.
 
 ### Iteration 19
 
@@ -92,7 +94,7 @@ Material changes to persistence architecture, state ownership, permissions, priv
 
 ## Dependencies and sequence
 
-The current delivery dependency is `15 → 16 → 17 → 18 → 19 → 20 → 21`. It reflects model, presentation, editing, target-addition, container, movement, and closure dependencies. It does not bind an iteration to a contributor, terminal, branch, forecast date, or permanent single-line execution policy.
+The current delivery dependency is `15 → 16 → 17 → 18 → 19 → 20 → 21`. Iteration 18 is complete and its targeted addition mechanism is available for Iteration 19 to reuse. The sequence does not bind an iteration to a contributor, terminal, branch, forecast date, or permanent single-line execution policy.
 
 ## Validation
 
@@ -106,7 +108,8 @@ The eventual artifact must retain `applicationId` `com.avenor.launcher`, use the
 
 ## Known limitations and legacy issues
 
-- Exact implementation, migration, build, automated-test, device, and artifact evidence is not yet available.
+- Exact build, automated-test, and artifact evidence is not yet available for Iteration 18.
+- Iteration 18 has author-reported device acceptance for the currently implemented flow; this does not replace the unrun Gradle and instrumented-test evidence.
 - Broader device, API, OEM, profile, clone, accessibility, and performance coverage remains unknown until performed.
 - `1.2.0` closed with its exact-identifier installation and in-place-upgrade checks `Not run`; `1.3.0` must create its own truthful upgrade evidence rather than revising that history.
 
@@ -120,6 +123,6 @@ The eventual artifact must retain `applicationId` `com.avenor.launcher`, use the
 
 ## Completion result
 
-No version completion result exists. Iteration 15 is `Completed`; Iterations 16-21 remain
+No version completion result exists. Iterations 15-18 are `Completed`; Iterations 19-21 remain
 `Planned`, so `1.3.0` remains incomplete. No version artifact, tag, publication, or release is
 claimed.

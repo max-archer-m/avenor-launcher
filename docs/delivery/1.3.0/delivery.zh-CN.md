@@ -2,7 +2,7 @@
 
 > 英文语义源：[delivery.md](delivery.md)。
 >
-> 本记录规划 `1.3.0` 所选择的行为。`Planned` 不授权生产实现、版本号修改、构建、commit、push、tag、发布或 Release。
+> 本记录跟踪 `1.3.0` 所选择的行为。状态和证据不授权版本号修改、commit、push、tag、发布或 Release。
 
 ## 版本意图
 
@@ -55,7 +55,7 @@
 | [迭代 15：统一收藏聚合与兼容迁移](iteration-15-unified-favorite-aggregation-and-migration.zh-CN.md) | `Completed` | 2026-08-23 | 实现已完成；作者报告编译、升级、收藏数据及剩余验收均通过，未发现重大问题。 |
 | [迭代 16：纵向列表普通模式构图](iteration-16-vertical-list-normal-mode-composition.zh-CN.md) | `Completed` | 2026-08-24 | 普通 Home 构图及 P1 聚合持久化修复已实现；作者报告当前可验证行为基本验收通过。 |
 | [迭代 17：Home 编辑会话与纵向列表管理](iteration-17-home-edit-session-and-vertical-list-management.zh-CN.md) | `Completed` | 2026-08-25 | 实现已完成；作者报告编译、安装及当前可验证行为基本验收通过。 |
-| [迭代 18：Drawer 目标化收藏多选与纵向新增](iteration-18-drawer-targeted-multiselection-and-list-creation.zh-CN.md) | `Planned` | 2026-08-23 | 技术评估建议在收藏栏之前完成可复用的目标化新增流程。 |
+| [迭代 18：Drawer 目标化收藏多选与纵向新增](iteration-18-drawer-targeted-multiselection-and-list-creation.zh-CN.md) | `Completed` | 2026-08-25 | 实现已完成；作者报告代码层面验收和基本设备验收通过，当前无功能问题。 |
 | [迭代 19：收藏栏呈现、创建和管理](iteration-19-favorite-bar-presentation-creation-and-management.zh-CN.md) | `Planned` | 2026-08-23 | 收藏栏复用已接受的编辑会话和目标化 Drawer 新增流程。 |
 | [迭代 20：跨容器应用拖动与两轴自动滚动](iteration-20-cross-container-drag-and-two-axis-auto-scroll.zh-CN.md) | `Planned` | 2026-08-23 | 跨容器移动依赖所有目标类型及其本地管理行为。 |
 | [迭代 21：升级、回归与版本闭环](iteration-21-upgrade-regression-and-version-closure.zh-CN.md) | `Planned` | 2026-08-23 | 最终收尾依赖迭代 15–20 的接受和版本所需证据。 |
@@ -76,7 +76,9 @@
 
 ### 迭代 18
 
-[契约](iteration-18-drawer-targeted-multiselection-and-list-creation.zh-CN.md)。状态为 `Planned`；未记录实现、命令、证据、制品、结果、commit 或 tag。
+[契约](iteration-18-drawer-targeted-multiselection-and-list-creation.zh-CN.md)。当前已实现持久化列表和临时纵向列表新增控件、精确目标捕获、Drawer 多选模式、按序选择与圆形数字指示器、已收藏身份禁用、保存期间适用交互冻结、按当前清单重验选择、零有效身份时的临时列表保护、Home 目标位置恢复，以及统一聚合的原子追加或中等尺寸临时列表创建。Home 编辑面同时包含已验收的列表级拖动交换行为。作者报告代码层面验收和基本设备验收通过，当前无功能问题；交换瞬间的轻微停顿被记录为性能观察，不作为功能失败。
+
+以下本地检查为 `Passed`：`git diff --check`、暂存区差异空白检查、受影响 XML 解析和实现代码行宽扫描。Agent 执行的 Gradle 与 instrumented tests 为 `Not run`；更广泛的 API、OEM、profile、clone、进程重建、无障碍和性能场景仍为 `Not run` 或 `Unknown`。这些属于证据缺口，不代表作者已接受的迭代范围存在失败。根据作者 2026-08-25 的决定，状态为 `Completed`；不声明 commit、push、tag、发布、制品或 Release。
 
 ### 迭代 19
 
@@ -92,7 +94,7 @@
 
 ## 依赖与顺序
 
-当前交付依赖为 `15 → 16 → 17 → 18 → 19 → 20 → 21`，体现模型、呈现、编辑、目标化新增、容器、移动和收尾依赖。它不把迭代永久绑定到贡献者、终端、分支、预计日期或单线执行政策。
+当前交付依赖为 `15 → 16 → 17 → 18 → 19 → 20 → 21`，体现模型、呈现、编辑、目标化新增、容器、移动和收尾依赖。迭代 18 已完成，其目标化新增机制可由迭代 19 复用。该顺序不把迭代永久绑定到贡献者、终端、分支、预计日期或单线执行政策。
 
 ## 验证
 
@@ -106,7 +108,8 @@
 
 ## 已知限制与遗留问题
 
-- 尚无精确实现、迁移、构建、自动化测试、设备或制品证据。
+- 迭代 18 尚无精确构建、自动化测试和制品证据。
+- 迭代 18 已有作者报告的当前流程设备验收；这不能替代尚未运行的 Gradle 和 instrumented-test 证据。
 - 更广泛设备、API、OEM、profile、clone、无障碍和性能覆盖在执行前保持未知。
 - `1.2.0` 关闭时，其精确标识安装和原位升级检查为 `Not run`；`1.3.0` 必须建立自身真实升级证据，而不是修改该历史。
 
@@ -120,5 +123,5 @@
 
 ## 完成结果
 
-目前不存在版本完成结果。迭代 15 为 `Completed`；迭代 16–21 仍为 `Planned`，因此
+目前不存在版本完成结果。迭代 15–18 为 `Completed`；迭代 19–21 仍为 `Planned`，因此
 `1.3.0` 尚未完成。不声明任何版本制品、tag、发布或 Release。

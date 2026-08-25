@@ -38,6 +38,15 @@
     <string name="loading_favorites">Loading favorites…</string>
     <string name="unable_to_load_favorites">Unable to load favorites</string>
     <string name="home_empty_favorites">Add applications from Drawer</string>
+    <string name="add_favorites_to_list">Add applications to list</string>
+    <string name="drawer_select_favorites">Select applications</string>
+    <string name="drawer_selection_cancel">Cancel</string>
+    <string name="drawer_selection_confirm">Confirm</string>
+    <string name="drawer_selection_add_to_list">Add to list</string>
+    <string name="drawer_selection_create_list">Create list</string>
+    <string name="drawer_selection_order_format">Selected, item %1$d</string>
+    <string name="drawer_selection_not_selected">Not selected</string>
+    <string name="drawer_selection_already_favorite_unavailable">Favorited; unavailable</string>
     <string name="favorite_application_unavailable">Application unavailable</string>
     <string name="favorite_application_disabled">Application disabled</string>
     <string name="favorite_disabled_format">%1$s — Disabled</string>

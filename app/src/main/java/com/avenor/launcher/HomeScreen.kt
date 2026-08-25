@@ -141,6 +141,8 @@ internal fun HomeScreen(
     onRequestEditMode: () -> Unit = {},
     onLaunchFavorite: (FavoriteAvailability) -> Unit = {},
     onLongPressFavorite: (LaunchableEntry) -> Unit = {},
+    onAddFavoritesToList: (String) -> Unit = {},
+    onAddProvisionalFavorites: () -> Unit = {},
     onCommitFavoriteComposition: (
         aggregate: FavoriteAggregate,
         onComplete: (Boolean) -> Unit,
@@ -151,6 +153,8 @@ internal fun HomeScreen(
     var now by remember { mutableStateOf(clock()) }
     var dragSession by remember { mutableStateOf<FavoriteDragSession?>(null) }
     var listDragSession by remember { mutableStateOf<FavoriteListDragSession?>(null) }
+    var listDragCommittedGeneration by remember { mutableIntStateOf(-1) }
+    val editListStates = remember { mutableMapOf<String, LazyListState>() }
     var dragGeneration by remember { mutableIntStateOf(0) }
     var undoAggregate by remember { mutableStateOf<FavoriteAggregate?>(null) }
     var editSessionId by remember { mutableIntStateOf(0) }
@@ -238,7 +242,7 @@ internal fun HomeScreen(
         recordUndo: Boolean = false,
         onCommitted: () -> Unit = {},
         onFailed: () -> Unit = {},
-    ) {
+) {
         if (favoriteState !is FavoriteReadState.Readable) return
         val previousJob = editMutationJob
         val session = editSessionId
@@ -383,17 +387,29 @@ internal fun HomeScreen(
             size = IntSize(bounds.width.roundToInt(), bounds.height.roundToInt()),
             touchStartInWindow = touchInWindow,
             displayedLists = displayedLists,
+            initialDisplayedLists = displayedLists,
             visibleIdentities = visibleIdentities,
             visibleScrollOffset = listState.firstVisibleItemScrollOffset,
         )
+        listDragCommittedGeneration = -1
     }
 
     fun advanceListDrag(amount: Offset) {
         val previous = listDragSession ?: return
-        val moved = previous.copy(delta = previous.delta + amount)
+        val sourceState = editListStates[previous.sourceContainer.id]
+        val moved = previous.copy(
+            delta = previous.delta + amount,
+            visibleIdentities = sourceState?.layoutInfo?.visibleItemsInfo
+                ?.mapNotNull { item ->
+                    previous.sourceContainer.identities.getOrNull(item.index)
+                }
+                ?: previous.visibleIdentities,
+            visibleScrollOffset = sourceState?.firstVisibleItemScrollOffset
+                ?: previous.visibleScrollOffset,
+        )
         val targetIndex = when {
-            primaryListBoundsInWindow.contains(moved.touchInWindow) -> 0
-            companionListBoundsInWindow.contains(moved.touchInWindow) -> 1
+            primaryContainerBoundsInWindow.contains(moved.touchInWindow) -> 0
+            companionContainerBoundsInWindow.contains(moved.touchInWindow) -> 1
             else -> {
                 listDragSession = moved
                 return
@@ -414,10 +430,13 @@ internal fun HomeScreen(
         val advanced = moved.copy(
             currentIndex = targetIndex,
             displayedLists = reordered,
+            exchangeGeneration = moved.exchangeGeneration + 1,
         )
         listDragSession = advanced
         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
         val sourceId = advanced.sourceContainer.id
+        val committedLists = advanced.displayedLists
+        val exchangeGeneration = advanced.exchangeGeneration
         commitEditAggregate(
             transform = { aggregate ->
                 val currentIndex = aggregate.verticalLists.indexOfFirst { it.id == sourceId }
@@ -427,13 +446,45 @@ internal fun HomeScreen(
                     aggregate.moveVerticalList(currentIndex, targetIndex)
                 }
             },
+            onCommitted = {
+                val active = listDragSession
+                if (active?.sourceContainer?.id == sourceId &&
+                    active.exchangeGeneration == exchangeGeneration &&
+                    active.displayedLists == committedLists
+                ) {
+                    listDragCommittedGeneration = exchangeGeneration
+                    if (active.released) {
+                        listDragSession = null
+                    }
+                }
+            },
             onFailed = {
-                if (listDragSession?.sourceContainer?.id == sourceId) {
+                if (listDragSession?.sourceContainer?.id == sourceId &&
+                    listDragSession?.exchangeGeneration == exchangeGeneration
+                ) {
                     listDragSession = null
+                    listDragCommittedGeneration = -1
                 }
             },
         )
     }
+
+    fun finishListDrag() {
+        val session = listDragSession ?: return
+        if (session.displayedLists == session.initialDisplayedLists) {
+            listDragSession = null
+            return
+        }
+        val released = session.copy(released = true)
+        listDragSession = if (
+            listDragCommittedGeneration == released.exchangeGeneration
+        ) {
+            null
+        } else {
+            released
+        }
+    }
+
     // Edge scrolling moves the group under the finger while the touch point itself stays put, so
     // the target is resolved again for the group's new geometry after every scrolled frame.
     LaunchedEffect(edgeScroll) {
@@ -572,7 +623,13 @@ internal fun HomeScreen(
                 )
 
                 is FavoriteReadState.Readable -> {
-                    if (favoriteState.aggregate.verticalLists.isEmpty()) {
+                    if (favoriteState.aggregate.verticalLists.isEmpty() && editMode) {
+                        HomeFavoriteProvisionalList(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = onAddProvisionalFavorites,
+                            testTag = "favorite_provisional_add_0",
+                        )
+                    } else if (favoriteState.aggregate.verticalLists.isEmpty()) {
                         Text(
                             text = stringResource(R.string.home_empty_favorites),
                             color = MaterialTheme.colorScheme.onBackground,
@@ -602,6 +659,16 @@ internal fun HomeScreen(
                         } ?: persistedEditAggregate
                         val primaryContainer = editAggregate.verticalLists.getOrNull(0)
                         val companionContainer = editAggregate.verticalLists.getOrNull(1)
+                        val primaryEditListState = primaryContainer?.let { container ->
+                            editListStates.getOrPut(container.id) {
+                                favoriteListState
+                            }
+                        } ?: favoriteListState
+                        val companionEditListState = companionContainer?.let { container ->
+                            editListStates.getOrPut(container.id) {
+                                companionFavoriteListState
+                            }
+                        } ?: companionFavoriteListState
                         val primaryIdentities = primaryContainer?.identities.orEmpty()
                         val companionIdentities = companionContainer?.identities.orEmpty()
                         val activeSession = dragSession?.takeIf { it.hasInGroupExchange }
@@ -663,11 +730,16 @@ internal fun HomeScreen(
                             val controlBarHeight = dimensionResource(
                                 R.dimen.home_favorite_list_control_bar_height,
                             )
+                            val addControlHeight = if (editMode) {
+                                controlBarHeight
+                            } else {
+                                0.dp
+                            }
                             val contentHeight = (
                                 maxOf(
                                     primaryContentHeight,
                                     companionContentHeight,
-                                ) + controlBarHeight
+                                ) + controlBarHeight + addControlHeight
                             ).coerceAtMost(maxHeight)
                             Row(
                                 modifier = Modifier
@@ -684,7 +756,7 @@ internal fun HomeScreen(
                                             .fillMaxHeight(),
                                         identities = primaryDisplayed,
                                         availabilityByIdentity = favoriteAvailability,
-                                        listState = favoriteListState,
+                                        listState = primaryEditListState,
                                         nestedScrollConnection = favoriteNestedScrollConnection,
                                         editMode = editMode,
                                         compact = false,
@@ -729,6 +801,9 @@ internal fun HomeScreen(
                                                 recordUndo = true,
                                             )
                                         },
+                                        onAddFavorites = {
+                                            onAddFavoritesToList(primaryContainer.id)
+                                        },
                                         onContainerBoundsInWindow = {
                                             primaryContainerBoundsInWindow = it
                                         },
@@ -737,7 +812,7 @@ internal fun HomeScreen(
                                                 primaryContainer.id,
                                         listExchangeHighlight = listDragSession?.let { session ->
                                             session.sourceContainer.id != primaryContainer.id &&
-                                                primaryListBoundsInWindow
+                                                primaryContainerBoundsInWindow
                                                     .contains(session.touchInWindow)
                                         } == true,
                                         listDragActive = listDragSession != null,
@@ -747,13 +822,15 @@ internal fun HomeScreen(
                                                 index = 0,
                                                 bounds = primaryContainerBoundsInWindow,
                                                 touchInWindow = touch,
-                                                listState = favoriteListState,
+                                                listState = primaryEditListState,
                                                 displayedLists = editAggregate.verticalLists,
                                             )
                                         },
                                         onListDrag = ::advanceListDrag,
-                                        onListDragEnd = { listDragSession = null },
-                                        onListDragCancel = { listDragSession = null },
+                                        onListDragEnd = ::finishListDrag,
+                                        onListDragCancel = {
+                                            listDragSession = null
+                                        },
                                         onDragStart = { identity, origin, size, touch ->
                                             dragGeneration += 1
                                             dragSession = FavoriteDragSession(
@@ -781,7 +858,7 @@ internal fun HomeScreen(
                                             .fillMaxHeight(),
                                         identities = companionDisplayed,
                                         availabilityByIdentity = favoriteAvailability,
-                                        listState = companionFavoriteListState,
+                                        listState = companionEditListState,
                                         nestedScrollConnection =
                                             companionFavoriteNestedScrollConnection,
                                         editMode = editMode,
@@ -827,6 +904,9 @@ internal fun HomeScreen(
                                                 recordUndo = true,
                                             )
                                         },
+                                        onAddFavorites = {
+                                            onAddFavoritesToList(companionContainer.id)
+                                        },
                                         onContainerBoundsInWindow = {
                                             companionContainerBoundsInWindow = it
                                         },
@@ -835,7 +915,7 @@ internal fun HomeScreen(
                                                 companionContainer.id,
                                         listExchangeHighlight = listDragSession?.let { session ->
                                             session.sourceContainer.id != companionContainer.id &&
-                                                companionListBoundsInWindow
+                                                companionContainerBoundsInWindow
                                                     .contains(session.touchInWindow)
                                         } == true,
                                         listDragActive = listDragSession != null,
@@ -845,13 +925,15 @@ internal fun HomeScreen(
                                                 index = 1,
                                                 bounds = companionContainerBoundsInWindow,
                                                 touchInWindow = touch,
-                                                listState = companionFavoriteListState,
+                                                listState = companionEditListState,
                                                 displayedLists = editAggregate.verticalLists,
                                             )
                                         },
                                         onListDrag = ::advanceListDrag,
-                                        onListDragEnd = { listDragSession = null },
-                                        onListDragCancel = { listDragSession = null },
+                                        onListDragEnd = ::finishListDrag,
+                                        onListDragCancel = {
+                                            listDragSession = null
+                                        },
                                         onDragStart = { identity, origin, size, touch ->
                                             dragGeneration += 1
                                             dragSession = FavoriteDragSession(
@@ -870,6 +952,15 @@ internal fun HomeScreen(
                                         onDrag = ::advanceAndPersistDrag,
                                         onDragEnd = endDrag,
                                         onDragCancel = { dragSession = null },
+                                    )
+                                }
+                                if (companionContainer == null) {
+                                    HomeFavoriteProvisionalList(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight(),
+                                        onClick = onAddProvisionalFavorites,
+                                        testTag = "favorite_provisional_add_1",
                                     )
                                 }
                             }
@@ -1164,8 +1255,11 @@ private data class FavoriteListDragSession(
     val size: IntSize,
     val touchStartInWindow: Offset,
     val displayedLists: List<FavoriteContainer>,
+    val initialDisplayedLists: List<FavoriteContainer>,
     val visibleIdentities: List<LaunchableIdentity>,
     val visibleScrollOffset: Int,
+    val released: Boolean = false,
+    val exchangeGeneration: Int = 0,
     val delta: Offset = Offset.Zero,
 ) {
     val touchInWindow: Offset get() = touchStartInWindow + delta
@@ -1282,7 +1376,9 @@ private fun HomeFavoriteDragPreview(
     val previewElevation = with(density) {
         dimensionResource(R.dimen.home_reorder_drag_elevation).toPx()
     }
-    val topLeft = session.originInWindow + session.delta - rootOriginInWindow
+    val topLeft = session.originInWindow +
+        session.delta -
+        rootOriginInWindow
     Box(
         modifier = Modifier
             .offset { IntOffset(topLeft.x.roundToInt(), topLeft.y.roundToInt()) }
@@ -1312,16 +1408,12 @@ private fun HomeFavoriteListDragPreview(
     val width = with(density) { session.size.width.toDp() }
     val height = with(density) { session.size.height.toDp() }
     val topLeft = session.originInWindow + session.delta - rootOriginInWindow
-    val elevation = with(density) {
-        dimensionResource(R.dimen.home_reorder_drag_elevation).toPx()
-    }
     val previewAlpha = integerResource(R.integer.home_drag_preview_alpha_percent) / 100f
     val rowHeight = dimensionResource(session.sourceContainer.listSize.rowHeightResource())
     Column(
         modifier = Modifier
             .offset { IntOffset(topLeft.x.roundToInt(), topLeft.y.roundToInt()) }
             .size(width, height)
-            .graphicsLayer { shadowElevation = elevation }
             .clip(RoundedCornerShape(dimensionResource(R.dimen.home_edit_surface_radius)))
             .background(colorResource(R.color.home_edit_surface))
             .alpha(previewAlpha)
@@ -1385,13 +1477,23 @@ private fun HomeFavoriteListDragPreview(
                             .fillMaxWidth()
                             .height(rowHeight),
                     ) {
-                        HomeFavoritePreviewContent(
-                            availability = availabilityByIdentity[identity]
-                                ?: FavoriteAvailability.Unknown(null),
-                            listSize = session.sourceContainer.listSize,
-                            maxWidth = width,
-                            shadowElevation = 0f,
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(
+                                    horizontal = dimensionResource(
+                                        R.dimen.home_favorite_edge_margin,
+                                    ),
+                                ),
+                        ) {
+                            HomeFavoritePreviewContent(
+                                availability = availabilityByIdentity[identity]
+                                    ?: FavoriteAvailability.Unknown(null),
+                                listSize = session.sourceContainer.listSize,
+                                maxWidth = width,
+                                shadowElevation = 0f,
+                            )
+                        }
                     }
                 }
             }
@@ -1772,6 +1874,7 @@ private fun HomeFavoriteList(
     listCount: Int = 0,
     onChangeListSize: (FavoriteListSize) -> Unit = {},
     onRemoveList: () -> Unit = {},
+    onAddFavorites: () -> Unit = {},
     onContainerBoundsInWindow: (Rect) -> Unit = {},
     sourceListPlaceholder: Boolean = false,
     listExchangeHighlight: Boolean = false,
@@ -1786,6 +1889,9 @@ private fun HomeFavoriteList(
     onDragCancel: () -> Unit,
     testTag: String? = null,
 ) {
+    val controlBarHeight = dimensionResource(
+        R.dimen.home_favorite_list_control_bar_height,
+    )
     val sourceSlotAlpha = integerResource(R.integer.home_drag_source_slot_alpha_percent) / 100f
     val insertionLineColor = colorResource(R.color.home_favorite_insertion_line)
     val insertionLineThickness = with(LocalDensity.current) {
@@ -1825,28 +1931,49 @@ private fun HomeFavoriteList(
                     )
                 },
             )
-            .alpha(if (sourceListPlaceholder) 0f else 1f)
             .then(
                 if (sourceListPlaceholder) Modifier.clearAndSetSemantics {} else Modifier,
-            ),
+            )
     ) {
         if (editMode && listIndex != null) {
-            FavoriteListControlBar(
-                index = listIndex,
-                listCount = listCount,
-                selectedSize = listSize ?: FavoriteListSize.Medium,
-                onChangeSize = onChangeListSize,
-                onRemoveList = onRemoveList,
-                onListDragStart = onListDragStart,
-                onListDrag = onListDrag,
-                onListDragEnd = onListDragEnd,
-                onListDragCancel = onListDragCancel,
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(controlBarHeight)
+                    .alpha(if (sourceListPlaceholder) 0f else 1f)
+                    .then(
+                        if (sourceListPlaceholder) {
+                            Modifier.clearAndSetSemantics {}
+                        } else {
+                            Modifier
+                        },
+                    ),
+            ) {
+                FavoriteListControlBar(
+                    index = listIndex,
+                    listCount = listCount,
+                    selectedSize = listSize ?: FavoriteListSize.Medium,
+                    onChangeSize = onChangeListSize,
+                    onRemoveList = onRemoveList,
+                    onListDragStart = onListDragStart,
+                    onListDrag = onListDrag,
+                    onListDragEnd = onListDragEnd,
+                    onListDragCancel = onListDragCancel,
+                )
+            }
         }
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
+                .alpha(if (sourceListPlaceholder) 0f else 1f)
+                .then(
+                    if (sourceListPlaceholder) {
+                        Modifier.clearAndSetSemantics {}
+                    } else {
+                        Modifier
+                    },
+                )
                 .then(
                     nestedScrollConnection?.let { Modifier.nestedScroll(it) } ?: Modifier,
                 )
@@ -1981,7 +2108,62 @@ private fun HomeFavoriteList(
                     },
                 )
             }
+            if (editMode && listIndex != null) {
+                item(key = "favorite_add_$listIndex") {
+                    HomeFavoriteAddControl(
+                        onClick = onAddFavorites,
+                        testTag = "favorite_add_$listIndex",
+                    )
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun HomeFavoriteAddControl(
+    onClick: () -> Unit,
+    testTag: String,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(R.dimen.home_favorite_list_control_bar_height))
+            .clickable(role = Role.Button, onClick = onClick)
+            .testTag(testTag),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_add),
+            contentDescription = stringResource(R.string.add_favorites_to_list),
+            tint = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.size(dimensionResource(R.dimen.home_reorder_handle_size)),
+        )
+        Spacer(Modifier.width(dimensionResource(R.dimen.home_favorite_edge_margin)))
+        Text(
+            text = stringResource(R.string.add_favorites_to_list),
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+    }
+}
+
+@Composable
+private fun HomeFavoriteProvisionalList(
+    modifier: Modifier,
+    onClick: () -> Unit,
+    testTag: String,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .editSurface(enabled = true),
+    ) {
+        HomeFavoriteAddControl(
+            onClick = onClick,
+            testTag = testTag,
+        )
     }
 }
 
