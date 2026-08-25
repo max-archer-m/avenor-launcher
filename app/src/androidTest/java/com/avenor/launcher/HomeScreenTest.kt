@@ -1442,6 +1442,16 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
         return true
     }
 
+    override suspend fun updateAggregate(
+        transform: (FavoriteAggregate) -> FavoriteAggregate,
+    ): FavoriteAggregate? {
+        val current = mutableState.value as? FavoriteReadState.Readable ?: return null
+        val updated = transform(current.aggregate)
+        if (!isValidAggregate(updated)) return null
+        mutableState.value = FavoriteReadState.Readable(updated)
+        return updated
+    }
+
     fun readableIdentities(): List<LaunchableIdentity> =
         (state.value as FavoriteReadState.Readable).identities
 }

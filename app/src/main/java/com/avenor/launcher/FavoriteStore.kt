@@ -89,6 +89,9 @@ internal interface FavoriteStore {
         companionIdentities: List<LaunchableIdentity>,
     ): Boolean
     suspend fun replaceAggregate(aggregate: FavoriteAggregate): Boolean
+    suspend fun updateAggregate(
+        transform: (FavoriteAggregate) -> FavoriteAggregate,
+    ): FavoriteAggregate?
 }
 
 internal class AtomicFileFavoriteStore private constructor(
@@ -290,6 +293,28 @@ internal class AtomicFileFavoriteStore private constructor(
             }
             writeSucceeded
         }
+
+    override suspend fun updateAggregate(
+        transform: (FavoriteAggregate) -> FavoriteAggregate,
+    ): FavoriteAggregate? = mutationMutex.withLock {
+        val readable = mutableState.value as? FavoriteReadState.Readable ?: return null
+        val updated = transform(readable.aggregate)
+        if (!isValidAggregate(updated)) return null
+        if (updated == readable.aggregate) return readable.aggregate
+        val writeSucceeded = withContext(Dispatchers.IO) {
+            try {
+                writeDocument(updated)
+                true
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: Exception) {
+                false
+            }
+        }
+        if (!writeSucceeded) return@withLock null
+        mutableState.value = FavoriteReadState.Readable(updated)
+        updated
+    }
 
     private data class FavoriteDocument(
         val schemaVersion: Int,

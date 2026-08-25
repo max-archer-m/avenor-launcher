@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
@@ -65,6 +64,14 @@ private data class FavoriteRevealRequest(
     val containerId: String,
     val identity: LaunchableIdentity,
 )
+
+private fun nextVerticalListId(containers: List<FavoriteContainer>): String {
+    var suffix = 1
+    while (containers.any { it.id == "vertical-list-$suffix" }) {
+        suffix += 1
+    }
+    return "vertical-list-$suffix"
+}
 
 private const val DRAWER_MOVEMENT_PER_GESTURE_DP = 1.5f
 private const val TARGET_FLING_THRESHOLD_DP_PER_SECOND = 1_000f
@@ -243,41 +250,13 @@ internal fun AvenorApp(
         val content = inventoryState as? LaunchableInventoryState.Content
             ?: return@LaunchedEffect
         val availableIdentities = content.snapshot.entries
-            .mapTo(mutableSetOf(), LaunchableEntry::identity)
-        favoriteSelection = favoriteSelection.filter { it in availableIdentities }
-    }
-
-    LaunchedEffect(favoriteRevealRequest, favoriteState, settledSurface, homeEditMode) {
-        val request = favoriteRevealRequest ?: return@LaunchedEffect
-        if (settledSurface != AvenorSurface.Home || !homeEditMode) return@LaunchedEffect
-        val readable = favoriteState as? FavoriteReadState.Readable ?: return@LaunchedEffect
-        val containerIndex = readable.aggregate.verticalLists.indexOfFirst {
-            it.id == request.containerId
+            .mapTo(mutableSetOf<LaunchableIdentity>(), LaunchableEntry::identity)
+        val temporarilyUnavailable = content.snapshot.profileReadStatus
+            .filterValues { it == ProfileInventoryReadStatus.Unavailable }
+            .keys
+        favoriteSelection = favoriteSelection.filter { identity ->
+            identity in availableIdentities || identity.profileSerialNumber in temporarilyUnavailable
         }
-        val container = readable.aggregate.verticalLists.getOrNull(containerIndex)
-            ?: return@LaunchedEffect
-        val itemIndex = container.identities.indexOf(request.identity)
-        if (itemIndex < 0) {
-            favoriteRevealRequest = null
-            return@LaunchedEffect
-        }
-        val listState = when (containerIndex) {
-            0 -> homeFavoriteListState
-            1 -> companionFavoriteListState
-            else -> null
-        }
-        if (listState == null) {
-            favoriteRevealRequest = null
-            return@LaunchedEffect
-        }
-        withFrameNanos { }
-        val isVisible = listState.layoutInfo.visibleItemsInfo.any {
-            it.index == itemIndex
-        }
-        if (!isVisible) {
-            listState.scrollToItem(itemIndex)
-        }
-        favoriteRevealRequest = null
     }
 
     val favoriteMembership = (favoriteState as? FavoriteReadState.Readable)?.identities?.toSet()
@@ -441,61 +420,89 @@ internal fun AvenorApp(
         if (selected.isEmpty() || favoriteSelectionSaving) return
         favoriteSelectionSaving = true
         scope.launch {
-            val readable = effectiveFavoriteStore.state.value as? FavoriteReadState.Readable
             val inventorySnapshot = (inventoryCoordinator.state.value
                 as? LaunchableInventoryState.Content)?.snapshot
-            val container = target.containerId?.let { containerId ->
-                readable?.aggregate?.verticalLists
-                    ?.firstOrNull { it.id == containerId }
-            }
-            val currentIdentities = readable?.aggregate?.identities?.toSet().orEmpty()
             val currentInventoryIdentities = inventorySnapshot?.entries
-                ?.mapTo(mutableSetOf(), LaunchableEntry::identity)
+                ?.mapTo(mutableSetOf<LaunchableIdentity>(), LaunchableEntry::identity)
                 .orEmpty()
-            val appendable = selected.filter { identity ->
-                identity in currentInventoryIdentities && identity !in currentIdentities
-            }
-            val updated = when {
-                readable == null || inventorySnapshot == null || appendable.isEmpty() -> null
-                target.provisional -> {
-                    val newId = "vertical-list-${readable.aggregate.verticalLists.size + 1}"
-                    readable.aggregate.copy(
-                        verticalLists = readable.aggregate.verticalLists + FavoriteContainer(
-                            id = newId,
-                            type = FavoriteContainerType.VerticalList,
-                            identities = appendable,
-                            listSize = FavoriteListSize.Medium,
-                        ),
-                    )
-                }
-                container != null -> readable.aggregate.updateVerticalList(container.id) {
-                    existing ->
-                        existing.copy(identities = existing.identities + appendable)
-                }
-                else -> null
-            }
-            val succeeded = when {
-                updated == null -> false
-                else -> effectiveFavoriteStore.replaceAggregate(updated)
-            }
-            if (succeeded) {
-                updated?.let { editMembership = it.identities.toSet() }
-                updated?.let { aggregate ->
-                    val targetContainerId = target.containerId
-                        ?: aggregate.verticalLists.lastOrNull()?.id
-                    val revealedIdentity = selected.firstOrNull { identity ->
-                        targetContainerId?.let { containerId ->
-                            aggregate.verticalLists
-                                .firstOrNull { it.id == containerId }
-                                ?.identities
-                                ?.contains(identity) == true
-                        } == true
+            val temporarilyUnavailableIdentities = inventorySnapshot?.profileReadStatus
+                ?.filterValues { it == ProfileInventoryReadStatus.Unavailable }
+                ?.keys
+                .orEmpty()
+            var updatedAggregate: FavoriteAggregate? = null
+            var targetInvalid = false
+            var noValidSelection = false
+            val savedAggregate = inventorySnapshot?.let {
+                effectiveFavoriteStore.updateAggregate { aggregate ->
+                    val container = target.containerId?.let { containerId ->
+                        aggregate.verticalLists.firstOrNull { it.id == containerId }
                     }
-                    if (targetContainerId != null && revealedIdentity != null) {
-                        favoriteRevealRequest = FavoriteRevealRequest(
-                            containerId = targetContainerId,
-                            identity = revealedIdentity,
+                    if ((target.containerId != null && container == null) ||
+                        (target.provisional && aggregate.verticalLists.size >= 2)
+                    ) {
+                        targetInvalid = true
+                        return@updateAggregate aggregate
+                    }
+                    val appendable = selected.filter { identity ->
+                        (identity in currentInventoryIdentities ||
+                            identity.profileSerialNumber in temporarilyUnavailableIdentities) &&
+                            identity !in aggregate.identities
+                    }
+                    if (appendable.isEmpty()) {
+                        noValidSelection = true
+                        updatedAggregate = aggregate
+                        return@updateAggregate aggregate
+                    }
+                    val updated = if (target.provisional) {
+                        aggregate.copy(
+                            verticalLists = aggregate.verticalLists + FavoriteContainer(
+                                id = nextVerticalListId(aggregate.verticalLists),
+                                type = FavoriteContainerType.VerticalList,
+                                identities = appendable,
+                                listSize = FavoriteListSize.Medium,
+                            ),
                         )
+                    } else {
+                        container!!.copy(
+                            identities = container.identities + appendable,
+                        ).let { updatedContainer ->
+                            aggregate.updateVerticalList(container.id) { updatedContainer }
+                        }
+                    }
+                    updatedAggregate = updated
+                    updated
+                }
+            }
+            if (targetInvalid) {
+                favoriteSelectionSaving = false
+                closeFavoriteSelection()
+                Toast.makeText(
+                    androidContext,
+                    R.string.favorite_reorder_unavailable,
+                    Toast.LENGTH_SHORT,
+                ).show()
+                return@launch
+            }
+            if (savedAggregate != null) {
+                updatedAggregate?.let { editMembership = it.identities.toSet() }
+                if (!noValidSelection) {
+                    updatedAggregate?.let { aggregate ->
+                        val targetContainerId = target.containerId
+                            ?: aggregate.verticalLists.lastOrNull()?.id
+                        val revealedIdentity = selected.firstOrNull { identity ->
+                            targetContainerId?.let { containerId ->
+                                aggregate.verticalLists
+                                    .firstOrNull { it.id == containerId }
+                                    ?.identities
+                                    ?.contains(identity) == true
+                            } == true
+                        }
+                        if (targetContainerId != null && revealedIdentity != null) {
+                            favoriteRevealRequest = FavoriteRevealRequest(
+                                containerId = targetContainerId,
+                                identity = revealedIdentity,
+                            )
+                        }
                     }
                 }
                 closeFavoriteSelection()
@@ -809,27 +816,23 @@ internal fun AvenorApp(
                 },
                 onAddFavoritesToList = ::openFavoriteSelection,
                 onAddProvisionalFavorites = ::openProvisionalFavoriteSelection,
-                onCommitFavoriteComposition = {
-                    aggregate,
-                    onComplete,
-                ->
-                    scope.launch {
-                        val succeeded = if (
-                            !effectiveFavoriteStore.replaceAggregate(aggregate)
-                        ) {
-                            Toast.makeText(
-                                androidContext,
-                                R.string.favorite_reorder_unavailable,
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                            false
-                        } else {
-                            if (homeEditMode) {
-                                editMembership = aggregate.identities.toSet()
-                            }
-                            true
+                favoriteRevealContainerId = favoriteRevealRequest?.containerId,
+                favoriteRevealIdentity = favoriteRevealRequest?.identity,
+                onFavoriteRevealComplete = { favoriteRevealRequest = null },
+                onCommitFavoriteComposition = { transform ->
+                    val aggregate = effectiveFavoriteStore.updateAggregate(transform)
+                    if (aggregate == null) {
+                        Toast.makeText(
+                            androidContext,
+                            R.string.favorite_reorder_unavailable,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                        null
+                    } else {
+                        if (homeEditMode) {
+                            editMembership = aggregate.identities.toSet()
                         }
-                        onComplete(succeeded)
+                        aggregate
                     }
                 },
                 onLaunchFavorite = { availability ->
@@ -1026,5 +1029,15 @@ private class InMemoryFavoriteStore : FavoriteStore {
         if (!isValidAggregate(aggregate)) return false
         mutableState.value = FavoriteReadState.Readable(aggregate)
         return true
+    }
+
+    override suspend fun updateAggregate(
+        transform: (FavoriteAggregate) -> FavoriteAggregate,
+    ): FavoriteAggregate? {
+        val current = mutableState.value as? FavoriteReadState.Readable ?: return null
+        val updated = transform(current.aggregate)
+        if (!isValidAggregate(updated)) return null
+        mutableState.value = FavoriteReadState.Readable(updated)
+        return updated
     }
 }

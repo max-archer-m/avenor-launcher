@@ -123,8 +123,6 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 
 
 @Composable
@@ -143,10 +141,12 @@ internal fun HomeScreen(
     onLongPressFavorite: (LaunchableEntry) -> Unit = {},
     onAddFavoritesToList: (String) -> Unit = {},
     onAddProvisionalFavorites: () -> Unit = {},
-    onCommitFavoriteComposition: (
-        aggregate: FavoriteAggregate,
-        onComplete: (Boolean) -> Unit,
-    ) -> Unit = { _, onComplete -> onComplete(true) },
+    favoriteRevealContainerId: String? = null,
+    favoriteRevealIdentity: LaunchableIdentity? = null,
+    onFavoriteRevealComplete: () -> Unit = {},
+    onCommitFavoriteComposition: suspend (
+        transform: (FavoriteAggregate) -> FavoriteAggregate,
+    ) -> FavoriteAggregate? = { transform -> transform(FavoriteAggregate()) },
     accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
 ) {
     val context = LocalContext.current
@@ -155,6 +155,64 @@ internal fun HomeScreen(
     var listDragSession by remember { mutableStateOf<FavoriteListDragSession?>(null) }
     var listDragCommittedGeneration by remember { mutableIntStateOf(-1) }
     val editListStates = remember { mutableMapOf<String, LazyListState>() }
+    LaunchedEffect(
+        favoriteRevealContainerId,
+        favoriteRevealIdentity,
+        favoriteState,
+        editMode,
+    ) {
+        val containerId = favoriteRevealContainerId ?: return@LaunchedEffect
+        val identity = favoriteRevealIdentity ?: return@LaunchedEffect
+        if (!editMode || favoriteState !is FavoriteReadState.Readable) {
+            return@LaunchedEffect
+        }
+        val aggregate = favoriteState.aggregate
+        val containerIndex = aggregate.verticalLists.indexOfFirst { it.id == containerId }
+        val container = aggregate.verticalLists.getOrNull(containerIndex)
+        val itemIndex = container?.identities?.indexOf(identity) ?: -1
+        if (container == null || itemIndex < 0) {
+            onFavoriteRevealComplete()
+            return@LaunchedEffect
+        }
+        val listState = when (containerIndex) {
+            0 -> editListStates.getOrPut(container.id) { favoriteListState }
+            1 -> editListStates.getOrPut(container.id) { companionFavoriteListState }
+            else -> null
+        }
+        if (listState == null) {
+            onFavoriteRevealComplete()
+            return@LaunchedEffect
+        }
+        withFrameNanos { }
+        val visibleItems = listState.layoutInfo.visibleItemsInfo
+        val target = visibleItems.firstOrNull {
+            it.index == itemIndex
+        }
+        if (target != null) {
+            val viewportStart = listState.layoutInfo.viewportStartOffset
+            val viewportEnd = listState.layoutInfo.viewportEndOffset
+            val targetEnd = target.offset + target.size
+            when {
+                target.offset < viewportStart -> {
+                    listState.scrollBy((target.offset - viewportStart).toFloat())
+                }
+                targetEnd > viewportEnd -> {
+                    listState.scrollBy((targetEnd - viewportEnd).toFloat())
+                }
+            }
+        } else if (visibleItems.isNotEmpty()) {
+            val firstVisibleIndex = visibleItems.first().index
+            val lastVisibleIndex = visibleItems.last().index
+            if (itemIndex < firstVisibleIndex) {
+                listState.scrollToItem(itemIndex)
+            } else if (itemIndex > lastVisibleIndex) {
+                listState.scrollToItem(
+                    (itemIndex - visibleItems.size + 1).coerceAtLeast(0),
+                )
+            }
+        }
+        onFavoriteRevealComplete()
+    }
     var dragGeneration by remember { mutableIntStateOf(0) }
     var undoAggregate by remember { mutableStateOf<FavoriteAggregate?>(null) }
     var editSessionId by remember { mutableIntStateOf(0) }
@@ -255,19 +313,16 @@ internal fun HomeScreen(
             val updated = transform(base)
             if (!isValidAggregate(updated)) return@launch
             pendingEditAggregate = updated
-            val succeeded = suspendCancellableCoroutine<Boolean> { continuation ->
-                onCommitFavoriteComposition(updated) { result ->
-                    if (continuation.isActive) continuation.resume(result)
-                }
-            }
+            val persisted = onCommitFavoriteComposition(transform)
             if (session != editSessionId || !editMode) return@launch
-            if (!succeeded) {
+            if (persisted == null) {
                 if (pendingEditAggregate == updated) pendingEditAggregate = null
                 onFailed()
                 return@launch
             }
-            committedEditAggregate = updated
-            if (pendingEditAggregate == updated) pendingEditAggregate = null
+            pendingEditAggregate = persisted
+            committedEditAggregate = persisted
+            if (pendingEditAggregate == persisted) pendingEditAggregate = null
             onCommitted()
             if (!recordUndo) {
                 undoSequence += 1
@@ -762,7 +817,6 @@ internal fun HomeScreen(
                                         compact = false,
                                         listSize = primaryContainer.listSize,
                                         draggedIdentity = activeDraggedIdentity,
-                                        preserveViewportDuringDrag = dragSession != null,
                                         exchangeTargetIdentity = dragSession?.crossGroupTarget,
                                         insertionBoundaryIndex = dragSession?.insertionBoundaryIn(
                                             companion = false,
@@ -865,7 +919,6 @@ internal fun HomeScreen(
                                         compact = false,
                                         listSize = companionContainer.listSize,
                                         draggedIdentity = activeDraggedIdentity,
-                                        preserveViewportDuringDrag = dragSession != null,
                                         exchangeTargetIdentity = dragSession?.crossGroupTarget,
                                         insertionBoundaryIndex = dragSession?.insertionBoundaryIn(
                                             companion = true,
@@ -1863,7 +1916,6 @@ private fun HomeFavoriteList(
     compact: Boolean,
     listSize: FavoriteListSize? = null,
     draggedIdentity: LaunchableIdentity?,
-    preserveViewportDuringDrag: Boolean = false,
     exchangeTargetIdentity: LaunchableIdentity?,
     insertionBoundaryIndex: Int?,
     onBoundsInWindow: (Rect) -> Unit,
@@ -2035,13 +2087,7 @@ private fun HomeFavoriteList(
         ) {
             itemsIndexed(
                 items = identities,
-                key = { index, identity ->
-                    // Identity keys make LazyColumn follow a moved first item to its new index.
-                    // During a drag, keep the viewport anchored to physical slots instead; explicit
-                    // edge scrolling remains the only operation allowed to move the viewport.
-                    if (preserveViewportDuringDrag) "drag-slot-$index"
-                    else identity.stableKey()
-                },
+                key = { _, identity -> identity.stableKey() },
             ) { index, identity ->
                 val availability = availabilityByIdentity[identity]
                     ?: FavoriteAvailability.Unknown(null)
