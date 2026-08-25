@@ -18,6 +18,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -45,7 +46,9 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.height
@@ -68,6 +71,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -84,6 +88,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputScope
@@ -141,7 +146,10 @@ internal fun HomeScreen(
     onLongPressFavorite: (LaunchableEntry) -> Unit = {},
     onAddFavoritesToList: (String) -> Unit = {},
     onAddProvisionalFavorites: () -> Unit = {},
+    onAddFavoritesToBar: (String) -> Unit = {},
+    onAddProvisionalFavoriteBar: () -> Unit = {},
     favoriteRevealContainerId: String? = null,
+    favoriteRevealContainerType: FavoriteContainerType? = null,
     favoriteRevealIdentity: LaunchableIdentity? = null,
     onFavoriteRevealComplete: () -> Unit = {},
     onCommitFavoriteComposition: suspend (
@@ -152,11 +160,24 @@ internal fun HomeScreen(
     val context = LocalContext.current
     var now by remember { mutableStateOf(clock()) }
     var dragSession by remember { mutableStateOf<FavoriteDragSession?>(null) }
+    var favoriteBarDragSession by remember {
+        mutableStateOf<FavoriteBarDragSession?>(null)
+    }
     var listDragSession by remember { mutableStateOf<FavoriteListDragSession?>(null) }
     var listDragCommittedGeneration by remember { mutableIntStateOf(-1) }
     val editListStates = remember { mutableMapOf<String, LazyListState>() }
+    val favoriteBarStates = remember { mutableStateMapOf<String, LazyListState>() }
+    val favoriteBarItemWidthPx = with(LocalDensity.current) {
+        dimensionResource(R.dimen.home_favorite_bar_item_width).toPx()
+    }
+    val favoriteBarItemStridePx = with(LocalDensity.current) {
+        favoriteBarItemWidthPx + dimensionResource(
+            R.dimen.home_favorite_bar_item_spacing,
+        ).toPx()
+    }
     LaunchedEffect(
         favoriteRevealContainerId,
+        favoriteRevealContainerType,
         favoriteRevealIdentity,
         favoriteState,
         editMode,
@@ -167,17 +188,28 @@ internal fun HomeScreen(
             return@LaunchedEffect
         }
         val aggregate = favoriteState.aggregate
-        val containerIndex = aggregate.verticalLists.indexOfFirst { it.id == containerId }
-        val container = aggregate.verticalLists.getOrNull(containerIndex)
+        val containerType = favoriteRevealContainerType
+            ?: FavoriteContainerType.VerticalList
+        val containers = when (containerType) {
+            FavoriteContainerType.VerticalList -> aggregate.verticalLists
+            FavoriteContainerType.FavoriteBar -> aggregate.favoriteBars
+        }
+        val containerIndex = containers.indexOfFirst { it.id == containerId }
+        val container = containers.getOrNull(containerIndex)
         val itemIndex = container?.identities?.indexOf(identity) ?: -1
         if (container == null || itemIndex < 0) {
             onFavoriteRevealComplete()
             return@LaunchedEffect
         }
-        val listState = when (containerIndex) {
-            0 -> editListStates.getOrPut(container.id) { favoriteListState }
-            1 -> editListStates.getOrPut(container.id) { companionFavoriteListState }
-            else -> null
+        val listState = when (containerType) {
+            FavoriteContainerType.VerticalList -> when (containerIndex) {
+                0 -> editListStates.getOrPut(container.id) { favoriteListState }
+                1 -> editListStates.getOrPut(container.id) { companionFavoriteListState }
+                else -> null
+            }
+            FavoriteContainerType.FavoriteBar -> favoriteBarStates.getOrPut(container.id) {
+                LazyListState()
+            }
         }
         if (listState == null) {
             onFavoriteRevealComplete()
@@ -198,6 +230,23 @@ internal fun HomeScreen(
                 }
                 targetEnd > viewportEnd -> {
                     listState.scrollBy((targetEnd - viewportEnd).toFloat())
+                }
+            }
+        } else if (visibleItems.isNotEmpty() &&
+            containerType == FavoriteContainerType.FavoriteBar
+        ) {
+            val viewportStart = listState.layoutInfo.viewportStartOffset
+            val viewportEnd = listState.layoutInfo.viewportEndOffset
+            val firstVisible = visibleItems.first()
+            val targetStart = firstVisible.offset +
+                ((itemIndex - firstVisible.index) * favoriteBarItemStridePx)
+            val targetEnd = targetStart + favoriteBarItemWidthPx
+            when {
+                targetStart < viewportStart -> {
+                    listState.scrollBy(targetStart - viewportStart)
+                }
+                targetEnd > viewportEnd -> {
+                    listState.scrollBy(targetEnd - viewportEnd)
                 }
             }
         } else if (visibleItems.isNotEmpty()) {
@@ -283,6 +332,7 @@ internal fun HomeScreen(
         if (!editMode) {
             editSessionId += 1
             dragSession = null
+            favoriteBarDragSession = null
             listDragSession = null
             undoAggregate = null
             pendingEditAggregate = null
@@ -291,6 +341,24 @@ internal fun HomeScreen(
             snackbarHostState.currentSnackbarData?.dismiss()
         } else {
             editSessionId += 1
+        }
+    }
+
+    LaunchedEffect(favoriteState, editMode) {
+        val readable = favoriteState as? FavoriteReadState.Readable
+            ?: return@LaunchedEffect
+        val committed = committedEditAggregate ?: return@LaunchedEffect
+        if (editMode &&
+            readable.aggregate != committed &&
+            editMutationJob?.isActive != true
+        ) {
+            if (undoAggregate != null) {
+                undoSequence += 1
+                undoAggregate = null
+                snackbarHostState.currentSnackbarData?.dismiss()
+            }
+            pendingEditAggregate = null
+            committedEditAggregate = readable.aggregate
         }
     }
 
@@ -379,10 +447,67 @@ internal fun HomeScreen(
                             ).takeIf { it.identities.isNotEmpty() }
                         }
                     },
+                    favoriteBars = aggregate.favoriteBars.mapNotNull { container ->
+                        if (container.id != containerId) {
+                            container
+                        } else {
+                            container.copy(
+                                identities = container.identities - identity,
+                            ).takeIf { it.identities.isNotEmpty() }
+                        }
+                    },
                 )
             },
             favoriteRemovedMessage,
             recordUndo = true,
+        )
+    }
+
+    fun advanceAndPersistFavoriteBarDrag(amount: Offset) {
+        val session = favoriteBarDragSession ?: return
+        var residualX = session.residualX + amount.x
+        var displayed = session.displayedIdentities
+        var sourceIndex = displayed.indexOf(session.identity)
+        if (sourceIndex < 0) return
+        var exchanged = false
+        val threshold = favoriteBarItemStridePx / 2f
+        while (residualX >= threshold && sourceIndex < displayed.lastIndex) {
+            displayed = displayed.exchangedAt(sourceIndex, sourceIndex + 1)
+            sourceIndex += 1
+            residualX -= favoriteBarItemStridePx
+            exchanged = true
+        }
+        while (residualX <= -threshold && sourceIndex > 0) {
+            displayed = displayed.exchangedAt(sourceIndex, sourceIndex - 1)
+            sourceIndex -= 1
+            residualX += favoriteBarItemStridePx
+            exchanged = true
+        }
+        favoriteBarDragSession = session.copy(
+            displayedIdentities = displayed,
+            delta = session.delta + amount,
+            residualX = residualX,
+        )
+        if (!exchanged) return
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
+        val generation = session.generation
+        commitEditAggregate(
+            transform = { aggregate ->
+                aggregate.copy(
+                    favoriteBars = aggregate.favoriteBars.map { bar ->
+                        if (bar.id == session.barId) {
+                            bar.copy(identities = displayed)
+                        } else {
+                            bar
+                        }
+                    },
+                )
+            },
+            onFailed = {
+                if (favoriteBarDragSession?.generation == generation) {
+                    favoriteBarDragSession = null
+                }
+            },
         )
     }
     fun advanceAndPersistDrag(amount: Offset) {
@@ -664,7 +789,12 @@ internal fun HomeScreen(
                 )
             }
             Spacer(Modifier.height(dimensionResource(R.dimen.home_module_spacing)))
-            when (favoriteState) {
+            Box(
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .fillMaxWidth(),
+            ) {
+                when (favoriteState) {
                 FavoriteReadState.Loading -> HomeFavoriteMessage(
                     message = stringResource(R.string.loading_favorites),
                     showProgress = true,
@@ -677,21 +807,23 @@ internal fun HomeScreen(
                     onRetry = onRetryFavorites,
                 )
 
-                is FavoriteReadState.Readable -> {
+                    is FavoriteReadState.Readable -> {
                     if (favoriteState.aggregate.verticalLists.isEmpty() && editMode) {
                         HomeFavoriteProvisionalList(
                             modifier = Modifier.fillMaxWidth(),
                             onClick = onAddProvisionalFavorites,
                             testTag = "favorite_provisional_add_0",
                         )
-                    } else if (favoriteState.aggregate.verticalLists.isEmpty()) {
+                    } else if (favoriteState.aggregate.verticalLists.isEmpty() &&
+                        favoriteState.aggregate.favoriteBars.isEmpty()
+                    ) {
                         Text(
                             text = stringResource(R.string.home_empty_favorites),
                             color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.testTag("home_favorites_empty"),
                         )
-                    } else if (!editMode) {
+                    } else if (!editMode && favoriteState.aggregate.verticalLists.isNotEmpty()) {
                         HomeFavoriteComposition(
                             verticalLists = favoriteState.aggregate.verticalLists,
                             availabilityByIdentity = favoriteAvailability,
@@ -703,7 +835,7 @@ internal fun HomeScreen(
                             onLaunchFavorite = onLaunchFavorite,
                             onLongPressFavorite = onLongPressFavorite,
                         )
-                    } else {
+                    } else if (editMode) {
                         val persistedEditAggregate = pendingEditAggregate
                             ?: committedEditAggregate
                             ?: favoriteState.aggregate
@@ -1019,6 +1151,56 @@ internal fun HomeScreen(
                             }
                         }
                     }
+                    }
+                }
+            }
+            (favoriteState as? FavoriteReadState.Readable)?.aggregate?.let { aggregate ->
+                val renderedAggregate = if (editMode) {
+                    pendingEditAggregate ?: committedEditAggregate ?: aggregate
+                } else {
+                    aggregate
+                }
+                val renderedBars = favoriteBarDragSession?.let { session ->
+                    renderedAggregate.favoriteBars.map { bar ->
+                        if (bar.id == session.barId) {
+                            bar.copy(identities = session.displayedIdentities)
+                        } else {
+                            bar
+                        }
+                    }
+                } ?: renderedAggregate.favoriteBars
+                if (renderedBars.isNotEmpty() ||
+                    (editMode && renderedBars.size < 5)
+                ) {
+                    if (aggregate.verticalLists.isNotEmpty() || editMode) {
+                        Spacer(Modifier.height(dimensionResource(R.dimen.home_module_spacing)))
+                    }
+                    HomeFavoriteBars(
+                        favoriteBars = renderedBars,
+                        availabilityByIdentity = favoriteAvailability,
+                        editMode = editMode,
+                        onLaunchFavorite = onLaunchFavorite,
+                        onLongPressFavorite = onLongPressFavorite,
+                        onAddFavoritesToBar = onAddFavoritesToBar,
+                        onAddProvisionalFavoriteBar = onAddProvisionalFavoriteBar,
+                        favoriteBarStates = favoriteBarStates,
+                        draggedIdentity = favoriteBarDragSession?.identity,
+                        onRemoveFavorite = ::removeFavoriteFromContainer,
+                        onDragStart = { bar, identity, origin, size ->
+                            dragGeneration += 1
+                            favoriteBarDragSession = FavoriteBarDragSession(
+                                generation = dragGeneration,
+                                barId = bar.id,
+                                identity = identity,
+                                displayedIdentities = bar.identities,
+                                originInWindow = origin,
+                                size = size,
+                            )
+                        },
+                        onDrag = ::advanceAndPersistFavoriteBarDrag,
+                        onDragEnd = { favoriteBarDragSession = null },
+                        onDragCancel = { favoriteBarDragSession = null },
+                    )
                 }
             }
         }
@@ -1042,6 +1224,14 @@ internal fun HomeScreen(
                     rootOriginInWindow = dragRootOriginInWindow,
                 )
             }
+        }
+        favoriteBarDragSession?.let { session ->
+            HomeFavoriteBarDragPreview(
+                session = session,
+                availability = favoriteAvailability[session.identity]
+                    ?: FavoriteAvailability.Unknown(null),
+                rootOriginInWindow = dragRootOriginInWindow,
+            )
         }
     }
 }
@@ -1093,6 +1283,17 @@ private data class FavoriteDragSession(
             copy(crossGroupTarget = null, insertion = null)
         }
 }
+
+private data class FavoriteBarDragSession(
+    val generation: Int,
+    val barId: String,
+    val identity: LaunchableIdentity,
+    val displayedIdentities: List<LaunchableIdentity>,
+    val originInWindow: Offset,
+    val size: IntSize,
+    val delta: Offset = Offset.Zero,
+    val residualX: Float = 0f,
+)
 
 /**
  * Cross-group insertion boundary of an active drag. A boundary is pure feedback: it marks where a
@@ -1446,6 +1647,38 @@ private fun HomeFavoriteDragPreview(
             availability = availability,
             listSize = session.listSize,
             maxWidth = with(density) { session.size.width.toDp() },
+            shadowElevation = previewElevation,
+        )
+    }
+}
+
+@Composable
+private fun HomeFavoriteBarDragPreview(
+    session: FavoriteBarDragSession,
+    availability: FavoriteAvailability,
+    rootOriginInWindow: Offset,
+) {
+    val density = LocalDensity.current
+    val topLeft = session.originInWindow + session.delta - rootOriginInWindow
+    val previewAlpha = integerResource(R.integer.home_drag_preview_alpha_percent) / 100f
+    val previewElevation = with(density) {
+        dimensionResource(R.dimen.home_reorder_drag_elevation).toPx()
+    }
+    Box(
+        modifier = Modifier
+            .offset { IntOffset(topLeft.x.roundToInt(), topLeft.y.roundToInt()) }
+            .size(
+                width = with(density) { session.size.width.toDp() },
+                height = with(density) { session.size.height.toDp() },
+            )
+            .alpha(previewAlpha)
+            .clearAndSetSemantics {}
+            .testTag("home_favorite_bar_drag_preview"),
+    ) {
+        HomeFavoritePreviewContent(
+            availability = availability,
+            listSize = FavoriteListSize.Medium,
+            maxWidth = dimensionResource(R.dimen.home_favorite_bar_item_width),
             shadowElevation = previewElevation,
         )
     }
@@ -2170,6 +2403,7 @@ private fun HomeFavoriteList(
 private fun HomeFavoriteAddControl(
     onClick: () -> Unit,
     testTag: String,
+    @StringRes labelRes: Int = R.string.add_favorites_to_list,
 ) {
     Row(
         modifier = Modifier
@@ -2182,16 +2416,355 @@ private fun HomeFavoriteAddControl(
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_add),
-            contentDescription = stringResource(R.string.add_favorites_to_list),
+            contentDescription = stringResource(labelRes),
             tint = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.size(dimensionResource(R.dimen.home_reorder_handle_size)),
         )
         Spacer(Modifier.width(dimensionResource(R.dimen.home_favorite_edge_margin)))
         Text(
-            text = stringResource(R.string.add_favorites_to_list),
+            text = stringResource(labelRes),
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyLarge,
         )
+    }
+}
+
+@Composable
+private fun HomeFavoriteBars(
+    favoriteBars: List<FavoriteContainer>,
+    availabilityByIdentity: Map<LaunchableIdentity, FavoriteAvailability>,
+    editMode: Boolean,
+    onLaunchFavorite: (FavoriteAvailability) -> Unit,
+    onLongPressFavorite: (LaunchableEntry) -> Unit,
+    onAddFavoritesToBar: (String) -> Unit,
+    onAddProvisionalFavoriteBar: () -> Unit,
+    favoriteBarStates: MutableMap<String, LazyListState>,
+    draggedIdentity: LaunchableIdentity?,
+    onRemoveFavorite: (String, LaunchableIdentity) -> Unit,
+    onDragStart: (FavoriteContainer, LaunchableIdentity, Offset, IntSize) -> Unit,
+    onDrag: (Offset) -> Unit,
+    onDragEnd: () -> Unit,
+    onDragCancel: () -> Unit,
+) {
+    val borderAlpha =
+        integerResource(R.integer.home_favorite_bar_border_alpha_percent) / 100f
+    val fadeAlpha =
+        integerResource(R.integer.home_favorite_bar_overflow_fade_alpha_percent) / 100f
+    val fadeWidthPx = with(LocalDensity.current) {
+        dimensionResource(R.dimen.home_favorite_bar_overflow_fade_width).toPx()
+    }
+    val fadeColor = MaterialTheme.colorScheme.background.copy(alpha = fadeAlpha)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .editSurface(editMode),
+        verticalArrangement = Arrangement.spacedBy(
+            dimensionResource(R.dimen.home_favorite_bar_spacing),
+        ),
+    ) {
+        favoriteBars.forEachIndexed { barIndex, bar ->
+            val listState = favoriteBarStates.getOrPut(bar.id) { LazyListState() }
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(dimensionResource(R.dimen.home_favorite_bar_height))
+                    .then(
+                        if (editMode) {
+                            Modifier.border(
+                                width = dimensionResource(
+                                    R.dimen.home_favorite_bar_border_width,
+                                ),
+                                color = MaterialTheme.colorScheme.onBackground.copy(
+                                    alpha = borderAlpha,
+                                ),
+                                shape = RoundedCornerShape(
+                                    dimensionResource(R.dimen.home_favorite_bar_corner_radius),
+                                ),
+                            )
+                        } else {
+                            Modifier
+                        },
+                    )
+                    .clip(RoundedCornerShape(
+                        dimensionResource(R.dimen.home_favorite_bar_corner_radius),
+                    ))
+                    .drawWithContent {
+                        drawContent()
+                        if (listState.canScrollBackward) {
+                            drawRect(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(fadeColor, fadeColor.copy(alpha = 0f)),
+                                    startX = 0f,
+                                    endX = fadeWidthPx,
+                                ),
+                                size = Size(fadeWidthPx, size.height),
+                            )
+                        }
+                        if (listState.canScrollForward) {
+                            drawRect(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(fadeColor.copy(alpha = 0f), fadeColor),
+                                    startX = size.width - fadeWidthPx,
+                                    endX = size.width,
+                                ),
+                                topLeft = Offset(size.width - fadeWidthPx, 0f),
+                                size = Size(fadeWidthPx, size.height),
+                            )
+                        }
+                    }
+                    .testTag("home_favorite_bar_$barIndex"),
+                state = listState,
+                horizontalArrangement = Arrangement.spacedBy(
+                    dimensionResource(R.dimen.home_favorite_bar_item_spacing),
+                ),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                items(
+                    items = bar.identities,
+                    key = LaunchableIdentity::stableKey,
+                ) { identity ->
+                    val availability = availabilityByIdentity[identity]
+                        ?: FavoriteAvailability.Unknown(null)
+                    HomeFavoriteBarItem(
+                        availability = availability,
+                        editMode = editMode,
+                        sourcePlaceholder = identity == draggedIdentity,
+                        onClick = { onLaunchFavorite(availability) },
+                        onLongClick = {
+                            availability.presentationEntry?.let(onLongPressFavorite)
+                        },
+                        onRemoveFavorite = { onRemoveFavorite(bar.id, identity) },
+                        onDragStart = { origin, size ->
+                            onDragStart(bar, identity, origin, size)
+                        },
+                        onDrag = onDrag,
+                        onDragEnd = onDragEnd,
+                        onDragCancel = onDragCancel,
+                    )
+                }
+                if (editMode) {
+                    item(key = "favorite_bar_add_${bar.id}") {
+                        Box(
+                            modifier = Modifier
+                                .width(dimensionResource(R.dimen.home_favorite_bar_item_width))
+                                .fillMaxHeight(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            HomeFavoriteAddControl(
+                                onClick = { onAddFavoritesToBar(bar.id) },
+                                testTag = "favorite_bar_add_$barIndex",
+                                labelRes = R.string.add_favorites_to_bar,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        if (editMode && favoriteBars.size < 5) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(dimensionResource(R.dimen.home_favorite_bar_height))
+                    .border(
+                        width = dimensionResource(R.dimen.home_favorite_bar_border_width),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = borderAlpha),
+                        shape = RoundedCornerShape(
+                            dimensionResource(R.dimen.home_favorite_bar_corner_radius),
+                        ),
+                    )
+                    .clip(RoundedCornerShape(
+                        dimensionResource(R.dimen.home_favorite_bar_corner_radius),
+                    )),
+                contentAlignment = Alignment.Center,
+            ) {
+                HomeFavoriteAddControl(
+                    onClick = onAddProvisionalFavoriteBar,
+                    testTag = "favorite_bar_provisional_add",
+                    labelRes = R.string.add_favorites_to_bar,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+private fun HomeFavoriteBarItem(
+    availability: FavoriteAvailability,
+    editMode: Boolean,
+    sourcePlaceholder: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    onRemoveFavorite: () -> Unit,
+    onDragStart: (Offset, IntSize) -> Unit,
+    onDrag: (Offset) -> Unit,
+    onDragEnd: () -> Unit,
+    onDragCancel: () -> Unit,
+) {
+    val entry = availability.presentationEntry
+    val iconSize = dimensionResource(R.dimen.home_favorite_icon_size)
+    val iconPixels = with(LocalDensity.current) { iconSize.roundToPx() }
+    val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
+    val itemBackgroundAlpha = integerResource(
+        R.integer.home_favorite_bar_item_background_alpha_percent,
+    ) / 100f
+    val borderAlpha = integerResource(R.integer.home_favorite_bar_border_alpha_percent) / 100f
+    val interactionSource = remember(entry?.identity) { MutableInteractionSource() }
+    val removeInteractionSource = remember(entry?.identity) { MutableInteractionSource() }
+    val hapticFeedback = LocalHapticFeedback.current
+    val removeBadgeAlpha =
+        integerResource(R.integer.home_favorite_remove_badge_alpha_percent) / 100f
+    var itemOriginInWindow by remember(entry?.identity) { mutableStateOf(Offset.Zero) }
+    var itemSize by remember(entry?.identity) { mutableStateOf(IntSize.Zero) }
+    Box(
+        modifier = Modifier
+            .width(dimensionResource(R.dimen.home_favorite_bar_item_width))
+            .fillMaxHeight()
+            .onGloballyPositioned {
+                itemOriginInWindow = it.positionInWindow()
+                itemSize = it.size
+            }
+            .clip(RoundedCornerShape(
+                dimensionResource(R.dimen.home_favorite_bar_corner_radius),
+            ))
+            .background(
+                MaterialTheme.colorScheme.onBackground.copy(alpha = itemBackgroundAlpha),
+            )
+            .border(
+                width = dimensionResource(R.dimen.home_favorite_bar_border_width),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = borderAlpha),
+                shape = RoundedCornerShape(
+                    dimensionResource(R.dimen.home_favorite_bar_corner_radius),
+                ),
+            )
+            .combinedClickable(
+                enabled = !editMode,
+                interactionSource = interactionSource,
+                indication = if (editMode) null else ripple(
+                    color = colorResource(R.color.home_favorite_ripple),
+                ),
+                role = Role.Button,
+                onClick = onClick,
+                onLongClick = {
+                    if (entry != null) {
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onLongClick()
+                    }
+                },
+            )
+            .alpha(if (availability is FavoriteAvailability.Available) 1f else disabledAlpha)
+            .then(if (sourcePlaceholder) Modifier.alpha(0f) else Modifier)
+            .testTag("home_favorite_bar_item"),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = dimensionResource(R.dimen.home_favorite_edge_margin))
+                .padding(
+                    end = if (editMode) {
+                        dimensionResource(R.dimen.home_reorder_handle_target_size)
+                    } else {
+                        0.dp
+                    },
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (entry == null) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_inventory_error),
+                    contentDescription = null,
+                    modifier = Modifier.size(iconSize),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            } else {
+                val bitmap = entry.iconBitmap?.asImageBitmap() ?: remember(entry.icon, iconPixels) {
+                    entry.icon.toBitmap(iconPixels, iconPixels).asImageBitmap()
+                }
+                Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(iconSize))
+            }
+            Spacer(Modifier.width(dimensionResource(R.dimen.home_favorite_icon_label_gap)))
+            Text(
+                text = when (availability) {
+                    is FavoriteAvailability.Available -> availability.entry.label
+                    is FavoriteAvailability.Disabled -> entry?.let {
+                        stringResource(R.string.favorite_disabled_format, it.label)
+                    } ?: stringResource(R.string.favorite_application_disabled)
+                    is FavoriteAvailability.TemporarilyUnavailable,
+                    is FavoriteAvailability.Unknown,
+                    -> entry?.let {
+                        stringResource(R.string.favorite_unavailable_format, it.label)
+                    } ?: stringResource(R.string.favorite_application_unavailable)
+                    FavoriteAvailability.ConfirmedRemoved ->
+                        stringResource(R.string.favorite_application_unavailable)
+                },
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                fontSize = dimensionResource(R.dimen.home_favorite_text_size).value.sp,
+                lineHeight = dimensionResource(R.dimen.home_favorite_line_height).value.sp,
+            )
+        }
+        if (editMode) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .size(dimensionResource(R.dimen.home_favorite_remove_target_size))
+                    .clickable(
+                        interactionSource = removeInteractionSource,
+                        indication = null,
+                        role = Role.Button,
+                        onClick = onRemoveFavorite,
+                    )
+                    .testTag("remove_favorite_bar_item"),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(dimensionResource(R.dimen.home_favorite_remove_badge_size))
+                        .clip(CircleShape)
+                        .background(
+                            MaterialTheme.colorScheme.error.copy(alpha = removeBadgeAlpha),
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = stringResource(R.string.remove_favorite_item),
+                        modifier = Modifier.size(
+                            dimensionResource(R.dimen.home_favorite_remove_icon_size),
+                        ),
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+            Icon(
+                painter = painterResource(R.drawable.ic_drag_handle),
+                contentDescription = stringResource(R.string.favorite_reorder_handle),
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(dimensionResource(R.dimen.home_reorder_handle_target_size))
+                    .pointerInput(entry?.identity) {
+                        detectDragGestures(
+                            onDragStart = { onDragStart(itemOriginInWindow, itemSize) },
+                            onDragEnd = onDragEnd,
+                            onDragCancel = onDragCancel,
+                            onDrag = { change, amount ->
+                                change.consume()
+                                onDrag(amount)
+                            },
+                        )
+                    }
+                    .padding(
+                        (
+                            dimensionResource(R.dimen.home_reorder_handle_target_size) -
+                                dimensionResource(R.dimen.home_reorder_handle_size)
+                            ) / 2,
+                    )
+                    .testTag("favorite_bar_reorder_handle"),
+            )
+        }
     }
 }
 

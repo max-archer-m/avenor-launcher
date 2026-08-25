@@ -43,6 +43,9 @@
     <string name="drawer_selection_confirm">确认</string>
     <string name="drawer_selection_add_to_list">添加到列表</string>
     <string name="drawer_selection_create_list">创建列表</string>
+    <string name="drawer_selection_add_to_favorite_bar">添加到收藏栏</string>
+    <string name="drawer_selection_create_favorite_bar">创建收藏栏</string>
+    <string name="add_favorites_to_bar">向收藏栏添加应用</string>
     <string name="drawer_selection_order_format">已选择，第 %1$d 项</string>
     <string name="drawer_selection_not_selected">未选择</string>
     <string name="drawer_selection_already_favorite_unavailable">已在收藏中，无法选择</string>

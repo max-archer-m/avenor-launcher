@@ -137,6 +137,167 @@ class HomeScreenTest {
     }
 
     @Test
+    fun favoriteBarDisplaysAndLaunchesItsExactEntry() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 42,
+                componentName = ComponentName("com.example.bar", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Favorite bar application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        var selectedAvailability: FavoriteAvailability? = null
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        FavoriteAggregate(
+                            favoriteBars = listOf(
+                                FavoriteContainer(
+                                    id = "favorite-bar-1",
+                                    type = FavoriteContainerType.FavoriteBar,
+                                    identities = listOf(entry.identity),
+                                ),
+                            ),
+                        ),
+                    ),
+                    favoriteAvailability = mapOf(
+                        entry.identity to FavoriteAvailability.Available(entry),
+                    ),
+                    onLaunchFavorite = { selectedAvailability = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home_favorite_bar_0").assertIsDisplayed()
+        composeRule.onNodeWithText("Favorite bar application").performClick()
+        composeRule.runOnIdle {
+            assertEquals(FavoriteAvailability.Available(entry), selectedAvailability)
+        }
+        composeRule.onNodeWithTag("home_favorites_empty").assertDoesNotExist()
+    }
+
+    @Test
+    fun editModeExposesExistingAndProvisionalFavoriteBarTargets() {
+        val identity = LaunchableIdentity(
+            profileSerialNumber = 42,
+            componentName = ComponentName("com.example.bar", "MainActivity"),
+        )
+        var existingTarget: String? = null
+        var provisionalRequested = false
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        FavoriteAggregate(
+                            favoriteBars = listOf(
+                                FavoriteContainer(
+                                    id = "favorite-bar-1",
+                                    type = FavoriteContainerType.FavoriteBar,
+                                    identities = listOf(identity),
+                                ),
+                            ),
+                        ),
+                    ),
+                    editMode = true,
+                    onAddFavoritesToBar = { existingTarget = it },
+                    onAddProvisionalFavoriteBar = { provisionalRequested = true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("favorite_bar_add_0").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { assertEquals("favorite-bar-1", existingTarget) }
+        composeRule.onNodeWithTag("favorite_bar_provisional_add")
+            .assertIsDisplayed()
+            .performClick()
+        composeRule.runOnIdle { assertEquals(true, provisionalRequested) }
+    }
+
+    @Test
+    fun favoriteBarRevealScrollsOnlyItsTargetIntoView() {
+        val entries = List(6) { index ->
+            LaunchableEntry(
+                identity = LaunchableIdentity(
+                    profileSerialNumber = 42,
+                    componentName = ComponentName("com.example.bar$index", "MainActivity"),
+                ),
+                user = Process.myUserHandle(),
+                label = "Favorite bar application $index",
+                icon = ColorDrawable(Color.TRANSPARENT),
+            )
+        }
+        var revealCompleted = false
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        FavoriteAggregate(
+                            favoriteBars = listOf(
+                                FavoriteContainer(
+                                    id = "favorite-bar-reveal",
+                                    type = FavoriteContainerType.FavoriteBar,
+                                    identities = entries.map { it.identity },
+                                ),
+                            ),
+                        ),
+                    ),
+                    favoriteAvailability = entries.associate { entry ->
+                        entry.identity to FavoriteAvailability.Available(entry)
+                    },
+                    editMode = true,
+                    favoriteRevealContainerId = "favorite-bar-reveal",
+                    favoriteRevealContainerType = FavoriteContainerType.FavoriteBar,
+                    favoriteRevealIdentity = entries.last().identity,
+                    onFavoriteRevealComplete = { revealCompleted = true },
+                )
+            }
+        }
+
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Favorite bar application 5").assertIsDisplayed()
+        composeRule.runOnIdle { assertEquals(true, revealCompleted) }
+    }
+
+    @Test
+    fun removingTheFinalFavoriteBarItemDeletesItsContainerAndOffersUndo() {
+        val identity = LaunchableIdentity(
+            profileSerialNumber = 42,
+            componentName = ComponentName("com.example.removed.bar", "MainActivity"),
+        )
+        val initial = FavoriteAggregate(
+            favoriteBars = listOf(
+                FavoriteContainer(
+                    id = "favorite-bar-remove",
+                    type = FavoriteContainerType.FavoriteBar,
+                    identities = listOf(identity),
+                ),
+            ),
+        )
+        var committed = initial
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(initial),
+                    editMode = true,
+                    onCommitFavoriteComposition = { transform ->
+                        transform(committed).also { committed = it }
+                    },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("remove_favorite_bar_item").performClick()
+        composeRule.waitForIdle()
+        composeRule.runOnIdle { assertEquals(emptyList<FavoriteContainer>(), committed.favoriteBars) }
+        composeRule.onNodeWithText("Removed from favorites").assertIsDisplayed()
+        composeRule.onNodeWithText("Undo").performClick()
+        composeRule.waitForIdle()
+        composeRule.runOnIdle { assertEquals(initial, committed) }
+    }
+
+    @Test
     fun editModeKeepsThePersistedListComposition() {
         val identity = LaunchableIdentity(
             profileSerialNumber = 42,
