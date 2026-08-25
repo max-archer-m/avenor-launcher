@@ -20,7 +20,7 @@ Normal Home conditionally presents up to five untitled fixed-medium horizontal f
 
 ## Included work
 
-- Present zero to five favorite bars below the favorite-list area with contracted geometry, fixed medium items, overflow fades, launch, long press, identity, badge, and accessibility behavior.
+- Present zero to five `56dp`-high favorite bars below the favorite-list area with the shared Home geometry: `8dp` adjacent-module spacing and no uniform Home outer padding, with no padding in the favorite-bar containers or their items. Item internals define their own placement, including a `16dp` icon start margin and the application handle's physical-right-edge `40dp`-wide, full-item-height target without an end margin. Normal and edit modes preserve those boundaries; editing surfaces, outlines, and fixed rails add no extra outer inset. Preserve the remaining contracted fixed-medium item, overflow-fade, launch, long-press, identity, badge, and accessibility behavior.
 - Preserve each bar's meaningful same-process horizontal position and reset it after process recreation; apply captured restoration and target-only reveal after Drawer multi-selection.
 - Add existing and provisional favorite-bar targets to the Iteration 18 multi-selection mechanism; create a bar only from at least one successfully saved valid identity.
 - Present fixed edit rails, remove action, conditional complete-bar reorder action, add control, and provisional bar when capacity permits.
@@ -56,7 +56,7 @@ Five independent horizontal states can conflict with Home edit and Drawer restor
 
 ## Acceptance criteria
 
-- No bar reserves normal-mode height; one to five bars use contracted size, spacing, item geometry, overflow, launch, and long-press behavior.
+- No bar reserves normal-mode height; one to five bars use the contracted `8dp` adjacent-module spacing and no uniform Home outer padding, `56dp` bar height, zero container/item padding, application-handle target geometry, item geometry, overflow, launch, and long-press behavior without acquiring an additional edit-mode inset.
 - Same-process, edit-exit, system Home, and external-return positions follow navigation rules; process recreation resets to start.
 - Existing and provisional targets use the Iteration 18 flow without duplicating its state machine.
 - A bar is created atomically only with valid confirmed entries; no persisted empty bar exists.
