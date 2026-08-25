@@ -44,6 +44,9 @@
     <string name="drawer_selection_confirm">Confirm</string>
     <string name="drawer_selection_add_to_list">Add to list</string>
     <string name="drawer_selection_create_list">Create list</string>
+    <string name="drawer_selection_add_to_favorite_bar">Add to favorite bar</string>
+    <string name="drawer_selection_create_favorite_bar">Create favorite bar</string>
+    <string name="add_favorites_to_bar">Add applications to favorite bar</string>
     <string name="drawer_selection_order_format">Selected, item %1$d</string>
     <string name="drawer_selection_not_selected">Not selected</string>
     <string name="drawer_selection_already_favorite_unavailable">Favorited; unavailable</string>
