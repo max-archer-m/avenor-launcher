@@ -3,7 +3,7 @@
     <integer name="home_drag_preview_alpha_percent">100</integer>
     <integer name="home_drag_source_slot_alpha_percent">0</integer>
     <integer name="home_favorite_edge_scroll_dp_per_second">120</integer>
-    <integer name="home_favorite_remove_badge_alpha_percent">24</integer>
+    <integer name="home_favorite_list_remove_pressed_alpha_percent">80</integer>
     <integer name="home_favorite_bar_item_background_alpha_percent">6</integer>
     <integer name="home_favorite_bar_border_alpha_percent">12</integer>
     <integer name="home_favorite_bar_overflow_fade_alpha_percent">24</integer>

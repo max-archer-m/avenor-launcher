@@ -56,7 +56,7 @@ Material changes to persistence architecture, state ownership, permissions, priv
 | [Iteration 16: Vertical-List Normal-Mode Composition](iteration-16-vertical-list-normal-mode-composition.md) | `Completed` | 2026-08-24 | Normal Home composition and P1 aggregate-persistence fixes are implemented; the author reported that the currently verifiable behavior was basically accepted. |
 | [Iteration 17: Home Edit Session and Vertical-List Management](iteration-17-home-edit-session-and-vertical-list-management.md) | `Completed` | 2026-08-25 | Implementation is complete; the author reported that compilation, installation, and the currently verifiable behavior were basically accepted. |
 | [Iteration 18: Drawer Targeted Multi-Selection and Vertical-List Addition](iteration-18-drawer-targeted-multiselection-and-list-creation.md) | `Completed` | 2026-08-25 | The implementation is complete; the author reported that code-level acceptance and the basic device acceptance passed with no current functional issue. |
-| [Iteration 19: Favorite-Bar Presentation, Creation, and Management](iteration-19-favorite-bar-presentation-creation-and-management.md) | `In progress` | 2026-08-25 | The author authorized the iteration branch and scope review after Iteration 18 was integrated into `main`. |
+| [Iteration 19: Favorite-Bar Presentation, Creation, and Management](iteration-19-favorite-bar-presentation-creation-and-management.md) | `Completed` | 2026-08-26 | Implementation is complete; the author reported that packaging and compilation operated normally and the current functional acceptance basically passed. |
 | [Iteration 20: Cross-Container Application Drag and Two-Axis Auto-Scroll](iteration-20-cross-container-drag-and-two-axis-auto-scroll.md) | `Planned` | 2026-08-23 | Cross-container movement requires all destination types and their local management behavior. |
 | [Iteration 21: Upgrade, Regression, and Version Closure](iteration-21-upgrade-regression-and-version-closure.md) | `Planned` | 2026-08-23 | Final closure follows acceptance of Iterations 15-20 and the required version evidence. |
 
@@ -82,7 +82,9 @@ The following local checks are `Passed`: `git diff --check`, staged-diff whitesp
 
 ### Iteration 19
 
-[Contract](iteration-19-favorite-bar-presentation-creation-and-management.md). Status is `In progress`; the author authorized the iteration branch and scope review after Iteration 18 was integrated into `main`. The first additive slice implements typed existing and provisional favorite-bar Drawer targets, atomic creation or append, conditional normal and edit-mode Home presentation, fixed-medium application items, launch and long-press behavior, the five-bar provisional-entry limit, localized labels, and focused UI-test coverage; the author reported that this slice passed device acceptance. The second additive slice implements stable per-bar lazy horizontal viewports, conditional overflow fades, same-process position retention through the retained Home composition, identity-keyed inventory reconciliation, process-start reset, and target-only minimum horizontal reveal after Drawer confirmation; the author reported that its basic device acceptance passed. The third additive slice implements overlapping item-removal controls, latest-only Undo including automatic empty-bar deletion and restoration, independent follow-pointer same-bar drag previews, adjacent immediate exchanges with queued atomic persistence, source placeholders, failure rollback, and successful-addition synchronization that invalidates stale Undo. `git diff --check`, affected XML parsing, and the changed implementation line-width sweep are `Passed`; the author reported that compilation and the current functional acceptance basically passed. The observed remaining concerns are UI-contract refinements rather than current functional failures, so Iteration 19 remains `In progress` pending an accepted product-contract update and implementation alignment. Agent-run Gradle and instrumented tests are `Not run`; no artifact or tag is recorded yet.
+[Contract](iteration-19-favorite-bar-presentation-creation-and-management.md). Typed existing and provisional favorite-bar Drawer targets, atomic creation or append, conditional normal and edit-mode Home presentation, fixed-medium application items, launch and long-press behavior, the five-bar limit, localized add actions, stable horizontal viewports, overflow fades, retained same-process positions, inventory reconciliation, and target-only reveal are implemented. Application and complete-bar removal, latest-only Undo with capacity reservation, automatic empty-bar deletion and restoration, same-bar application exchange, complete-bar reorder, fixed edit rails, compact vertical-list controls, source placeholders, persistence rollback, and successful-addition invalidation of stale Undo are also implemented.
+
+The author reported that the packaging and compilation workflows operated normally and that the current functional acceptance basically passed. The author also clarified that the accepted vertical-list start geometry is the composed `8dp` Home content padding plus `8dp` list-item icon inset, yielding `16dp` from the applicable safe edge; a later product-document wording clarification does not represent an implementation failure or block this iteration. `git diff --check`, affected XML parsing, and the changed implementation line-width sweep are `Passed`. Agent-run Gradle and instrumented tests are `Not run`; broader device, accessibility, locale, process-recreation, and failure-injection scenarios remain `Not run` or `Unknown`. These are recorded evidence gaps rather than reported failures for the author-accepted scope. Status is `Completed` by author decision on 2026-08-26; no commit, push, tag, publication, or release is claimed.
 
 ### Iteration 20
 
@@ -94,7 +96,7 @@ The following local checks are `Passed`: `git diff --check`, staged-diff whitesp
 
 ## Dependencies and sequence
 
-The current delivery dependency is `15 → 16 → 17 → 18 → 19 → 20 → 21`. Iteration 18 is complete and its targeted addition mechanism is available for Iteration 19 to reuse. The sequence does not bind an iteration to a contributor, terminal, branch, forecast date, or permanent single-line execution policy.
+The current delivery dependency is `15 → 16 → 17 → 18 → 19 → 20 → 21`. Iteration 19 is complete and establishes the container types and local-management behavior required by Iteration 20. The sequence does not bind an iteration to a contributor, terminal, branch, forecast date, or permanent single-line execution policy.
 
 ## Validation
 
@@ -123,6 +125,6 @@ The eventual artifact must retain `applicationId` `com.avenor.launcher`, use the
 
 ## Completion result
 
-No version completion result exists. Iterations 15-18 are `Completed`; Iteration 19 is
-`In progress`; and Iterations 20-21 remain `Planned`, so `1.3.0` remains incomplete. No version
+No version completion result exists. Iterations 15-19 are `Completed`, and Iterations 20-21
+remain `Planned`, so `1.3.0` remains incomplete. No version
 artifact, tag, publication, or release is claimed.
