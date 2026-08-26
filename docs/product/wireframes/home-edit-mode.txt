@@ -21,13 +21,13 @@
 |  FAVORITE COMPOSITION EDIT SURFACE::::::::|  SAME EDIT SURFACE:::::::::::::::|
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
 |  LEFT LIST / EQUAL WIDTH / SCROLL.........|  RIGHT LIST OR PROVISIONAL.......|
-| [X LIST] [M SIZE] [H LIST]................| PERSISTED: SAME 3-SLOT BAR.......|
-|  40DP BAR / 36DP SURFACE / 36X40 TARGETS / 20DP ART / 4DP GAP................|
+|..................[X24][M TEXT][H24] / 40X40 TARGETS / RIGHT ALIGNED..........|
+|  40DP BAR / 1DP BOTTOM LINE / NO PAD, FILL, OUTER BORDER, OR GAP.............|
 |  SIZE MENU @ BUTTON XY / 4DP BELOW / FLIP OR CLAMP 8DP.......................|
 |  (O)[48 APP] LARGE / (*)[40 APP] MEDIUM / (O)[32 APP] SMALL..................|
 |  PROVISIONAL LIST HAS NO BAR; ONE LIST HIDES REORDER.........................|
 |  SHARED VIEWPORT / INDEPENDENT SCROLL........................................|
-|  LIST DRAG: STATIC VISIBLE-VIEWPORT PREVIEW / BODY SWAP SAVES................|
+|  LIST DRAG: LONG PRESS + MOVE / STATIC PREVIEW / BODY SWAP SAVES.............|
 |  REMOVE LIST: DEFAULT DIALOG -> LIST REMOVED / UNDO..........................|
 |  (X)[L1-1 40DP] APP [H24/W40 HANDLE]::::::|::::::::::::::::::::::::::::::::::|
 |:::::::::::::::::::::::::::::::::::::::::::|  (X)[L2-1] APP [H24/W40 HANDLE]::|
@@ -85,8 +85,8 @@
 |.......................8DP MODULE SPACING.....................................|
 |..............SECONDARY EDIT SURFACE / MAX 5 FAVORITE BARS....................|
 |..R1 [X BAR]|(X)[APP][H] ...|[H BAR IF 2+]....................................|
-|..FIXED 48DP RAILS; EXISTING: + ADD APPS; PROVISIONAL: + NEW BAR..............|
-|..REORDER PREVIEW = FROZEN COMPLETE VISIBLE FAVORITE BAR......................|
+|..RAILS: BOTH 40DP / 24DP ART; EXISTING: + APPS; PROVISIONAL: + NEW BAR.......|
+|..LONG PRESS + MOVE -> FROZEN COMPLETE VISIBLE FAVORITE BAR PREVIEW...........|
 |..REMOVE FAVORITE BAR: DEFAULT DIALOG -> REMOVED / UNDO.......................|
 |  56DP BAR; ZERO CONTAINER AND ITEM PADDING...................................|
 |..............................................................................|
