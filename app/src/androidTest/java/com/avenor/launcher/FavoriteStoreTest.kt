@@ -381,6 +381,137 @@ class FavoriteStoreTest {
         file.delete()
     }
 
+    @Test
+    fun moveFavoriteSupportsEveryContainerTypePair() {
+        val moved = identity(1, "com.example.moved", "Main")
+        val sourceTail = identity(1, "com.example.source.tail", "Main")
+        val targetFirst = identity(1, "com.example.target.first", "Main")
+        val targetLast = identity(1, "com.example.target.last", "Main")
+
+        fun verifyMove(
+            sourceType: FavoriteContainerType,
+            targetType: FavoriteContainerType,
+        ) {
+            val source = FavoriteContainer(
+                id = "source",
+                type = sourceType,
+                identities = listOf(moved, sourceTail),
+            )
+            val target = FavoriteContainer(
+                id = "target",
+                type = targetType,
+                identities = listOf(targetFirst, targetLast),
+            )
+            val aggregate = FavoriteAggregate(
+                verticalLists = listOf(source, target)
+                    .filter { it.type == FavoriteContainerType.VerticalList },
+                favoriteBars = listOf(source, target)
+                    .filter { it.type == FavoriteContainerType.FavoriteBar },
+            )
+
+            val updated = aggregate.moveFavorite(
+                sourceContainerId = source.id,
+                targetContainerId = target.id,
+                identity = moved,
+                targetIndex = 1,
+                exchangeIdentity = null,
+            )
+
+            assertEquals(listOf(sourceTail), updated.container(source.id)?.identities)
+            assertEquals(
+                listOf(targetFirst, moved, targetLast),
+                updated.container(target.id)?.identities,
+            )
+            assertTrue(isValidAggregate(updated))
+        }
+
+        verifyMove(FavoriteContainerType.VerticalList, FavoriteContainerType.VerticalList)
+        verifyMove(FavoriteContainerType.VerticalList, FavoriteContainerType.FavoriteBar)
+        verifyMove(FavoriteContainerType.FavoriteBar, FavoriteContainerType.VerticalList)
+        verifyMove(FavoriteContainerType.FavoriteBar, FavoriteContainerType.FavoriteBar)
+    }
+
+    @Test
+    fun moveFavoriteExchangePreservesBothContainerSlotsAndIdentityUniqueness() {
+        val moved = identity(1, "com.example.moved", "Main")
+        val sourceTail = identity(1, "com.example.source.tail", "Main")
+        val exchanged = identity(1, "com.example.exchanged", "Main")
+        val targetTail = identity(1, "com.example.target.tail", "Main")
+        val source = FavoriteContainer(
+            id = "source-list",
+            type = FavoriteContainerType.VerticalList,
+            identities = listOf(moved, sourceTail),
+        )
+        val target = FavoriteContainer(
+            id = "target-bar",
+            type = FavoriteContainerType.FavoriteBar,
+            identities = listOf(exchanged, targetTail),
+        )
+        val aggregate = FavoriteAggregate(
+            verticalLists = listOf(source),
+            favoriteBars = listOf(target),
+        )
+
+        val updated = aggregate.moveFavorite(
+            sourceContainerId = source.id,
+            targetContainerId = target.id,
+            identity = moved,
+            targetIndex = null,
+            exchangeIdentity = exchanged,
+        )
+
+        assertEquals(listOf(exchanged, sourceTail), updated.verticalLists.single().identities)
+        assertEquals(listOf(moved, targetTail), updated.favoriteBars.single().identities)
+        assertEquals(aggregate.identities.toSet(), updated.identities.toSet())
+        assertTrue(isValidAggregate(updated))
+    }
+
+    @Test
+    fun moveFavoriteDeletesAnEmptySourceAndIgnoresInvalidMoves() {
+        val moved = identity(1, "com.example.moved", "Main")
+        val targetEntry = identity(1, "com.example.target", "Main")
+        val aggregate = FavoriteAggregate(
+            verticalLists = listOf(
+                FavoriteContainer(
+                    id = "source-list",
+                    type = FavoriteContainerType.VerticalList,
+                    identities = listOf(moved),
+                ),
+            ),
+            favoriteBars = listOf(
+                FavoriteContainer(
+                    id = "target-bar",
+                    type = FavoriteContainerType.FavoriteBar,
+                    identities = listOf(targetEntry),
+                ),
+            ),
+        )
+
+        val updated = aggregate.moveFavorite(
+            sourceContainerId = "source-list",
+            targetContainerId = "target-bar",
+            identity = moved,
+            targetIndex = 0,
+            exchangeIdentity = null,
+        )
+
+        assertTrue(updated.verticalLists.isEmpty())
+        assertEquals(listOf(moved, targetEntry), updated.favoriteBars.single().identities)
+        assertEquals(
+            aggregate,
+            aggregate.moveFavorite(
+                sourceContainerId = "missing",
+                targetContainerId = "target-bar",
+                identity = moved,
+                targetIndex = 0,
+                exchangeIdentity = null,
+            ),
+        )
+    }
+
+    private fun FavoriteAggregate.container(id: String): FavoriteContainer? =
+        (verticalLists + favoriteBars).firstOrNull { it.id == id }
+
     private fun temporaryFavoriteFile() = ApplicationProvider.getApplicationContext<android.content.Context>()
         .cacheDir
         .resolve("favorites-${UUID.randomUUID()}.bin")
