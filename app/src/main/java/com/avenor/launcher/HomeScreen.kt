@@ -294,6 +294,7 @@ internal fun HomeScreen(
     var pendingEditAggregate by remember { mutableStateOf<FavoriteAggregate?>(null) }
     var committedEditAggregate by remember { mutableStateOf<FavoriteAggregate?>(null) }
     var editMutationJob by remember { mutableStateOf<Job?>(null) }
+    val currentFavoriteState by rememberUpdatedState(favoriteState)
     val snackbarHostState = remember { SnackbarHostState() }
     val editScope = rememberCoroutineScope()
     var dragRootOriginInWindow by remember { mutableStateOf(Offset.Zero) }
@@ -314,6 +315,8 @@ internal fun HomeScreen(
     val edgeScrollSpeedPxPerSecond = with(LocalDensity.current) {
         integerResource(R.integer.home_favorite_edge_scroll_dp_per_second).dp.toPx()
     }
+    val edgeScrollStartDelayMillis =
+        integerResource(R.integer.home_favorite_edge_scroll_start_delay_ms).toLong()
     val hapticFeedback = LocalHapticFeedback.current
     val undoLabel = stringResource(R.string.undo)
     val favoriteListSizeMessage = stringResource(R.string.favorite_list_size)
@@ -321,6 +324,13 @@ internal fun HomeScreen(
     val favoriteBarRemovedMessage = stringResource(R.string.favorite_bar_removed)
     val favoriteRemovedMessage = stringResource(R.string.favorite_removed)
     val undoUnavailableMessage = stringResource(R.string.favorite_undo_unavailable)
+    fun cancelActiveDragSessions() {
+        dragSession = null
+        favoriteBarDragSession = null
+        applicationDragTargetSession = null
+        favoriteBarContainerDragSession = null
+        listDragSession = null
+    }
     val advanceDrag: (Offset) -> Unit = { amount ->
         applicationDragTargetSession = applicationDragTargetSession?.advanced(
             amount = amount,
@@ -343,12 +353,13 @@ internal fun HomeScreen(
             hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
         }
     }
-    val edgeScroll = dragSession?.edgeScroll(
-        primaryBoundsInWindow = primaryListBoundsInWindow,
-        primaryListState = favoriteListState,
-        companionBoundsInWindow = companionListBoundsInWindow,
-        companionListState = companionFavoriteListState,
+    val applicationEdgeScroll = applicationDragTargetSession?.edgeScroll(
+        descriptors = applicationContainerDescriptors,
         bandPx = edgeScrollBandPx,
+        primaryListState = favoriteListState,
+        companionListState = companionFavoriteListState,
+        editListStates = editListStates,
+        favoriteBarStates = favoriteBarStates,
     )
 
     LaunchedEffect(clock) {
@@ -362,11 +373,7 @@ internal fun HomeScreen(
     LaunchedEffect(editMode) {
         if (!editMode) {
             editSessionId += 1
-            dragSession = null
-            favoriteBarDragSession = null
-            applicationDragTargetSession = null
-            favoriteBarContainerDragSession = null
-            listDragSession = null
+            cancelActiveDragSessions()
             undoAggregate = null
             pendingEditAggregate = null
             committedEditAggregate = null
@@ -374,6 +381,8 @@ internal fun HomeScreen(
             snackbarHostState.currentSnackbarData?.dismiss()
         } else {
             editSessionId += 1
+            committedEditAggregate =
+                (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate
         }
     }
 
@@ -385,6 +394,7 @@ internal fun HomeScreen(
             readable.aggregate != committed &&
             editMutationJob?.isActive != true
         ) {
+            cancelActiveDragSessions()
             if (undoAggregate != null) {
                 undoSequence += 1
                 undoAggregate = null
@@ -409,7 +419,7 @@ internal fun HomeScreen(
             previousJob?.join()
             val base = pendingEditAggregate
                 ?: committedEditAggregate
-                ?: (favoriteState as? FavoriteReadState.Readable)?.aggregate
+                ?: (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate
                 ?: return@launch
             val updated = transform(base)
             if (!isValidAggregate(updated)) return@launch
@@ -418,6 +428,12 @@ internal fun HomeScreen(
             if (session != editSessionId || !editMode) return@launch
             if (persisted == null) {
                 if (pendingEditAggregate == updated) pendingEditAggregate = null
+                withFrameNanos { }
+                if (session != editSessionId || !editMode) return@launch
+                committedEditAggregate =
+                    (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate
+                        ?: committedEditAggregate
+                cancelActiveDragSessions()
                 onFailed()
                 return@launch
             }
@@ -516,9 +532,13 @@ internal fun HomeScreen(
         val targetId = targetKey.substringAfter(':')
         val provisionalTarget = targetKey.startsWith(PROVISIONAL_VERTICAL_LIST_DRAG_KEY_PREFIX) ||
             targetKey == PROVISIONAL_FAVORITE_BAR_DRAG_KEY
-        val sourceType = targetSession.sourceContainerType
         val targetIdentity = targetSession.targetIdentity
         val targetIndex = targetSession.targetIndex
+        val provisionalContainerId = if (provisionalTarget) UUID.randomUUID().toString() else null
+        // The pointer has already been released when this function is called. Remove the active
+        // target before starting the asynchronous save so edge scrolling cannot continue while the
+        // aggregate mutation is pending.
+        applicationDragTargetSession = null
         commitEditAggregate(
             transform = transform@{ aggregate ->
                 if (provisionalTarget) {
@@ -530,7 +550,7 @@ internal fun HomeScreen(
                         targetSession.sourceIdentity,
                     )
                     val newContainer = FavoriteContainer(
-                        id = UUID.randomUUID().toString(),
+                        id = provisionalContainerId ?: return@transform aggregate,
                         type = targetType,
                         identities = listOf(targetSession.sourceIdentity),
                     )
@@ -737,14 +757,32 @@ internal fun HomeScreen(
         )
     }
     fun advanceAndPersistDrag(amount: Offset) {
+        val primaryViewport =
+            favoriteListState.firstVisibleItemIndex to
+                favoriteListState.firstVisibleItemScrollOffset
+        val companionViewport =
+            companionFavoriteListState.firstVisibleItemIndex to
+                companionFavoriteListState.firstVisibleItemScrollOffset
         val previous = dragSession
         advanceDrag(amount)
         val advanced = dragSession
         if (previous == null || advanced == null) return
-        val sameContainerOrderChanged =
-            previous.displayedPrimary != advanced.displayedPrimary ||
-                previous.displayedCompanion != advanced.displayedCompanion
-        if (!sameContainerOrderChanged) return
+        val primaryOrderChanged = previous.displayedPrimary != advanced.displayedPrimary
+        val companionOrderChanged = previous.displayedCompanion != advanced.displayedCompanion
+        val orderChanged = primaryOrderChanged || companionOrderChanged
+        if (!orderChanged) return
+
+        // Stable item keys normally anchor the first visible item after a reorder. During a drag,
+        // keep the numeric viewport instead so exchanging the first two rows cannot move the list.
+        if (primaryOrderChanged) {
+            favoriteListState.requestScrollToItem(primaryViewport.first, primaryViewport.second)
+        }
+        if (companionOrderChanged) {
+            companionFavoriteListState.requestScrollToItem(
+                companionViewport.first,
+                companionViewport.second,
+            )
+        }
 
         val generation = advanced.generation
         val visiblePrimary = advanced.displayedPrimary
@@ -890,29 +928,63 @@ internal fun HomeScreen(
         }
     }
 
-    // Edge scrolling moves the group under the finger while the touch point itself stays put, so
-    // the target is resolved again for the group's new geometry after every scrolled frame.
-    LaunchedEffect(edgeScroll) {
-        val request = edgeScroll ?: return@LaunchedEffect
-        val listState = if (request.inCompanion) {
-            companionFavoriteListState
-        } else {
-            favoriteListState
-        }
-        var previousFrameNanos = withFrameNanos { it }
+    LaunchedEffect(
+        applicationEdgeScroll?.containerKey,
+        applicationEdgeScroll?.axis,
+        applicationEdgeScroll?.forward,
+    ) {
+        val initialRequest = applicationEdgeScroll ?: return@LaunchedEffect
+        delay(edgeScrollStartDelayMillis)
+        var previousFrame = 0L
         while (true) {
-            val frameNanos = withFrameNanos { it }
-            val elapsedSeconds = (frameNanos - previousFrameNanos) / NANOS_PER_SECOND
-            previousFrameNanos = frameNanos
-            val canScroll = if (request.forward) {
-                listState.canScrollForward
-            } else {
-                listState.canScrollBackward
+            val request = applicationDragTargetSession?.edgeScroll(
+                descriptors = applicationContainerDescriptors,
+                bandPx = edgeScrollBandPx,
+                primaryListState = favoriteListState,
+                companionListState = companionFavoriteListState,
+                editListStates = editListStates,
+                favoriteBarStates = favoriteBarStates,
+            ) ?: break
+            if (request.containerKey != initialRequest.containerKey ||
+                request.axis != initialRequest.axis ||
+                request.forward != initialRequest.forward
+            ) {
+                break
             }
-            if (!canScroll) break
-            val distance = edgeScrollSpeedPxPerSecond * elapsedSeconds
-            listState.scrollBy(if (request.forward) distance else -distance)
-            advanceAndPersistDrag(Offset.Zero)
+            val state = when (request.axis) {
+                ApplicationDragAxis.Vertical -> when {
+                    request.containerKey == PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0 ||
+                        request.containerKey == PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1 -> null
+                    else -> editListStates[request.containerKey.substringAfter(':')]
+                        ?: if (request.containerKey == "vertical-list:${PRIMARY_LIST_ID}") {
+                            favoriteListState
+                        } else {
+                            companionFavoriteListState
+                        }
+                }
+                ApplicationDragAxis.Horizontal ->
+                    favoriteBarStates[request.containerKey.substringAfter(':')]
+            } ?: break
+            if (previousFrame == 0L) {
+                previousFrame = withFrameNanos { it }
+                continue
+            }
+            val frame = withFrameNanos { it }
+            val elapsedSeconds = (frame - previousFrame) / NANOS_PER_SECOND
+            previousFrame = frame
+            val distance = edgeScrollSpeedPxPerSecond *
+                request.proximity.coerceIn(0f, 1f) *
+                elapsedSeconds
+            val consumed = state.scrollBy(
+                if (request.forward) distance else -distance,
+            )
+            if (consumed == 0f) break
+            if (dragSession != null) {
+                advanceAndPersistDrag(Offset.Zero)
+            } else if (favoriteBarDragSession != null) {
+                advanceAndPersistFavoriteBarDrag(Offset.Zero)
+            }
+            if (!state.canScroll(request.forward)) break
         }
     }
 
@@ -1163,7 +1235,10 @@ internal fun HomeScreen(
                                     },
                                 )
                             } else if (session?.hasInGroupExchange == true) {
-                                dragSession = session.copy(released = true)
+                                // In-group exchanges are persisted as they happen. End the session
+                                // immediately so releasing near an edge cannot re-enable the legacy
+                                // edge-scroll effect during the release recomposition.
+                                dragSession = null
                             } else {
                                 dragSession = null
                             }
@@ -1242,6 +1317,11 @@ internal fun HomeScreen(
                                             applicationDragTargetSession?.showsContainerHighlight(
                                                 primaryContainer.applicationDragKey(),
                                             ) == true,
+                                        applicationDragKey =
+                                            primaryContainer.applicationDragKey(),
+                                        applicationDragActive =
+                                            applicationDragTargetSession != null,
+                                        applicationEdgeScroll = applicationEdgeScroll,
                                         onLaunchFavorite = onLaunchFavorite,
                                         onLongPressFavorite = onLongPressFavorite,
                                         onRemoveFavorite = { identity ->
@@ -1405,6 +1485,11 @@ internal fun HomeScreen(
                                             applicationDragTargetSession?.showsContainerHighlight(
                                                 companionContainer.applicationDragKey(),
                                             ) == true,
+                                        applicationDragKey =
+                                            companionContainer.applicationDragKey(),
+                                        applicationDragActive =
+                                            applicationDragTargetSession != null,
+                                        applicationEdgeScroll = applicationEdgeScroll,
                                         onLaunchFavorite = onLaunchFavorite,
                                         onLongPressFavorite = onLongPressFavorite,
                                         onRemoveFavorite = { identity ->
@@ -1607,6 +1692,7 @@ internal fun HomeScreen(
                             applicationDragTargetSession?.targetMode,
                         applicationDropTargetIndex =
                             applicationDragTargetSession?.targetIndex,
+                        applicationEdgeScroll = applicationEdgeScroll,
                         draggedIdentity = favoriteBarDragSession?.identity,
                         draggedBarId = favoriteBarContainerDragSession?.sourceContainer?.id,
                         highlightedBarId =
@@ -1760,17 +1846,17 @@ private data class FavoriteBarDragSession(
     val residualX: Float = 0f,
 )
 
-private enum class ApplicationDragAxis {
+internal enum class ApplicationDragAxis {
     Vertical,
     Horizontal,
 }
 
-private enum class ApplicationDragTargetMode {
+internal enum class ApplicationDragTargetMode {
     Exchange,
     Insertion,
 }
 
-private data class ApplicationDragContainerDescriptor(
+internal data class ApplicationDragContainerDescriptor(
     val key: String,
     val type: FavoriteContainerType,
     val axis: ApplicationDragAxis,
@@ -1778,7 +1864,7 @@ private data class ApplicationDragContainerDescriptor(
     val identities: List<LaunchableIdentity> = emptyList(),
 )
 
-private data class ApplicationDragTargetSession(
+internal data class ApplicationDragTargetSession(
     val sourceContainerKey: String,
     val sourceIdentity: LaunchableIdentity,
     val sourceContainerType: FavoriteContainerType,
@@ -1879,7 +1965,81 @@ private data class ApplicationDragTargetSession(
 
     fun showsContainerHighlight(containerKey: String): Boolean =
         targetContainerKey == containerKey
+
+    fun edgeScroll(
+        descriptors: Map<String, ApplicationDragContainerDescriptor>,
+        bandPx: Float,
+        primaryListState: LazyListState,
+        companionListState: LazyListState,
+        editListStates: Map<String, LazyListState>,
+        favoriteBarStates: Map<String, LazyListState>,
+    ): ApplicationEdgeScroll? {
+        val request = edgeScrollCandidate(descriptors, bandPx) ?: return null
+        val state = when (request.axis) {
+            ApplicationDragAxis.Vertical ->
+                editListStates[request.containerKey.substringAfter(':')]
+                ?: if (request.containerKey == "vertical-list:${PRIMARY_LIST_ID}") {
+                    primaryListState
+                } else {
+                    companionListState
+                }
+            ApplicationDragAxis.Horizontal ->
+                favoriteBarStates[request.containerKey.substringAfter(':')]
+        } ?: return null
+        return request.takeIf { state.canScroll(it.forward) }
+    }
 }
+
+internal fun ApplicationDragTargetSession.edgeScrollCandidate(
+    descriptors: Map<String, ApplicationDragContainerDescriptor>,
+    bandPx: Float,
+): ApplicationEdgeScroll? {
+    val activeKey = targetContainerKey ?: sourceContainerKey
+    val descriptor = descriptors[activeKey] ?: return null
+    if (!descriptor.bounds.contains(touchInWindow)) return null
+    val axis = descriptor.axis
+    val coordinate = if (axis == ApplicationDragAxis.Vertical) {
+        touchInWindow.y
+    } else {
+        touchInWindow.x
+    }
+    val start = if (axis == ApplicationDragAxis.Vertical) {
+        descriptor.bounds.top
+    } else {
+        descriptor.bounds.left
+    }
+    val end = if (axis == ApplicationDragAxis.Vertical) {
+        descriptor.bounds.bottom
+    } else {
+        descriptor.bounds.right
+    }
+    val band = bandPx.coerceAtMost((end - start) / 2f)
+    if (band <= 0f) return null
+    val distanceFromEdge = when {
+        coordinate < start + band -> start + band - coordinate
+        coordinate >= end - band -> coordinate - (end - band)
+        else -> return null
+    }
+    val forward = coordinate >= end - band
+    return ApplicationEdgeScroll(
+        containerKey = activeKey,
+        axis = axis,
+        forward = forward,
+        proximity = (distanceFromEdge / band).coerceIn(0f, 1f),
+        touchInWindow = touchInWindow,
+    )
+}
+
+internal data class ApplicationEdgeScroll(
+    val containerKey: String,
+    val axis: ApplicationDragAxis,
+    val forward: Boolean,
+    val proximity: Float,
+    val touchInWindow: Offset,
+)
+
+private fun LazyListState.canScroll(forward: Boolean): Boolean =
+    if (forward) canScrollForward else canScrollBackward
 
 private fun FavoriteContainer.applicationDragKey(): String = when (type) {
     FavoriteContainerType.VerticalList -> "vertical-list:$id"
@@ -2089,51 +2249,6 @@ private fun FavoriteDragSession.feedbackChangedFrom(previous: FavoriteDragSessio
         crossGroupTarget != previous.crossGroupTarget ||
         insertion != previous.insertion
 
-/**
- * Edge scroll the active drag currently asks for. While the touch point rests in a group's leading
- * or trailing band, that group scrolls, so favorites outside the viewport stay reachable without
- * releasing the drag. The band is capped at half the group so its two edges cannot overlap. Returns
- * null when the touch point is outside both groups or away from the group's edges.
- */
-private fun FavoriteDragSession.edgeScroll(
-    primaryBoundsInWindow: Rect,
-    primaryListState: LazyListState,
-    companionBoundsInWindow: Rect,
-    companionListState: LazyListState,
-    bandPx: Float,
-): FavoriteEdgeScroll? {
-    val inCompanionGroup = when {
-        primaryBoundsInWindow.contains(touchInWindow) -> false
-        companionBoundsInWindow.contains(touchInWindow) -> true
-        else -> return null
-    }
-    val bounds = if (inCompanionGroup) companionBoundsInWindow else primaryBoundsInWindow
-    val listState = if (inCompanionGroup) companionListState else primaryListState
-    val band = bandPx.coerceAtMost(bounds.height / 2f)
-    val forward = when {
-        touchInWindow.y < bounds.top + band -> false
-        touchInWindow.y >= bounds.bottom - band -> true
-        else -> return null
-    }
-
-    val canScroll = if (forward) {
-        listState.canScrollForward
-    } else {
-        listState.canScrollBackward
-    }
-    if (!canScroll) return null
-
-    return FavoriteEdgeScroll(inCompanionGroup, forward)
-}
-
-/**
- * Group an active drag scrolls and the direction it scrolls. Equal requests keep the running scroll
- * alive, so a drag that stays in the same band scrolls continuously instead of restarting.
- */
-private data class FavoriteEdgeScroll(
-    val inCompanion: Boolean,
-    val forward: Boolean,
-)
 private data class FavoriteListDragSession(
     val sourceContainer: FavoriteContainer,
     val currentIndex: Int,
@@ -3105,6 +3220,9 @@ private fun HomeFavoriteList(
                         onBoundsInWindow: (Rect) -> Unit,
     onApplicationItemBounds: (LaunchableIdentity, Rect) -> Unit = { _, _ -> },
     applicationDropHighlight: Boolean = false,
+    applicationDragKey: String? = null,
+    applicationDragActive: Boolean = false,
+    applicationEdgeScroll: ApplicationEdgeScroll? = null,
     onLaunchFavorite: (FavoriteAvailability) -> Unit,
     onLongPressFavorite: (LaunchableEntry) -> Unit,
     onRemoveFavorite: (LaunchableIdentity) -> Unit = {},
@@ -3217,7 +3335,11 @@ private fun HomeFavoriteList(
                     },
                 )
                 .then(
-                    nestedScrollConnection?.let { Modifier.nestedScroll(it) } ?: Modifier,
+                    if (applicationDragActive) {
+                        Modifier
+                    } else {
+                        nestedScrollConnection?.let { Modifier.nestedScroll(it) } ?: Modifier
+                    },
                 )
                 .then(
                     // An empty group has no row to carry the line, so its only boundary
@@ -3241,6 +3363,22 @@ private fun HomeFavoriteList(
                     onBoundsInWindow(
                         Rect(offset = origin, size = coordinates.size.toSize()),
                     )
+                }
+                .drawWithContent {
+                    drawContent()
+                    if (applicationEdgeScroll?.containerKey == applicationDragKey) {
+                        drawRect(
+                            color = insertionLineColor.copy(
+                                alpha = applicationEdgeScroll?.proximity ?: 0f,
+                            ),
+                            topLeft = if (applicationEdgeScroll?.forward ?: false) {
+                                Offset(0f, size.height - insertionLineThickness)
+                            } else {
+                                Offset.Zero
+                            },
+                            size = Size(size.width, insertionLineThickness),
+                        )
+                    }
                 }
                 .then(
                     if (!editMode || listDragActive) {
@@ -3276,6 +3414,7 @@ private fun HomeFavoriteList(
                 )
                 .testTag(testTag ?: if (compact) "home_companion_favorites" else "home_favorites"),
             state = listState,
+            userScrollEnabled = !applicationDragActive,
         ) {
             itemsIndexed(
                 items = identities,
@@ -3400,6 +3539,7 @@ private fun HomeFavoriteBars(
         MutableMap<String, ApplicationDragContainerDescriptor>,
     applicationItemBoundsInWindow: MutableMap<String, Rect>,
     applicationDropTargetKey: String?,
+    applicationEdgeScroll: ApplicationEdgeScroll? = null,
     applicationDropTargetIdentity: LaunchableIdentity?,
     applicationDropTargetMode: ApplicationDragTargetMode?,
     applicationDropTargetIndex: Int?,
@@ -3530,6 +3670,19 @@ private fun HomeFavoriteBars(
                         .clip(barShape)
                         .drawWithContent {
                             drawContent()
+                            if (applicationEdgeScroll?.containerKey == bar.applicationDragKey()) {
+                                drawRect(
+                                    color = fadeColor.copy(
+                                        alpha = applicationEdgeScroll.proximity,
+                                    ),
+                                    topLeft = if (applicationEdgeScroll.forward) {
+                                        Offset(size.width - fadeWidthPx, 0f)
+                                    } else {
+                                        Offset.Zero
+                                    },
+                                    size = Size(fadeWidthPx, size.height),
+                                )
+                            }
                             if (listState.canScrollBackward) {
                                 drawRect(
                                     brush = Brush.horizontalGradient(

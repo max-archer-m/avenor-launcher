@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Process
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertDoesNotExist
@@ -325,6 +326,70 @@ class HomeScreenTest {
 
         composeRule.onNodeWithTag("home_favorites").assertIsDisplayed()
         composeRule.onNodeWithTag("home_companion_favorites").assertDoesNotExist()
+    }
+
+    @Test
+    fun failedEditMutationRetainsNewerReliableInventoryState() {
+        val removedEntry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 42,
+                componentName = ComponentName("com.example.removed", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Removed during failed save",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val refreshedEntry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 42,
+                componentName = ComponentName("com.example.refreshed", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Reliable refreshed application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val initial = FavoriteAggregate(
+            verticalLists = listOf(
+                FavoriteContainer(
+                    id = "inventory-interruption-list",
+                    type = FavoriteContainerType.VerticalList,
+                    identities = listOf(removedEntry.identity),
+                ),
+            ),
+        )
+        val refreshed = initial.copy(
+            verticalLists = listOf(
+                initial.verticalLists.single().copy(
+                    identities = listOf(refreshedEntry.identity),
+                ),
+            ),
+        )
+        val favoriteState = mutableStateOf<FavoriteReadState>(
+            FavoriteReadState.Readable(initial),
+        )
+
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = favoriteState.value,
+                    favoriteAvailability = mapOf(
+                        removedEntry.identity to FavoriteAvailability.Available(removedEntry),
+                        refreshedEntry.identity to FavoriteAvailability.Available(refreshedEntry),
+                    ),
+                    editMode = true,
+                    onCommitFavoriteComposition = {
+                        favoriteState.value = FavoriteReadState.Readable(refreshed)
+                        null
+                    },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("remove_favorite_item").performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("Reliable refreshed application").assertIsDisplayed()
+        composeRule.onNodeWithText("Removed during failed save").assertDoesNotExist()
     }
 
     @Test
