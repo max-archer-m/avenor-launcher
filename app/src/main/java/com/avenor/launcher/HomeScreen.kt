@@ -18,7 +18,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -92,7 +91,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.pointerInput
@@ -123,6 +125,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import java.util.UUID
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -132,6 +135,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 
 @Composable
@@ -167,6 +171,9 @@ internal fun HomeScreen(
     var favoriteBarDragSession by remember {
         mutableStateOf<FavoriteBarDragSession?>(null)
     }
+    var applicationDragTargetSession by remember {
+        mutableStateOf<ApplicationDragTargetSession?>(null)
+    }
     var favoriteBarContainerDragSession by remember {
         mutableStateOf<FavoriteBarContainerDragSession?>(null)
     }
@@ -176,6 +183,15 @@ internal fun HomeScreen(
     val editListStates = remember { mutableMapOf<String, LazyListState>() }
     val favoriteBarStates = remember { mutableStateMapOf<String, LazyListState>() }
     val favoriteBarBoundsInWindow = remember { mutableStateMapOf<String, Rect>() }
+    val applicationContainerBoundsInWindow = remember {
+        mutableStateMapOf<String, Rect>()
+    }
+    val applicationContainerDescriptors = remember {
+        mutableStateMapOf<String, ApplicationDragContainerDescriptor>()
+    }
+    val applicationItemBoundsInWindow = remember {
+        mutableStateMapOf<String, Rect>()
+    }
     val favoriteBarItemWidthPx = with(LocalDensity.current) {
         dimensionResource(R.dimen.home_favorite_bar_item_width).toPx()
     }
@@ -306,6 +322,11 @@ internal fun HomeScreen(
     val favoriteRemovedMessage = stringResource(R.string.favorite_removed)
     val undoUnavailableMessage = stringResource(R.string.favorite_undo_unavailable)
     val advanceDrag: (Offset) -> Unit = { amount ->
+        applicationDragTargetSession = applicationDragTargetSession?.advanced(
+            amount = amount,
+            containerDescriptors = applicationContainerDescriptors,
+            itemBoundsInWindow = applicationItemBoundsInWindow,
+        )
         val previous = dragSession
         val advanced = previous?.advanced(
             amount = amount,
@@ -343,6 +364,7 @@ internal fun HomeScreen(
             editSessionId += 1
             dragSession = null
             favoriteBarDragSession = null
+            applicationDragTargetSession = null
             favoriteBarContainerDragSession = null
             listDragSession = null
             undoAggregate = null
@@ -486,6 +508,67 @@ internal fun HomeScreen(
         )
     }
 
+    fun commitCrossContainerDrag(targetSession: ApplicationDragTargetSession): Boolean {
+        val targetKey = targetSession.targetContainerKey ?: return false
+        val targetType = targetSession.targetContainerType ?: return false
+        if (targetKey == targetSession.sourceContainerKey) return false
+        val sourceId = targetSession.sourceContainerKey.substringAfter(':')
+        val targetId = targetKey.substringAfter(':')
+        val provisionalTarget = targetKey.startsWith(PROVISIONAL_VERTICAL_LIST_DRAG_KEY_PREFIX) ||
+            targetKey == PROVISIONAL_FAVORITE_BAR_DRAG_KEY
+        val sourceType = targetSession.sourceContainerType
+        val targetIdentity = targetSession.targetIdentity
+        val targetIndex = targetSession.targetIndex
+        commitEditAggregate(
+            transform = transform@{ aggregate ->
+                if (provisionalTarget) {
+                    val source = aggregate.containerForDragKey(targetSession.sourceContainerKey)
+                        ?: return@transform aggregate
+                    if (targetIdentity != null) return@transform aggregate
+                    val movedAggregate = aggregate.removeIdentityFromContainer(
+                        source.id,
+                        targetSession.sourceIdentity,
+                    )
+                    val newContainer = FavoriteContainer(
+                        id = UUID.randomUUID().toString(),
+                        type = targetType,
+                        identities = listOf(targetSession.sourceIdentity),
+                    )
+                    return@transform if (targetType ==
+                        FavoriteContainerType.VerticalList
+                    ) {
+                        movedAggregate.copy(
+                            verticalLists = movedAggregate.verticalLists + newContainer,
+                        )
+                    } else {
+                        movedAggregate.copy(
+                            favoriteBars = movedAggregate.favoriteBars + newContainer,
+                        )
+                    }
+                }
+                if (targetId.isBlank()) return@transform aggregate
+                aggregate.moveFavorite(
+                    sourceContainerId = sourceId,
+                    targetContainerId = targetId,
+                    identity = targetSession.sourceIdentity,
+                    targetIndex = targetIndex,
+                    exchangeIdentity = targetIdentity,
+                )
+            },
+            onCommitted = {
+                dragSession = null
+                favoriteBarDragSession = null
+                applicationDragTargetSession = null
+            },
+            onFailed = {
+                dragSession = null
+                favoriteBarDragSession = null
+                applicationDragTargetSession = null
+            },
+        )
+        return true
+    }
+
     fun startFavoriteBarContainerDrag(
         bar: FavoriteContainer,
         index: Int,
@@ -510,7 +593,6 @@ internal fun HomeScreen(
             canScrollForward = state?.canScrollForward == true,
         )
         favoriteBarContainerCommittedGeneration = -1
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
     }
 
     fun advanceFavoriteBarContainerDrag(amount: Offset) {
@@ -592,7 +674,23 @@ internal fun HomeScreen(
     }
 
     fun advanceAndPersistFavoriteBarDrag(amount: Offset) {
+        applicationDragTargetSession = applicationDragTargetSession?.advanced(
+            amount = amount,
+            containerDescriptors = applicationContainerDescriptors,
+            itemBoundsInWindow = applicationItemBoundsInWindow,
+        )
         val session = favoriteBarDragSession ?: return
+        val targetSession = applicationDragTargetSession
+        val sourceBounds = targetSession?.let { active ->
+            applicationContainerBoundsInWindow[active.sourceContainerKey]
+        }
+        if (targetSession == null || sourceBounds?.contains(targetSession.touchInWindow) != true) {
+            favoriteBarDragSession = session.copy(
+                delta = session.delta + amount,
+                residualX = 0f,
+            )
+            return
+        }
         var residualX = session.residualX + amount.x
         var displayed = session.displayedIdentities
         var sourceIndex = displayed.indexOf(session.identity)
@@ -687,7 +785,6 @@ internal fun HomeScreen(
         val visibleIdentities = listState.layoutInfo.visibleItemsInfo.mapNotNull { item ->
             container.identities.getOrNull(item.index)
         }
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
         listDragSession = FavoriteListDragSession(
             sourceContainer = container,
             currentIndex = index,
@@ -944,6 +1041,31 @@ internal fun HomeScreen(
                             modifier = Modifier.fillMaxWidth(),
                             onClick = onAddProvisionalFavorites,
                             testTag = "favorite_provisional_add_0",
+                            applicationDropHighlight =
+                                applicationDragTargetSession?.showsContainerHighlight(
+                                    PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
+                                ) == true,
+                            onBoundsInWindow = {
+                            applicationContainerBoundsInWindow[
+                                PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0
+                            ] = it
+                            applicationContainerDescriptors[
+                                PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0
+                            ] = ApplicationDragContainerDescriptor(
+                                key = PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
+                                type = FavoriteContainerType.VerticalList,
+                                axis = ApplicationDragAxis.Vertical,
+                                bounds = it,
+                            )
+                            },
+                            onDisposed = {
+                                applicationContainerBoundsInWindow.remove(
+                                    PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
+                                )
+                                applicationContainerDescriptors.remove(
+                                    PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
+                                )
+                            },
                         )
                     } else if (favoriteState.aggregate.verticalLists.isEmpty() &&
                         favoriteState.aggregate.favoriteBars.isEmpty()
@@ -997,10 +1119,20 @@ internal fun HomeScreen(
                             ?: primaryIdentities
                         val companionDisplayed = activeSession?.displayedCompanion
                             ?: companionIdentities
+                        val applicationTarget = applicationDragTargetSession
                         // A release completes the current exchange or insertion when the touch
                         // point is inside either group; any other area restores the saved state.
-                        val endDrag: () -> Unit = {
+                        val endDrag: () -> Unit = endDrag@{
                             val session = dragSession
+                            val applicationTarget = applicationDragTargetSession
+                            if (applicationTarget?.targetContainerType != null &&
+                                applicationTarget.targetContainerKey !=
+                                    applicationTarget.sourceContainerKey
+                            ) {
+                                commitCrossContainerDrag(applicationTarget)
+                                return@endDrag
+                            }
+                            applicationDragTargetSession = null
                             if (session != null &&
                                 (session.crossGroupTarget != null || session.hasInsertion) &&
                                 (
@@ -1077,11 +1209,39 @@ internal fun HomeScreen(
                                         compact = false,
                                         listSize = primaryContainer.listSize,
                                         draggedIdentity = activeDraggedIdentity,
-                                        exchangeTargetIdentity = dragSession?.crossGroupTarget,
-                                        insertionBoundaryIndex = dragSession?.insertionBoundaryIn(
-                                            companion = false,
-                                        ),
-                                        onBoundsInWindow = { primaryListBoundsInWindow = it },
+                                        exchangeTargetIdentity =
+                                            if (applicationTarget?.targetContainerKey ==
+                                                primaryContainer.applicationDragKey() &&
+                                                applicationTarget.targetMode ==
+                                                ApplicationDragTargetMode.Exchange
+                                            ) {
+                                                applicationTarget.targetIdentity
+                                            } else {
+                                                dragSession?.crossGroupTarget
+                                            },
+                                        insertionBoundaryIndex =
+                                            if (applicationTarget?.targetContainerKey ==
+                                                primaryContainer.applicationDragKey() &&
+                                                applicationTarget.targetMode ==
+                                                ApplicationDragTargetMode.Insertion
+                                            ) {
+                                                applicationTarget.targetIndex
+                                            } else {
+                                                dragSession?.insertionBoundaryIn(companion = false)
+                                            },
+                                        onBoundsInWindow = {
+                                            primaryListBoundsInWindow = it
+                                            applicationContainerBoundsInWindow[
+                                                primaryContainer.applicationDragKey()
+                                            ] = it
+                                            applicationContainerDescriptors[
+                                                primaryContainer.applicationDragKey()
+                                            ] = primaryContainer.applicationDragDescriptor(it)
+                                        },
+                                        applicationDropHighlight =
+                                            applicationDragTargetSession?.showsContainerHighlight(
+                                                primaryContainer.applicationDragKey(),
+                                            ) == true,
                                         onLaunchFavorite = onLaunchFavorite,
                                         onLongPressFavorite = onLongPressFavorite,
                                         onRemoveFavorite = { identity ->
@@ -1121,6 +1281,26 @@ internal fun HomeScreen(
                                         onContainerBoundsInWindow = {
                                             primaryContainerBoundsInWindow = it
                                         },
+                                        onContainerDisposed = {
+                                            applicationContainerBoundsInWindow.remove(
+                                                primaryContainer.applicationDragKey(),
+                                            )
+                                            applicationContainerDescriptors.remove(
+                                                primaryContainer.applicationDragKey(),
+                                            )
+                                            applicationItemBoundsInWindow.keys
+                                                .filter {
+                                                    it.startsWith(
+                                                        "${primaryContainer.applicationDragKey()}:",
+                                                    )
+                                                }
+                                                .forEach(applicationItemBoundsInWindow::remove)
+                                        },
+                                        onApplicationItemBounds = { identity, bounds ->
+                                            applicationItemBoundsInWindow[
+                                                "${primaryContainer.applicationDragKey()}:${identity.stableKey()}"
+                                            ] = bounds
+                                        },
                                         sourceListPlaceholder =
                                             listDragSession?.sourceContainer?.id ==
                                                 primaryContainer.id,
@@ -1159,10 +1339,23 @@ internal fun HomeScreen(
                                                 displayedCompanion =
                                                     companionIdentities,
                                             )
+                                            applicationDragTargetSession =
+                                                ApplicationDragTargetSession(
+                                                    sourceContainerKey =
+                                                        primaryContainer.applicationDragKey(),
+                                                    sourceIdentity = identity,
+                                                    sourceContainerType =
+                                                        FavoriteContainerType.VerticalList,
+                                                    sourceAxis = ApplicationDragAxis.Vertical,
+                                                    touchStartInWindow = touch,
+                                                )
                                         },
                                         onDrag = ::advanceAndPersistDrag,
                                         onDragEnd = endDrag,
-                                        onDragCancel = { dragSession = null },
+                                        onDragCancel = {
+                                            dragSession = null
+                                            applicationDragTargetSession = null
+                                        },
                                     )
                                 }
                                 if (companionContainer != null) {
@@ -1179,11 +1372,39 @@ internal fun HomeScreen(
                                         compact = false,
                                         listSize = companionContainer.listSize,
                                         draggedIdentity = activeDraggedIdentity,
-                                        exchangeTargetIdentity = dragSession?.crossGroupTarget,
-                                        insertionBoundaryIndex = dragSession?.insertionBoundaryIn(
-                                            companion = true,
-                                        ),
-                                        onBoundsInWindow = { companionListBoundsInWindow = it },
+                                        exchangeTargetIdentity =
+                                            if (applicationTarget?.targetContainerKey ==
+                                                companionContainer.applicationDragKey() &&
+                                                applicationTarget.targetMode ==
+                                                ApplicationDragTargetMode.Exchange
+                                            ) {
+                                                applicationTarget.targetIdentity
+                                            } else {
+                                                dragSession?.crossGroupTarget
+                                            },
+                                        insertionBoundaryIndex =
+                                            if (applicationTarget?.targetContainerKey ==
+                                                companionContainer.applicationDragKey() &&
+                                                applicationTarget.targetMode ==
+                                                ApplicationDragTargetMode.Insertion
+                                            ) {
+                                                applicationTarget.targetIndex
+                                            } else {
+                                                dragSession?.insertionBoundaryIn(companion = true)
+                                            },
+                                        onBoundsInWindow = {
+                                            companionListBoundsInWindow = it
+                                            applicationContainerBoundsInWindow[
+                                                companionContainer.applicationDragKey()
+                                            ] = it
+                                            applicationContainerDescriptors[
+                                                companionContainer.applicationDragKey()
+                                            ] = companionContainer.applicationDragDescriptor(it)
+                                        },
+                                        applicationDropHighlight =
+                                            applicationDragTargetSession?.showsContainerHighlight(
+                                                companionContainer.applicationDragKey(),
+                                            ) == true,
                                         onLaunchFavorite = onLaunchFavorite,
                                         onLongPressFavorite = onLongPressFavorite,
                                         onRemoveFavorite = { identity ->
@@ -1223,6 +1444,26 @@ internal fun HomeScreen(
                                         onContainerBoundsInWindow = {
                                             companionContainerBoundsInWindow = it
                                         },
+                                        onContainerDisposed = {
+                                            applicationContainerBoundsInWindow.remove(
+                                                companionContainer.applicationDragKey(),
+                                            )
+                                            applicationContainerDescriptors.remove(
+                                                companionContainer.applicationDragKey(),
+                                            )
+                                            applicationItemBoundsInWindow.keys
+                                                .filter {
+                                                    it.startsWith(
+                                                        "${companionContainer.applicationDragKey()}:",
+                                                    )
+                                                }
+                                                .forEach(applicationItemBoundsInWindow::remove)
+                                        },
+                                        onApplicationItemBounds = { identity, bounds ->
+                                            applicationItemBoundsInWindow[
+                                                "${companionContainer.applicationDragKey()}:${identity.stableKey()}"
+                                            ] = bounds
+                                        },
                                         sourceListPlaceholder =
                                             listDragSession?.sourceContainer?.id ==
                                                 companionContainer.id,
@@ -1261,10 +1502,23 @@ internal fun HomeScreen(
                                                 displayedCompanion =
                                                     companionIdentities,
                                             )
+                                            applicationDragTargetSession =
+                                                ApplicationDragTargetSession(
+                                                    sourceContainerKey =
+                                                        companionContainer.applicationDragKey(),
+                                                    sourceIdentity = identity,
+                                                    sourceContainerType =
+                                                        FavoriteContainerType.VerticalList,
+                                                    sourceAxis = ApplicationDragAxis.Vertical,
+                                                    touchStartInWindow = touch,
+                                                )
                                         },
                                         onDrag = ::advanceAndPersistDrag,
                                         onDragEnd = endDrag,
-                                        onDragCancel = { dragSession = null },
+                                        onDragCancel = {
+                                            dragSession = null
+                                            applicationDragTargetSession = null
+                                        },
                                     )
                                 }
                                 if (companionContainer == null) {
@@ -1274,6 +1528,31 @@ internal fun HomeScreen(
                                             .fillMaxHeight(),
                                         onClick = onAddProvisionalFavorites,
                                         testTag = "favorite_provisional_add_1",
+                                        applicationDropHighlight =
+                                            applicationDragTargetSession?.showsContainerHighlight(
+                                                PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1,
+                                            ) == true,
+                                        onBoundsInWindow = {
+                                            applicationContainerBoundsInWindow[
+                                                PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1
+                                            ] = it
+                                            applicationContainerDescriptors[
+                                                PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1
+                                            ] = ApplicationDragContainerDescriptor(
+                                                key = PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1,
+                                                type = FavoriteContainerType.VerticalList,
+                                                axis = ApplicationDragAxis.Vertical,
+                                                bounds = it,
+                                            )
+                                        },
+                                        onDisposed = {
+                                                applicationContainerBoundsInWindow.remove(
+                                                    PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1,
+                                                )
+                                                applicationContainerDescriptors.remove(
+                                                    PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1,
+                                                )
+                                        },
                                     )
                                 }
                             }
@@ -1315,6 +1594,19 @@ internal fun HomeScreen(
                         onAddProvisionalFavoriteBar = onAddProvisionalFavoriteBar,
                         favoriteBarStates = favoriteBarStates,
                         favoriteBarBoundsInWindow = favoriteBarBoundsInWindow,
+                        applicationContainerBoundsInWindow =
+                            applicationContainerBoundsInWindow,
+                        applicationContainerDescriptors =
+                            applicationContainerDescriptors,
+                        applicationItemBoundsInWindow = applicationItemBoundsInWindow,
+                        applicationDropTargetKey =
+                            applicationDragTargetSession?.targetContainerKey,
+                        applicationDropTargetIdentity =
+                            applicationDragTargetSession?.targetIdentity,
+                        applicationDropTargetMode =
+                            applicationDragTargetSession?.targetMode,
+                        applicationDropTargetIndex =
+                            applicationDragTargetSession?.targetIndex,
                         draggedIdentity = favoriteBarDragSession?.identity,
                         draggedBarId = favoriteBarContainerDragSession?.sourceContainer?.id,
                         highlightedBarId =
@@ -1332,7 +1624,7 @@ internal fun HomeScreen(
                         onBarDrag = ::advanceFavoriteBarContainerDrag,
                         onBarDragEnd = ::finishFavoriteBarContainerDrag,
                         onBarDragCancel = { favoriteBarContainerDragSession = null },
-                        onDragStart = { bar, identity, origin, size ->
+                        onDragStart = { bar, identity, origin, size, touch ->
                             dragGeneration += 1
                             favoriteBarDragSession = FavoriteBarDragSession(
                                 generation = dragGeneration,
@@ -1342,10 +1634,30 @@ internal fun HomeScreen(
                                 originInWindow = origin,
                                 size = size,
                             )
+                            applicationDragTargetSession = ApplicationDragTargetSession(
+                                sourceContainerKey = bar.applicationDragKey(),
+                                sourceIdentity = identity,
+                                sourceContainerType = FavoriteContainerType.FavoriteBar,
+                                sourceAxis = ApplicationDragAxis.Horizontal,
+                                touchStartInWindow = touch,
+                            )
                         },
                         onDrag = ::advanceAndPersistFavoriteBarDrag,
-                        onDragEnd = { favoriteBarDragSession = null },
-                        onDragCancel = { favoriteBarDragSession = null },
+                        onDragEnd = {
+                            val target = applicationDragTargetSession
+                            if (target?.targetContainerType != null &&
+                                target.targetContainerKey != target.sourceContainerKey
+                            ) {
+                                commitCrossContainerDrag(target)
+                            } else {
+                                favoriteBarDragSession = null
+                                applicationDragTargetSession = null
+                            }
+                        },
+                        onDragCancel = {
+                            favoriteBarDragSession = null
+                            applicationDragTargetSession = null
+                        },
                     )
                 }
             }
@@ -1447,6 +1759,153 @@ private data class FavoriteBarDragSession(
     val delta: Offset = Offset.Zero,
     val residualX: Float = 0f,
 )
+
+private enum class ApplicationDragAxis {
+    Vertical,
+    Horizontal,
+}
+
+private enum class ApplicationDragTargetMode {
+    Exchange,
+    Insertion,
+}
+
+private data class ApplicationDragContainerDescriptor(
+    val key: String,
+    val type: FavoriteContainerType,
+    val axis: ApplicationDragAxis,
+    val bounds: Rect,
+    val identities: List<LaunchableIdentity> = emptyList(),
+)
+
+private data class ApplicationDragTargetSession(
+    val sourceContainerKey: String,
+    val sourceIdentity: LaunchableIdentity,
+    val sourceContainerType: FavoriteContainerType,
+    val sourceAxis: ApplicationDragAxis,
+    val touchStartInWindow: Offset,
+    val delta: Offset = Offset.Zero,
+    val targetContainerKey: String? = null,
+    val targetContainerType: FavoriteContainerType? = null,
+    val targetAxis: ApplicationDragAxis? = null,
+    val targetMode: ApplicationDragTargetMode? = null,
+    val targetIdentity: LaunchableIdentity? = null,
+    val targetIndex: Int? = null,
+) {
+    val touchInWindow: Offset get() = touchStartInWindow + delta
+
+    fun advanced(
+        amount: Offset,
+        containerDescriptors: Map<String, ApplicationDragContainerDescriptor>,
+        itemBoundsInWindow: Map<String, Rect>,
+    ): ApplicationDragTargetSession {
+        val moved = copy(delta = delta + amount)
+        val descriptor = containerDescriptors.values.firstOrNull { candidate ->
+            candidate.key != sourceContainerKey &&
+                candidate.bounds.contains(moved.touchInWindow)
+        }
+        if (descriptor == null) {
+            return moved.copy(
+                targetContainerKey = null,
+                targetContainerType = null,
+                targetAxis = null,
+                targetMode = null,
+                targetIdentity = null,
+                targetIndex = null,
+            )
+        }
+        val itemIndex = descriptor.identities.indexOfFirst { identity ->
+            itemBoundsInWindow[
+                "${descriptor.key}:${identity.stableKey()}"
+            ]?.contains(moved.touchInWindow) == true
+        }
+        val coordinate = if (descriptor.axis == ApplicationDragAxis.Vertical) {
+            moved.touchInWindow.y
+        } else {
+            moved.touchInWindow.x
+        }
+        val orderedBounds = descriptor.identities.mapIndexedNotNull { index, identity ->
+            itemBoundsInWindow[
+                "${descriptor.key}:${identity.stableKey()}"
+            ]?.let { index to it }
+        }
+        val insertionIndex = if (itemIndex >= 0) {
+            val identity = descriptor.identities[itemIndex]
+            val bounds = itemBoundsInWindow[
+                "${descriptor.key}:${identity.stableKey()}"
+            ] ?: Rect.Zero
+            val center = if (descriptor.axis == ApplicationDragAxis.Vertical) {
+                (bounds.top + bounds.bottom) / 2f
+            } else {
+                (bounds.left + bounds.right) / 2f
+            }
+            val edgeBand = if (descriptor.axis == ApplicationDragAxis.Vertical) {
+                bounds.height / 3f
+            } else {
+                bounds.width / 3f
+            }
+            when {
+                coordinate < center - edgeBand -> itemIndex
+                coordinate > center + edgeBand -> itemIndex + 1
+                else -> null
+            }
+        } else {
+            val before = orderedBounds.firstOrNull { (_, bounds) ->
+                coordinate < if (descriptor.axis == ApplicationDragAxis.Vertical) {
+                    bounds.top
+                } else {
+                    bounds.left
+                }
+            }?.first
+            before ?: orderedBounds.lastOrNull()?.first?.plus(1) ?: 0
+        }
+        return moved.copy(
+            targetContainerKey = descriptor?.key,
+            targetContainerType = descriptor?.type,
+            targetAxis = descriptor?.axis,
+            targetMode = if (itemIndex >= 0 && insertionIndex == null) {
+                ApplicationDragTargetMode.Exchange
+            } else {
+                ApplicationDragTargetMode.Insertion
+            },
+            targetIdentity = if (insertionIndex == null) {
+                descriptor.identities.getOrNull(itemIndex)
+            } else {
+                null
+            },
+            targetIndex = insertionIndex ?: itemIndex.coerceAtLeast(0),
+        )
+    }
+
+    fun showsContainerHighlight(containerKey: String): Boolean =
+        targetContainerKey == containerKey
+}
+
+private fun FavoriteContainer.applicationDragKey(): String = when (type) {
+    FavoriteContainerType.VerticalList -> "vertical-list:$id"
+    FavoriteContainerType.FavoriteBar -> "favorite-bar:$id"
+}
+
+private fun FavoriteContainer.applicationDragDescriptor(
+    bounds: Rect,
+): ApplicationDragContainerDescriptor =
+    ApplicationDragContainerDescriptor(
+        key = applicationDragKey(),
+        type = type,
+        axis = when (type) {
+            FavoriteContainerType.VerticalList -> ApplicationDragAxis.Vertical
+            FavoriteContainerType.FavoriteBar -> ApplicationDragAxis.Horizontal
+        },
+        bounds = bounds,
+        identities = identities,
+    )
+
+private const val PROVISIONAL_VERTICAL_LIST_DRAG_KEY_PREFIX = "vertical-list:provisional:"
+private const val PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0 =
+    "${PROVISIONAL_VERTICAL_LIST_DRAG_KEY_PREFIX}0"
+private const val PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1 =
+    "${PROVISIONAL_VERTICAL_LIST_DRAG_KEY_PREFIX}1"
+private const val PROVISIONAL_FAVORITE_BAR_DRAG_KEY = "favorite-bar:provisional"
 
 private data class FavoriteBarContainerDragSession(
     val sourceContainer: FavoriteContainer,
@@ -2419,6 +2878,7 @@ private fun FavoriteListControlBar(
     var removeDialogVisible by remember(index) { mutableStateOf(false) }
     var reorderOriginInWindow by remember(index) { mutableStateOf(Offset.Zero) }
     var reorderDragging by remember(index) { mutableStateOf(false) }
+    val hapticFeedback = LocalHapticFeedback.current
     val dividerColor = colorResource(R.color.home_favorite_list_control_border)
     val dividerWidth = with(LocalDensity.current) {
         dimensionResource(R.dimen.home_favorite_list_control_border_width).toPx()
@@ -2479,6 +2939,11 @@ private fun FavoriteListControlBar(
                                 .pointerInput(index) {
                                     detectReorderDrag(
                                         onPressChanged = { reorderDragging = it },
+                                        onLongPress = {
+                                            hapticFeedback.performHapticFeedback(
+                                                HapticFeedbackType.LongPress,
+                                            )
+                                        },
                                         onDragStart = { localTouch ->
                                             onListDragStart(reorderOriginInWindow + localTouch)
                                         },
@@ -2637,7 +3102,9 @@ private fun HomeFavoriteList(
     draggedIdentity: LaunchableIdentity?,
     exchangeTargetIdentity: LaunchableIdentity?,
     insertionBoundaryIndex: Int?,
-    onBoundsInWindow: (Rect) -> Unit,
+                        onBoundsInWindow: (Rect) -> Unit,
+    onApplicationItemBounds: (LaunchableIdentity, Rect) -> Unit = { _, _ -> },
+    applicationDropHighlight: Boolean = false,
     onLaunchFavorite: (FavoriteAvailability) -> Unit,
     onLongPressFavorite: (LaunchableEntry) -> Unit,
     onRemoveFavorite: (LaunchableIdentity) -> Unit = {},
@@ -2647,6 +3114,7 @@ private fun HomeFavoriteList(
     onRemoveList: () -> Unit = {},
     onAddFavorites: () -> Unit = {},
     onContainerBoundsInWindow: (Rect) -> Unit = {},
+    onContainerDisposed: () -> Unit = {},
     sourceListPlaceholder: Boolean = false,
     listExchangeHighlight: Boolean = false,
     listDragActive: Boolean = false,
@@ -2660,6 +3128,9 @@ private fun HomeFavoriteList(
     onDragCancel: () -> Unit,
     testTag: String? = null,
 ) {
+    DisposableEffect(Unit) {
+        onDispose(onContainerDisposed)
+    }
     val controlBarHeight = dimensionResource(
         R.dimen.home_favorite_list_control_bar_height,
     )
@@ -2690,7 +3161,7 @@ private fun HomeFavoriteList(
             }
             .editSurface(editMode)
             .then(
-                if (!listExchangeHighlight) {
+                if (!listExchangeHighlight && !applicationDropHighlight) {
                     Modifier
                 } else {
                     Modifier.border(
@@ -2783,10 +3254,12 @@ private fun HomeFavoriteList(
                                         it.handleHitZoneInWindow().contains(inWindow)
                                     }
                                 },
-                                onDragStart = { anchor, local ->
+                                onLongPress = {
                                     hapticFeedback.performHapticFeedback(
                                         HapticFeedbackType.LongPress,
                                     )
+                                },
+                                onDragStart = { anchor, local ->
                                     currentOnDragStart(
                                         anchor.identity,
                                         anchor.rowOriginInWindow,
@@ -2862,6 +3335,10 @@ private fun HomeFavoriteList(
                     listSize = listSize,
                     exchangeHighlight = identity == exchangeTargetIdentity,
                     onRowBoundsInWindow = { origin, size ->
+                        onApplicationItemBounds(
+                            identity,
+                            Rect(offset = origin, size = size.toSize()),
+                        )
                         dragAnchors[anchorKey] =
                             (dragAnchors[anchorKey] ?: FavoriteDragAnchor(identity))
                                 .copy(rowOriginInWindow = origin, rowSize = size)
@@ -2918,6 +3395,14 @@ private fun HomeFavoriteBars(
     onAddProvisionalFavoriteBar: () -> Unit,
     favoriteBarStates: MutableMap<String, LazyListState>,
     favoriteBarBoundsInWindow: MutableMap<String, Rect>,
+    applicationContainerBoundsInWindow: MutableMap<String, Rect>,
+    applicationContainerDescriptors:
+        MutableMap<String, ApplicationDragContainerDescriptor>,
+    applicationItemBoundsInWindow: MutableMap<String, Rect>,
+    applicationDropTargetKey: String?,
+    applicationDropTargetIdentity: LaunchableIdentity?,
+    applicationDropTargetMode: ApplicationDragTargetMode?,
+    applicationDropTargetIndex: Int?,
     draggedIdentity: LaunchableIdentity?,
     draggedBarId: String?,
     highlightedBarId: String?,
@@ -2927,7 +3412,7 @@ private fun HomeFavoriteBars(
     onBarDrag: (Offset) -> Unit,
     onBarDragEnd: () -> Unit,
     onBarDragCancel: () -> Unit,
-    onDragStart: (FavoriteContainer, LaunchableIdentity, Offset, IntSize) -> Unit,
+    onDragStart: (FavoriteContainer, LaunchableIdentity, Offset, IntSize, Offset) -> Unit,
     onDrag: (Offset) -> Unit,
     onDragEnd: () -> Unit,
     onDragCancel: () -> Unit,
@@ -2949,6 +3434,16 @@ private fun HomeFavoriteBars(
         ),
     ) {
         favoriteBars.forEachIndexed { barIndex, bar ->
+            DisposableEffect(bar.id) {
+                onDispose {
+                    favoriteBarBoundsInWindow.remove(bar.id)
+                    applicationContainerBoundsInWindow.remove(bar.applicationDragKey())
+                    applicationContainerDescriptors.remove(bar.applicationDragKey())
+                    applicationItemBoundsInWindow.keys
+                        .filter { it.startsWith("${bar.applicationDragKey()}:") }
+                        .forEach(applicationItemBoundsInWindow::remove)
+                }
+            }
             val listState = favoriteBarStates.getOrPut(bar.id) { LazyListState() }
             val barShape = RoundedCornerShape(
                 dimensionResource(R.dimen.home_favorite_bar_corner_radius),
@@ -2989,7 +3484,9 @@ private fun HomeFavoriteBars(
                         },
                     )
                     .then(
-                        if (bar.id == highlightedBarId) {
+                        if (bar.id == highlightedBarId ||
+                            applicationDropTargetKey == bar.applicationDragKey()
+                        ) {
                             Modifier.border(
                                 width = dimensionResource(
                                     R.dimen.home_favorite_exchange_border_width,
@@ -3014,6 +3511,22 @@ private fun HomeFavoriteBars(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .onGloballyPositioned { coordinates ->
+                            applicationContainerBoundsInWindow[
+                                bar.applicationDragKey()
+                            ] = Rect(
+                                offset = coordinates.positionInWindow(),
+                                size = coordinates.size.toSize(),
+                            )
+                            applicationContainerDescriptors[
+                                bar.applicationDragKey()
+                            ] = bar.applicationDragDescriptor(
+                                Rect(
+                                    offset = coordinates.positionInWindow(),
+                                    size = coordinates.size.toSize(),
+                                ),
+                            )
+                        }
                         .clip(barShape)
                         .drawWithContent {
                             drawContent()
@@ -3048,10 +3561,10 @@ private fun HomeFavoriteBars(
                         ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        items(
+                        itemsIndexed(
                             items = bar.identities,
-                            key = LaunchableIdentity::stableKey,
-                        ) { identity ->
+                            key = { _, identity -> identity.stableKey() },
+                        ) { index, identity ->
                             val availability = availabilityByIdentity[identity]
                                 ?: FavoriteAvailability.Unknown(null)
                             HomeFavoriteBarItem(
@@ -3063,12 +3576,27 @@ private fun HomeFavoriteBars(
                                     availability.presentationEntry?.let(onLongPressFavorite)
                                 },
                                 onRemoveFavorite = { onRemoveFavorite(bar.id, identity) },
-                                onDragStart = { origin, size ->
-                                    onDragStart(bar, identity, origin, size)
+                                onDragStart = { origin, size, touch ->
+                                    onDragStart(bar, identity, origin, size, touch)
                                 },
                                 onDrag = onDrag,
                                 onDragEnd = onDragEnd,
                                 onDragCancel = onDragCancel,
+                                onItemBoundsInWindow = { bounds ->
+                                    applicationItemBoundsInWindow[
+                                        "${bar.applicationDragKey()}:${identity.stableKey()}"
+                                    ] = bounds
+                                },
+                                exchangeHighlight =
+                                    applicationDropTargetKey == bar.applicationDragKey() &&
+                                        applicationDropTargetMode ==
+                                        ApplicationDragTargetMode.Exchange &&
+                                        applicationDropTargetIdentity == identity,
+                                insertionHighlight =
+                                    applicationDropTargetKey == bar.applicationDragKey() &&
+                                        applicationDropTargetMode ==
+                                        ApplicationDragTargetMode.Insertion &&
+                                        applicationDropTargetIndex == index,
                             )
                         }
                         if (editMode) {
@@ -3109,10 +3637,39 @@ private fun HomeFavoriteBars(
             }
         }
         if (editMode && favoriteBars.size < 5) {
+            DisposableEffect(PROVISIONAL_FAVORITE_BAR_DRAG_KEY) {
+                onDispose {
+                    applicationContainerBoundsInWindow.remove(
+                        PROVISIONAL_FAVORITE_BAR_DRAG_KEY,
+                    )
+                    applicationContainerDescriptors.remove(
+                        PROVISIONAL_FAVORITE_BAR_DRAG_KEY,
+                    )
+                }
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(dimensionResource(R.dimen.home_favorite_bar_height))
+                    .onGloballyPositioned { coordinates ->
+                        applicationContainerBoundsInWindow[
+                            PROVISIONAL_FAVORITE_BAR_DRAG_KEY
+                        ] = Rect(
+                            offset = coordinates.positionInWindow(),
+                            size = coordinates.size.toSize(),
+                        )
+                        applicationContainerDescriptors[
+                            PROVISIONAL_FAVORITE_BAR_DRAG_KEY
+                        ] = ApplicationDragContainerDescriptor(
+                            key = PROVISIONAL_FAVORITE_BAR_DRAG_KEY,
+                            type = FavoriteContainerType.FavoriteBar,
+                            axis = ApplicationDragAxis.Horizontal,
+                            bounds = Rect(
+                                offset = coordinates.positionInWindow(),
+                                size = coordinates.size.toSize(),
+                            ),
+                        )
+                    }
                     .border(
                         width = dimensionResource(R.dimen.home_favorite_bar_border_width),
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = borderAlpha),
@@ -3122,7 +3679,28 @@ private fun HomeFavoriteBars(
                     )
                     .clip(RoundedCornerShape(
                         dimensionResource(R.dimen.home_favorite_bar_corner_radius),
-                    )),
+                    ))
+                    .then(
+                        if (applicationDropTargetKey ==
+                            PROVISIONAL_FAVORITE_BAR_DRAG_KEY
+                        ) {
+                            Modifier.border(
+                                width = dimensionResource(
+                                    R.dimen.home_favorite_exchange_border_width,
+                                ),
+                                color = colorResource(
+                                    R.color.home_favorite_exchange_border,
+                                ),
+                                shape = RoundedCornerShape(
+                                    dimensionResource(
+                                        R.dimen.home_favorite_exchange_border_radius,
+                                    ),
+                                ),
+                            )
+                        } else {
+                            Modifier
+                        },
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 HomeFavoriteAddControl(
@@ -3230,6 +3808,7 @@ private fun FavoriteBarReorderControl(
     var originInWindow by remember(index) { mutableStateOf(Offset.Zero) }
     var dragging by remember(index) { mutableStateOf(false) }
     val description = stringResource(R.string.favorite_bar_reorder_handle)
+    val hapticFeedback = LocalHapticFeedback.current
     Box(
         modifier = Modifier
             .width(dimensionResource(R.dimen.home_favorite_bar_reorder_target_width))
@@ -3241,6 +3820,11 @@ private fun FavoriteBarReorderControl(
                         .pointerInput(index) {
                             detectReorderDrag(
                                 onPressChanged = { dragging = it },
+                                onLongPress = {
+                                    hapticFeedback.performHapticFeedback(
+                                        HapticFeedbackType.LongPress,
+                                    )
+                                },
                                 onDragStart = { touch -> onDragStart(originInWindow + touch) },
                                 onDrag = onDrag,
                                 onDragEnd = {
@@ -3300,10 +3884,13 @@ private fun HomeFavoriteBarItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onRemoveFavorite: () -> Unit,
-    onDragStart: (Offset, IntSize) -> Unit,
+    onDragStart: (Offset, IntSize, Offset) -> Unit,
     onDrag: (Offset) -> Unit,
     onDragEnd: () -> Unit,
     onDragCancel: () -> Unit,
+    onItemBoundsInWindow: (Rect) -> Unit = {},
+    exchangeHighlight: Boolean = false,
+    insertionHighlight: Boolean = false,
 ) {
     val entry = availability.presentationEntry
     val iconSize = dimensionResource(R.dimen.home_favorite_icon_size)
@@ -3313,6 +3900,9 @@ private fun HomeFavoriteBarItem(
         R.integer.home_favorite_bar_item_background_alpha_percent,
     ) / 100f
     val borderAlpha = integerResource(R.integer.home_favorite_bar_border_alpha_percent) / 100f
+    val handleTargetWidthPx = with(LocalDensity.current) {
+        dimensionResource(R.dimen.home_favorite_bar_drag_target_width).toPx()
+    }
     val interactionSource = remember(entry?.identity) { MutableInteractionSource() }
     val removeInteractionSource = remember(entry?.identity) { MutableInteractionSource() }
     val hapticFeedback = LocalHapticFeedback.current
@@ -3338,6 +3928,9 @@ private fun HomeFavoriteBarItem(
             .onGloballyPositioned {
                 itemOriginInWindow = it.positionInWindow()
                 itemSize = it.size
+                onItemBoundsInWindow(
+                    Rect(offset = it.positionInWindow(), size = it.size.toSize()),
+                )
             }
             .background(
                 MaterialTheme.colorScheme.onBackground.copy(alpha = itemBackgroundAlpha),
@@ -3369,6 +3962,19 @@ private fun HomeFavoriteBarItem(
             )
             .alpha(if (availability is FavoriteAvailability.Available) 1f else disabledAlpha)
             .then(if (sourcePlaceholder) Modifier.alpha(0f) else Modifier)
+            .then(
+                if (exchangeHighlight) {
+                    Modifier.border(
+                        width = dimensionResource(R.dimen.home_favorite_exchange_border_width),
+                        color = colorResource(R.color.home_favorite_exchange_border),
+                        shape = RoundedCornerShape(
+                            dimensionResource(R.dimen.home_favorite_exchange_border_radius),
+                        ),
+                    )
+                } else {
+                    Modifier
+                },
+            )
             .testTag("home_favorite_bar_item"),
     ) {
         Row(
@@ -3477,14 +4083,27 @@ private fun HomeFavoriteBarItem(
                     .width(dimensionResource(R.dimen.home_favorite_bar_drag_target_width))
                     .fillMaxHeight()
                     .pointerInput(entry?.identity) {
-                        detectDragGestures(
-                            onDragStart = { onDragStart(itemOriginInWindow, itemSize) },
+                        detectReorderDrag(
+                            onPressChanged = {},
+                            onLongPress = {
+                                hapticFeedback.performHapticFeedback(
+                                    HapticFeedbackType.LongPress,
+                                )
+                            },
+                            onDragStart = { localTouch ->
+                                onDragStart(
+                                    itemOriginInWindow,
+                                    itemSize,
+                                    Offset(
+                                        x = itemOriginInWindow.x + itemSize.width -
+                                            handleTargetWidthPx + localTouch.x,
+                                        y = itemOriginInWindow.y + localTouch.y,
+                                    ),
+                                )
+                            },
                             onDragEnd = onDragEnd,
                             onDragCancel = onDragCancel,
-                            onDrag = { change, amount ->
-                                change.consume()
-                                onDrag(amount)
-                            },
+                            onDrag = onDrag,
                         )
                     }
                     .padding(
@@ -3496,6 +4115,15 @@ private fun HomeFavoriteBarItem(
                     .testTag("favorite_bar_reorder_handle"),
             )
         }
+        if (insertionHighlight) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .width(dimensionResource(R.dimen.home_favorite_insertion_line_thickness))
+                    .fillMaxHeight()
+                    .background(colorResource(R.color.home_favorite_insertion_line)),
+            )
+        }
     }
 }
 
@@ -3504,11 +4132,40 @@ private fun HomeFavoriteProvisionalList(
     modifier: Modifier,
     onClick: () -> Unit,
     testTag: String,
+    applicationDropHighlight: Boolean,
+    onBoundsInWindow: (Rect) -> Unit,
+    onDisposed: () -> Unit,
 ) {
+    DisposableEffect(onDisposed) {
+        onDispose(onDisposed)
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .editSurface(enabled = true),
+            .onGloballyPositioned { coordinates ->
+                onBoundsInWindow(
+                    Rect(
+                        offset = coordinates.positionInWindow(),
+                        size = coordinates.size.toSize(),
+                    ),
+                )
+            }
+            .editSurface(enabled = true)
+            .then(
+                if (applicationDropHighlight) {
+                    Modifier.border(
+                        width = dimensionResource(
+                            R.dimen.home_favorite_exchange_border_width,
+                        ),
+                        color = colorResource(R.color.home_favorite_exchange_border),
+                        shape = RoundedCornerShape(
+                            dimensionResource(R.dimen.home_favorite_exchange_border_radius),
+                        ),
+                    )
+                } else {
+                    Modifier
+                },
+            ),
     ) {
         HomeFavoriteAddControl(
             onClick = onClick,
@@ -3547,6 +4204,40 @@ private fun HomeFavoriteProvisionalList(
     }
 
     /**
+     * Waits for the platform long-press timeout without treating consumption by the item's existing
+     * click or scroll modifiers as cancellation. No event is consumed before recognition, so a
+     * movement beyond touch slop remains available to the owning LazyColumn or LazyRow.
+     */
+    private suspend fun AwaitPointerEventScope.awaitHandleLongPress(
+        down: PointerInputChange,
+    ): PointerInputChange? {
+        var current = down
+        return try {
+            withTimeout(viewConfiguration.longPressTimeoutMillis) {
+                while (true) {
+                    val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                    if (event.changes.any { it.id != down.id && it.pressed }) {
+                        return@withTimeout null
+                    }
+                    val change = event.changes.firstOrNull { it.id == down.id }
+                        ?: return@withTimeout null
+                    if (change.changedToUpIgnoreConsumed()) return@withTimeout null
+                    if ((change.position - down.position).getDistance() >=
+                        viewConfiguration.touchSlop
+                    ) {
+                        return@withTimeout null
+                    }
+                    current = change
+                }
+                @Suppress("UNREACHABLE_CODE")
+                null
+            }
+        } catch (_: PointerEventTimeoutCancellationException) {
+            current
+        }
+    }
+
+    /**
      * Runs favorite drags for one group. The gesture belongs to the group
      * instead of the dragged row, because a cross-group exchange or an edge
      * scroll disposes that row and would cancel a row-owned gesture in the
@@ -3557,6 +4248,7 @@ private fun HomeFavoriteProvisionalList(
      */
     private suspend fun PointerInputScope.detectFavoriteDrag(
         anchorAt: (Offset) -> FavoriteDragAnchor?,
+        onLongPress: () -> Unit,
         onDragStart: (FavoriteDragAnchor, Offset) -> Unit,
         onDrag: (Offset) -> Unit,
         onDragEnd: () -> Unit,
@@ -3565,13 +4257,15 @@ private fun HomeFavoriteProvisionalList(
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
             val anchor = anchorAt(down.position) ?: return@awaitEachGesture
+            val longPress = awaitHandleLongPress(down) ?: return@awaitEachGesture
             var dragging = false
-            var beforeSlop = Offset.Zero
             var cancelled = false
             try {
+                longPress.consume()
+                onLongPress()
                 while (true) {
                     val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                    if (event.changes.any { it.id != down.id }) {
+                    if (event.changes.any { it.id != down.id && it.pressed }) {
                         cancelled = true
                         break
                     }
@@ -3588,16 +4282,13 @@ private fun HomeFavoriteProvisionalList(
                         }
                         break
                     }
-                    if (dragging) {
-                        change.consume()
-                        onDrag(movement)
-                        continue
-                    }
-                    beforeSlop += movement
-                    if (beforeSlop.getDistance() < viewConfiguration.touchSlop) continue
                     change.consume()
-                    dragging = true
-                    onDragStart(anchor, change.position)
+                    if (!dragging) {
+                        if (movement == Offset.Zero) continue
+                        dragging = true
+                        onDragStart(anchor, longPress.position)
+                    }
+                    onDrag(movement)
                 }
                 if (dragging) {
                     dragging = false
@@ -3618,6 +4309,7 @@ private fun HomeFavoriteProvisionalList(
 
     private suspend fun PointerInputScope.detectReorderDrag(
         onPressChanged: (Boolean) -> Unit,
+        onLongPress: () -> Unit,
         onDragStart: (Offset) -> Unit,
         onDrag: (Offset) -> Unit,
         onDragEnd: () -> Unit,
@@ -3625,14 +4317,15 @@ private fun HomeFavoriteProvisionalList(
     ) {
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-            onPressChanged(true)
+            val longPress = awaitHandleLongPress(down) ?: return@awaitEachGesture
             var dragging = false
-            var beforeSlop = Offset.Zero
             var cancelled = false
             try {
+                longPress.consume()
+                onLongPress()
                 while (true) {
                     val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                    if (event.changes.any { it.id != down.id }) {
+                    if (event.changes.any { it.id != down.id && it.pressed }) {
                         cancelled = true
                         break
                     }
@@ -3649,17 +4342,14 @@ private fun HomeFavoriteProvisionalList(
                         }
                         break
                     }
-                    if (dragging) {
-                        change.consume()
-                        onDrag(movement)
-                        continue
-                    }
-                    beforeSlop += movement
-                    if (beforeSlop.getDistance() < viewConfiguration.touchSlop) continue
                     change.consume()
-                    dragging = true
-                    onDragStart(down.position)
-                    onDrag(beforeSlop)
+                    if (!dragging) {
+                        if (movement == Offset.Zero) continue
+                        dragging = true
+                        onPressChanged(true)
+                        onDragStart(longPress.position)
+                    }
+                    onDrag(movement)
                 }
                 if (dragging) {
                     dragging = false

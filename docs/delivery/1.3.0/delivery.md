@@ -57,7 +57,7 @@ Material changes to persistence architecture, state ownership, permissions, priv
 | [Iteration 17: Home Edit Session and Vertical-List Management](iteration-17-home-edit-session-and-vertical-list-management.md) | `Completed` | 2026-08-25 | Implementation is complete; the author reported that compilation, installation, and the currently verifiable behavior were basically accepted. |
 | [Iteration 18: Drawer Targeted Multi-Selection and Vertical-List Addition](iteration-18-drawer-targeted-multiselection-and-list-creation.md) | `Completed` | 2026-08-25 | The implementation is complete; the author reported that code-level acceptance and the basic device acceptance passed with no current functional issue. |
 | [Iteration 19: Favorite-Bar Presentation, Creation, and Management](iteration-19-favorite-bar-presentation-creation-and-management.md) | `Completed` | 2026-08-26 | Implementation is complete; the author reported that packaging and compilation operated normally and the current functional acceptance basically passed. |
-| [Iteration 20: Cross-Container Application Drag and Two-Axis Auto-Scroll](iteration-20-cross-container-drag-and-two-axis-auto-scroll.md) | `Planned` | 2026-08-23 | Cross-container movement requires all destination types and their local management behavior. |
+| [Iteration 20: Cross-Container Application Drag and Two-Axis Auto-Scroll](iteration-20-cross-container-drag-and-two-axis-auto-scroll.md) | `In progress` | 2026-08-26 | The author authorized implementation after accepting Iteration 19; the first additive slice unifies long-press drag activation and pre-recognition scroll handoff. |
 | [Iteration 21: Upgrade, Regression, and Version Closure](iteration-21-upgrade-regression-and-version-closure.md) | `Planned` | 2026-08-23 | Final closure follows acceptance of Iterations 15-20 and the required version evidence. |
 
 ## Iteration evidence and results
@@ -88,7 +88,7 @@ The author reported that the packaging and compilation workflows operated normal
 
 ### Iteration 20
 
-[Contract](iteration-20-cross-container-drag-and-two-axis-auto-scroll.md). Status is `Planned`; no implementation, command, evidence, artifact, result, commit, or tag is recorded.
+[Contract](iteration-20-cross-container-drag-and-two-axis-auto-scroll.md). Status is `In progress`. The first additive slice applies one platform-standard long-press activation boundary to application handles, complete-list handles, and complete-favorite-bar handles. Recognition emits one long-press semantic haptic; release without subsequent movement creates no preview or drag result, movement before recognition remains available to the owning viewport, and additional-pointer input cancels an active drag. The author reported that this slice basically passed device acceptance. The second additive slice establishes a shared application-drag target session and lifecycle-safe geometry registry for persisted and provisional vertical lists and favorite bars, excluding fixed controls from application target geometry while preserving the existing source preview and local exchange behavior. Cross-container target persistence, detailed body/boundary classification, and two-axis auto-scroll remain pending. Static local checks passed. Agent-run Gradle and instrumented tests are `Not run`; no commit, push, artifact, or tag is recorded.
 
 ### Iteration 21
 
@@ -125,6 +125,6 @@ The eventual artifact must retain `applicationId` `com.avenor.launcher`, use the
 
 ## Completion result
 
-No version completion result exists. Iterations 15-19 are `Completed`, and Iterations 20-21
-remain `Planned`, so `1.3.0` remains incomplete. No version
+No version completion result exists. Iterations 15-19 are `Completed`, Iteration 20 is
+`In progress`, and Iteration 21 remains `Planned`, so `1.3.0` remains incomplete. No version
 artifact, tag, publication, or release is claimed.
