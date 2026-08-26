@@ -22,7 +22,7 @@
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
 |  LEFT LIST / EQUAL WIDTH / SCROLL.........|  RIGHT LIST OR PROVISIONAL.......|
 | [X LIST] [M SIZE] [H LIST]................| PERSISTED: SAME 3-SLOT BAR.......|
-|  48DP BAR / 40DP CIRCLES / 24DP ICONS / NO RIPPLE............................|
+|  40DP BAR / 36DP SURFACE / 36X40 TARGETS / 20DP ART / 4DP GAP................|
 |  SIZE MENU @ BUTTON XY / 4DP BELOW / FLIP OR CLAMP 8DP.......................|
 |  (O)[48 APP] LARGE / (*)[40 APP] MEDIUM / (O)[32 APP] SMALL..................|
 |  PROVISIONAL LIST HAS NO BAR; ONE LIST HIDES REORDER.........................|
@@ -74,7 +74,7 @@
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
 |:::::::::::::::::::::::::::::::::::::::::::|  [L2-5] APP [HANDLE]:::::::::::::|
 |:::::::::::::::::::::::::::::::::::::::::::|::::::::::::::::::::::::::::::::::|
-|  [+ ADD / 24DP ICON / 48DP TARGET]::::::::|  [+ ADD / 48DP TARGET]:::::::::::|
+|  [TEXT: + ADD APPS / >=48DP TARGET]:::::::|  [TEXT: + NEW LIST]::::::::::::::|
 |  ^/v EDGE AUTO-SCROLL:::::::::::::::::::::|  ^/v AUTO-SCROLL:::::::::::::::::|
 |  OPAQUE PREVIEW / FIXED GRAB OFFSET / SOURCE PLACEHOLDER.....................|
 |  SAME-CONTAINER BODY SWAP SAVES NOW; CROSS-CONTAINER RELEASE SAVES...........|
@@ -85,7 +85,7 @@
 |.......................8DP MODULE SPACING.....................................|
 |..............SECONDARY EDIT SURFACE / MAX 5 FAVORITE BARS....................|
 |..R1 [X BAR]|(X)[APP][H] ...|[H BAR IF 2+]....................................|
-|..FIXED 48DP RAILS; ONE BAR HIDES H; PROVISIONAL ADD ONLY.....................|
+|..FIXED 48DP RAILS; EXISTING: + ADD APPS; PROVISIONAL: + NEW BAR..............|
 |..REORDER PREVIEW = FROZEN COMPLETE VISIBLE FAVORITE BAR......................|
 |..REMOVE FAVORITE BAR: DEFAULT DIALOG -> REMOVED / UNDO.......................|
 |  56DP BAR; ZERO CONTAINER AND ITEM PADDING...................................|
