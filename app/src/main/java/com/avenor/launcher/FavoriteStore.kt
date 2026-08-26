@@ -539,6 +539,94 @@ internal fun FavoriteAggregate.updateVerticalList(
     },
 )
 
+internal fun FavoriteAggregate.moveFavorite(
+    sourceContainerId: String,
+    targetContainerId: String,
+    identity: LaunchableIdentity,
+    targetIndex: Int?,
+    exchangeIdentity: LaunchableIdentity?,
+): FavoriteAggregate {
+    if (sourceContainerId == targetContainerId) return this
+    val allContainers = verticalLists + favoriteBars
+    val source = allContainers.firstOrNull { it.id == sourceContainerId } ?: return this
+    val target = allContainers.firstOrNull { it.id == targetContainerId } ?: return this
+    if (identity !in source.identities) return this
+    if (exchangeIdentity != null && exchangeIdentity !in target.identities) return this
+    val sourceUpdated = source.identities.filterNot { it == identity }
+    val targetUpdated = target.identities.toMutableList()
+    if (exchangeIdentity != null) {
+        val targetSlot = targetUpdated.indexOf(exchangeIdentity)
+        if (targetSlot < 0) return this
+        targetUpdated[targetSlot] = identity
+        val sourceSlot = sourceUpdated.size.coerceAtMost(source.identities.indexOf(identity))
+        val sourceWithExchange = sourceUpdated.toMutableList().also {
+            it.add(sourceSlot, exchangeIdentity)
+        }
+        return copy(
+            verticalLists = verticalLists.mapNotNull { container ->
+                when (container.id) {
+                    sourceContainerId -> container.copy(identities = sourceWithExchange)
+                        .takeIf { it.identities.isNotEmpty() }
+                    targetContainerId -> container.copy(identities = targetUpdated)
+                    else -> container
+                }
+            },
+            favoriteBars = favoriteBars.mapNotNull { container ->
+                when (container.id) {
+                    sourceContainerId -> container.copy(identities = sourceWithExchange)
+                        .takeIf { it.identities.isNotEmpty() }
+                    targetContainerId -> container.copy(identities = targetUpdated)
+                    else -> container
+                }
+            },
+        )
+    } else {
+        targetUpdated.add(targetIndex?.coerceIn(0, targetUpdated.size) ?: targetUpdated.size, identity)
+    }
+    fun update(container: FavoriteContainer): FavoriteContainer? = when (container.id) {
+        sourceContainerId -> container.copy(identities = sourceUpdated)
+            .takeIf { it.identities.isNotEmpty() }
+        targetContainerId -> container.copy(identities = targetUpdated)
+        else -> container
+    }
+    return copy(
+        verticalLists = verticalLists.mapNotNull(::update),
+        favoriteBars = favoriteBars.mapNotNull(::update),
+    )
+}
+
+internal fun FavoriteAggregate.containerForDragKey(
+    key: String,
+): FavoriteContainer? = when {
+    key.startsWith("vertical-list:") ->
+        verticalLists.firstOrNull { "vertical-list:${it.id}" == key }
+    key.startsWith("favorite-bar:") ->
+        favoriteBars.firstOrNull { "favorite-bar:${it.id}" == key }
+    else -> null
+}
+
+internal fun FavoriteAggregate.removeIdentityFromContainer(
+    containerId: String,
+    identity: LaunchableIdentity,
+): FavoriteAggregate = copy(
+    verticalLists = verticalLists.mapNotNull { container ->
+        if (container.id != containerId) {
+            container
+        } else {
+            container.copy(identities = container.identities - identity)
+                .takeIf { it.identities.isNotEmpty() }
+        }
+    },
+    favoriteBars = favoriteBars.mapNotNull { container ->
+        if (container.id != containerId) {
+            container
+        } else {
+            container.copy(identities = container.identities - identity)
+                .takeIf { it.identities.isNotEmpty() }
+        }
+    },
+)
+
 internal fun FavoriteAggregate.moveVerticalList(
     fromIndex: Int,
     toIndex: Int,

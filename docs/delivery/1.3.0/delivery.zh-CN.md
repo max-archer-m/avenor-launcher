@@ -57,7 +57,7 @@
 | [迭代 17：Home 编辑会话与纵向列表管理](iteration-17-home-edit-session-and-vertical-list-management.zh-CN.md) | `Completed` | 2026-08-25 | 实现已完成；作者报告编译、安装及当前可验证行为基本验收通过。 |
 | [迭代 18：Drawer 目标化收藏多选与纵向新增](iteration-18-drawer-targeted-multiselection-and-list-creation.zh-CN.md) | `Completed` | 2026-08-25 | 实现已完成；作者报告代码层面验收和基本设备验收通过，当前无功能问题。 |
 | [迭代 19：收藏栏呈现、创建和管理](iteration-19-favorite-bar-presentation-creation-and-management.zh-CN.md) | `Completed` | 2026-08-26 | 实现已完成；作者报告打包和编译流程正常，当前功能基本验收通过。 |
-| [迭代 20：跨容器应用拖动与两轴自动滚动](iteration-20-cross-container-drag-and-two-axis-auto-scroll.zh-CN.md) | `Planned` | 2026-08-23 | 跨容器移动依赖所有目标类型及其本地管理行为。 |
+| [迭代 20：跨容器应用拖动与两轴自动滚动](iteration-20-cross-container-drag-and-two-axis-auto-scroll.zh-CN.md) | `In progress` | 2026-08-26 | 作者在接受迭代 19 后授权实现；首个可叠加切片统一长按拖动启动及识别前滚动交接。 |
 | [迭代 21：升级、回归与版本闭环](iteration-21-upgrade-regression-and-version-closure.zh-CN.md) | `Planned` | 2026-08-23 | 最终收尾依赖迭代 15–20 的接受和版本所需证据。 |
 
 ## 迭代证据与结果
@@ -88,7 +88,7 @@
 
 ### 迭代 20
 
-[契约](iteration-20-cross-container-drag-and-two-axis-auto-scroll.zh-CN.md)。状态为 `Planned`；未记录实现、命令、证据、制品、结果、commit 或 tag。
+[契约](iteration-20-cross-container-drag-and-two-axis-auto-scroll.zh-CN.md)。状态为 `In progress`。首个可叠加切片为应用 handle、整列表 handle 和整收藏栏 handle 应用同一个平台标准长按启动边界。识别时产生一次长按语义触觉；识别后未继续移动便松手时不创建预览或拖动结果，识别前移动仍可交给所属视口处理，新增指针输入会取消活跃拖动。作者报告该切片设备基本验收通过。第二个可叠加切片为持久化及临时纵向列表和收藏栏建立共享应用拖动目标会话和具备生命周期清理的几何注册表；应用目标几何排除固定控制区域，同时保留现有来源预览和本地交换行为。跨容器目标持久化、细化的主体／边界分类及两轴自动滚动仍待完成。静态本地检查通过。Agent 执行的 Gradle 与 instrumented tests 为 `Not run`；未记录 commit、push、制品或 tag。
 
 ### 迭代 21
 
@@ -125,6 +125,6 @@
 
 ## 完成结果
 
-目前不存在版本完成结果。迭代 15–19 为 `Completed`，迭代 20–21 仍为 `Planned`，
-因此 `1.3.0` 尚未完成。不声明任何版本制品、tag、发布或
+目前不存在版本完成结果。迭代 15–19 为 `Completed`，迭代 20 为 `In progress`，
+迭代 21 仍为 `Planned`，因此 `1.3.0` 尚未完成。不声明任何版本制品、tag、发布或
 Release。
