@@ -25,7 +25,7 @@ One traceable installable candidate can upgrade the accepted `1.2.0` baseline on
 
 - Reconcile product contracts, implementation, tests, identifiers, and evidence for Iterations 15-20; resolve or record every material mismatch.
 - Validate representative `1.2.0` primary/companion states through an in-place upgrade into the unified model; a clean installation may provide supplemental evidence but cannot replace this journey.
-- Validate normal Home, edit session, targeted additions, favorite bars, local and cross-container movement, auto-scroll, navigation, launch, inventory changes, persistence failure, same-process return, and process recreation.
+- Validate normal Home, edit session, targeted additions, favorite bars, long-press drag activation and scroll arbitration, local and cross-container movement, auto-scroll, navigation, launch, inventory changes, persistence failure, same-process return, and process recreation.
 - Check current Android backup configuration and confirm Avenor-owned favorite files remain excluded from cloud and device-transfer backup without assuming existing compliance.
 - Produce or identify an installable artifact with accepted identifiers, source commit, signing category, digest, and upgrade limitation.
 - Record mandatory and recommended checks as Passed, Failed, Not run, Unknown, or Unavailable with environment and ownership.
@@ -62,14 +62,14 @@ The precise `versionCode`, source commit, signing category, artifact, device env
 - Iterations 15-20 have accepted results and no unresolved material contract mismatch.
 - An accepted candidate retains `com.avenor.launcher`, uses approved `1.3.0` identifiers, and is traceable to source and signing category.
 - The mandatory author-designated physical device upgrades the candidate in place from the accepted `1.2.0` baseline and completes the full selected journey without unintended loss, duplication, wrong destination/order, destructive overwrite, crash, ANR, wrong launch, or navigation dead end.
-- Process recreation, inventory changes, persistence failure, Undo, navigation restoration, and cross-container behavior meet the selected contracts.
+- Process recreation, inventory changes, persistence failure, Undo, navigation restoration, long-press drag activation, pre-recognition scrolling, and cross-container behavior meet the selected contracts.
 - Manifest, `allowBackup`, `dataExtractionRules`, and applicable equivalent configuration are checked; favorite persistence does not enter Android cloud or device-transfer backup.
 - Every skipped, unknown, failed, or unavailable check is recorded accurately.
 - The author separately decides version completion and whether the completed baseline merits a tag; GitHub Release remains optional and separately authorized.
 
 ## Validation requirements
 
-Primary-device in-place upgrade from the accepted `1.2.0` baseline and the complete author journey are mandatory version evidence. A clean installation is recommended supplemental evidence and cannot replace the upgrade. Focused automated tests and additional API 31, API 36/37, OEM, profile, clone, locale, font-scale, navigation-mode, accessibility, and performance coverage are recommended unless promoted. Actual commands, environments, devices, artifacts, and outcomes belong in `delivery.md`.
+Primary-device in-place upgrade from the accepted `1.2.0` baseline and the complete author journey are mandatory version evidence. That journey includes each drag-handle type, one activation haptic after long-press recognition, and ordinary horizontal or vertical scrolling before recognition without a preview. A clean installation is recommended supplemental evidence and cannot replace the upgrade. Focused automated tests and additional API 31, API 36/37, OEM, profile, clone, locale, font-scale, navigation-mode, accessibility, and performance coverage are recommended unless promoted. Actual commands, environments, devices, artifacts, and outcomes belong in `delivery.md`.
 
 ## Related decisions and technical assessments
 
