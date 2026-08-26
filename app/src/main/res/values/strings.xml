@@ -27,6 +27,11 @@
     <string name="remove_favorite_item">Remove favorite</string>
     <string name="favorite_removed">Removed from favorites</string>
     <string name="favorite_list_removed">Favorite list removed</string>
+    <string name="remove_favorite_bar">Remove favorite bar</string>
+    <string name="remove_favorite_bar_title">Remove favorite bar?</string>
+    <string name="remove_favorite_bar_body">All applications in this favorite bar will be removed from favorites.</string>
+    <string name="favorite_bar_removed">Favorite bar removed</string>
+    <string name="favorite_bar_reorder_handle">Reorder favorite bar</string>
     <string name="undo">Undo</string>
     <string name="favorite_undo_unavailable">Unable to restore favorite</string>
     <string name="favorite_reorder_handle">Move favorite</string>
@@ -38,7 +43,8 @@
     <string name="loading_favorites">Loading favorites…</string>
     <string name="unable_to_load_favorites">Unable to load favorites</string>
     <string name="home_empty_favorites">Add applications from Drawer</string>
-    <string name="add_favorites_to_list">Add applications to list</string>
+    <string name="add_apps">＋ Add apps</string>
+    <string name="new_favorite_list">＋ New favorite list</string>
     <string name="drawer_select_favorites">Select applications</string>
     <string name="drawer_selection_cancel">Cancel</string>
     <string name="drawer_selection_confirm">Confirm</string>
@@ -46,7 +52,7 @@
     <string name="drawer_selection_create_list">Create list</string>
     <string name="drawer_selection_add_to_favorite_bar">Add to favorite bar</string>
     <string name="drawer_selection_create_favorite_bar">Create favorite bar</string>
-    <string name="add_favorites_to_bar">Add applications to favorite bar</string>
+    <string name="new_favorite_bar">＋ New favorite bar</string>
     <string name="drawer_selection_order_format">Selected, item %1$d</string>
     <string name="drawer_selection_not_selected">Not selected</string>
     <string name="drawer_selection_already_favorite_unavailable">Favorited; unavailable</string>

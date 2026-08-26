@@ -409,6 +409,17 @@ private fun DrawerFavoriteSelectionList(
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
 ) {
+    val sectionAnchors = remember(sections) {
+        buildMap {
+            var itemIndex = 0
+            sections.forEach { section ->
+                put(section.label, itemIndex)
+                itemIndex += 1 + section.entries.size
+            }
+        }
+    }
+    val coroutineScope = rememberCoroutineScope()
+    var activeIndexLabel by remember { mutableStateOf<String?>(null) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -421,38 +432,78 @@ private fun DrawerFavoriteSelectionList(
             onCancel = onCancel,
             onConfirm = onConfirm,
         )
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth()
-                .testTag("drawer_favorite_selection_list"),
-            contentPadding = PaddingValues(
-                start = dimensionResource(R.dimen.drawer_horizontal_padding),
-                end = dimensionResource(R.dimen.drawer_horizontal_padding),
-            ),
-            state = listState,
+                .fillMaxWidth(),
         ) {
-            sections.forEach { section ->
-                item(key = "selection_section:${section.label}") {
-                    DrawerSectionHeader(section.label)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag("drawer_favorite_selection_list"),
+                contentPadding = PaddingValues(
+                    start = dimensionResource(R.dimen.drawer_horizontal_padding),
+                    end = dimensionResource(R.dimen.drawer_horizontal_padding) +
+                        dimensionResource(R.dimen.drawer_index_width),
+                ),
+                state = listState,
+            ) {
+                sections.forEach { section ->
+                    item(key = "selection_section:${section.label}") {
+                        DrawerSectionHeader(section.label)
+                    }
+                    items(
+                        items = section.entries,
+                        key = { entry ->
+                            "selection:${entry.identity.profileSerialNumber}:" +
+                                entry.identity.componentName.flattenToString()
+                        },
+                    ) { entry ->
+                        val alreadyFavorite = entry.identity in favoriteMembership
+                        val order = selection.indexOf(entry.identity)
+                        DrawerFavoriteSelectionRow(
+                            entry = entry,
+                            order = order.takeIf { it >= 0 }?.plus(1),
+                            alreadyFavorite = alreadyFavorite,
+                            enabled = !saving && !alreadyFavorite,
+                            onClick = { onToggle(entry.identity) },
+                        )
+                    }
                 }
-                items(
-                    items = section.entries,
-                    key = { entry ->
-                        "selection:${entry.identity.profileSerialNumber}:" +
-                            entry.identity.componentName.flattenToString()
-                    },
-                ) { entry ->
-                    val alreadyFavorite = entry.identity in favoriteMembership
-                    val order = selection.indexOf(entry.identity)
-                    DrawerFavoriteSelectionRow(
-                        entry = entry,
-                        order = order.takeIf { it >= 0 }?.plus(1),
-                        alreadyFavorite = alreadyFavorite,
-                        enabled = !saving && !alreadyFavorite,
-                        onClick = { onToggle(entry.identity) },
-                    )
-                }
+            }
+            DrawerAlphabetIndex(
+                labels = sections.map(DrawerSection::label),
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .windowInsetsPadding(WindowInsets.safeDrawing),
+                onSelect = { label, immediate ->
+                    if (!saving) {
+                        val anchor = sectionAnchors.getValue(label)
+                        coroutineScope.launch {
+                            if (immediate) {
+                                listState.scrollToItem(anchor)
+                            } else {
+                                listState.animateScrollToItem(anchor)
+                            }
+                        }
+                    }
+                },
+                onActiveLabelChange = { label ->
+                    activeIndexLabel = if (saving) null else label
+                },
+                onSelectSettings = {},
+                includeSettings = false,
+            )
+            activeIndexLabel?.let { label ->
+                DrawerIndexBubble(
+                    label = label,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(
+                            end = dimensionResource(R.dimen.drawer_index_width) +
+                                dimensionResource(R.dimen.drawer_index_bubble_index_gap),
+                        ),
+                )
             }
         }
     }
@@ -729,11 +780,14 @@ private fun DrawerAlphabetIndex(
     onSelect: (String, Boolean) -> Unit,
     onActiveLabelChange: (String?) -> Unit,
     onSelectSettings: (Boolean) -> Unit,
+    includeSettings: Boolean = true,
 ) {
     val slotHeight = dimensionResource(R.dimen.drawer_index_slot_height)
     val density = LocalDensity.current
     val indexState = rememberLazyListState()
-    val indexEntries = remember(labels) { labels + SETTINGS_INDEX_ENTRY }
+    val indexEntries = remember(labels, includeSettings) {
+        if (includeSettings) labels + SETTINGS_INDEX_ENTRY else labels
+    }
     LazyColumn(
         modifier = modifier
             .heightIn(max = dimensionResource(R.dimen.drawer_index_complete_height))
@@ -827,32 +881,34 @@ private fun DrawerAlphabetIndex(
                 )
             }
         }
-        item(key = "index:settings") {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(slotHeight)
-                    .semantics {
-                        role = Role.Button
-                        onClick {
-                            onSelectSettings(true)
-                            true
+        if (includeSettings) {
+            item(key = "index:settings") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(slotHeight)
+                        .semantics {
+                            role = Role.Button
+                            onClick {
+                                onSelectSettings(true)
+                                true
+                            }
                         }
-                    }
-                    .testTag("drawer_index_settings"),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_settings),
-                    contentDescription = stringResource(R.string.settings),
-                    modifier = Modifier.size(
-                        dimensionResource(R.dimen.drawer_index_settings_icon_size),
-                    ),
-                    tint = MaterialTheme.colorScheme.onBackground,
-                )
+                        .testTag("drawer_index_settings"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_settings),
+                        contentDescription = stringResource(R.string.settings),
+                        modifier = Modifier.size(
+                            dimensionResource(R.dimen.drawer_index_settings_icon_size),
+                        ),
+                        tint = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
             }
         }
-    }
+}
 }
 
 @Composable

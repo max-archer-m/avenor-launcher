@@ -26,6 +26,11 @@
     <string name="remove_favorite_item">移除收藏</string>
     <string name="favorite_removed">已从收藏中移除</string>
     <string name="favorite_list_removed">收藏列表已移除</string>
+    <string name="remove_favorite_bar">移除收藏栏</string>
+    <string name="remove_favorite_bar_title">移除收藏栏？</string>
+    <string name="remove_favorite_bar_body">此收藏栏中的所有应用都将从收藏中移除。</string>
+    <string name="favorite_bar_removed">收藏栏已移除</string>
+    <string name="favorite_bar_reorder_handle">重新排序收藏栏</string>
     <string name="undo">撤销</string>
     <string name="favorite_undo_unavailable">无法恢复收藏</string>
     <string name="favorite_reorder_handle">移动收藏</string>
@@ -37,7 +42,8 @@
     <string name="loading_favorites">正在加载收藏…</string>
     <string name="unable_to_load_favorites">无法加载收藏</string>
     <string name="home_empty_favorites">从抽屉添加应用</string>
-    <string name="add_favorites_to_list">向列表添加应用</string>
+    <string name="add_apps">＋ 添加应用</string>
+    <string name="new_favorite_list">＋ 新建收藏列表</string>
     <string name="drawer_select_favorites">选择应用</string>
     <string name="drawer_selection_cancel">取消</string>
     <string name="drawer_selection_confirm">确认</string>
@@ -45,7 +51,7 @@
     <string name="drawer_selection_create_list">创建列表</string>
     <string name="drawer_selection_add_to_favorite_bar">添加到收藏栏</string>
     <string name="drawer_selection_create_favorite_bar">创建收藏栏</string>
-    <string name="add_favorites_to_bar">向收藏栏添加应用</string>
+    <string name="new_favorite_bar">＋ 新建收藏栏</string>
     <string name="drawer_selection_order_format">已选择，第 %1$d 项</string>
     <string name="drawer_selection_not_selected">未选择</string>
     <string name="drawer_selection_already_favorite_unavailable">已在收藏中，无法选择</string>
