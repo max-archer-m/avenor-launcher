@@ -27,6 +27,7 @@ This document is the authoritative source for exact Home layout, typography, com
 - A persisted vertical list has a `40dp`-high control bar without padding, fill, rounded whole-bar surface, outer border, or following gap. A `1dp` light-foreground bottom divider at `12%` opacity separates it from content.
 - Three `40dp x 40dp` control targets align flush to the physical right edge in physical right-to-left reorder, size, remove order. Reorder centers `24dp` artwork; remove centers a `24dp x 24dp` error-red background with white X; size contains only its localized value. One list hides reorder while retaining its position.
 - The size menu uses three `64dp` rows. Each row orders its selection indicator, bundled generic application icon preview, and localized label without RTL mirroring. Preview sizes are `48dp`, `40dp`, and `32dp`.
+- The anchored size menu normally appears `4dp` below the size control and centers on it. When it must clamp horizontally or vertically inside safe content, it retains at least `8dp` safe-boundary clearance.
 - Add actions are plain localized text targets at least `48dp` high and wide enough for the label, with no decorative container or separate plus icon.
 
 ## Favorite bars
