@@ -8,18 +8,54 @@ Drawer presents every launchable application entry successfully read from the so
 
 “Every launchable application entry” is bounded by Avenor's current Android role and least-privilege permissions. It does not mean every installed package, hidden profile, or entry that could become visible only after adding another sensitive permission.
 
-- The application inventory is a single-column list; a future grid is an additive capability and is outside the current contract.
-- Each section anchor occupies its own `32dp`-high row and scrolls with the application list; section anchors never remain pinned over later content. Its `14sp/20sp` medium-weight label uses a `56dp` start inset from the application-row content boundary so it aligns with the application-name column after the `40dp` icon and `16dp` icon-to-name gap. The inset applies only to the anchor label and does not add permanent margin to application rows.
-- Each application row is at least `56dp` high and displays a `40dp` platform icon, platform-provided badge when present, and application name, with `16dp` between icon and name.
-- An application name occupies exactly one static line. A name that does not fit uses end ellipsis as defined in [design-foundations.md](../design-foundations.md).
+- The application inventory supports the selected row count as a finite arrangement value;
+  it is not restricted to a single-column list. A future grid capability beyond the
+  defined right-or-below arrangement is outside the current contract.
+- With inline section-anchor presentation, each section anchor occupies its own
+  `32dp`-high row and scrolls with the application list; it never remains pinned over
+  later content. With left-side presentation, each section anchor is placed to the
+  left of its section's application entries and scrolls with that list content.
+  Left-side anchors are not fixed to the Drawer viewport, do not create a separate
+  fixed-width anchor panel, and remain non-interactive. Multiple section anchors may
+  appear at the same time at their respective section positions; they do not replace
+  or merge with one another. Inline anchor labels use a
+  `56dp` start inset from the application-row content boundary so they align with
+  the application-name column after the `40dp` icon and `16dp` icon-to-name gap.
+  This inset applies only to inline anchor labels and does not add permanent margin
+  to application rows. Both presentations use `16sp/24sp` bold labels.
+- For the current medium-size sample, a right-side-name item uses an `8dp` leading inset,
+  a `40dp` icon, a `16dp` icon-to-name gap, and an `8dp` trailing inset. A below-icon-name
+  item uses a `40dp` icon, an `8dp` icon-to-name gap, centered icon and name content,
+  and at least `8dp` horizontal text insets. Columns have no separate inter-column gap;
+  each row item's width is the available application-content width divided by the selected
+  row count.
+- Application names use `16sp/24sp` normal-weight text in both arrangements. A name
+  occupies exactly one static line and uses end ellipsis when it does not fit, as defined
+  in [design-foundations.md](../design-foundations.md).
+- The application-size setting is a horizontal three-option single-selection list within
+  its `56dp` setting row. Options appear in large, medium, and small order, and each
+  complete option combines one selection indicator, a bundled Android-default generic
+  application-icon preview, and a localized label in one interaction target. The previews
+  use `48dp`, `40dp`, and `32dp` visible sizes respectively. The indicator-to-icon gap is
+  `4dp`, the icon-to-label gap is `8dp`, and no additional independent `16dp` gap separates
+  options. The title-to-control-region gap is `16dp`; each option retains an independent
+  target of at least `48dp × 48dp`. English labels such as `Large`, `Medium`, and `Small`
+  remain within their complete targets without wrapping or reducing the preview sizes.
 - Selecting an application immediately launches it and suppresses duplicate rapid activation.
 - Long-pressing an application produces long-press haptic feedback and opens the application action sheet.
 
 ## Top app bar
 
 - Drawer always reserves one fixed `56dp`-high top app bar below the status-bar safe inset. It remains fixed while the application list scrolls, uses the transparent Drawer surface, and does not introduce a visible bar background.
-- In ordinary mode, the left side contains a standard `24dp` Back arrow in a `48dp` interaction target. Selecting it completes the same downward Drawer-to-Home transition as system Back. The center is an empty, non-interactive slot reserved for a future search field; no title, search affordance, placeholder, or unavailable control is currently displayed. The right side is visually empty and has no interaction target.
-- The application list and AlphabetIndex begin below the top app bar and remain clear of its controls. The fixed bar height participates in the available-height calculation for the index.
+- In ordinary mode, the left side contains a standard `24dp` Back arrow in a `48dp`
+  interaction target. Selecting it completes the same downward Drawer-to-Home transition
+  as system Back. The center is an empty, non-interactive slot reserved for a future
+  search field; no title, search affordance, placeholder, or unavailable control is
+  currently displayed. The right side contains one overflow-style display-settings
+  entry in its own interaction target.
+- The application list and AlphabetIndex begin below the top app bar and remain clear of
+  its controls. The fixed bar height participates in the available-height calculation
+  for the index.
 
 ## Favorite multi-selection mode
 
@@ -121,7 +157,10 @@ Drawer presents every launchable application entry successfully read from the so
 
 ## Acceptance intent
 
-- Ordinary Drawer keeps the transparent top app bar fixed while content scrolls; its Back arrow returns through the normal downward transition, and its empty center and right regions expose no inactive controls.
+- Ordinary Drawer keeps the transparent top app bar fixed while content scrolls; its Back
+  arrow returns through the normal downward transition, its center remains a reserved
+  non-interactive search slot, and its right-side display-settings entry opens the
+  display-settings dialog.
 - Favorite multi-selection preserves selection order visibly, never launches or long-presses an application, never exposes Settings, and saves only the complete selection through Confirm. Every cancellation path discards all unconfirmed entries.
 - Every launchable entry returned by a successfully read source within Avenor's current role and least-privilege boundary appears once. Entries from an isolated failed non-current profile may be absent without blocking available Content. Primary, work-profile, and cloned entries follow the applicable platform identity treatment; Private Space entries requiring `ACCESS_HIDDEN_PROFILES` are intentionally absent. Primary and cloned entries remain distinguishable when the platform supplies a badge; Avenor-specific fallback distinction is outside the current scope.
 - Initial index contact lands immediately on the intended anchor with its heading positioned at the top of the visible list. Each later available-token change smooth-scrolls to that token's anchor without queuing targets.

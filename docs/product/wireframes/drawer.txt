@@ -1,6 +1,6 @@
 +------------------------------------------------------------------------------+
 |                    DRAWER / ORDINARY + MULTI-SELECT                          |
-|  [BACK 24/48]       EMPTY FUTURE SEARCH SLOT                                 |
+|  [BACK 24/48]       FUTURE SEARCH SLOT                         [MORE]        |
 |-------------------56DP TRANSPARENT TOP APP BAR-------------------------------|
 |                                                                              |
 |                                                                              |
@@ -79,7 +79,7 @@
 |                                                           X                  |
 |                                                                              |
 |  MULTI: ORDER SLOT LEFT OF ICON; CONFIRM ALONE SAVES      Y                  |
-|  ORDINARY: ANCHORS SCROLL; 56DP LABEL INSET                                  |
+|  ORDINARY: ANCHORS SCROLL; DISPLAY SETTINGS VIA MORE                         |
 |                                                                              |
 |                                                                              |
 |                                                           Z                  |

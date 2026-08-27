@@ -19,7 +19,7 @@
 | Application shortcut | 应用快捷操作 | 应用通过平台暴露的操作 |
 | Launcher action | 启动器操作 | Avenor 提供的操作，例如收藏、编辑或卸载 |
 | Application action sheet | 应用操作面板 | 包含应用身份、应用快捷操作和启动器操作的模态 Bottom Sheet |
-| Section anchor | 分组锚点 | Drawer 中的分组标题，例如 A 或 `#`；它是索引跳转目标并随列表滚动，不保持吸顶 |
+| Section anchor | 分组锚点 | Drawer 中的分组标题，例如 A 或 `#`；内嵌展示位于分组上方，左侧展示位于分组应用旁侧，两种展示均随应用列表滚动且不保持吸顶 |
 | Alphabet index | 字母索引 | Drawer 右侧用于跳转到锚点的固定索引 |
 | Edit mode | 编辑模式 | 从收藏操作或基础信息区符合条件的空白位置长按进入，在 Home 中显示模块边界、收藏移动能力和面向明确目标的新增控件的状态 |
 | Favorite multi-selection | 收藏多选 | Drawer 的临时模式，为一个已记录的 Home 收藏目标收集一组有顺序且此前未收藏的应用 |

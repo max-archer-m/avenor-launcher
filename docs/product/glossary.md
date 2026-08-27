@@ -19,7 +19,7 @@
 | Application shortcut | 应用快捷操作 | An action exposed by the application through the platform |
 | Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, edit, or uninstall |
 | Application action sheet | 应用操作面板 | The modal Bottom Sheet containing application identity, application shortcuts, and Launcher actions |
-| Section anchor | 分组锚点 | A Drawer section heading such as A or `#`; it is an index destination and scrolls with the list rather than remaining pinned |
+| Section anchor | 分组锚点 | A Drawer section heading such as A or `#`; inline presentation places it above its section and left-side presentation places it beside its section, with both presentations scrolling with the application list rather than remaining pinned |
 | Alphabet index | 字母索引 | The fixed right-side Drawer index used to jump between anchors |
 | Edit mode | 编辑模式 | The Home state entered from a favorite action or eligible basic-information blank-space long-press, exposing module boundaries, favorite movement, and destination-targeted add controls |
 | Favorite multi-selection | 收藏多选 | The temporary Drawer mode that collects an ordered set of previously unfavorited applications for one captured Home favorite destination |
