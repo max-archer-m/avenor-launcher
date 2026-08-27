@@ -14,7 +14,7 @@
 
 采用[发布治理](../../release.zh-CN.md)定义的 `作者日用基线`。
 
-当前候选版本已配置 `versionName` `1.3.0` 和暂定 `versionCode` `4`。源提交、签名类别、制品身份、完成决定和任何 tag 决定，均留待各自后续门禁。只有对应 APK 按发布治理成为可追踪证据时，该 `versionCode` 才成为已分配值。本版本可能在验收后成为候选 tag，但这只是作者届时的独立决定，并非承诺结果。
+已接受候选版本配置为 `versionName` `1.3.0` 和 `versionCode` `4`。其源码为 commit `0bdb54a49530fa6a84e9c57a054447d3ba093525`；本地构建的 debug APK 及签名身份记录在迭代 21 下。候选源码与验收证据已集成至 `main` 并同步到指定共享 Git 历史。tag 仍是作者的独立决定，并非承诺结果。
 
 ## 产品引用
 
@@ -58,7 +58,7 @@
 | [迭代 18：Drawer 目标化收藏多选与纵向新增](iteration-18-drawer-targeted-multiselection-and-list-creation.zh-CN.md) | `Completed` | 2026-08-25 | 实现已完成；作者报告代码层面验收和基本设备验收通过，当前无功能问题。 |
 | [迭代 19：收藏栏呈现、创建和管理](iteration-19-favorite-bar-presentation-creation-and-management.zh-CN.md) | `Completed` | 2026-08-26 | 实现已完成；作者报告打包和编译流程正常，当前功能基本验收通过。 |
 | [迭代 20：跨容器应用拖动与两轴自动滚动](iteration-20-cross-container-drag-and-two-axis-auto-scroll.zh-CN.md) | `Completed` | 2026-08-27 | 实现已完成；作者报告编译、打包及当前功能基本验收通过，未发现明显问题。 |
-| [迭代 21：升级、回归与版本闭环](iteration-21-upgrade-regression-and-version-closure.zh-CN.md) | `In progress` | 2026-08-27 | 迭代 15–20 验收并集成后，已开始候选版本配置工作。 |
+| [迭代 21：升级、回归与版本闭环](iteration-21-upgrade-regression-and-version-closure.zh-CN.md) | `Completed` | 2026-08-27 | 可追溯源码的本地候选、强制升级旅程及所选回归旅程已获作者接受。 |
 
 ## 迭代证据与结果
 
@@ -96,9 +96,11 @@
 
 [契约](iteration-21-upgrade-regression-and-version-closure.zh-CN.md)。第一个收尾小步已将候选版本配置为 `applicationId` `com.avenor.launcher`、`versionName` `1.3.0` 和暂定 `versionCode` `4`；新增打包身份覆盖；并扩展现有备份配置测试，要求云备份与设备迁移同时排除每个已配置的应用存储域。作者报告该候选配置编译正常，并验收通过第一小步。
 
-第二小步修复了 POSIX Gradle 入口权限、两处过时 instrumentation API、可确定触发的持久化失败夹具、两处等价 KTX 调用和四处编译器报告的冗余空值检查。同时为 14 项已审阅的历史资源问题建立 Lint 基线，并按项目规则将工具、依赖及已选 target SDK 的更新提示保持为不导致失败的维护信息。Agent 执行的 `assembleDebug` 和最终 `lintDebug` 为 `Passed`；Lint 未报告新问题。`testDebugUnitTest` 为 `NO-SOURCE`，不提供行为覆盖。首次在作者 SM-S9180 / Android 16 上执行完整 `connectedDebugAndroidTest` 共运行 85 项测试：65 项通过、20 项失败。两项持久化失败夹具问题已修正；随后聚焦复跑的 31 项非 Home 测试全部通过，覆盖候选身份、备份排除、持久化、拖动协调、日期格式化和无障碍探针。完整 Home 测试集尚未通过：已观察失败包括中文设备上的英文固定断言，以及 Avenor 作为当前 Home 应用时 Compose 测试层级丢失。这些仍是失败或未解决的测试环境与测试稳健性证据，不声明产品失败，也不声明回归套件已通过。不声明已保留制品、已接受源提交、完成结果、commit、push 或 tag。状态为 `In progress`。
+第二小步修复了 POSIX Gradle 入口权限、两处过时 instrumentation API、可确定触发的持久化失败夹具、两处等价 KTX 调用和四处编译器报告的冗余空值检查。同时为 14 项已审阅的历史资源问题建立 Lint 基线，并按项目规则将工具、依赖及已选 target SDK 的更新提示保持为不导致失败的维护信息。Agent 执行的 `assembleDebug` 和最终 `lintDebug` 为 `Passed`；Lint 未报告新问题。`testDebugUnitTest` 为 `NO-SOURCE`，不提供行为覆盖。首次在作者 SM-S9180 / Android 16 上执行完整 `connectedDebugAndroidTest` 共运行 85 项测试：65 项通过、20 项失败。两项持久化失败夹具问题已修正；随后聚焦复跑的 31 项非 Home 测试全部通过，覆盖候选身份、备份排除、持久化、拖动协调、日期格式化和无障碍探针。完整 Home 测试集尚未通过：已观察失败包括中文设备上的英文固定断言，以及 Avenor 作为当前 Home 应用时 Compose 测试层级丢失。这些仍是失败或未解决的测试环境与测试稳健性证据，不声明产品失败，也不声明回归套件已通过。
 
 对于强制升级旅程，未能找到受保护交付记录中原始 `1.2.0` APK 的字节文件。Agent 从已接受源码 commit `b119aadbdff04284f02c106fd93a59121641dbea` 重建了 `1.2.0(3)`；重建 APK 的 SHA-256 为 `9D49C8637A1B98231B7FDD362F75E5FEEFE6743868F374BF0C46AF3265F4DE7`，与受保护 APK 记录的摘要不同，因此它是源码等价的重建基线，而非原始已接受制品。它保留 `com.avenor.launcher`、target SDK 36，并与当前候选版本共用同一 debug 证书 SHA-256 `E6786FC1914AAD390436C4F24661D81A2781492F45741CC77F96D0AD8B8C4E77`。在作者 SM-S9180 / Android 16 上，全新安装重建基线通过；随后通过 `adb install -r -t` 保留数据原位升级至工作区 `1.3.0(4)` 候选版本。包检查显示首次安装时间保留为 `2026-08-27 11:02:41`，最后更新时间变为 `2026-08-27 11:05:15`。首次未带 `-t` 的尝试未改变安装状态，因 debug 候选版本带有 `testOnly` 标记而被拒绝。作者报告原伴收藏已正确迁移为第二个纵向收藏列表，并验收通过完整所选旅程，包括列表成员与顺序保留、进程重建、新增、删除、Undo、列表与收藏栏移动、Home、Drawer、Settings 和应用启动。未报告崩溃、ANR、破坏性收藏状态错误、错误启动或导航死路。这完成了物理设备旅程证据，同时保留上述重建基线限制；候选源码与制品收尾仍待完成。
+
+随后，精确候选以 `0bdb54a49530fa6a84e9c57a054447d3ba093525` 提交，并从干净工作区重新构建，`assembleDebug` 为 `Passed`。所得开发 APK 为 `app/build/outputs/apk/debug/app-debug.apk`，SHA-256 为 `234ED4989FF966E8E2C7533E2BFA2EA68CD8F91DD37A829DF2DEC7BC90E8ADA5`，包名为 `com.avenor.launcher`，版本为 `1.3.0(4)`，target SDK 为 36，debug 证书 SHA-256 为 `E6786FC1914AAD390436C4F24661D81A2781492F45741CC77F96D0AD8B8C4E77`。升级旅程从重建的 `1.2.0(3)` 基线再次执行到该精确 APK。具有代表性的主收藏与伴收藏状态得到保留；包检查保留首次安装时间 `2026-08-27 11:43:47`，最后更新时间记录为 `2026-08-27 11:48:12`。三星在安装和更新期间自动为应用分身用户注册该包；该次用户安装已被明确移除，最终仅保留预期的主用户安装。作者报告操作正常，候选基本验收通过。根据作者 2026-08-27 的决定，迭代 21 状态为 `Completed`。候选源码与验收证据已集成至 `main` 并同步到指定共享 Git 历史。该 APK 是本地开发证据，不是已保留或已发布的版本制品；不声明 tag、发布或 Release。
 
 ## 依赖与顺序
 
@@ -121,6 +123,8 @@
 - 迭代 20 已有作者报告的编译、打包和当前功能验收；Agent 执行的 Gradle、instrumented tests 及更广泛兼容性和中断矩阵仍未运行或未知。
 - 更广泛设备、API、OEM、profile、clone、无障碍和性能覆盖在执行前保持未知。
 - `1.2.0` 关闭时，其精确标识安装和原位升级检查为 `Not run`；`1.3.0` 必须建立自身真实升级证据，而不是修改该历史。
+- 原始已接受 `1.2.0` APK 字节不可用，因此强制旅程使用了上文记录的源码等价重建基线。
+- 完整 Home instrumentation 套件仍未解决；31 项聚焦非 Home 测试通过，且作者已接受物理设备候选旅程。
 
 ## 完成条件
 
@@ -132,6 +136,4 @@
 
 ## 完成结果
 
-目前不存在版本完成结果。迭代 15–20 为 `Completed`，迭代 21 为 `In progress`，
-因此 `1.3.0` 尚未完成。不声明任何版本制品、tag、发布或
-Release。
+`1.3.0` 已在 `作者日用基线` 交付等级下标记为 `Completed`。迭代 15–21 均为 `Completed`，作者已接受 `1.3.0(4)` 候选，其源码与验收证据也已集成至 `main` 并同步到指定共享 Git 历史。不声明已保留版本制品、tag、发布或 Release。
