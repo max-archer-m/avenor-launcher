@@ -1,6 +1,6 @@
 # Settings 交互规格
 
-> 英文语义源：[settings.md](settings.md)。空间草图见共享的 [Settings 线框](../wireframes/settings.txt)，阅读规则见[线框索引](../low-fidelity-wireframes.zh-CN.md)。
+> 英文语义源：[settings.md](settings.md)。精确视觉数值见 [Settings 表现规范](../presentation/settings.zh-CN.md)；空间草图见共享的 [Settings 线框](../wireframes/settings.txt)，阅读规则见[线框索引](../low-fidelity-wireframes.zh-CN.md)。
 
 ## 入口与返回
 
@@ -54,23 +54,18 @@
 - 两者均打开深色、本地且可离线阅读的内容；长内容可以纵向滚动。
 - 模态关闭方式和 Settings 位置恢复行为与隐私 Bottom Sheet 一致。
 
-## 设置项呈现
+## 设置项角色
 
 ### 主要设置项
 
-- 主要设置项包含标题、可选副标题，以及右侧 `24dp` 的 Android 或 Material 内置箭头图标。
-- 标题采用 Material 3 `titleMedium`：`16sp/24sp`、中等字重、`onSurface`。
-- 副标题采用 `bodySmall`：`12sp/16sp`、正常字重、`onSurfaceVariant`。
-- 右侧箭头使用 `onSurfaceVariant`。
-- 有副标题的双行设置项至少高 `72dp`；无副标题的单行设置项至少高 `56dp`，标题垂直居中。
-- 主要设置项采用 `16dp` 横向内容 padding。
+- 主要设置项包含标题、可选副标题；打开其他目标时显示右侧 Android 或 Material 箭头。
+- 主要设置项的字体、颜色角色、行几何、padding 和箭头尺寸由 [Settings 表现规范](../presentation/settings.zh-CN.md)定义。
 
 ### 次要信息项
 
 - 隐私、Avenor License、第三方 License、项目仓库和版本信息使用次要呈现。
-- 次要项采用居中的 Material 3 `titleSmall`：`14sp/20sp`、中等字重、`onSurfaceVariant`。
 - 次要项不显示右侧箭头。可点击入口仍然可以点击；版本信息不可点击。
-- 次要项至少高 `40dp`，内容水平和垂直居中。
+- 次要项的字体、颜色角色、行几何和对齐由 Settings 表现规范定义。
 
 ## 项目仓库
 

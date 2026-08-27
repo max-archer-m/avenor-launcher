@@ -1,66 +1,41 @@
 # Avenor Launcher Low-Fidelity Wireframes
 
-> Semantic source: English. Chinese counterpart: [low-fidelity-wireframes.zh-CN.md](low-fidelity-wireframes.zh-CN.md).
+> Public semantic source: English. Chinese counterpart: [low-fidelity-wireframes.zh-CN.md](low-fidelity-wireframes.zh-CN.md).
 
-The wireframes visualize the current product contract's spatial hierarchy, region relationships, and primary content order. They do not define pixel-perfect styling or implementation structure. Normative behavior remains in the applicable interaction specification.
-
-Each language-neutral ASCII canvas is stored once under `docs/product/wireframes/`. Full-screen surfaces target approximately 80 columns by 96 lines; modal surfaces may be shorter. Home uses a complete canvas to show content-driven modules within the non-scrolling screen, including unallocated transparent space that is not a product region. Canvas labels are structural annotations, not user-visible copy.
+The language-neutral ASCII canvases under `docs/product/wireframes/` visualize spatial hierarchy, region relationships, and major content order. They do not independently define product behavior, user-visible copy, exact visual values, or implementation structure.
 
 ## Reading rules
 
-- `L1` and `L2` mark illustrative equal-status vertical favorite-list entries. The canvas shows the default medium size: a `40dp` icon, `56dp` item height, and `16sp/24sp` name. Large uses `48dp`, `64dp`, and `18sp/28sp`; small uses `32dp`, `48dp`, and `14sp/20sp`.
-- Home applies uniform `8dp` content padding inside the platform `safeDrawing` bounds. The basic-information module adds no padding of its own. Its time and date rows add `8dp` start and end margins inside the padded boundary, producing final `16dp` row boundaries from the corresponding safe edges; the time row also adds `8dp` top margin for a final `16dp` safe-edge distance. The visible date text keeps another `8dp` start inset relative to the time text and therefore begins `24dp` from the safe start edge, while the complete row target remains at `16dp`. The favorite-list area, each vertical list, each favorite bar, and each favorite item add no padding beyond Home's outer content padding. Vertical-list item icons use an explicit `8dp` start margin, vertical centering, and a `16dp` icon-to-name gap. In the physical-leftmost list, this item margin composes with Home's `8dp` content padding to produce a final `16dp` icon distance from the safe screen edge. One list uses the complete padded area width; two visible lists divide that width equally after an `8dp` inter-list gap. Favorite-bar item geometry is defined separately below. Normal and edit modes preserve the applicable geometry.
-- Numbered entries illustrate placement and do not establish a fixed capacity. Each list scrolls independently only when its content overflows; losing its final entry deletes that list. A favorite bar likewise deletes when it loses its final application entry.
-- Drawer action-sheet additions enter the physical-leftmost vertical list by default; reordering lists changes that destination. In Home edit mode, an independent opaque preview follows the touch point while its source slot remains stable. Vertical lists and favorite bars are application containers. The preview retains source size until a successful cross-container release applies the target list size or fixed favorite bar presentation.
-- Dragging onto another application body in the same container exchanges and persists immediately; same-container gaps never insert. In another container, an occupied body means exchange and a valid first, between-item, last, or provisional-empty boundary means insertion. Cross-container feedback is mutually exclusive and saves one operation only on valid release.
-- Target feedback and horizontal or vertical edge auto-scroll use the finger touch point. Application dragging starts proportional auto-scroll after approximately `120ms` inside an eligible `48dp` target-viewport edge zone. Only the current valid container scrolls; its active edge shows a non-interactive light-foreground gradient up to `8%` opacity below insertion and exchange feedback. Invalid release preserves the last successfully persisted same-container exchange and discards any unsaved cross-container target.
-- Application names remain one line and use end ellipsis when required.
-- Drawer supports independent application size, arrangement, and section-anchor presentation settings.
-  Arrangement combines a right-or-below mode selector with a row-count stepper rather than
-  predefined named modes. Its title remains fixed while the right-side controls scroll
-  horizontally only when they overflow.
-  In the medium-size sample, right-side-name items use `8dp` leading and trailing insets,
-  a `40dp` icon, and a `16dp` icon-to-name gap. Below-icon-name items use a centered
-  `40dp` icon and name with an `8dp` gap and at least `8dp` horizontal text insets.
-  Columns use `0dp` separate spacing and divide available application-content width by
-  the selected row count. Names use normal-weight `16sp/24sp` static single-line
-  end-ellipsized text. Exact Drawer size tokens and other arrangement spacing are
-  intentionally not shown here.
-- Drawer section anchors use `16sp/24sp` bold type. Inline anchors remain above their
-  section and scroll with the application list; left-side anchors remain beside their
-  section's application entries and scroll with that list content. Left-side anchors
-  are not fixed to the Drawer viewport, do not create a separate fixed-width anchor
-  panel, and remain non-interactive without additional sticky behavior. Multiple anchors
-  may appear simultaneously at their respective section positions without replacing or
-  merging with one another.
-- Drawer display settings use compact title-and-control rows. The current medium-size section-anchor selector is a `148dp × 44dp` frame containing two equal `72dp × 40dp` animated thumbs; exact outer spacing for the complete dialog and the other selectors remains outside this wireframe's detail.
-- The Drawer application-size selector is a horizontal large-medium-small single-selection list
-  in a `56dp` setting row. Each option combines its selection indicator, bundled default
-  application-icon preview, and localized label in one target. The previews use `48dp`,
-  `40dp`, and `32dp`; use `4dp` between indicator and icon, `8dp` between icon and label,
-  no independent `16dp` gap between options, and a `16dp` title-to-control gap. Each option
-  retains an independent at-least-`48dp × 48dp` target, and English labels remain single-line.
-- Dot fills show allocated space and do not prescribe a visible texture, color, or additional layer.
-- The secondary favorites area sits below the favorite-list area with `8dp` vertical spacing, uses the complete Home content width after `safeDrawing` and uniform `8dp` content padding, and has zero height without content. It contains at most five `56dp`-high horizontal favorite-bar containers without additional container padding; Home itself does not scroll vertically because of this area. Unallocated transparent Home space is not that module.
-- Each favorite bar contains a finite user-defined sequence of content-measured launchable entries and scrolls horizontally only when those entries overflow. Favorite bars use `8dp` vertical spacing. Entries use a fixed, non-selectable medium height with an `8dp` start inset, `40dp` icon, `8dp` icon-to-name gap, one `16sp/24sp` name line measured up to `64dp`, and `8dp` trailing inset, producing a maximum item width of `128dp`. Short labels shrink their items; longer labels use end ellipsis. Entries align left with `8dp` spacing and do not redistribute unused width. Current favorite bars show no title or title-height reservation. Selecting an entry launches its application, while long-pressing it opens the existing application action sheet.
-- Home edit mode adds a horizontally centered localized plain-text action at each favorite-list or favorite bar end. Existing destinations use `＋ Add apps`, while the provisional list shown below the two-list limit uses `＋ New favorite list` and the provisional favorite bar shown below the five-bar limit uses `＋ New favorite bar`. The leading `＋` is text rather than a separate icon asset; each complete label is one target at least `48dp` high and wide enough for its localized text. The same Drawer canvas represents ordinary and favorite multi-selection modes: ordinary mode has a transparent top bar with Back and the display-settings entry, while multi-selection replaces it with Cancel, the applicable add-or-create target description, and Confirm. Every application icon receives a fixed `40dp` leading region containing a centered `24dp` empty circle; selection fills it with the light role, adds a dark `14sp/20sp` order number, and applies an `8%` light row background.
-- Entering multi-selection captures every Home container scroll position. Cancellation restores them exactly. Successful confirmation preserves every non-target position and minimally scrolls only the target when required to reveal the first still-valid newly appended entry completely; provisional containers begin at their content start.
-- Multi-selection reuses Drawer Loading and Error content states while keeping Cancel and the destination description. Loading or full Error hides rows, Settings, and AlphabetIndex and disables Confirm; Error preserves the in-memory ordered selection for one-read Retry or cancellation. A valid inventory whose entries are all already favorited remains disabled Content rather than Empty or Error.
-- Every edit-mode favorite shows a trailing `24dp` handle centered in an author-approved compact target that is `40dp` wide, occupies the full item height, sits flush against the physical right edge, and has no end margin. A separate physical-top-left `20dp × 20dp` solid error-red remove control uses a white X and a same-size author-approved compact target. The targets never overlap. Removing persists immediately and shows the latest-only `Removed from favorites` / `UNDO` Snackbar.
-- Every edit-mode application, complete-list, and complete-favorite-bar drag requires platform-standard long-press recognition on its handle. Recognition produces one standard long-press semantic haptic feedback; only later movement creates and moves the preview. Earlier movement cancels the drag candidate and remains ordinary scrolling when available, so swiping a favorite bar cannot create a drag preview.
-- The populated secondary-favorites module uses the shared editing surface. Each favorite bar remains transparent inside a `1dp`, `12%` light-foreground outline with conditional edge fades only where more horizontal content exists.
-- Every persisted editable favorite bar has equal fixed `40dp × 56dp` outer rails. The logical-start remove rail centers a `24dp × 24dp` solid error-red background with a white X; the logical-end reorder rail centers its `24dp` handle. Both leave `8dp` on each horizontal side and use the complete rail as the target. One persisted favorite bar hides reorder while preserving its `40dp` rail; at least two show it, and a provisional favorite bar exposes neither action. The central application viewport scrolls between the rails without resizing content-measured entries capped at `128dp`. Complete-favorite bar removal first uses the default confirmation Dialog, then the latest-only `Favorite bar removed` / `UNDO`. Reorder freezes the complete visible favorite bar window; favorite bar-body crossings exchange and persist immediately, while gaps never insert.
-- Every persisted vertical list has a fixed `40dp` top control bar with no padding, fill, rounded whole-bar surface, outer border, or following gap; only a `1dp` light-foreground bottom divider at `12%` opacity separates applications. Three adjacent `40dp × 40dp` targets align flush to the physical right edge in right-to-left reorder, size, remove order without RTL mirroring. Remove centers a `24dp × 24dp` solid error-red background with a white X, size contains only its localized current-value text, and reorder centers a `24dp` handle. One list hides reorder while preserving its rightmost position, and provisional lists have no bar. The size menu anchors to the button's current coordinates, avoids safe boundaries, and presents large, medium, and small as complete `64dp` rows ordered indicator, bundled default icon at `48dp/40dp/32dp`, then label. Confirmed complete-list removal shows `List removed` / `UNDO`; static visible-viewport previews exchange two lists immediately when the finger enters the other list body, without gap insertion.
-- The Home basic-information label marks eligible blank space only; time and date targets are excluded from double-tap locking.
+- Canvas labels are structural annotations, not user-visible copy.
+- Dotted fill means only that space is allocated; it does not prescribe texture, color, opacity, or another layer.
+- Repeated labels such as `L1`, `L2`, or numbered application entries are illustrative. They do not establish fixed content, capacity, or identity.
+- A canvas may show one representative content state without defining all valid sizes, arrangements, loading states, error states, or edit states.
+- The canvas boundary communicates composition, not a device profile or pixel-to-character scale. Dimensions written in a wireframe description are ASCII canvas dimensions, not product UI values.
+- Application names remain illustrative. Localization, truncation, typography, icon size, spacing, targets, and visual states belong to the applicable behavior or presentation contract.
+- Unallocated Home space remains transparent background rather than an unnamed product module.
+
+## Contract routing
+
+Use the owning document for a product decision instead of interpreting the wireframe:
+
+| Question | Behavior owner | Exact presentation owner |
+| --- | --- | --- |
+| Home content, editing, drag results, and container lifecycle | [Home interaction](surfaces/home.md) | [Home presentation](presentation/home.md) |
+| Drawer inventory, sorting, selection, index behavior, and settings actions | [Drawer interaction](surfaces/drawer.md) | [Drawer presentation](presentation/drawer.md) |
+| Application action availability, order semantics, and results | [Application action sheet](surfaces/app-action-sheet.md) | [Application action sheet presentation](presentation/app-action-sheet.md) |
+| Settings content, navigation, and results | [Settings interaction](surfaces/settings.md) | [Settings presentation](presentation/settings.md) |
+| Cross-surface transitions and system-return behavior | [Navigation](navigation.md) | Applicable surface presentation specification |
 
 ## Wireframe index
 
-- [Home](wireframes/home.txt) - complete 80 x 96 canvas; shows content-driven vertical sizing, the current two-list equal-width state, and unallocated transparent space. One-list normal Home expands that list to full composition width.
-- [Home edit mode](wireframes/home-edit-mode.txt) - complete 80 x 103 canvas; shows editing surfaces, persisted-list top control bars and size menu, favorite drag handles, list-end add controls, provisional list and favorite bar entries, and independent list scrolling.
-- [Drawer](wireframes/drawer.txt) - complete 80 x 96 Content-state canvas; shows the fixed transparent top app bar, ordinary and multi-selection bar semantics, the default single application list, non-pinned anchors aligned with the application-name column, final ordinary-mode Settings section, and fixed alphabet index. Alternate application arrangements, sizes, and the compact display-settings dialog are governed by the Drawer contract and are not dimensioned in this canvas. Full-surface Loading and Error states hide that index as defined by the Drawer contract.
-- [Application action sheet](wireframes/app-action-sheet.txt) - 80 x 80 modal-state canvas; shows the blocked background, scrim, and BottomSheet content order.
-- [Settings](wireframes/settings.txt) - complete 80 x 96 canvas; shows navigation, default-Launcher status, and product-information rows.
+- [Home](wireframes/home.txt) — complete `80 x 96` canvas showing content-driven vertical regions, the representative two-list state, and unallocated transparent space. The Home contracts define other valid states.
+- [Home edit mode](wireframes/home-edit-mode.txt) — complete `80 x 103` canvas showing editing regions, list controls, add actions, provisional containers, and independent scrolling relationships.
+- [Drawer](wireframes/drawer.txt) — complete `80 x 96` representative Content-state canvas showing the fixed top region, ordinary and multi-selection semantics, list anchors, Settings section, and alphabet index.
+- [Application action sheet](wireframes/app-action-sheet.txt) — `80 x 80` modal-state canvas showing the blocked background, scrim, and content order.
+- [Settings](wireframes/settings.txt) — complete `80 x 96` canvas showing navigation, Launcher status, and product-information regions.
 
-## Authority boundary
+## Authority and update rules
 
-A wireframe is a visual aid, not an independent product decision. When a wireframe and normative prose differ, the applicable interaction specification and product foundation requirements govern. Update the wireframe in the same documentation change when a confirmed spatial contract changes.
+A wireframe is a visual aid, not an independent product decision. When it differs from normative prose, the applicable behavior contract governs outcomes and the applicable presentation specification governs exact visual values.
+
+Update a wireframe in the same documentation change when a confirmed spatial hierarchy, region relationship, or major content order changes. A behavior-only change or presentation-token-only change does not require editing a wireframe unless the canvas would otherwise become structurally misleading.

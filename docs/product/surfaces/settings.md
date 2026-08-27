@@ -1,6 +1,6 @@
 # Settings Interaction Specification
 
-> Public semantic source: English. Chinese counterpart: [settings.zh-CN.md](settings.zh-CN.md). The spatial sketch is the shared [Settings wireframe](../wireframes/settings.txt), with reading rules in the [wireframe index](../low-fidelity-wireframes.md).
+> Public semantic source: English. Chinese counterpart: [settings.zh-CN.md](settings.zh-CN.md). Exact visual values are defined in the [Settings presentation specification](../presentation/settings.md); the spatial sketch is the shared [Settings wireframe](../wireframes/settings.txt), with reading rules in the [wireframe index](../low-fidelity-wireframes.md).
 
 ## Entry and return
 
@@ -54,23 +54,18 @@ Complex logs, update checks, backup, cloud synchronization, diagnostic export, a
 - Each opens a dark, local, offline-readable presentation. Long content scrolls vertically.
 - Their modal dismissal and Settings-position restoration match the Privacy Bottom Sheet.
 
-## Settings item presentation
+## Settings item roles
 
 ### Primary settings items
 
-- A primary item contains a title, optional supporting text, and a `24dp` Android or Material trailing arrow icon.
-- The title uses Material 3 `titleMedium`: `16sp/24sp`, medium weight, and `onSurface`.
-- Supporting text uses `bodySmall`: `12sp/16sp`, normal weight, and `onSurfaceVariant`.
-- The trailing arrow uses `onSurfaceVariant`.
-- A two-line item is at least `72dp` high. A one-line item is at least `56dp` high and vertically centers its title.
-- Primary items use `16dp` horizontal content padding.
+- A primary item contains a title, optional supporting text, and a trailing Android or Material arrow when it opens another destination.
+- Primary item typography, color roles, row geometry, padding, and arrow size belong to the [Settings presentation specification](../presentation/settings.md).
 
 ### Secondary information items
 
 - Privacy, Avenor License, Third-party License, Project repository, and Version information use the secondary presentation.
-- Secondary items use centered Material 3 `titleSmall` text: `14sp/20sp`, medium weight, and `onSurfaceVariant`.
 - They do not show a trailing arrow. Clickable entries remain clickable despite the intentionally secondary presentation; Version information is not clickable.
-- A secondary item is at least `40dp` high and centers its content horizontally and vertically.
+- Secondary item typography, color roles, row geometry, and alignment belong to the Settings presentation specification.
 
 ## Project repository
 

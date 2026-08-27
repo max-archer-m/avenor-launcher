@@ -1,6 +1,6 @@
 # Application Action Sheet
 
-> Public semantic source: English. Chinese counterpart: [app-action-sheet.zh-CN.md](app-action-sheet.zh-CN.md). The spatial sketch is the shared [application action sheet wireframe](../wireframes/app-action-sheet.txt), with reading rules in the [wireframe index](../low-fidelity-wireframes.md).
+> Public semantic source: English. Chinese counterpart: [app-action-sheet.zh-CN.md](app-action-sheet.zh-CN.md). Exact visual values are defined in the [application action sheet presentation specification](../presentation/app-action-sheet.md); the spatial sketch is the shared [application action sheet wireframe](../wireframes/app-action-sheet.txt), with reading rules in the [wireframe index](../low-fidelity-wireframes.md).
 
 ## Presentation
 
@@ -18,10 +18,12 @@ The application action sheet is a modal bottom sheet opened by long-pressing an 
 
 From top to bottom:
 
-1. Application name aligned left and a standard `24dp` application-information icon aligned right.
-2. A light divider with `16dp` horizontal inset.
-3. An optional application-shortcut region containing platform-provided shortcuts, each displayed with a standard `24dp` icon plus name, followed by a light divider with `16dp` horizontal inset.
-4. Launcher actions in a horizontal row, each with a standard `24dp` icon above its label.
+1. Application name aligned left and the application-information control aligned right.
+2. A light inset divider.
+3. An optional application-shortcut region containing platform-provided shortcuts, each displayed with an icon plus name, followed by the same inset divider.
+4. Launcher actions in a horizontal row, each with its icon above its label.
+
+Exact icon, divider, and badge geometry belongs to the [application action sheet presentation specification](../presentation/app-action-sheet.md).
 
 If the platform exposes no application shortcuts, omit the complete application-shortcut region, including its trailing divider. The divider below the application identity remains, so identity and Launcher actions retain one boundary without adjacent duplicate dividers.
 
@@ -32,7 +34,7 @@ The current contract does not define a dedicated overflow interaction for unusua
 - The application name is not interactive.
 - No application icon is shown in the header.
 - For a cloned application, display the platform-provided clone badge independently at the Bottom Sheet's bottom-right corner to follow the identity treatment observed on the author's Samsung device.
-- The badge uses a `12dp × 12dp` visual region aligned to the Bottom Sheet's bottom-right corner without an outward offset.
+- The badge aligns to the Bottom Sheet's bottom-right corner without an outward offset. Its exact visual region belongs to the application action sheet presentation specification.
 - The badge is decorative, cannot receive input, does not occupy a Launcher-action slot, and does not reserve content-layout space. Primary applications do not show it.
 - Selecting the information icon opens the system application-information surface.
 - Returning from system application information does not restore the sheet and refreshes the affected application state.
@@ -41,7 +43,7 @@ The current contract does not define a dedicated overflow interaction for unusua
 ## Launcher actions
 
 - Launcher actions use five fixed horizontal slots ordered from left to right. Visible actions compact into the leftmost available slots; hidden actions leave no internal gap, and unused slots remain empty on the right. Actions do not redistribute evenly across the full width.
-- Each Launcher action's complete icon-and-label item is one interaction target. The `24dp` icon is not an independent or smaller touch target.
+- Each Launcher action's complete icon-and-label item is one interaction target. The icon is not an independent or smaller touch target.
 - At most five Launcher actions are defined; this limit does not apply to platform application shortcuts.
 - On Home the action order is remove favorite, edit, then uninstall. Edit opens Home edit mode and remains available for a single favorite; uninstall is hidden when unavailable, and later visible actions shift left.
 - On Drawer the action order is add favorite or remove favorite according to current state, then uninstall when available. Uninstall shifts into the next left slot and is hidden when unavailable.
