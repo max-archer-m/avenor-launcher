@@ -16,9 +16,9 @@ This document owns exact Drawer layout, typography, component geometry, and visu
 
 ## Section anchors and alphabet index
 
-- Section anchors use bold `16sp/24sp` text. Inline anchors remain above their section; left-side anchors remain beside section entries. Both scroll with list content.
+- Section anchors use bold `16sp/24sp` text. Inline anchors occupy a `32dp`-high row and use a `56dp` start inset so their text aligns with the application-name column; left-side anchors remain beside section entries. Both scroll with list content.
 - Alphabet index labels use `11sp` medium-weight text in fixed `20dp` slots. Its Settings gear uses `11dp` artwork inside one complete `20dp` slot.
-- The maximum 28-slot model requires `560dp` complete available height after applicable insets and Drawer padding. Below that height the index becomes independently scrollable.
+- The maximum index model contains 28 fixed slots. The Drawer behavior contract owns the resulting available-height threshold and scrolling decision.
 - The active-token bubble uses at least `64dp x 64dp` and displays `32sp` medium-weight text or the corresponding Settings gear.
 - A non-interactive Drawer error icon uses the shared `40dp` status-icon token.
 

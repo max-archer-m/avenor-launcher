@@ -1,6 +1,6 @@
 # Drawer Interaction Specification
 
-> Public semantic source: English. Chinese counterpart: [drawer.zh-CN.md](drawer.zh-CN.md). Shared navigation is defined in [navigation.md](../navigation.md); the spatial sketch is the shared [Drawer wireframe](../wireframes/drawer.txt), with reading rules in the [wireframe index](../low-fidelity-wireframes.md).
+> Public semantic source: English. Chinese counterpart: [drawer.zh-CN.md](drawer.zh-CN.md). Shared navigation is defined in [navigation.md](../navigation.md); exact Drawer visual values are defined in the [Drawer presentation specification](../presentation/drawer.md); the spatial sketch is the shared [Drawer wireframe](../wireframes/drawer.txt), with reading rules in the [wireframe index](../low-fidelity-wireframes.md).
 
 ## Purpose and layout
 
@@ -8,47 +8,17 @@ Drawer presents every launchable application entry successfully read from the so
 
 “Every launchable application entry” is bounded by Avenor's current Android role and least-privilege permissions. It does not mean every installed package, hidden profile, or entry that could become visible only after adding another sensitive permission.
 
-- The application inventory supports the selected row count as a finite arrangement value;
-  it is not restricted to a single-column list. A future grid capability beyond the
-  defined right-or-below arrangement is outside the current contract.
-- With inline section-anchor presentation, each section anchor occupies its own
-  `32dp`-high row and scrolls with the application list; it never remains pinned over
-  later content. With left-side presentation, each section anchor is placed to the
-  left of its section's application entries and scrolls with that list content.
-  Left-side anchors are not fixed to the Drawer viewport, do not create a separate
-  fixed-width anchor panel, and remain non-interactive. Multiple section anchors may
-  appear at the same time at their respective section positions; they do not replace
-  or merge with one another. Inline anchor labels use a
-  `56dp` start inset from the application-row content boundary so they align with
-  the application-name column after the `40dp` icon and `16dp` icon-to-name gap.
-  This inset applies only to inline anchor labels and does not add permanent margin
-  to application rows. Both presentations use `16sp/24sp` bold labels.
-- For the current medium-size sample, a right-side-name item uses an `8dp` leading inset,
-  a `40dp` icon, a `16dp` icon-to-name gap, and an `8dp` trailing inset. A below-icon-name
-  item uses a `40dp` icon, an `8dp` icon-to-name gap, centered icon and name content,
-  and at least `8dp` horizontal text insets. Columns have no separate inter-column gap;
-  each row item's width is the available application-content width divided by the selected
-  row count.
-- Application names use `16sp/24sp` normal-weight text in both arrangements. A name
-  occupies exactly one static line and uses end ellipsis when it does not fit, as defined
-  in [design-foundations.md](../design-foundations.md).
-- The application-size setting is a horizontal three-option single-selection list within
-  its `56dp` setting row. Options appear in large, medium, and small order, and each
-  complete option combines one selection indicator, a bundled Android-default generic
-  application-icon preview, and a localized label in one interaction target. The previews
-  use `48dp`, `40dp`, and `32dp` visible sizes respectively. The indicator-to-icon gap is
-  `4dp`, the icon-to-label gap is `8dp`, and no additional independent `16dp` gap separates
-  options. The title-to-control-region gap is `16dp`; each option retains an independent
-  target of at least `48dp × 48dp`. English labels such as `Large`, `Medium`, and `Small`
-  remain within their complete targets without wrapping or reducing the preview sizes.
+- The application inventory supports the selected row count as a finite arrangement value; it is not restricted to a single-column list. A future grid capability beyond the defined right-or-below arrangement is outside the current contract.
+- With inline section anchors, each anchor occupies its own row and scrolls with the application list; it never remains pinned over later content. With left-side anchors, each anchor remains beside its section's entries and scrolls with that content. Left-side anchors are not fixed to the viewport, do not create a separate fixed-width panel, and remain non-interactive. Multiple anchors may appear simultaneously at their respective section positions without replacing or merging. Inline anchors align with the application-name column without adding permanent margin to application rows.
+- Right-side-name and below-icon-name arrangements use the exact item geometry defined in the [Drawer presentation specification](../presentation/drawer.md#surface-and-application-content). The selected row count divides the available application-content width. Names occupy one static line and use end ellipsis.
+- The application-size setting is a horizontal large-medium-small single-selection list. Each complete option combines one selection indicator, bundled Android-default generic application-icon preview, and localized label in one interaction target. Exact row, preview, spacing, and target geometry belongs to the Drawer presentation specification. Labels remain within their targets without wrapping or reducing preview sizes.
 - Selecting an application immediately launches it and suppresses duplicate rapid activation.
 - Long-pressing an application produces long-press haptic feedback and opens the application action sheet.
 
 ## Top app bar
 
-- Drawer always reserves one fixed `56dp`-high top app bar below the status-bar safe inset. It remains fixed while the application list scrolls, uses the transparent Drawer surface, and does not introduce a visible bar background.
-- In ordinary mode, the left side contains a standard `24dp` Back arrow in a `48dp`
-  interaction target. Selecting it completes the same downward Drawer-to-Home transition
+- Drawer always reserves one fixed top app bar below the status-bar safe inset. It remains fixed while the application list scrolls, uses the transparent Drawer surface, and does not introduce a visible bar background. Exact geometry belongs to the Drawer presentation specification.
+- In ordinary mode, the left side contains the standard Back control. Selecting it completes the same downward Drawer-to-Home transition
   as system Back. The center is an empty, non-interactive slot reserved for a future
   search field; no title, search affordance, placeholder, or unavailable control is
   currently displayed. The right side contains one overflow-style display-settings
@@ -62,7 +32,7 @@ Drawer presents every launchable application entry successfully read from the so
 - Selecting an edit-mode add control on Home opens the existing Drawer surface in favorite multi-selection mode and captures that control's persisted-list, provisional-list, existing-favorite-bar, or provisional-favorite-bar target. The Drawer completes its upward transition programmatically rather than requiring another user drag.
 - The same inventory, locale-aware ordering, application rows, section anchors, and AlphabetIndex are reused. The fixed Settings section and Settings index token are hidden because Settings is not a selectable application target.
 - The top app bar replaces its ordinary contents with `Cancel` on the left, a localized description of the captured destination in the center, and `Confirm` on the right. The center text is `Add to list` for a persisted vertical list, `Create list` for a provisional vertical list, `Add to favorite bar` for an existing favorite bar, and `Create favorite bar` for a provisional favorite bar. These labels describe the current action without assigning a persistent title or ordinal to the destination. Confirm is disabled while nothing is selected.
-- Selecting an available application toggles its selection instead of launching it. Long-press actions and the application action sheet are disabled in this mode. Every row reserves the same fixed `40dp` leading region to the left of the application icon so row content does not shift. An available unselected row shows the centered empty `24dp` outlined circle defined by the design foundations. A selected row fills that circle, displays its one-based plain-text order, and receives the defined `8%` selected background. The indicator is not independently interactive; selecting the complete row again deselects it, removes both selected treatments, and closes later numbering gaps.
+- Selecting an available application toggles its selection instead of launching it. Long-press actions and the application action sheet are disabled in this mode. Every row reserves the presentation-defined leading indicator region so row content does not shift. An available unselected row shows an empty outlined circle; a selected row fills it, displays its one-based plain-text order, and receives the selected-row treatment defined by the Drawer presentation specification. The indicator is not independently interactive; selecting the complete row again deselects it, removes selected treatments, and closes later numbering gaps.
 - Selection order is the order in which entries were selected. Deselecting an entry immediately closes the numbering gap, and confirming appends the remaining entries to the captured destination in the displayed number order.
 - An identity already assigned to any vertical favorite list or favorite bar remains visible but unavailable for selection. Its empty indicator, icon, and name use the disabled semantic opacity; selecting it has no effect and produces no Toast or other feedback. Primary, cloned, and work-profile entries continue to use their distinct stable identities when this state is evaluated.
 - Selecting Confirm saves the complete current selection once, then completes the downward transition and returns to the same Home edit mode under the target-only minimum reveal rule defined by Home. Selecting Cancel, system Back, or a valid downward Drawer dismissal discards the complete unconfirmed selection, completes the downward transition, and returns to Home edit mode with every captured Home container at its exact pre-entry scroll position.
@@ -113,13 +83,13 @@ Drawer presents every launchable application entry successfully read from the so
 
 - A fixed right-side index is visible whenever Drawer presents navigable Content. Full-surface Loading and Error states hide the entire index because those states do not present any list anchors; the index is not partially displayed.
 - It contains `#`, each non-empty A–Z section, and a fixed Settings gear below Z. Empty alphabetical sections are omitted.
-- Index labels use `11sp` medium-weight text in fixed `20dp` slots. The Settings gear graphic is `11dp` inside one complete `20dp` index slot; its slot and index interaction range must not be reduced to the graphic bounds. Non-empty entries are not stretched to redistribute unused height.
-- The maximum index model contains 28 slots: `#`, A–Z, and Settings. Its minimum complete available height is therefore `560dp`, calculated as `28 × 20dp` after excluding status-bar, navigation-bar, display-cutout, Drawer-padding, and system-gesture insets.
+- Index labels, slots, and Settings gear use the exact values defined by the [Drawer presentation specification](../presentation/drawer.md#section-anchors-and-alphabet-index). The complete slot and index interaction range must not be reduced to the gear artwork, and non-empty entries are not stretched to redistribute unused height.
+- The maximum index model contains 28 slots: `#`, A–Z, and Settings. Its minimum complete available height is therefore `560dp` after excluding status-bar, navigation-bar, display-cutout, Drawer-padding, and system-gesture insets.
 - At `560dp` or more of available height, the index does not scroll. Below `560dp`, the index becomes an independently scrollable vertical region while the application list remains separately scrollable.
 - On initial pointer down over an available index entry, the application list jumps immediately and without animation to that entry's anchor, with the anchor heading positioned at the top of the visible list. This direct positioning does not wait for pointer release and produces index-step haptic feedback.
 - After the initial pointer down, entering a different available index entry starts a smooth scroll to that entry's anchor. Moving within the same index slot does not change the list position. A newly selected anchor cancels and replaces an unfinished smooth-scroll target; targets are never queued.
 - The final position is the last selected anchor position. On pointer release or cancellation, the current smooth scroll finishes at that anchor; the list does not derive a percentage position from the pointer, snap to another anchor, or play a completion animation.
-- A magnified bubble displays only the active character, or the Settings gear when that token is active, using `32sp` medium-weight text inside a region at least `64dp × 64dp`. It remains visible while the pointer is held and disappears immediately on release or cancellation.
+- A magnified bubble displays only the active character or Settings gear using the Drawer presentation specification. It remains visible while the pointer is held and disappears immediately on release or cancellation.
 - While the index owns the pointer, the application list does not independently consume the gesture; index movement may drive the list only through the discrete anchor smooth-scroll behavior above.
 - The Settings gear is an index anchor, not a control that opens Settings. Selecting it by initial pointer down jumps immediately to the fixed Settings section; entering it during index movement smooth-scrolls to that section and produces the same index-step haptic feedback as any other anchor change.
 - The Settings row in that section is the only Drawer control that opens Settings.
@@ -148,7 +118,7 @@ Drawer presents every launchable application entry successfully read from the so
 
 - A successful read that returns no launchable entries is treated as an error rather than a valid empty Drawer.
 - A failed inventory read that leaves no usable launchable entries uses the same error state.
-- The application region hides the progress indicator, shows a non-interactive `40dp` error icon, displays the localized message `Unable to load applications`, and provides a separate `Retry` action.
+- The application region hides the progress indicator, shows the shared non-interactive status icon, displays the localized message `Unable to load applications`, and provides a separate `Retry` action.
 - The error state does not instruct the user to restart Avenor.
 - The application list, fixed Settings section, and AlphabetIndex remain absent while this full-surface error is shown.
 - Selecting Retry clears the visible error state, returns to the Loading state, and starts a new inventory read.
