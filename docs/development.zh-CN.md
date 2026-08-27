@@ -17,7 +17,7 @@
 - Java 语言级别：JDK 17。
 - Android 配置：`minSdk 31`、`targetSdk 36`、`compileSdk 37`。
 - 应用标识：`com.avenor.launcher`。
-- 当前版本标识：`versionName 1.2.0`、`versionCode 3`。
+- 当前候选版本标识：`versionName 1.3.0`、`versionCode 4`。
 - 依赖仓库当前使用阿里云镜像。`settings.gradle.kts` 保留了被注释的官方上游替代配置，供有意识地手动切换。
 
 这些值是当前仓库配置，不表示每台主机都已具备匹配的 JDK、Android SDK、模拟器、设备连接、凭据或依赖缓存。

@@ -17,7 +17,7 @@ This document records the minimum current development baseline for Avenor Launch
 - Java language level: JDK 17.
 - Android configuration: `minSdk 31`, `targetSdk 36`, and `compileSdk 37`.
 - Application identity: `com.avenor.launcher`.
-- Current version identity: `versionName 1.2.0`, `versionCode 3`.
+- Current candidate version identity: `versionName 1.3.0`, `versionCode 4`.
 - Dependency repositories currently use Aliyun mirrors. `settings.gradle.kts` retains commented official-upstream alternatives for deliberate manual switching.
 
 Treat these values as current repository configuration, not promises that every host already has the matching JDK, Android SDK, emulator, device connection, credentials, or cached dependencies.

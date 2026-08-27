@@ -8,11 +8,13 @@ import android.os.Process
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
@@ -95,7 +97,7 @@ class HomeScreenTest {
         }
 
         composeRule.onNodeWithTag("home_favorite_list_0").assertIsDisplayed()
-        composeRule.onNodeWithTag("home_favorite_list_1").assertDoesNotExist()
+        composeRule.onAllNodesWithTag("home_favorite_list_1").assertCountEquals(0)
     }
 
     @Test
@@ -176,7 +178,7 @@ class HomeScreenTest {
         composeRule.runOnIdle {
             assertEquals(FavoriteAvailability.Available(entry), selectedAvailability)
         }
-        composeRule.onNodeWithTag("home_favorites_empty").assertDoesNotExist()
+        composeRule.onAllNodesWithTag("home_favorites_empty").assertCountEquals(0)
     }
 
     @Test
@@ -325,7 +327,7 @@ class HomeScreenTest {
         }
 
         composeRule.onNodeWithTag("home_favorites").assertIsDisplayed()
-        composeRule.onNodeWithTag("home_companion_favorites").assertDoesNotExist()
+        composeRule.onAllNodesWithTag("home_companion_favorites").assertCountEquals(0)
     }
 
     @Test
@@ -389,7 +391,7 @@ class HomeScreenTest {
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText("Reliable refreshed application").assertIsDisplayed()
-        composeRule.onNodeWithText("Removed during failed save").assertDoesNotExist()
+        composeRule.onAllNodesWithText("Removed during failed save").assertCountEquals(0)
     }
 
     @Test
@@ -603,7 +605,7 @@ class HomeScreenTest {
         }
 
         composeRule.onNodeWithText("Remove favorite").assertIsDisplayed()
-        composeRule.onNodeWithText("Add favorite").assertDoesNotExist()
+        composeRule.onAllNodesWithText("Add favorite").assertCountEquals(0)
         composeRule.onNodeWithText("Remove favorite").performClick()
         composeRule.runOnIdle { assertEquals(true, removeRequested) }
     }
@@ -747,7 +749,7 @@ class HomeScreenTest {
         composeRule.onNodeWithTag("favorite_reorder_handle").assertIsDisplayed()
         composeRule.onNodeWithTag("home_surface").performTouchInput { swipeUp() }
 
-        composeRule.onNodeWithTag("drawer_surface").assertDoesNotExist()
+        composeRule.onAllNodesWithTag("drawer_surface").assertCountEquals(0)
         composeRule.onNodeWithTag("favorite_reorder_handle").assertIsDisplayed()
     }
 
@@ -1210,7 +1212,7 @@ class HomeScreenTest {
         composeRule.onNodeWithTag("favorite_add_0").assertIsDisplayed()
         composeRule.onNodeWithTag("favorite_add_0").performClick()
         composeRule.runOnIdle { assertEquals(PRIMARY_LIST_ID, addTarget) }
-        composeRule.onNodeWithTag("reorder_favorite_list_0").assertDoesNotExist()
+        composeRule.onAllNodesWithTag("reorder_favorite_list_0").assertCountEquals(0)
         composeRule.onNodeWithTag("favorite_list_size_0").assertIsDisplayed()
         composeRule.onNodeWithTag("favorite_list_size_0").performClick()
         composeRule.onNodeWithTag("favorite_list_size_menu_0").assertIsDisplayed()
@@ -1218,17 +1220,17 @@ class HomeScreenTest {
         composeRule.onNodeWithTag("favorite_list_size_0").performClick()
         composeRule.onNodeWithTag("remove_favorite_list_0").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Remove list").assertIsDisplayed()
-        composeRule.onNodeWithText("Remove list").assertDoesNotExist()
+        composeRule.onAllNodesWithText("Remove list").assertCountEquals(0)
         composeRule.onNodeWithTag("remove_favorite_list_0").performClick()
         composeRule.onNodeWithText("Remove favorite list?").assertIsDisplayed()
         composeRule.onNodeWithText(
             "All applications in this list will be removed from favorites.",
         ).assertIsDisplayed()
         composeRule.onNodeWithTag("cancel_remove_favorite_list_0").performClick()
-        composeRule.onNodeWithText("Remove favorite list?").assertDoesNotExist()
+        composeRule.onAllNodesWithText("Remove favorite list?").assertCountEquals(0)
         composeRule.onNodeWithTag("remove_favorite_item").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Remove favorite").assertIsDisplayed()
-        composeRule.onNodeWithText("Remove favorite").assertDoesNotExist()
+        composeRule.onAllNodesWithText("Remove favorite").assertCountEquals(0)
     }
 
     @Test
@@ -1243,7 +1245,7 @@ class HomeScreenTest {
         }
 
         composeRule.onNodeWithTag("favorite_provisional_add_0").assertIsDisplayed()
-        composeRule.onNodeWithTag("home_favorites_empty").assertDoesNotExist()
+        composeRule.onAllNodesWithTag("home_favorites_empty").assertCountEquals(0)
     }
 
     @Test
@@ -1345,7 +1347,7 @@ class HomeScreenTest {
             }
         }
 
-        composeRule.onNodeWithTag("application_shortcut_region").assertDoesNotExist()
+        composeRule.onAllNodesWithTag("application_shortcut_region").assertCountEquals(0)
     }
 
     @Test
@@ -1435,7 +1437,7 @@ class HomeScreenTest {
             assertEquals(entry, loadedEntry)
             assertEquals(shortcut, launchedShortcut)
         }
-        composeRule.onNodeWithTag("application_action_sheet").assertDoesNotExist()
+        composeRule.onAllNodesWithTag("application_action_sheet").assertCountEquals(0)
     }
 
     @Test
@@ -1564,7 +1566,7 @@ class HomeScreenTest {
         composeRule.runOnIdle { assertEquals(0, controller.settingsRequests) }
 
         composeRule.onNodeWithTag("accessibility_disclosure_cancel").performClick()
-        composeRule.onNodeWithTag("accessibility_prominent_disclosure").assertDoesNotExist()
+        composeRule.onAllNodesWithTag("accessibility_prominent_disclosure").assertCountEquals(0)
         composeRule.runOnIdle { assertEquals(0, controller.settingsRequests) }
     }
 
@@ -1587,7 +1589,7 @@ class HomeScreenTest {
         composeRule.onNodeWithTag("accessibility_disclosure_continue").performClick()
 
         composeRule.runOnIdle { assertEquals(1, controller.settingsRequests) }
-        composeRule.onNodeWithTag("accessibility_prominent_disclosure").assertDoesNotExist()
+        composeRule.onAllNodesWithTag("accessibility_prominent_disclosure").assertCountEquals(0)
     }
 
 }

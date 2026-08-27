@@ -11,8 +11,16 @@ import org.xmlpull.v1.XmlPullParser
 
 @RunWith(AndroidJUnit4::class)
 class BackupConfigurationTest {
+    private val excludedDomains = setOf(
+        "root",
+        "file",
+        "database",
+        "sharedpref",
+        "external",
+    )
+
     @Test
-    fun packagedApplicationDisablesBackupAndExcludesFilesFromCloudAndDeviceTransfer() {
+    fun packagedApplicationDisablesBackupAndExcludesStorageFromCloudAndDeviceTransfer() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         assertEquals(0, context.applicationInfo.flags and ApplicationInfo.FLAG_ALLOW_BACKUP)
 
@@ -41,7 +49,10 @@ class BackupConfigurationTest {
             }
         }
 
-        assertTrue(Triple("cloud-backup", "file", ".") in exclusions)
-        assertTrue(Triple("device-transfer", "file", ".") in exclusions)
+        listOf("cloud-backup", "device-transfer").forEach { section ->
+            excludedDomains.forEach { domain ->
+                assertTrue(Triple(section, domain, ".") in exclusions)
+            }
+        }
     }
 }

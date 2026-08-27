@@ -4,8 +4,8 @@ import android.app.role.RoleManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
+import androidx.core.net.toUri
 
 internal interface SettingsPlatform {
     fun openPrivacyContact(): Boolean = false
@@ -38,11 +38,11 @@ internal class AndroidSettingsPlatform(context: Context) : SettingsPlatform {
     )
 
     override fun openPrivacyContact(): Boolean = open(
-        Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_CONTACT_URL)),
+        Intent(Intent.ACTION_VIEW, PRIVACY_CONTACT_URL.toUri()),
     )
 
     override fun openProjectRepository(): Boolean = open(
-        Intent(Intent.ACTION_VIEW, Uri.parse(PROJECT_REPOSITORY_URL)),
+        Intent(Intent.ACTION_VIEW, PROJECT_REPOSITORY_URL.toUri()),
     )
 
     override fun versionText(): String {

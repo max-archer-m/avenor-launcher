@@ -3,6 +3,7 @@ package com.avenor.launcher
 import android.content.ComponentName
 import androidx.test.core.app.ApplicationProvider
 import java.io.DataOutputStream
+import java.io.File
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -11,6 +12,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class FavoriteStoreTest {
+    private companion object {
+        const val EXPECTED_COMPANION_LIST_ID = "vertical-list-2"
+    }
+
     @Test
     fun contextStoreWritesFavoritesInsideTheExcludedFilesDirectory() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
@@ -83,16 +88,16 @@ class FavoriteStoreTest {
 
     @Test
     fun failedWriteKeepsLastReadableState(): Unit = runBlocking {
-        val file = temporaryFavoriteFile()
+        val blockedParent = temporaryFavoriteFile().apply { writeText("not a directory") }
+        val file = File(blockedParent, "favorites.bin")
         val store = AtomicFileFavoriteStore(file)
         val identity = identity(1, "com.example", "Main")
         store.load()
-        assertTrue(file.mkdir())
 
         assertFalse(store.add(identity))
         assertEquals(emptyList<LaunchableIdentity>(), store.readableIdentities())
 
-        file.delete()
+        blockedParent.delete()
     }
 
     @Test
@@ -197,7 +202,7 @@ class FavoriteStoreTest {
         val readable = store.state.value as FavoriteReadState.Readable
         assertTrue(readable.primaryIdentities.isEmpty())
         assertEquals(listOf(companion), readable.companionIdentities)
-        assertEquals(COMPANION_LIST_ID, readable.aggregate.verticalLists.single().id)
+        assertEquals(EXPECTED_COMPANION_LIST_ID, readable.aggregate.verticalLists.single().id)
         file.delete()
     }
 
@@ -358,13 +363,14 @@ class FavoriteStoreTest {
         val readable = store.state.value as FavoriteReadState.Readable
         assertTrue(readable.primaryIdentities.isEmpty())
         assertEquals(listOf(companion), readable.companionIdentities)
-        assertEquals(COMPANION_LIST_ID, readable.aggregate.verticalLists.single().id)
+        assertEquals(EXPECTED_COMPANION_LIST_ID, readable.aggregate.verticalLists.single().id)
         file.delete()
     }
 
     @Test
     fun failedCompositionWriteDoesNotPublishUnpersistedState(): Unit = runBlocking {
-        val file = temporaryFavoriteFile()
+        val container = temporaryFavoriteFile().apply { assertTrue(mkdir()) }
+        val file = File(container, "favorites.bin")
         val first = identity(1, "com.example.first", "Main")
         val second = identity(1, "com.example.second", "Main")
         val store = AtomicFileFavoriteStore(file)
@@ -373,12 +379,13 @@ class FavoriteStoreTest {
         store.add(second)
         val before = store.state.value
         assertTrue(file.delete())
-        assertTrue(file.mkdir())
+        assertTrue(container.delete())
+        container.writeText("not a directory")
 
         assertFalse(store.replaceComposition(listOf(second), listOf(first)))
         assertEquals(before, store.state.value)
 
-        file.delete()
+        container.delete()
     }
 
     @Test
