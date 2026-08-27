@@ -349,8 +349,10 @@ internal fun HomeScreen(
         dragSession = advanced
         // A tick marks the moment the feedback changes, so an exchange or a moved insertion
         // boundary is felt without watching the moving rows.
-        if (advanced != null && previous != null && advanced.feedbackChangedFrom(previous)) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
+        advanced?.let { current ->
+            if (current.feedbackChangedFrom(previous)) {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
+            }
         }
     }
     val applicationEdgeScroll = applicationDragTargetSession?.edgeScroll(
@@ -1946,9 +1948,9 @@ internal data class ApplicationDragTargetSession(
             before ?: orderedBounds.lastOrNull()?.first?.plus(1) ?: 0
         }
         return moved.copy(
-            targetContainerKey = descriptor?.key,
-            targetContainerType = descriptor?.type,
-            targetAxis = descriptor?.axis,
+            targetContainerKey = descriptor.key,
+            targetContainerType = descriptor.type,
+            targetAxis = descriptor.axis,
             targetMode = if (itemIndex >= 0 && insertionIndex == null) {
                 ApplicationDragTargetMode.Exchange
             } else {

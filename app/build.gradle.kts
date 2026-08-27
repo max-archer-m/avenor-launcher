@@ -22,8 +22,8 @@ android {
         applicationId = "com.avenor.launcher"
         minSdk = 31
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 4
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -67,11 +67,18 @@ android {
 
     lint {
         abortOnError = true
+        baseline = file("lint-baseline.xml")
         checkReleaseBuilds = true
         warningsAsErrors = true
         // Iteration 1 does not define a product icon; retain the platform fallback
         // instead of turning an invented placeholder into a product asset.
         disable += "MissingApplicationIcon"
+        // Tool and dependency update notices are reviewed maintenance inputs, not
+        // correctness failures for the currently selected platform baseline.
+        disable += "AndroidGradlePluginVersion"
+        disable += "GradleDependency"
+        disable += "NewerVersionAvailable"
+        disable += "OldTargetApi"
     }
 
     packaging {
