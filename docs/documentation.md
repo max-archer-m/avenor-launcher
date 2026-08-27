@@ -29,7 +29,10 @@ Each durable fact has one primary location. Other documents link to or briefly i
 | --- | --- |
 | Project routing and project-specific authorization boundaries | `AGENTS.md` |
 | Documentation locations and maintenance rules | `docs/documentation.md` |
-| Product direction and current user behavior | `overview.md`, requirements, and the applicable file under `docs/product/` |
+| Product direction, capability boundary, and cross-surface acceptance intent | `overview.md` and the applicable requirements document |
+| Current surface, feature, and navigation behavior | The applicable interaction specification under `docs/product/` |
+| Shared and component presentation values | `docs/product/design-foundations.md` or the applicable component presentation specification |
+| Spatial visualization and structural examples | `docs/product/low-fidelity-wireframes.md` and `docs/product/wireframes/`, as non-normative views of the linked contract |
 | Development environment and build entry points | `docs/development.md` |
 | Validation methods, evidence states, and execution authority | `docs/validation.md` |
 | Delivery levels, artifacts, signing, and release operations | `docs/release.md` |
@@ -38,7 +41,9 @@ Each durable fact has one primary location. Other documents link to or briefly i
 | Consequential technical rationale | The applicable active or superseded ADR |
 | Role authority | The Toolkit role definitions and authorization matrix |
 
-When two authoritative documents state the same rule, select one owner and replace the duplicate with a link. A delivery record may summarize the scope it selects, but it must not become a second product specification, validation guide, architecture document, or release policy.
+When two authoritative documents state the same rule, select one owner and replace the duplicate with a link. A delivery record may summarize the scope it selects, but it must not become a second product specification, presentation specification, validation guide, architecture document, or release policy.
+
+Classify a value by what it controls rather than by whether it is numeric. A gesture threshold that changes an action result belongs to the applicable interaction specification. A capacity limit belongs to the applicable product requirement or behavior specification. Font size, weight, line height, spacing, padding, margin, radius, opacity, visible icon size, and other reusable visual geometry belong to the applicable presentation specification. A minimum interaction target or another accessibility boundary belongs to the shared design or component contract that owns that requirement.
 
 ## Current product contract and delivery history
 
@@ -67,8 +72,8 @@ When a delivery record needs to explain a boundary, it should prefer positive se
 | Settings interaction | [`docs/product/surfaces/settings.md`](product/surfaces/settings.md) | [`docs/product/surfaces/settings.zh-CN.md`](product/surfaces/settings.zh-CN.md) | Current facts and rules | Defines current Settings information and behavior |
 | Double-tap lock | [`docs/product/features/double-tap-lock.md`](product/features/double-tap-lock.md) | [`docs/product/features/double-tap-lock.zh-CN.md`](product/features/double-tap-lock.zh-CN.md) | Current facts and rules | Defines the Home gesture, optional accessibility-service boundary, authorization, failure, and disclosure behavior |
 | Privacy and data handling | [`docs/product/features/privacy.md`](product/features/privacy.md) | [`docs/product/features/privacy.zh-CN.md`](product/features/privacy.zh-CN.md) | Current facts and user-visible text | Defines local data handling, backup and deletion boundaries, Privacy copy, contact behavior, and the separate accessibility prominent disclosure |
-| Low-fidelity wireframes | [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) | [`docs/product/low-fidelity-wireframes.zh-CN.md`](product/low-fidelity-wireframes.zh-CN.md) | Current product visualization | Visualizes the current Home, Drawer, application action sheet, and Settings contracts without replacing their normative text |
-| Product design foundations | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | Current facts and rules | Defines current theme, layout, typography, icon, accessibility, and resource principles |
+| Low-fidelity wireframes | [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) | [`docs/product/low-fidelity-wireframes.zh-CN.md`](product/low-fidelity-wireframes.zh-CN.md) | Current product visualization | Explains wireframe notation and visualizes spatial hierarchy, region relationships, and content order without independently defining behavior or exact presentation values |
+| Product design foundations | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | Current facts and rules | Owns shared theme, layout, typography, icon, accessibility, resource principles, and current reusable presentation values |
 | Product glossary | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | Current facts and rules | Defines canonical product terms |
 | Version, artifact, and release governance | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | Current facts and rules | Defines delivery levels, application versions, completed records, APK artifacts, signing continuity, tags, and GitHub Releases |
 | Version-delivery format | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | Project governance | Defines the unified delivery directory, delivery-level selection, format, and migration exception |
@@ -99,6 +104,18 @@ Maintain product information in three distinct responsibilities:
 1. **Product direction:** `overview.md` records durable purpose, principles, capability layers, and long-term boundaries. A future `docs/roadmap.md` may record capability-layer movement from V1 to V2 to V3 to V4 and major project outcomes between those layers. It must remain more macroscopic than version or iteration planning.
 2. **Current product definition:** Requirements Briefs and interaction specifications record current user behavior, state, constraints, and acceptance intent. They describe the current product rather than preserving version-by-version narrative history.
 3. **Change rationale and delivery history:** Product decision records explain consequential scope choices. Iteration and version records describe project progress and implementation evolution without becoming a second copy of the current product definition.
+
+### Behavior, presentation, and visualization
+
+Maintain interface information through three separate responsibilities:
+
+1. **Behavior specifications:** Requirements and the applicable navigation, surface, or feature specification define product logic, state, available actions, click and gesture results, transitions, failure and recovery behavior, persistence effects, capacity rules, and observable acceptance intent. They may name a semantic presentation choice, such as large, medium, or small, when that choice affects product behavior. They do not repeat exact reusable visual values owned by a presentation specification.
+2. **Presentation specifications:** [`docs/product/design-foundations.md`](product/design-foundations.md) owns shared design principles and reusable values. When a component or surface accumulates enough independent presentation detail to require its own maintained source, create `docs/product/presentation/<scope>.md` with real confirmed content and add it to this map. Presentation specifications own exact font sizes, weights, line heights, spacing, padding, margins, visible sizes, radii, borders, opacity, and comparable visual geometry. They do not redefine product state or action results.
+3. **Low-fidelity visualization:** [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) owns notation and reading guidance; the files under `docs/product/wireframes/` visualize hierarchy, relationships, and representative composition. They link to behavior and presentation sources instead of copying their rules or exact values. A wireframe is not an independent product or presentation decision.
+
+When one change affects more than one responsibility, update the owner of each changed fact and update another document only when its own representation actually changes. A behavior-only change does not require presentation or wireframe edits. A token-only change does not require behavior prose edits. A confirmed spatial change updates its presentation source and the affected wireframe, while the behavior specification changes only if product behavior also changes.
+
+The existing product foundation, interaction, design-foundation, low-fidelity, and delivery documents may retain duplicated presentation values until a separately authorized migration consolidates them. Do not rewrite completed delivery history for this purpose. Before that migration is complete, do not add new duplication; when an active current-state document is changed, prefer moving the affected fact toward its designated owner and replacing other current-state copies with links, provided the authorized task includes that migration scope.
 
 ### Interaction specifications
 
@@ -151,6 +168,7 @@ Create one separate iteration contract beside `delivery.md` under `docs/delivery
 - An iteration is a reviewable delivery unit. Its boundary is decided from implementation difficulty, expected time, change breadth, dependencies, technical risk, and validation cost together, not solely from the product hierarchy or a fixed number of features.
 - An iteration may implement all or part of the current product definition, or combine tightly coupled work required to produce one verifiable result. It must not silently introduce scope absent from current product documents.
 - Each contract should state the objective, product-document references, before-and-after behavior where applicable, in-scope work, exclusions, dependencies, risks, affected code areas at a durable level, acceptance conditions, validation requirements, and related durable decisions or assessments.
+- Each new contract must identify the full Git commit of its accepted product-contract baseline and link the applicable product sources at that revision. It selects a bounded delivery subset from those sources instead of copying their behavior or presentation rules.
 - The contract identifies intended technical change areas and delivery consequences at a durable level. The version `delivery.md` records actual implementation evolution and evidence; Git commits and diffs remain authoritative for line-by-line source history.
 
 Iteration contracts define a stable product-delivery boundary. They do not own `Planned`, `In Progress`, `Completed`, or `Cancelled` state, transition dates or bases, actual evidence, commits, tags, final results, or remaining delivery issues. The sibling version `delivery.md` is the single authoritative source for those project-delivery facts. A state transition normally changes only `delivery.md` and its maintained language counterpart; do not modify the iteration contract merely to mirror state.

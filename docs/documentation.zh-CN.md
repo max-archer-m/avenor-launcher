@@ -29,7 +29,10 @@
 | --- | --- |
 | 项目路由和项目特定授权边界 | `AGENTS.md` |
 | 文档位置和维护规则 | `docs/documentation.md` |
-| 产品方向和当前用户行为 | `overview.md`、需求及 `docs/product/` 下的适用文件 |
+| 产品方向、能力边界与跨界面验收意图 | `overview.md` 和适用需求文档 |
+| 当前界面、功能和导航行为 | `docs/product/` 下适用的交互规范 |
+| 共享及组件表现数值 | `docs/product/design-foundations.md` 或适用的组件表现规范 |
+| 空间可视化与结构示例 | `docs/product/low-fidelity-wireframes.md` 和 `docs/product/wireframes/`，作为所链接契约的非规范性视图 |
 | 开发环境和构建入口 | `docs/development.md` |
 | 验证方法、证据状态和执行权限 | `docs/validation.md` |
 | 交付级别、制品、签名和发布操作 | `docs/release.md` |
@@ -38,7 +41,9 @@
 | 重大技术理由 | 对应的 Active 或 Superseded ADR |
 | 角色权限 | Toolkit 角色定义和授权矩阵 |
 
-当两份权威文档陈述同一规则时，应选择一个归属文件，并将另一处重复内容改为链接。交付记录可以概述其选择的范围，但不得成为第二份产品规格、验证指南、架构文档或发布规则。
+当两份权威文档陈述同一规则时，应选择一个归属文件，并将另一处重复内容改为链接。交付记录可以概述其选择的范围，但不得成为第二份产品规格、表现规范、验证指南、架构文档或发布规则。
+
+应根据一个数值控制的事项进行分类，而不是根据它是否为数字分类。会改变操作结果的手势阈值属于适用交互规范；容量上限属于适用产品需求或行为规范；字号、字重、行高、间距、padding、margin、圆角、透明度、可见图标尺寸及其他可复用视觉几何属于适用表现规范；最小交互目标或其他无障碍边界属于负责该要求的共享设计或组件契约。
 
 ## 当前产品契约与交付历史
 
@@ -67,8 +72,8 @@
 | Settings 交互 | [`docs/product/surfaces/settings.md`](product/surfaces/settings.md) | [`docs/product/surfaces/settings.zh-CN.md`](product/surfaces/settings.zh-CN.md) | 当前事实与规则 | 定义当前 Settings 信息与行为 |
 | 双击锁屏 | [`docs/product/features/double-tap-lock.md`](product/features/double-tap-lock.md) | [`docs/product/features/double-tap-lock.zh-CN.md`](product/features/double-tap-lock.zh-CN.md) | 当前事实与规则 | 定义 Home 手势、可选无障碍服务边界、授权、失败与披露行为 |
 | 隐私与数据处理 | [`docs/product/features/privacy.md`](product/features/privacy.md) | [`docs/product/features/privacy.zh-CN.md`](product/features/privacy.zh-CN.md) | 当前事实与用户可见正文 | 定义本地数据处理、备份与删除边界、Privacy 正文、联系行为及独立的无障碍显著披露 |
-| 低保真线框图 | [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) | [`docs/product/low-fidelity-wireframes.zh-CN.md`](product/low-fidelity-wireframes.zh-CN.md) | 当前产品可视化 | 可视化当前 Home、Drawer、应用操作面板与 Settings 契约，但不替代其规范性文字 |
-| 产品设计基础约束 | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | 当前事实与规则 | 定义当前主题、布局、字体、图标、无障碍和资源原则 |
+| 低保真线框图 | [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) | [`docs/product/low-fidelity-wireframes.zh-CN.md`](product/low-fidelity-wireframes.zh-CN.md) | 当前产品可视化 | 说明低保真图记法并可视化空间层级、区域关系和内容顺序，但不独立定义行为或精确表现数值 |
+| 产品设计基础约束 | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | 当前事实与规则 | 负责共享主题、布局、字体、图标、无障碍、资源原则及当前可复用表现数值 |
 | 产品字典 | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | 当前事实与规则 | 定义规范产品术语 |
 | 版本、产物与发布治理 | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | 当前事实与规则 | 定义交付级别、应用版本、已完成记录、APK 产物、签名连续性、tag 与 GitHub Release |
 | 版本交付格式 | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | 项目治理 | 定义统一交付目录、交付级别选择、格式与迁移例外 |
@@ -99,6 +104,18 @@
 1. **产品方向：** `overview.md` 记录持久的目的、原则、能力层级和长期边界。未来的 `docs/roadmap.md` 可以记录从 V1 到 V2、V3、V4 的能力层级演进及其间的重大项目结果，但必须比版本或迭代计划更宏观。
 2. **当前产品定义：** Requirements Brief 和交互规格记录当前用户行为、状态、约束和验收意图。它们描述当前产品，不保留按版本累积的叙事历史。
 3. **变更理由与交付历史：** 产品决定记录解释重要范围取舍；迭代和版本记录描述项目进展与实现演进，但不成为当前产品定义的第二份副本。
+
+### 行为、表现与可视化
+
+界面信息通过三项相互独立的职责维护：
+
+1. **行为规范：** 需求文档以及适用的导航、界面或功能规范负责产品逻辑、状态、可用操作、点击和手势结果、转换、失败与恢复行为、持久化影响、容量规则和可观察验收意图。当大、中、小等语义表现选择会影响产品行为时，可以命名该选择；不得重复表现规范负责的精确可复用视觉数值。
+2. **表现规范：** [`docs/product/design-foundations.md`](product/design-foundations.md) 负责共享设计原则和可复用数值。当一个组件或界面积累了足够独立的表现细节，需要单独维护的权威来源时，使用真实且已确认的内容创建 `docs/product/presentation/<scope>.md`，并将其加入本文档地图。表现规范负责精确字号、字重、行高、间距、padding、margin、可见尺寸、圆角、边框、透明度及类似视觉几何；不得重新定义产品状态或操作结果。
+3. **低保真可视化：** [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) 负责记法和阅读指引；`docs/product/wireframes/` 下的文件可视化层级、关系和代表性构图。它们应链接行为与表现来源，不复制其规则或精确数值。低保真图不是独立的产品或表现决定。
+
+当一个变更影响多项职责时，应更新每项已变化事实的归属文档；只有另一份文档自身的表达确实变化时，才更新该文档。仅行为变化不要求修改表现规范或低保真图；仅 token 变化不要求修改行为文本；已确认的空间变化应更新其表现来源和受影响低保真图，而行为规范只在产品行为同时变化时修改。
+
+在另行授权的迁移完成整合之前，现有产品基础需求、交互、设计基础、低保真和交付文档可以暂时保留重复表现数值。不得因此重写已完成交付历史。在迁移完成前，不得新增重复内容；修改活动的当前状态文档时，应优先将受影响事实移向其指定归属文档，并在其他当前状态副本中改为链接，但前提是已授权任务包含该迁移范围。
 
 ### 交互规格
 
@@ -151,6 +168,7 @@ docs/delivery/<version>/
 - 迭代是可评审的交付单元。其边界由实现难度、预计时间、变更广度、依赖、技术风险和验证成本共同决定，不单纯依据产品层级或固定功能数量。
 - 一个迭代可实现当前产品定义的全部或一部分，也可合并产生一个可验证结果所必需的紧密耦合工作；但不得静默引入当前产品文档中不存在的范围。
 - 每份契约应包含目标、产品文档引用、适用时的变更前后行为、范围、非目标、依赖、风险、持久层级的受影响代码区域、验收条件、验证要求，以及相关持久决定或评估。
+- 每份新契约必须标明其已接受产品契约基线的完整 Git commit，并链接该修订下适用的产品来源。契约从这些来源中选择有界交付子集，不复制其行为或表现规则。
 - 契约在持久层级标识预期技术影响面和交付后果。版本 `delivery.md` 记录实际实现演进和证据；Git commit 和 diff 仍是逐行源码历史的权威来源。
 
 迭代契约定义稳定的产品交付边界，不负责 `Planned`、`In Progress`、`Completed` 或 `Cancelled` 状态、转换日期与依据、实际证据、commit、tag、最终结果或剩余交付问题。同目录的版本 `delivery.md` 是这些项目交付事实的唯一权威来源。状态转换通常只修改 `delivery.md` 及其持续维护的语言对应稿；不得仅为同步状态而修改迭代契约。
