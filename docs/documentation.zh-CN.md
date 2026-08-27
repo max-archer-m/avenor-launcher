@@ -74,6 +74,10 @@
 | 隐私与数据处理 | [`docs/product/features/privacy.md`](product/features/privacy.md) | [`docs/product/features/privacy.zh-CN.md`](product/features/privacy.zh-CN.md) | 当前事实与用户可见正文 | 定义本地数据处理、备份与删除边界、Privacy 正文、联系行为及独立的无障碍显著披露 |
 | 低保真线框图 | [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) | [`docs/product/low-fidelity-wireframes.zh-CN.md`](product/low-fidelity-wireframes.zh-CN.md) | 当前产品可视化 | 说明低保真图记法并可视化空间层级、区域关系和内容顺序，但不独立定义行为或精确表现数值 |
 | 产品设计基础约束 | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | 当前事实与规则 | 负责共享主题、布局、字体、图标、无障碍、资源原则及当前可复用表现数值 |
+| Home 表现 | [`docs/product/presentation/home.md`](product/presentation/home.md) | [`docs/product/presentation/home.zh-CN.md`](product/presentation/home.zh-CN.md) | 当前事实与规则 | 定义 Home 精确布局、字体、组件几何和视觉状态数值，但不重新定义 Home 行为 |
+| Drawer 表现 | [`docs/product/presentation/drawer.md`](product/presentation/drawer.md) | [`docs/product/presentation/drawer.zh-CN.md`](product/presentation/drawer.zh-CN.md) | 当前事实与规则 | 定义 Drawer 精确布局、字体、组件几何和视觉状态数值，但不重新定义 Drawer 行为 |
+| 应用操作面板表现 | [`docs/product/presentation/app-action-sheet.md`](product/presentation/app-action-sheet.md) | [`docs/product/presentation/app-action-sheet.zh-CN.md`](product/presentation/app-action-sheet.zh-CN.md) | 当前事实与规则 | 定义应用操作面板的精确表现数值，但不重新定义其操作 |
+| Settings 表现 | [`docs/product/presentation/settings.md`](product/presentation/settings.md) | [`docs/product/presentation/settings.zh-CN.md`](product/presentation/settings.zh-CN.md) | 当前事实与规则 | 定义 Settings 精确字体与行几何，但不重新定义 Settings 行为 |
 | 产品字典 | [`docs/product/glossary.md`](product/glossary.md) | [`docs/product/glossary.zh-CN.md`](product/glossary.zh-CN.md) | 当前事实与规则 | 定义规范产品术语 |
 | 版本、产物与发布治理 | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | 当前事实与规则 | 定义交付级别、应用版本、已完成记录、APK 产物、签名连续性、tag 与 GitHub Release |
 | 版本交付格式 | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | 项目治理 | 定义统一交付目录、交付级别选择、格式与迁移例外 |
