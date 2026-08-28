@@ -87,7 +87,8 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 ## System surfaces
 
 - Home and Drawer show the system status bar.
-- Home and Drawer request full transparency for their application surface and for the status-bar and navigation-bar regions. They do not draw an Avenor gradient, scrim, blur, or opaque bar background.
+- Home preserves its transparent application surface. Drawer's application background follows its selected background mode and remains outside this navigation contract.
+- Home and Drawer request transparent status-bar and navigation-bar regions and draw edge to edge beneath them. Avenor does not add an independent opaque system-bar background; the applicable Home or Drawer surface treatment remains governed by its presentation specification.
 - Avenor leaves platform and device contrast enforcement at its default behavior. A system-provided translucent protection, including protection used by three-button navigation on applicable Android versions, is not replaced or forcibly disabled by Avenor.
 - The system navigation bar and controls follow the user's current navigation mode. Avenor does not hide them or enter immersive mode.
 - Home, Drawer, Settings, and every action sheet use the dark theme with light foreground elements. Opening a sheet must not switch system status-bar icons to a dark appearance.

@@ -22,11 +22,13 @@ Avenor processes the application entries that Android exposes to it under the cu
 
 When you add a Home favorite, Avenor stores that launchable identity, its favorite-list or favorite bar destination, its order, applicable list-level presentation setting, and the order of its containing list or favorite bar where applicable locally on the device. A temporary edit-mode Undo snapshot may retain the most recently removed favorite, complete vertical list, or complete favorite bar only until its Snackbar is replaced, dismissed, or invalidated by the documented navigation and lifecycle boundaries; it is not retained as undo history. Application inventory and shortcut information that is not part of a saved favorite is processed as needed and is not retained as Avenor-owned application-usage history.
 
+Avenor stores your selected Drawer application size, name placement, items-per-row count, section-anchor presentation, and background mode locally on the device. These display settings are used only to restore the presentation you selected and are not application-usage history.
+
 Avenor also reads current system information needed for its interface and controls, including time, date, system language, default-Launcher state, and whether the optional Avenor accessibility service is enabled and connected. Time and date are not retained as history, and these system states are not used for behavioral analytics.
 
 ### Storage, backup, and deletion
 
-Favorites remain on the device until you remove them or Android clears Avenor's application data. Avenor does not currently provide an in-app clear-all action, export, restoration, cloud synchronization, cloud backup, or device-to-device transfer of its application data. Android cloud backup and device-transfer backup must be disabled for Avenor-owned favorite data under the current product contract.
+Favorites and Drawer display settings remain on the device until you change them or Android clears Avenor's application data. Avenor does not currently provide an in-app clear-all action, export, restoration, cloud synchronization, cloud backup, or device-to-device transfer of its application data. Android cloud backup and device-transfer backup must be disabled for Avenor-owned favorite and display-setting data under the current product contract.
 
 If stored favorite data cannot be read reliably, Avenor preserves the original unreadable data and disables favorite changes rather than silently replacing it with an empty list. You can retry the read. Clearing Avenor's application data through Android system settings or uninstalling Avenor removes its locally stored application data; the current product does not provide recovery afterward.
 

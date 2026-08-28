@@ -21,7 +21,7 @@ Use the owning document for a product decision instead of interpreting the wiref
 | Question | Behavior owner | Exact presentation owner |
 | --- | --- | --- |
 | Home content, editing, drag results, and container lifecycle | [Home interaction](surfaces/home.md) | [Home presentation](presentation/home.md) |
-| Drawer inventory, sorting, selection, index behavior, and settings actions | [Drawer interaction](surfaces/drawer.md) | [Drawer presentation](presentation/drawer.md) |
+| Drawer inventory, search, sorting, selection, index behavior, and settings actions | [Drawer interaction](surfaces/drawer.md) | [Drawer presentation](presentation/drawer.md) |
 | Application action availability, order semantics, and results | [Application action sheet](surfaces/app-action-sheet.md) | [Application action sheet presentation](presentation/app-action-sheet.md) |
 | Settings content, navigation, and results | [Settings interaction](surfaces/settings.md) | [Settings presentation](presentation/settings.md) |
 | Cross-surface transitions and system-return behavior | [Navigation](navigation.md) | Applicable surface presentation specification |
@@ -30,7 +30,7 @@ Use the owning document for a product decision instead of interpreting the wiref
 
 - [Home](wireframes/home.txt) — complete canvas showing content-driven vertical regions, the representative two-list state, and unallocated transparent space. The Home contracts define other valid states.
 - [Home edit mode](wireframes/home-edit-mode.txt) — complete canvas showing editing regions, list controls, add actions, provisional containers, and independent scrolling relationships.
-- [Drawer](wireframes/drawer.txt) — representative Content-state canvas showing the fixed top region, ordinary and multi-selection semantics, list anchors, Settings section, and alphabet index.
+- [Drawer](wireframes/drawer.txt) — representative Content-state canvas showing the fixed search region, ordinary, search, and multi-selection semantics, list anchors, Settings section, and alphabet index.
 - [Application action sheet](wireframes/app-action-sheet.txt) — modal-state canvas showing the blocked background, scrim, and content order.
 - [Settings](wireframes/settings.txt) — complete canvas showing navigation, Launcher status, and product-information regions.
 

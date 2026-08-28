@@ -1,6 +1,6 @@
 +------------------------------------------------------------------------------+
-|                    DRAWER / ORDINARY + MULTI-SELECT                          |
-|  [BACK]             FUTURE SEARCH SLOT                         [MORE]        |
+|                 DRAWER / ORDINARY + SEARCH + MULTI-SELECT                    |
+|  [BACK]        [SEARCH APPS: MAGNIFIER | QUERY | X]            [MORE]        |
 |---------------------------FIXED TOP APP BAR----------------------------------|
 |                                                                              |
 |                                                                              |
@@ -72,14 +72,16 @@
 |                                                                              |
 |                                                           V                  |
 |                                                                              |
-|  MULTI: CANCEL | TARGET | CONFIRM                         W                  |
+|  SEARCH: EMPTY LEFT | CENTERED FIELD | CANCEL            W                   |
+|  MULTI: CANCEL | TARGET | CONFIRM                                            |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                                                           X                  |
 |                                                                              |
-|  MULTI: ORDER SLOT LEFT OF ICON                         Y                    |
-|  ORDINARY: SECTION ANCHORS AND DISPLAY-SETTINGS ENTRY                        |
+|  SEARCH: FILTERED ANCHORS/INDEX; SETTINGS HIDDEN         Y                   |
+|  MULTI: ORDER SLOT LEFT OF ICON                                              |
+|  ORDINARY: SECTION ANCHORS, SETTINGS, AND DISPLAY SETTINGS                   |
 |                                                                              |
 |                                                                              |
 |                                                           Z                  |

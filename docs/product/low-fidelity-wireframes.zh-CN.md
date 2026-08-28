@@ -21,7 +21,7 @@
 | 问题 | 行为责任文档 | 精确表现责任文档 |
 | --- | --- | --- |
 | Home 内容、编辑、拖动结果和容器生命周期 | [Home 交互](surfaces/home.zh-CN.md) | [Home 表现](presentation/home.zh-CN.md) |
-| Drawer 清单、排序、选择、索引行为和设置操作 | [Drawer 交互](surfaces/drawer.zh-CN.md) | [Drawer 表现](presentation/drawer.zh-CN.md) |
+| Drawer 清单、搜索、排序、选择、索引行为和设置操作 | [Drawer 交互](surfaces/drawer.zh-CN.md) | [Drawer 表现](presentation/drawer.zh-CN.md) |
 | 应用操作的可用性、顺序语义和结果 | [应用操作面板](surfaces/app-action-sheet.zh-CN.md) | [应用操作面板表现](presentation/app-action-sheet.zh-CN.md) |
 | Settings 内容、导航和结果 | [Settings 交互](surfaces/settings.zh-CN.md) | [Settings 表现](presentation/settings.zh-CN.md) |
 | 跨界面转换和系统返回行为 | [导航](navigation.zh-CN.md) | 适用界面的表现规范 |
@@ -30,7 +30,7 @@
 
 - [Home](wireframes/home.txt) — 完整画布，表达内容驱动的纵向区域、代表性的双列表状态及未分配透明空间；其他有效状态由 Home 契约定义。
 - [Home 编辑模式](wireframes/home-edit-mode.txt) — 完整画布，表达编辑区域、列表控件、新增操作、临时容器和独立滚动关系。
-- [Drawer](wireframes/drawer.txt) — 代表性 Content 状态画布，表达固定顶部区域、普通与多选语义、列表锚点、Settings 分组和字母索引。
+- [Drawer](wireframes/drawer.txt) — 代表性 Content 状态画布，表达固定搜索区域、普通／搜索／多选语义、列表锚点、Settings 分组和字母索引。
 - [应用操作面板](wireframes/app-action-sheet.txt) — 模态状态画布，表达被阻断背景、遮罩和内容顺序。
 - [Settings](wireframes/settings.txt) — 完整画布，表达导航、Launcher 状态和产品信息区域。
 

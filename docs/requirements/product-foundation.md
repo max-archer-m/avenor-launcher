@@ -72,7 +72,7 @@ The product compatibility boundary requires `minSdk` 31. Current configured `com
 - Favorites: up to two equal-status vertical favorite lists and up to five horizontal favorite bars. A launchable identity can appear in only one destination. Vertical lists persist one large, medium, or small list-level presentation value; new and migrated lists start at medium.
 - Favorite editing: explicit add, remove, move, reorder, resize, confirmation, cancellation, and latest-removal Undo behavior defined by the Home and Drawer contracts.
 - Double-tap lock: an optional, purpose-limited accessibility-service capability for eligible blank Home space. It does not gate independent Launcher paths.
-- Drawer: every launchable entry successfully read from Android-exposed sources, including cloned and work-profile entries when available. An isolated non-current-profile read failure does not block usable entries from other profiles.
+- Drawer: every launchable entry successfully read from Android-exposed sources, including cloned and work-profile entries when available, with ordinary-mode local application-name search and a user-selected Transparent or Frosted-glass background. A fresh configuration defaults to Frosted glass. An isolated non-current-profile read failure does not block usable entries from other profiles.
 - Application actions: application information, applicable Launcher favorite actions, edit entry, platform shortcuts, and uninstall only when the platform can safely address the selected identity.
 - Settings: default-Launcher state and system destination, double-tap-lock disclosure, Privacy, licenses, repository link, and version information as applicable.
 - English and Simplified Chinese resources selected from system locale, with English fallback.
@@ -103,7 +103,7 @@ An additive capability does not enter current scope merely because it can be bui
 | --- | --- |
 | Home content, favorite lifecycle, editing, dragging, and failure behavior | [Home interaction specification](../product/surfaces/home.md) |
 | Home exact layout, typography, geometry, and visual states | [Home presentation specification](../product/presentation/home.md) |
-| Drawer inventory, identity, sorting, selection, index behavior, and states | [Drawer interaction specification](../product/surfaces/drawer.md) |
+| Drawer inventory, identity, search, sorting, selection, index behavior, and states | [Drawer interaction specification](../product/surfaces/drawer.md) |
 | Drawer exact layout, typography, geometry, and visual states | [Drawer presentation specification](../product/presentation/drawer.md) |
 | Application action availability, order, dismissal, and results | [Application action sheet](../product/surfaces/app-action-sheet.md) |
 | Application action sheet exact geometry | [Application action sheet presentation](../product/presentation/app-action-sheet.md) |
@@ -120,7 +120,7 @@ An additive capability does not enter current scope merely because it can be bui
 - Home displays system time and date, locally saved favorites, and launches the selected identity.
 - Favorite identities distinguish primary, cloned, and work-profile entries and are not deduplicated solely by package name.
 - Favorite mutations are explicit, locally persisted, and preserve a valid destination and order without duplication or silent redirection.
-- Drawer presents and launches the reliable inventory available within Avenor's Android role and least-privilege boundary.
+- Drawer presents, locally searches, and launches the reliable inventory available within Avenor's Android role and least-privilege boundary.
 - Inventory refresh, partial-source failure, permanent disappearance, Loading, and Error behavior preserve usable paths and do not convert uncertain data into destructive conclusions.
 - Application actions and Settings open only destinations valid for the selected identity and report defined local failures without corrupting favorite state.
 - Double-tap lock requests the system lock action only after the user enables the applicable accessibility service and performs the defined gesture in an eligible area.
@@ -144,6 +144,7 @@ Minimum acceptable performance, power, memory, and startup-response thresholds a
 - The author can complete the Home–Drawer–Settings loop on the supported device boundary without a network connection.
 - Selecting a visible launchable identity launches the intended application.
 - Drawer does not omit, duplicate, or misidentify entries returned by successfully read Android sources; isolated failed sources may be absent without blocking available Content.
+- Ordinary Drawer search filters the reliable local application inventory by displayed application name without network access, changing the selected arrangement, or introducing a second application order.
 - Private Space identities requiring hidden-profile access remain outside inventory and permission declarations.
 - Favorite identity, destination, order, list size, and container order survive applicable recreation without unexpected loss, duplication, or reassignment.
 - Failed or uncertain reads remain distinguishable from valid empty data and do not overwrite the last reliable favorite state.
@@ -163,11 +164,12 @@ The product lets users maintain Home favorites and use individual Settings entri
 ## Local data boundary
 
 - Durable user-content data consists of stable favorite identity, destination, position, vertical-list size, and favorite-container order. A stable identity has one destination and cannot be duplicated across lists or bars.
+- Durable local configuration also includes the selected Drawer application size, name placement, items-per-row count, section-anchor presentation, and background mode. Each valid change is saved as one complete display-setting state.
 - Primary, cloned, and work-profile identities must remain distinguishable and must not be stored or deduplicated solely by package name.
 - The latest edit-mode removal snapshot is transient Undo state, not durable undo history.
 - Time and date come from the device system and are not retained historically.
 - Avenor does not collect or store accessibility window content or events, notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.
-- Avenor has no account, cloud synchronization, server, cloud backup, or cross-device backup. Android cloud backup and device-to-device transfer backup remain disabled for Avenor-owned favorite data until an author-approved restoration contract exists.
+- Avenor has no account, cloud synchronization, server, cloud backup, or cross-device backup. Android cloud backup and device-to-device transfer backup remain disabled for Avenor-owned favorite and display-setting data until an author-approved restoration contract exists.
 
 ## Dependencies and risks
 

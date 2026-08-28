@@ -8,6 +8,7 @@ This document is the authoritative source for exact Home layout, typography, com
 
 ## Surface and basic information
 
+- Home preserves the wallpaper without any full-screen dim, tint, scrim, glass surface, or blur. Text and monochrome foreground artwork drawn directly over the wallpaper may use one fixed glyph- or artwork-following dark shadow; Home does not sample the wallpaper or vary that treatment by content position, scroll position, or local luminance. Exact shadow color, opacity, offset, and blur radius are `To be decided` through author-device wallpaper calibration.
 - Home applies uniform `8dp` content padding inside `safeDrawing`. Adjacent visible modules use `8dp` spacing.
 - The basic-information module adds no padding. Its time and date rows use `8dp` start and end margins inside the padded boundary, producing `16dp` row boundaries from the corresponding safe edges. The time row adds `8dp` top margin for a final `16dp` top distance. Date text adds another `8dp` start inset and begins `24dp` from the safe start edge while its complete row target remains at `16dp`.
 - The time row is at least `64dp` high and uses `57sp/64sp` bold display text with tabular numerals where supported. The date row is `48dp` high and uses `16sp/24sp` normal text.
@@ -35,6 +36,7 @@ This document is the authoritative source for exact Home layout, typography, com
 - The secondary area uses the complete padded Home width and `8dp` spacing from adjacent content. Populated favorite bars are `56dp` high with `8dp` vertical spacing and no container padding.
 - Each entry uses an `8dp` start inset, `40dp` icon, `8dp` icon-to-name gap, one `16sp/24sp` normal line measured up to `64dp`, and `8dp` trailing inset. Total width is content-measured up to `128dp`; longer labels use end ellipsis. Entries use `8dp` spacing.
 - Each entry uses the light foreground role at `6%` for its background, `12%` for a `1dp` boundary, and a `12dp` corner radius.
+- Each favorite-bar entry clips its press Ripple to the same `12dp` rounded outline as its visible background and boundary. The Ripple must not paint beyond the entry boundary or appear as an unrounded rectangle.
 - An editable favorite bar uses equal `40dp x 56dp` fixed rails. The start rail centers a `24dp x 24dp` error-red remove graphic and the end rail centers a `24dp` reorder handle. Each rail leaves `8dp` on both horizontal sides; `1dp` dividers separate rails from the viewport.
 - Each editable favorite bar uses a transparent interior with a `1dp` light-foreground outline at `12%` opacity and `12dp` radius.
 
