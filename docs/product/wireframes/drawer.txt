@@ -1,96 +1,96 @@
 +------------------------------------------------------------------------------+
 |                    DRAWER / ORDINARY + MULTI-SELECT                          |
-|  [BACK 24/48]       FUTURE SEARCH SLOT                         [MORE]        |
-|-------------------56DP TRANSPARENT TOP APP BAR-------------------------------|
+|  [BACK]             FUTURE SEARCH SLOT                         [MORE]        |
+|---------------------------FIXED TOP APP BAR----------------------------------|
 |                                                                              |
 |                                                                              |
 |                   #                                       #                  |
 |                                                                              |
-|     [40DP ICON]  1PASSWORD                                 A                 |
+|     [ICON]  1PASSWORD                                      A                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                   A                                       B                  |
 |                                                                              |
-|     [40DP ICON]  APP ALPHA                                 C                 |
+|     [ICON]  APP ALPHA                                      C                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|     [40DP ICON]  APP ARCHIVE                               D                 |
+|     [ICON]  APP ARCHIVE                                    D                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                   B                                       E                  |
 |                                                                              |
-|     [40DP ICON]  BROWSER                                   F                 |
+|     [ICON]  BROWSER                                        F                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                   C                                       G                  |
 |                                                                              |
-|     [40DP ICON]  CALENDAR                                  H                 |
+|     [ICON]  CALENDAR                                       H                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|     [40DP ICON]  CAMERA                                    I                 |
+|     [ICON]  CAMERA                                         I                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                   M                                       J                  |
 |                                                                              |
-|     [40DP ICON]  MAPS                                      K                 |
+|     [ICON]  MAPS                                           K                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|     [40DP ICON]  MUSIC                                     L                 |
+|     [ICON]  MUSIC                                          L                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                   P                                       M                  |
 |                                                                              |
-|     [40DP ICON]  PHOTOS                                    N                 |
+|     [ICON]  PHOTOS                                         N                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                   S                                       O                  |
 |                                                                              |
-|     [40DP ICON]  SYSTEM TOOL                               P                 |
+|     [ICON]  SYSTEM TOOL                                    P                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                   W                                       R                  |
 |                                                                              |
-|     [40DP ICON]  WORK APP                                  S                 |
+|     [ICON]  WORK APP                                       S                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                   Z                                       T                  |
 |                                                                              |
-|     [40DP ICON]  ZETA                                      U                 |
+|     [ICON]  ZETA                                           U                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                                                           V                  |
 |                                                                              |
-|  MULTI: CANCEL | TARGET | CONFIRM; NO SETTINGS            W                  |
+|  MULTI: CANCEL | TARGET | CONFIRM                         W                  |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                                                           X                  |
 |                                                                              |
-|  MULTI: ORDER SLOT LEFT OF ICON; CONFIRM ALONE SAVES      Y                  |
-|  ORDINARY: ANCHORS SCROLL; DISPLAY SETTINGS VIA MORE                         |
+|  MULTI: ORDER SLOT LEFT OF ICON                         Y                    |
+|  ORDINARY: SECTION ANCHORS AND DISPLAY-SETTINGS ENTRY                        |
 |                                                                              |
 |                                                                              |
 |                                                           Z                  |
 |                                                                              |
-|                   SETTINGS                          [11DP GEAR / 20DP SLOT]  |
+|                   SETTINGS                          [INDEX GEAR]             |
 |                                                                              |
 |     [SETTINGS GEAR]  SETTINGS                                                |
 |                                                                              |
-|  INDEX GEAR JUMPS HERE; ONLY THE ROW OPENS SETTINGS                          |
+|  INDEX GEAR AND SETTINGS ROW SHARE THIS SECTION                              |
 |                                                                              |
-|  INDEX DOWN DIRECT; NEW TOKEN SMOOTH-SCROLLS; NO SNAP ON RELEASE             |
+|  INDEX REMAINS A SEPARATE NAVIGATION REGION                                  |
 |                                                                              |
 |                               BOTTOM SAFE AREA                               |
 +------------------------------------------------------------------------------+

@@ -62,7 +62,7 @@
 - 分发边界：为作者日常使用维护 GitHub 项目，不进行应用商店提交、GitHub Release APK、网站 APK 或其他公开分发。
 - 商店 target API、审核和数据披露要求不是当前交付门槛；公开分发进入范围时再复审。
 
-根据 [Android 17 SDK 设置指南](https://developer.android.com/about/versions/17/setup-sdk)，Android 17 对应 API 37。根据 [Google Play target API 要求](https://developer.android.com/google/play/requirements/target-sdk)，从 2026 年 8 月 31 日起，新应用与更新至少需要以 Android 16（API 36）为目标；该要求约束 `targetSdk`，不约束 `minSdk`。Avenor 当前不发布到 Google Play，因此这只是未来兼容性参考。兼容边界要求 `minSdk` 31。对于 `1.0.0`，技术评估需要验证 `targetSdk` 36，并使用最新稳定且兼容的 `compileSdk`；当前候选为 API 37，如果仍需预览版或候选版工具，则保留 API 36。选定值必须在构建配置中实现并验证。复核日期：2026-08-09。
+产品兼容边界要求 `minSdk` 31。当前配置的 `compileSdk`、`targetSdk` 和版本数值由[开发指南](../development.zh-CN.md)维护；公开分发的 target API 门禁由[发布治理](../release.zh-CN.md)维护。当前产品需求不保留历史版本的 SDK 选择指令。复核日期：2026-08-28。
 
 ## 当前产品范围
 
@@ -137,7 +137,7 @@
 - 当前数据保持本地，不引入账户、分析、服务器或云同步。
 - 验证结论必须注明实际证据，并遵循[验证指南](../validation.zh-CN.md)。
 
-最低可接受性能、功耗、内存和启动响应水平仍需在质量基线中定义，不作为仅完成本产品基础文档的条件。
+最低可接受性能、功耗、内存和启动响应阈值为 `To be decided`。当前没有独立质量基线文档建立数值门禁；除非适用交付明确选择并提供相应证据，否则这些阈值不是产品级完成条件。
 
 ## 产品级验收条件
 

@@ -21,14 +21,14 @@ See the [project overview](overview.md) for confirmed intent, boundaries, and un
 - [Validation guide](docs/validation.md)
 - [Product foundation requirements](docs/requirements/product-foundation.md)
 - [Version, artifact, and release governance](docs/release.md)
-- [1.0.0 completed delivery](docs/delivery/1.0.0/delivery.md)
+- [Completed delivery records, currently 1.0.0 through 1.3.0](docs/documentation.md#current-authoritative-documents)
 - [Version delivery documents](docs/versions/version-delivery-format.md)
 - [Iteration record format](docs/iterations/iteration-record-format.md)
 - [Agent instructions](AGENTS.md)
 - [Simplified Chinese agent instructions](AGENTS.zh-CN.md)
 - [License](LICENSE)
 
-System architecture, security, and privacy documentation have not yet been established. Their planned locations and creation conditions are recorded in the [documentation map](docs/documentation.md). The development and validation guides record the current minimum project baseline.
+Specialist system-architecture, security, and privacy-assessment documents have not yet been established. Their planned locations and creation conditions are recorded in the [documentation map](docs/documentation.md). The current product Privacy and data-handling contract is already defined in [Privacy and data handling](docs/product/features/privacy.md); the development, validation, and release guides record the applicable project baselines.
 
 ## License
 

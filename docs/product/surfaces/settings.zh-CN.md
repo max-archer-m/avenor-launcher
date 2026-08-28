@@ -5,6 +5,7 @@
 ## 入口与返回
 
 - 页面标题为 `设置`。
+- 固定顶部应用栏展示页面标题和一个可见返回控件。点击该控件与系统 Back 结果相同；两条路径都不会打开其他目标，也不会重置 Drawer 位置。
 - 只有点击 Drawer 列表末尾固定的设置条目才进入 Settings；选中字母索引中的齿轮锚点只导航到该条目所在分组。
 - Back 返回 Drawer，并在同一进程内保留此前列表位置。
 - Settings 使用不透明的标准 Material 3 dark color scheme。它与 Home、Drawer 的区别是会绘制 Material 表面背景，不透出应用下方的系统背景。
@@ -31,7 +32,7 @@
 
 - **隐私：** 打开 [privacy.zh-CN.md](../features/privacy.zh-CN.md) 定义的本地隐私 Bottom Sheet。
 - **Avenor License：** 打开本地 Avenor License Bottom Sheet；英文统一使用 `License`。
-- **第三方 License：** 实际依赖形成并可被盘点后，作为独立入口展示，并打开独立的本地可滚动内容。
+- **第三方 License：** 当前依赖集合是否适用该入口为 `To be decided`，需要先完成完整依赖与许可证盘点，并在盘点需要时取得专业复核。项目作者接受盘点结果和准确的本地离线可读通知正文前，该入口保持不显示。入口缺失不表示不存在第三方义务。
 - **项目仓库：** 通过隐式系统浏览器调用打开已配置的项目仓库链接。
 - **版本信息：** 使用 `v<版本名称>(<versionCode>)` 格式，例如 `v1.22.1(34)`；不可点击，也不支持复制。
 
@@ -50,7 +51,7 @@
 
 ## License 呈现
 
-- Avenor License 与存在时的第三方 License 是两个独立 Settings 入口。
+- Avenor License 与适用时经过作者接受的第三方 License 是两个独立 Settings 入口。
 - 两者均打开深色、本地且可离线阅读的内容；长内容可以纵向滚动。
 - 模态关闭方式和 Settings 位置恢复行为与隐私 Bottom Sheet 一致。
 

@@ -62,7 +62,7 @@ The current scope covers utility, not mass-market suitability, extensive customi
 - Distribution boundary: maintain the GitHub project for the author's daily use, with no application-store submission, GitHub Release APK, website APK, or other public distribution.
 - Store target-API, review, and data-disclosure requirements are not current delivery gates; review them if public distribution enters scope.
 
-Android 17 corresponds to API 37 according to the [Android 17 SDK setup guide](https://developer.android.com/about/versions/17/setup-sdk). Starting August 31, 2026, Google Play requires new applications and updates to target at least Android 16 (API 36), according to the [Google Play target API requirement](https://developer.android.com/google/play/requirements/target-sdk); this constrains `targetSdk`, not `minSdk`. Because Avenor does not currently publish to Google Play, this is a future compatibility reference. The compatibility boundary requires `minSdk` 31. For `1.0.0`, the technical assessment must validate `targetSdk` 36 and use the latest stable compatible `compileSdk`; API 37 is the current candidate, with API 36 retained if API 37 still requires preview or release-candidate tooling. Selected values must be implemented and verified in build configuration. Reviewed: 2026-08-09.
+The product compatibility boundary requires `minSdk` 31. Current configured `compileSdk`, `targetSdk`, and version values are maintained in the [development guide](../development.md); public-distribution target-API gates are maintained in [release governance](../release.md). This current product requirement does not preserve a historical version's SDK-selection instructions. Reviewed: 2026-08-28.
 
 ## Current product scope
 
@@ -137,7 +137,7 @@ Detailed interaction outcomes and exact presentation values are acceptance requi
 - Current data remains local; no account, analytics, server, or cloud synchronization is introduced.
 - Validation claims must identify actual evidence and follow [the validation guide](../validation.md).
 
-Minimum acceptable performance, power, memory, and startup-response levels remain to be defined in a quality baseline and are not completion conditions for this foundation document alone.
+Minimum acceptable performance, power, memory, and startup-response thresholds are `To be decided`. No separate quality-baseline document currently establishes numeric gates, so these thresholds are not product-level completion conditions unless an applicable delivery explicitly selects and evidences them.
 
 ## Product-level acceptance criteria
 

@@ -55,17 +55,9 @@ These labels describe capability direction rather than semantic software version
 
 ## Current product scope
 
-The current product contract defines a minimum daily-use utility loop: Home, Drawer, application launching, and the necessary Settings. Home uses content-driven vertical sizing on one non-pageable, non-collapsible surface: basic information wraps its required content, and the favorite-list area grows up to the remaining safe height before overflowing inside a list. The area currently contains at most two equal-status vertical lists: one list uses full width and two divide available width equally. Each list has a large, medium, or small list-level display size, with new lists defaulting to medium; a list is deleted when it loses its final favorite. A conditional secondary favorites area occupies no space without content and may contain up to five user-defined horizontal favorite bars below the favorite-list area. Every saved favorite has one destination across these vertical lists and favorite bars. An optional author-required double tap on eligible basic-information blank space locks the screen only after the user explicitly enables Avenor's purpose-limited accessibility service; this authorization is never required for independent Launcher paths. Drawer uses a single-list presentation and includes every launchable entry successfully read from the sources Android exposes, including cloned application entries when the platform exposes and Avenor successfully reads them. An isolated non-current-profile read failure does not block entries already available from other profiles. Its core tasks must remain fully local and offline. Widgets, folders, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development are outside the current product scope.
+The current product contract defines a local, offline-capable daily-use utility loop across Home, Drawer, application launching, and necessary Settings. It provides direct favorite management, platform-bounded application discovery, and an optional purpose-limited double-tap lock capability without making that accessibility authorization a condition for independent Launcher paths. Widgets, folder-like grouping, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development remain outside the current product scope.
 
-The detailed boundary and evidence are recorded in the [product foundation requirements](docs/requirements/product-foundation.md). The following remain unresolved:
-
-- Required Android roles, permissions, background capabilities, or package visibility
-- Analytics, crash reporting, payment, or other third-party services
-- Commercial model, which is intentionally deferred
-
-In particular, this overview does not place `QUERY_ALL_PACKAGES` or any other sensitive capability in the product scope. The product requires discovery of launchable entries, not unrestricted access to installed-package data. The implementation must use the smallest Android visibility scope that satisfies the current user journey.
-
-The current product does not support Android Private Space. Avenor does not declare `ACCESS_HIDDEN_PROFILES`, actively access or display Private Space entries, or provide a Private Space container or controls for visibility, locking, unlocking, favorites, or state restoration. “Every launchable entry” means only entries Android normally exposes within Avenor's current role and least-privilege boundary. Ordinary, work-profile, and cloned entries that the platform exposes without hidden-profile access remain governed by the current product contract. Future Private Space support is a separate product capability requiring a new author decision and renewed interaction, permission, privacy, compatibility, and validation review.
+The [product foundation requirements](docs/requirements/product-foundation.md) own the detailed current scope, platform and delivery boundary, product-level acceptance intent, dependencies, and open product questions. Applicable interaction specifications own surface-specific behavior; in particular, the [Drawer contract](docs/product/surfaces/drawer.md) owns application visibility, profile, and Private Space behavior. This overview does not create a second current-scope checklist.
 
 ## Additive requirements
 
@@ -98,4 +90,4 @@ AI is expected to perform a substantial share of project execution under human r
 - Documentation map and governance: [docs/documentation.md](docs/documentation.md)
 - License: [LICENSE](LICENSE)
 
-Architecture, development, validation, security, privacy, and release documentation will be established as their inputs are confirmed. Planned document locations must not be treated as completed evidence.
+The current development, validation, release, and product Privacy contracts are established through the [documentation map](docs/documentation.md). Specialist system-architecture, security, and privacy-assessment documents remain unestablished until their creation conditions have real inputs; a planned path is not completed evidence.

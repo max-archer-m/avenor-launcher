@@ -37,10 +37,10 @@
 |  SYSTEM SHORTCUTS                                                            |
 |                                                                              |
 |                                                                              |
-|  [24DP ICON]  SHORTCUT ONE                                                   |
+|  [ICON]  SHORTCUT ONE                                                        |
 |                                                                              |
 |                                                                              |
-|  [24DP ICON]  SHORTCUT TWO                                                   |
+|  [ICON]  SHORTCUT TWO                                                        |
 |                                                                              |
 |                                                                              |
 |                                                                              |
@@ -51,7 +51,7 @@
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  [24DP ICON]    [24DP ICON]    [24DP ICON]                                   |
+|  [ICON]         [ICON]         [ICON]                                        |
 |                                                                              |
 |  REMOVE         EDIT           UNINSTALL                                     |
 |                                                                              |

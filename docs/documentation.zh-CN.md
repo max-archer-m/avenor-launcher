@@ -29,7 +29,8 @@
 | --- | --- |
 | 项目路由和项目特定授权边界 | `AGENTS.md` |
 | 文档位置和维护规则 | `docs/documentation.md` |
-| 产品方向、能力边界与跨界面验收意图 | `overview.md` 和适用需求文档 |
+| 持久产品目的、原则、能力层级与长期边界 | `overview.md` |
+| 当前产品范围、跨功能需求与产品级验收意图 | 适用需求文档，当前为 `docs/requirements/product-foundation.md` |
 | 当前界面、功能和导航行为 | `docs/product/` 下适用的交互规范 |
 | 共享及组件表现数值 | `docs/product/design-foundations.md` 或适用的组件表现规范 |
 | 空间可视化与结构示例 | `docs/product/low-fidelity-wireframes.md` 和 `docs/product/wireframes/`，作为所链接契约的非规范性视图 |
@@ -64,15 +65,15 @@
 | 开发指南 | [`docs/development.md`](development.md) | [`docs/development.zh-CN.md`](development.zh-CN.md) | 当前事实与规则 | 定义当前开发环境、项目配置以及构建或运行入口 |
 | 验证指南 | [`docs/validation.md`](validation.md) | [`docs/validation.zh-CN.md`](validation.zh-CN.md) | 当前事实与规则 | 定义可用检查、执行权限、人工验证、证据和结果报告 |
 | 产品基础需求 | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | 当前事实与规则 | 记录产品问题、作者场景、当前范围、验收意图和开放产品问题 |
-| 产品决策与范围变更 | [`docs/product-decisions.md`](product-decisions.md) | [`docs/product-decisions.zh-CN.md`](product-decisions.zh-CN.md) | 项目治理与决策理由 | 定义决策权，并在启用时记录已经确认的重大产品选择 |
+| 产品决策与范围变更 | [`docs/product-decisions.md`](product-decisions.md) | [`docs/product-decisions.zh-CN.md`](product-decisions.zh-CN.md) | 决策理由 | 定义决策权，并在启用时记录已经确认的重大产品选择 |
 | 产品导航 | [`docs/product/navigation.md`](product/navigation.md) | [`docs/product/navigation.zh-CN.md`](product/navigation.zh-CN.md) | 当前事实与规则 | 定义界面层级、进入、退出、Back、恢复和公共过渡 |
 | Home 交互 | [`docs/product/surfaces/home.md`](product/surfaces/home.md) | [`docs/product/surfaces/home.zh-CN.md`](product/surfaces/home.zh-CN.md) | 当前事实与规则 | 定义 Home 信息、收藏、滚动、启动行为和编辑模式 |
 | Drawer 交互 | [`docs/product/surfaces/drawer.md`](product/surfaces/drawer.md) | [`docs/product/surfaces/drawer.zh-CN.md`](product/surfaces/drawer.zh-CN.md) | 当前事实与规则 | 定义应用清单、分组、排序、字母索引和实时更新 |
 | 应用操作面板 | [`docs/product/surfaces/app-action-sheet.md`](product/surfaces/app-action-sheet.md) | [`docs/product/surfaces/app-action-sheet.zh-CN.md`](product/surfaces/app-action-sheet.zh-CN.md) | 当前事实与规则 | 定义模态应用快捷操作和启动器操作 |
 | Settings 交互 | [`docs/product/surfaces/settings.md`](product/surfaces/settings.md) | [`docs/product/surfaces/settings.zh-CN.md`](product/surfaces/settings.zh-CN.md) | 当前事实与规则 | 定义当前 Settings 信息与行为 |
 | 双击锁屏 | [`docs/product/features/double-tap-lock.md`](product/features/double-tap-lock.md) | [`docs/product/features/double-tap-lock.zh-CN.md`](product/features/double-tap-lock.zh-CN.md) | 当前事实与规则 | 定义 Home 手势、可选无障碍服务边界、授权、失败与披露行为 |
-| 隐私与数据处理 | [`docs/product/features/privacy.md`](product/features/privacy.md) | [`docs/product/features/privacy.zh-CN.md`](product/features/privacy.zh-CN.md) | 当前事实与用户可见正文 | 定义本地数据处理、备份与删除边界、Privacy 正文、联系行为及独立的无障碍显著披露 |
-| 低保真线框图 | [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) | [`docs/product/low-fidelity-wireframes.zh-CN.md`](product/low-fidelity-wireframes.zh-CN.md) | 当前产品可视化 | 说明低保真图记法并可视化空间层级、区域关系和内容顺序，但不独立定义行为或精确表现数值 |
+| 隐私与数据处理 | [`docs/product/features/privacy.md`](product/features/privacy.md) | [`docs/product/features/privacy.zh-CN.md`](product/features/privacy.zh-CN.md) | 当前事实与规则 | 定义本地数据处理、备份与删除边界、Privacy 正文、联系行为及独立的无障碍显著披露 |
+| 低保真线框图 | [`docs/product/low-fidelity-wireframes.md`](product/low-fidelity-wireframes.md) | [`docs/product/low-fidelity-wireframes.zh-CN.md`](product/low-fidelity-wireframes.zh-CN.md) | 当前事实与规则 | 说明低保真图记法并可视化空间层级、区域关系和内容顺序，但不独立定义行为或精确表现数值 |
 | 产品设计基础约束 | [`docs/product/design-foundations.md`](product/design-foundations.md) | [`docs/product/design-foundations.zh-CN.md`](product/design-foundations.zh-CN.md) | 当前事实与规则 | 负责共享主题、布局、字体、图标、无障碍、资源原则及当前可复用表现数值 |
 | Home 表现 | [`docs/product/presentation/home.md`](product/presentation/home.md) | [`docs/product/presentation/home.zh-CN.md`](product/presentation/home.zh-CN.md) | 当前事实与规则 | 定义 Home 精确布局、字体、组件几何和视觉状态数值，但不重新定义 Home 行为 |
 | Drawer 表现 | [`docs/product/presentation/drawer.md`](product/presentation/drawer.md) | [`docs/product/presentation/drawer.zh-CN.md`](product/presentation/drawer.zh-CN.md) | 当前事实与规则 | 定义 Drawer 精确布局、字体、组件几何和视觉状态数值，但不重新定义 Drawer 行为 |
@@ -82,13 +83,18 @@
 | 版本、产物与发布治理 | [`docs/release.md`](release.md) | [`docs/release.zh-CN.md`](release.zh-CN.md) | 当前事实与规则 | 定义交付级别、应用版本、已完成记录、APK 产物、签名连续性、tag 与 GitHub Release |
 | 版本交付格式 | [`docs/versions/version-delivery-format.md`](versions/version-delivery-format.md) | [`docs/versions/version-delivery-format.zh-CN.md`](versions/version-delivery-format.zh-CN.md) | 项目治理 | 定义统一交付目录、交付级别选择、格式与迁移例外 |
 | 迭代契约格式 | [`docs/iterations/iteration-record-format.md`](iterations/iteration-record-format.md) | [`docs/iterations/iteration-record-format.zh-CN.md`](iterations/iteration-record-format.zh-CN.md) | 项目治理 | 定义迭代命名、必需契约章节、验收边界与历史保护 |
-| 1.0.0 已完成交付 | [`docs/delivery/1.0.0/delivery.md`](delivery/1.0.0/delivery.md) | [`docs/delivery/1.0.0/delivery.zh-CN.md`](delivery/1.0.0/delivery.zh-CN.md) | 交付历史 | 记录已完成的作者日常使用基线、纳入迭代、证据和已知缺口 |
-| 1.1.0 已完成交付 | [`docs/delivery/1.1.0/delivery.md`](delivery/1.1.0/delivery.md) | [`docs/delivery/1.1.0/delivery.zh-CN.md`](delivery/1.1.0/delivery.zh-CN.md) | 交付历史 | 记录已完成的作者日常使用基线，包括全宽主收藏编辑、应用快捷操作、基础 Settings、可选双击锁屏、静态名称清理和版本收尾 |
-| 1.2.0 已完成交付 | [`docs/delivery/1.2.0/delivery.md`](delivery/1.2.0/delivery.md) | [`docs/delivery/1.2.0/delivery.zh-CN.md`](delivery/1.2.0/delivery.zh-CN.md) | 交付历史 | 记录已关闭的迭代 12–14 边界、版本标识、可用产物证据、验证缺口和作者处置 |
+| 1.0.0 已完成交付 | [`docs/delivery/1.0.0/delivery.md`](delivery/1.0.0/delivery.md) | [`docs/delivery/1.0.0/delivery.zh-CN.md`](delivery/1.0.0/delivery.zh-CN.md) | 交付记录 | 记录已完成的作者日常使用基线、纳入迭代、证据和已知缺口 |
+| 1.1.0 已完成交付 | [`docs/delivery/1.1.0/delivery.md`](delivery/1.1.0/delivery.md) | [`docs/delivery/1.1.0/delivery.zh-CN.md`](delivery/1.1.0/delivery.zh-CN.md) | 交付记录 | 记录已完成的作者日常使用基线，包括全宽主收藏编辑、应用快捷操作、基础 Settings、可选双击锁屏、静态名称清理和版本收尾 |
+| 1.2.0 已完成交付 | [`docs/delivery/1.2.0/delivery.md`](delivery/1.2.0/delivery.md) | [`docs/delivery/1.2.0/delivery.zh-CN.md`](delivery/1.2.0/delivery.zh-CN.md) | 交付记录 | 记录已关闭的迭代 12–14 边界、版本标识、可用产物证据、验证缺口和作者处置 |
+| 1.3.0 已完成交付 | [`docs/delivery/1.3.0/delivery.md`](delivery/1.3.0/delivery.md) | [`docs/delivery/1.3.0/delivery.zh-CN.md`](delivery/1.3.0/delivery.zh-CN.md) | 交付记录 | 记录已完成的统一收藏模型交付、纳入的迭代 15–21、证据、已知观察和作者处置 |
 | 架构决定 | [`docs/decisions/`](decisions/) | - | 决策理由 | 记录重大、已实现且已接受的架构决定；只有 Active ADR 才建立其所述当前架构边界 |
-| 许可证 | [`LICENSE`](../LICENSE) | - | 法律文件 | 包含 Apache License 2.0 原文 |
+| 许可证 | [`LICENSE`](../LICENSE) | - | - | 包含 Apache License 2.0 原文 |
 
-当前活跃架构决定是 [ADR-0001](decisions/0001-establish-replaceable-launcher-icon-rendering.md)、[ADR-0002](decisions/0002-use-versioned-atomic-file-for-favorites.md) 和 [ADR-0003](decisions/0003-model-profile-completeness-for-favorite-reconciliation.md)。
+当前活跃架构决定是
+[ADR-0001](decisions/0001-establish-replaceable-launcher-icon-rendering.md)、
+[ADR-0002](decisions/0002-use-versioned-atomic-file-for-favorites.md)、
+[ADR-0003](decisions/0003-model-profile-completeness-for-favorite-reconciliation.md) 和
+[ADR-0004](decisions/0004-purpose-limited-accessibility-service-for-double-tap-lock.md)。
 
 ## 规划中的权威位置
 
@@ -98,8 +104,8 @@
 | --- | --- | --- | --- |
 | `docs/architecture.md` | 系统边界、组件、依赖、数据流和技术方向 | 技术栈或当前产品定义需要形成架构结论 | 默认英文；存在持续跨语言阅读需求时补充中文版本 |
 | `docs/security.md` | 安全模型、威胁、控制措施和响应流程 | 架构、权限、数据流或发行方式足以支持安全分析 | 默认英文；专业结论须复核，按需翻译 |
-| `docs/privacy.md` | 数据清单、处理目的、保留方式和用户权利 | 数据、权限、地区或第三方处理行为得到确认 | 默认英文；专业结论须复核，面向用户的版本按发行要求提供翻译 |
-| `CHANGELOG.md` | 用户可感知的版本变化 | 首个用户可感知版本或变更形成 | 英文公共语义源；按实际受众决定是否提供中文版本 |
+| `docs/privacy.md` | 对数据清单、处理目的、保留方式和用户权利进行专业隐私评估；不同于当前产品 Privacy 契约 | 已确认的数据、权限、地区、分发或第三方处理需要超出 [`docs/product/features/privacy.zh-CN.md`](product/features/privacy.zh-CN.md) 的分析 | 默认英文；专业结论须复核，面向用户的版本按发行要求提供翻译 |
+| `CHANGELOG.md` | 面向外部仓库或发布受众的简明用户可感知变更时间线 | 公开或面向仓库的发布需要一份独立于受保护交付记录的摘要 | 英文公共语义源；按实际受众决定是否提供中文版本 |
 
 ## 产品文档职责
 
@@ -119,7 +125,7 @@
 
 当一个变更影响多项职责时，应更新每项已变化事实的归属文档；只有另一份文档自身的表达确实变化时，才更新该文档。仅行为变化不要求修改表现规范或低保真图；仅 token 变化不要求修改行为文本；已确认的空间变化应更新其表现来源和受影响低保真图，而行为规范只在产品行为同时变化时修改。
 
-在另行授权的迁移完成整合之前，现有产品基础需求、交互、设计基础、低保真和交付文档可以暂时保留重复表现数值。不得因此重写已完成交付历史。在迁移完成前，不得新增重复内容；修改活动的当前状态文档时，应优先将受影响事实移向其指定归属文档，并在其他当前状态副本中改为链接，但前提是已授权任务包含该迁移范围。
+已完成交付历史可以保留当时历史边界中的数值，不得仅为了匹配当前契约而改写。活动的当前状态文档不享有该例外：重复事实应移入指定归属文档，其他当前状态副本改为链接或简短的非规范性上下文。
 
 ### 交互规格
 

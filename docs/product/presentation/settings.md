@@ -6,6 +6,12 @@
 
 This document owns exact Settings typography and row geometry. [Settings behavior](../surfaces/settings.md) owns page content, navigation, and action results.
 
+## Top app bar
+
+- The fixed top app bar is at least `56dp` high and uses `16dp` horizontal padding.
+- Its visible Back artwork uses the shared `24dp` functional-icon token in a standard `48dp x 48dp` icon-button target with a localized accessibility name.
+- The title uses Material 3 `titleLarge` and `onSurface`. A full-width divider using `onSurfaceVariant` separates the app bar from the scrolling item list.
+
 ## Primary items
 
 - Primary titles use Material 3 `titleMedium`: `16sp/24sp`, medium weight, and `onSurface`.

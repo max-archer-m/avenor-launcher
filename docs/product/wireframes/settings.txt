@@ -1,19 +1,19 @@
 +------------------------------------------------------------------------------+
 |                           SETTINGS / LOW FIDELITY                            |
 |                                                                              |
-|  [BACK / 24DP]  SETTINGS                                                     |
+|  [BACK]  SETTINGS                                                            |
 |                                                                              |
 |------------------------------------------------------------------------------|
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  DEFAULT HOME APPLICATION                                                    |
+|  DEFAULT HOME APPLICATION                                      >             |
+|  CURRENT DEFAULT-LAUNCHER STATE                                              |
 |                                                                              |
 |                                                                              |
-|  [40DP STATUS ICON]  CURRENT DEFAULT STATUS                                  |
 |                                                                              |
 |                                                                              |
-|                      OPEN SYSTEM HOME SETTINGS       >                       |
+|                                                                              |
 |                                                                              |
 |                                                                              |
 |  DOUBLE-TAP TO LOCK                                  [OFF]  >                |
@@ -22,29 +22,29 @@
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  PRODUCT INFORMATION                                                         |
+|  ABOUT                                                                       |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  [40DP ICON]  PRIVACY                                  >                     |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|  [40DP ICON]  LICENSE                                  >                     |
+|                         PRIVACY                                              |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  [40DP ICON]  APPLICATION VERSION                                            |
+|                     AVENOR LICENSE                                           |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  [40DP ICON]  BASIC INFORMATION                        >                     |
+|                 PROJECT REPOSITORY                                           |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                 APPLICATION VERSION                                          |
 |                                                                              |
 |                                                                              |
 |                                                                              |
@@ -55,24 +55,7 @@
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  USER-VISIBLE TEXT FOLLOWS SYSTEM LOCALE                                     |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|  ENGLISH AND SIMPLIFIED CHINESE RESOURCES                                    |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|  STANDARD DARK THEME BACKGROUND                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|  ROWS USE RIPPLE PRESS FEEDBACK                                              |
+|  REMAINING SCROLLABLE CONTENT SPACE                                          |
 |                                                                              |
 |                                                                              |
 |                                                                              |
@@ -80,7 +63,24 @@
 |                                                                              |
 |                                                                              |
 |                                                                              |
-|  ADDITIONAL SETTINGS ARE NOT IMPLIED                                         |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|  NO ADDITIONAL ROWS IN THIS REPRESENTATIVE STATE                             |
 |                                                                              |
 |                                                                              |
 |                                                                              |

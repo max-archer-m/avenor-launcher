@@ -21,14 +21,14 @@ Avenor Launcher 的目标是作为 Android 设备的默认主屏幕应用。产�
 - [验证指南](docs/validation.zh-CN.md)
 - [产品基础需求](docs/requirements/product-foundation.zh-CN.md)
 - [版本、产物与发布治理](docs/release.zh-CN.md)
-- [1.0.0 已完成交付](docs/delivery/1.0.0/delivery.zh-CN.md)
+- [已完成交付记录，当前为 1.0.0 至 1.3.0](docs/documentation.zh-CN.md#当前权威文档)
 - [版本交付文档](docs/versions/version-delivery-format.zh-CN.md)
 - [迭代记录格式](docs/iterations/iteration-record-format.zh-CN.md)
 - [Agent 指令](AGENTS.zh-CN.md)
 - [英文 Agent 指令](AGENTS.md)
 - [许可证](LICENSE)
 
-系统架构、安全和隐私文档尚未建立，其规划位置和创建条件见[文档地图](docs/documentation.zh-CN.md)。开发和验证指南记录当前最低项目基线。
+专业系统架构、安全和隐私评估文档尚未建立，其规划位置和创建条件见[文档地图](docs/documentation.zh-CN.md)。当前产品的 Privacy 与数据处理契约已由[隐私与数据处理](docs/product/features/privacy.zh-CN.md)定义；开发、验证和发布指南记录适用的项目基线。
 
 ## 许可证
 

@@ -5,6 +5,7 @@
 ## Entry and return
 
 - The page title is `Settings`.
+- A fixed top app bar displays the page title and one visible Back control. Selecting that control has the same result as system Back; neither path opens another destination or resets Drawer position.
 - Settings opens only when the user selects the fixed Settings row at the end of the Drawer list. Selecting the gear anchor in the AlphabetIndex only navigates to that row's section.
 - Back returns to Drawer and preserves its prior list position during the same process.
 - Settings uses an opaque standard Material 3 dark color scheme. Unlike Home and Drawer, it paints its Material surface background rather than exposing the system background beneath the application.
@@ -31,7 +32,7 @@
 
 - **Privacy:** Opens the local Privacy Bottom Sheet defined by [privacy.md](../features/privacy.md).
 - **Avenor License:** Opens the local Avenor License Bottom Sheet; the English label uses `License`.
-- **Third-party License:** Appears as a separate entry after actual dependencies exist and can be inventoried, and opens its own local scrollable presentation.
+- **Third-party License:** Its applicability to the current dependency set is `To be decided` pending a complete dependency-and-license inventory and any qualified review that inventory requires. The entry remains absent until the project author accepts both the inventory result and the exact local offline-readable notice content. Absence of the entry is not a claim that no third-party obligation exists.
 - **Project repository:** Opens the configured repository URL through an implicit system browser action.
 - **Version information:** Displays `v<version-name>(<version-code>)`, for example `v1.22.1(34)`. It is not interactive and cannot be copied.
 
@@ -50,7 +51,7 @@ Complex logs, update checks, backup, cloud synchronization, diagnostic export, a
 
 ## License presentation
 
-- Avenor License and, when present, Third-party License are separate Settings entries.
+- Avenor License and an author-accepted Third-party License, when applicable, are separate Settings entries.
 - Each opens a dark, local, offline-readable presentation. Long content scrolls vertically.
 - Their modal dismissal and Settings-position restoration match the Privacy Bottom Sheet.
 

@@ -22,7 +22,7 @@ This document is the authoritative source for exact Home layout, typography, com
 
 ## Edit presentation
 
-- Each editable Home module uses the shared subtle translucent light-gray editing surface with a small corner radius. Exact shared surface color, opacity, and radius remain subject to visual calibration.
+- Each editable Home module uses the shared subtle translucent light-gray editing surface with a small corner radius. Exact shared surface color, opacity, and radius are `To be decided`. Until confirmed, current resource values are implementation calibration rather than durable product-contract values and must remain resource-backed.
 - An application remove control is a white X on a solid error-red `20dp x 20dp` background at the physical top-left. Its visible and interaction bounds are both `20dp x 20dp`; this is an author-approved compact-target exception.
 - A persisted vertical list has a `40dp`-high control bar without padding, fill, rounded whole-bar surface, outer border, or following gap. A `1dp` light-foreground bottom divider at `12%` opacity separates it from content.
 - Three `40dp x 40dp` control targets align flush to the physical right edge in physical right-to-left reorder, size, remove order. Reorder centers `24dp` artwork; remove centers a `24dp x 24dp` error-red background with white X; size contains only its localized value. One list hides reorder while retaining its position.

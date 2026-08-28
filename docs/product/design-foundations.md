@@ -46,6 +46,7 @@ The applicable navigation, surface, or feature specification owns product state 
 
 - Interactive controls should provide a focusable target of at least `48dp x 48dp`. A smaller component-specific target requires an author-accepted reason and focused device evidence; dense layouts should first separate visible size from hit geometry.
 - Pressed, focused, selected, and disabled states must not rely on color alone.
+- The exact shared disabled-content opacity is `To be decided`. Disabled content must meanwhile retain an explicit disabled accessibility state and suppress actionable ripple or activation; a component-specific contract may define an additional non-color indicator but must not invent an independent opacity as a durable product value.
 - Every enabled click or long-press target provides a bounded Material ripple from the initial press unless its component contract defines another visible press state. The indication is clipped to the actual target and cancelled when input becomes scrolling, dragging, a surface transition, cancellation, or another non-click interaction.
 - The current dark-theme ripple derives from the light foreground-content role. A future light theme would derive it from that theme's foreground role; this does not add light-theme support now.
 - Ripple communicates a press, not successful completion. Disabled targets do not present an actionable ripple.
