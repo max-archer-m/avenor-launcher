@@ -20,7 +20,7 @@ Avenor Launcher is designed to keep its current product data and processing on y
 
 Avenor processes the application entries that Android exposes to it under the current Launcher role and permission boundary. This can include application names, icons, launchable components, Android profile identities, platform-provided badges, and application shortcuts. Avenor uses this information to show applications, distinguish launchable identities, launch the entry you select, and present applicable shortcuts.
 
-When you add a Home favorite, Avenor stores that launchable identity, its favorite-list or favorite bar destination, its order, applicable list-level presentation setting, and the order of its containing list or favorite bar where applicable locally on the device. A temporary edit-mode Undo snapshot may retain the most recently removed favorite, complete vertical list, or complete favorite bar only until its Snackbar is replaced, dismissed, or invalidated by the documented navigation and lifecycle boundaries; it is not retained as undo history. Application inventory and shortcut information that is not part of a saved favorite is processed as needed and is not retained as Avenor-owned application-usage history.
+When you add a Home favorite, Avenor locally stores its launchable identity, module destination and order. It also stores module type and applicable vertical-module size, name placement, and items-per-row settings. A temporary edit-mode Undo snapshot may retain the most recently removed favorite or module only until its Snackbar is replaced, dismissed, or invalidated by the documented lifecycle; it is not undo history. Inventory and shortcut information outside saved favorites is processed as needed and is not retained as Avenor-owned application-usage history.
 
 Avenor stores your selected Drawer application size, name placement, items-per-row count, section-anchor presentation, and background mode locally on the device. These display settings are used only to restore the presentation you selected and are not application-usage history.
 
@@ -29,6 +29,8 @@ Avenor also reads current system information needed for its interface and contro
 ### Storage, backup, and deletion
 
 Favorites and Drawer display settings remain on the device until you change them or Android clears Avenor's application data. Avenor does not currently provide an in-app clear-all action, export, restoration, cloud synchronization, cloud backup, or device-to-device transfer of its application data. Android cloud backup and device-transfer backup must be disabled for Avenor-owned favorite and display-setting data under the current product contract.
+
+The one-time adoption of the current Home module model starts Home favorites empty rather than migrating the former favorite structure. This author-accepted product transition does not clear independent Drawer display settings or other unrelated local configuration.
 
 If stored favorite data cannot be read reliably, Avenor preserves the original unreadable data and disables favorite changes rather than silently replacing it with an empty list. You can retry the read. Clearing Avenor's application data through Android system settings or uninstalling Avenor removes its locally stored application data; the current product does not provide recovery afterward.
 

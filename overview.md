@@ -26,7 +26,7 @@ Provide a restrained Android home screen that helps users find and open what the
 
 - **Calm and intentional:** Every default element and interaction must justify its contribution to finding what the user needs.
 - **Personal-first:** The author's willingness to use the product every day is the first product filter, while broader applicability is evaluated separately.
-- **Direct Home access:** Restraint limits distraction, cognitive overhead, and avoidable steps; it does not require Home to contain few applications. Favorites remain directly available across Home's equal-status vertical favorite lists and favorite bars without paging, folders, or another reveal surface. Each scrollable favorite container scrolls only when its content exceeds its visible region.
+- **Direct Home access:** Restraint limits distraction, cognitive overhead, and avoidable steps; it does not require Home to contain few applications. Favorites remain directly available in one ordered full-width main list of vertical modules and horizontal ribbons without paging, folders, or another reveal surface.
 - **Privacy-conscious:** Do not collect data unrelated to core functionality. Any future data access must be necessary, disclosed, minimized, and reviewed before implementation.
 - **User control:** Avoid dark patterns, forced engagement, misleading permission requests, and designs intended to maximize time spent in the launcher.
 - **Incremental evolution:** Grow one coherent product over time instead of maintaining unrelated variants.
@@ -61,7 +61,7 @@ The [product foundation requirements](docs/requirements/product-foundation.md) o
 
 ## Additive requirements
 
-An additive requirement is a capability that may be delivered when useful without defining or blocking the transition between V1, V2, and later capability layers. Landscape support, foldable and tablet adaptation, themes and colors, weather information, and widgets are current examples. Folder-like grouping is not an additive candidate because it conflicts with the current flat, directly visible favorite-container organization and adds a secondary reveal hierarchy.
+An additive requirement is a capability that may be delivered when useful without defining or blocking the transition between V1, V2, and later capability layers. Landscape support, foldable and tablet adaptation, themes and colors, weather information, and widgets are current examples. Folder-like grouping is not an additive candidate because it conflicts with the current flat, directly visible favorite-module organization and adds a secondary reveal hierarchy.
 
 Additive requirements are not automatically part of the current scope. Each must still pass the Feature decision test, be explicitly added to the current product contract, and satisfy applicable privacy, security, validation, and maintenance constraints.
 

@@ -68,12 +68,12 @@ The product compatibility boundary requires `minSdk` 31. Current configured `com
 
 ### In scope
 
-- Home: one non-pageable, non-collapsible, non-vertically-scrolling default Home containing system time, date, favorite content, and Drawer entry.
-- Favorites: up to two equal-status vertical favorite lists and up to five horizontal favorite bars. A launchable identity can appear in only one destination. Vertical lists persist one large, medium, or small list-level presentation value; new and migrated lists start at medium.
+- Home: one non-pageable, non-collapsible default Home with fixed time and date above one vertically scrolling, full-width favorite main list and the Drawer gesture entry.
+- Favorites: one ordered heterogeneous sequence of full-width vertical modules and single-row horizontal ribbons, without an artificial module-count limit. A launchable identity appears in only one module. Vertical modules persist module-level size, name placement, and items-per-row values; ribbons use one fixed style.
 - Favorite editing: explicit add, remove, move, reorder, resize, confirmation, cancellation, and latest-removal Undo behavior defined by the Home and Drawer contracts.
 - Double-tap lock: an optional, purpose-limited accessibility-service capability for eligible blank Home space. It does not gate independent Launcher paths.
 - Drawer: every launchable entry successfully read from Android-exposed sources, including cloned and work-profile entries when available, with ordinary-mode local application-name search and a user-selected Transparent or Frosted-glass background. A fresh configuration defaults to Frosted glass. An isolated non-current-profile read failure does not block usable entries from other profiles.
-- Application actions: application information, applicable Launcher favorite actions, edit entry, platform shortcuts, and uninstall only when the platform can safely address the selected identity.
+- Application actions: application information and platform shortcuts on Home or Drawer; Home additionally provides remove-favorite, edit, and uninstall when the platform can safely address the selected identity. Drawer has no Launcher-action region.
 - Settings: default-Launcher state and system destination, double-tap-lock disclosure, Privacy, licenses, repository link, and version information as applicable.
 - English and Simplified Chinese resources selected from system locale, with English fallback.
 - Offline availability for core tasks, local core-data storage, and only permissions traceable to necessary core capabilities.
@@ -146,7 +146,7 @@ Minimum acceptable performance, power, memory, and startup-response thresholds a
 - Drawer does not omit, duplicate, or misidentify entries returned by successfully read Android sources; isolated failed sources may be absent without blocking available Content.
 - Ordinary Drawer search filters the reliable local application inventory by displayed application name without network access, changing the selected arrangement, or introducing a second application order.
 - Private Space identities requiring hidden-profile access remain outside inventory and permission declarations.
-- Favorite identity, destination, order, list size, and container order survive applicable recreation without unexpected loss, duplication, or reassignment.
+- Favorite identity, module destination, application order, applicable vertical-module style, and module order survive applicable recreation without unexpected loss, duplication, or reassignment.
 - Failed or uncertain reads remain distinguishable from valid empty data and do not overwrite the last reliable favorite state.
 - Permission denial or revocation affects only the dependent capability and leaves independent Launcher paths available.
 - English, Simplified Chinese, and English fallback resolve according to system locale.
@@ -163,7 +163,7 @@ The product lets users maintain Home favorites and use individual Settings entri
 
 ## Local data boundary
 
-- Durable user-content data consists of stable favorite identity, destination, position, vertical-list size, and favorite-container order. A stable identity has one destination and cannot be duplicated across lists or bars.
+- Durable user-content data consists of ordered favorite modules, module type, stable favorite identity and position, and applicable vertical-module size, name placement, and items-per-row values. A stable identity has one module destination and cannot be duplicated across modules.
 - Durable local configuration also includes the selected Drawer application size, name placement, items-per-row count, section-anchor presentation, and background mode. Each valid change is saved as one complete display-setting state.
 - Primary, cloned, and work-profile identities must remain distinguishable and must not be stored or deduplicated solely by package name.
 - The latest edit-mode removal snapshot is transient Undo state, not durable undo history.

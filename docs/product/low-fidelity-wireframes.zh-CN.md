@@ -28,8 +28,8 @@
 
 ## 线框索引
 
-- [Home](wireframes/home.txt) — 完整画布，表达内容驱动的纵向区域、代表性的双列表状态及未分配透明空间；其他有效状态由 Home 契约定义。
-- [Home 编辑模式](wireframes/home-edit-mode.txt) — 完整画布，表达编辑区域、列表控件、新增操作、临时容器和独立滚动关系。
+- [Home](wireframes/home.txt) — 完整画布，表达固定基础信息与可纵向滚动的异构收藏主列表，并展示代表性同级模块。
+- [Home 编辑模式](wireframes/home-edit-mode.txt) — 完整画布，表达缩短的主列表视口、模块选择与拖动柄，以及展开的非模态样式面板。
 - [Drawer](wireframes/drawer.txt) — 代表性 Content 状态画布，表达固定搜索区域、普通／搜索／多选语义、列表锚点、Settings 分组和字母索引。
 - [应用操作面板](wireframes/app-action-sheet.txt) — 模态状态画布，表达被阻断背景、遮罩和内容顺序。
 - [Settings](wireframes/settings.txt) — 完整画布，表达导航、Launcher 状态和产品信息区域。

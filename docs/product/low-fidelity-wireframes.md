@@ -28,8 +28,8 @@ Use the owning document for a product decision instead of interpreting the wiref
 
 ## Wireframe index
 
-- [Home](wireframes/home.txt) — complete canvas showing content-driven vertical regions, the representative two-list state, and unallocated transparent space. The Home contracts define other valid states.
-- [Home edit mode](wireframes/home-edit-mode.txt) — complete canvas showing editing regions, list controls, add actions, provisional containers, and independent scrolling relationships.
+- [Home](wireframes/home.txt) — complete canvas showing fixed basic information and the vertically scrolling heterogeneous favorite main list with representative peer modules.
+- [Home edit mode](wireframes/home-edit-mode.txt) — complete canvas showing the shortened main-list viewport, module selection and handles, and the expanded non-modal style panel.
 - [Drawer](wireframes/drawer.txt) — representative Content-state canvas showing the fixed search region, ordinary, search, and multi-selection semantics, list anchors, Settings section, and alphabet index.
 - [Application action sheet](wireframes/app-action-sheet.txt) — modal-state canvas showing the blocked background, scrim, and content order.
 - [Settings](wireframes/settings.txt) — complete canvas showing navigation, Launcher status, and product-information regions.

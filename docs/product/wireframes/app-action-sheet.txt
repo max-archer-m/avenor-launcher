@@ -47,7 +47,7 @@
 |  --------------------------------------------------------------------------  |
 |                                                                              |
 |                                                                              |
-|  LAUNCHER ACTIONS                                                            |
+|  HOME-ONLY LAUNCHER ACTIONS / OMIT COMPLETE REGION ON DRAWER                 |
 |                                                                              |
 |                                                                              |
 |                                                                              |

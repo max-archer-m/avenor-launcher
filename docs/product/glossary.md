@@ -9,19 +9,19 @@
 | Drawer | 应用列表 | The full indexed list of platform-exposed launchable entries |
 | Settings | 设置 | Avenor configuration and product-information surface |
 | Launchable entry | 可启动应用条目 | One platform-exposed target that Avenor can launch; a primary app and clone are separate entries |
-| Favorite | 收藏应用 | A launchable entry saved to exactly one Home favorite destination; one stable entry identity cannot be duplicated across lists or favorite bars |
-| Favorite-list area | 收藏列表区 | The Home module containing a physical left-to-right horizontal sequence of at most two equal-status vertical favorite lists; one list uses full width and two divide available width equally |
-| Favorite size | 收藏尺寸 | A persisted large, medium, or small list-level presentation applied uniformly to every entry in one vertical favorite list; every list starts at medium and can be changed independently in edit mode |
-| Secondary favorites area | 次级收藏区 | The conditional Home module below the favorite-list area, containing up to five untitled horizontal favorite bars of fixed-medium user-defined favorite entries |
-| Favorite container | 收藏容器 | One vertical favorite list or one favorite bar; same-container application drags exchange immediately, while cross-container drags use release-time exchange or insertion |
-| Vertical-list controls | 纵向列表控件 | The fixed edit-mode top bar for a persisted vertical list: physical-left remove, center current-size selection, and physical-right reorder when two lists exist |
-| Favorite bar controls | 收藏栏控件 | Fixed edit-mode rails outside a persisted favorite bar's scrolling application viewport: confirm complete-favorite-bar removal at logical start and, when at least two persisted favorite bars exist, reorder at logical end |
+| Favorite | 收藏应用 | A launchable entry saved to exactly one Home favorite module; one stable identity cannot be duplicated across modules |
+| Favorite main list | 收藏主列表 | The one full-width, vertically scrolling ordered sequence of peer vertical favorite modules and horizontal favorite ribbons below Home basic information |
+| Favorite module | 收藏模块 | One persisted vertical favorite module or horizontal favorite ribbon containing at least one favorite |
+| Vertical favorite module | 纵向收藏模块 | A full-width module whose naturally expanded entries share one module-level size, name placement, and items-per-row style |
+| Horizontal favorite ribbon | 横向收藏织带 | A full-width, single-row module of fixed-style, content-measured favorite entries that scrolls horizontally only on overflow |
+| Edit dock | 编辑坞 | The fixed bottom Home edit region whose collapsed affordance opens the non-modal module style panel |
+| Style panel | 样式面板 | The expandable Home edit panel used to select modules, change applicable module style, add modules, or delete the selected module |
 | Application shortcut | 应用快捷操作 | An action exposed by the application through the platform |
 | Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, edit, or uninstall |
 | Application action sheet | 应用操作面板 | The modal Bottom Sheet containing application identity, application shortcuts, and Launcher actions |
 | Section anchor | 分组锚点 | A Drawer section heading such as A or `#`; inline presentation places it above its section and left-side presentation places it beside its section, with both presentations scrolling with the application list rather than remaining pinned |
 | Alphabet index | 字母索引 | The fixed right-side Drawer index used to jump between anchors |
-| Edit mode | 编辑模式 | The Home state entered from a favorite action or eligible basic-information blank-space long-press, exposing module boundaries, favorite movement, and destination-targeted add controls |
+| Edit mode | 编辑模式 | The Home state entered from a favorite action or eligible blank-space long press, exposing the edit dock, module movement, application editing, and destination-targeted add controls |
 | Favorite multi-selection | 收藏多选 | The temporary Drawer mode that collects an ordered set of previously unfavorited applications for one captured Home favorite destination |
 | Double-tap lock | 双击锁屏 | The optional Home gesture that requests one Android system lock action through Avenor's narrowly scoped accessibility service |
 | Privacy statement | 隐私声明 | The offline Settings presentation describing Avenor's current data handling, storage, deletion, permission, and external-link boundaries |
