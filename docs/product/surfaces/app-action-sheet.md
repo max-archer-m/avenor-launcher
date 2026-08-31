@@ -4,7 +4,7 @@
 
 ## Presentation
 
-The application action sheet is a modal bottom sheet opened by long-pressing an application on Home or Drawer.
+The application action sheet is a modal bottom sheet opened by long-pressing an application in normal Home mode or ordinary Drawer mode. Home application-level edit mode reserves application long press for movement, and Home module-level edit mode blocks application input completely.
 
 - It uses a dark surface with light text and preserves light system status-bar icons.
 - A light short horizontal drag handle appears at the top.

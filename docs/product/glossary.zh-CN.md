@@ -14,7 +14,7 @@
 | Favorite module | 收藏模块 | 至少包含一个收藏的持久纵向收藏模块或横向收藏织带 |
 | Vertical favorite module | 纵向收藏模块 | 全宽模块，其自然展开的全部条目共享一组模块级尺寸、名称位置和每行数量样式 |
 | Horizontal favorite ribbon | 横向收藏织带 | 全宽单行模块，包含固定样式、按内容测量的收藏条目，仅在溢出时横向滚动 |
-| Edit dock | 编辑坞 | Home 编辑模式底部固定区域，收起入口用于打开非模态模块样式面板 |
+| Edit dock | 编辑坞 | Home 编辑模式底部固定区域，在面板收起与展开时都保持可见，并包含展开或收起非模态模块样式面板的入口 |
 | Style panel | 样式面板 | 可展开的 Home 编辑面板，用于选择模块、修改适用模块样式、新增模块或删除已选模块 |
 | Application shortcut | 应用快捷操作 | 应用通过平台暴露的操作 |
 | Launcher action | 启动器操作 | Avenor 提供的操作，例如收藏、编辑或卸载 |

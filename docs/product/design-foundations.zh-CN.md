@@ -4,7 +4,7 @@
 
 ## 职责
 
-本文档定义共享主题、布局、字体、图标、交互、无障碍和资源原则。精确组件与界面数值属于适用表现规范：
+本文档定义共享主题、布局、字体、颜色、图标、交互、无障碍和资源原则，并负责多个界面共同复用的准确 token。组件或界面特有的准确数值属于适用表现规范：
 
 - [Home 表现](presentation/home.zh-CN.md)
 - [Drawer 表现](presentation/drawer.zh-CN.md)
@@ -19,14 +19,37 @@
 - Home 不绘制可见应用背景，保持系统壁纸清晰，不增加持久背景渐变、固定遮罩、模糊、玻璃效果或其他全界面对比度保护层。允许使用的前景对比度处理由 Home 表现规范负责。
 - Drawer 的应用背景遵循 [Drawer 行为](surfaces/drawer.zh-CN.md#显示设置)和 [Drawer 表现](presentation/drawer.zh-CN.md#背景模式与对比度)规范定义的用户选定模式。这项受限界面选择不改变共享深色主题语义角色。
 - Home 和 Drawer 请求透明系统栏区域并进行 edge-to-edge 绘制，使各自适用的界面处理在系统栏下方保持可见。组件规范定义的瞬时局部交互提示仍可使用。
-- Settings 使用不透明的标准 Material 3 深色配色方案。使用 Material 语义角色，不创建页面特定的深色十六进制颜色。
-- 模态面板保持深色，并保留浅色状态栏图标。
+- Settings 通过 Material 3 语义角色使用不透明的 Avenor 深色配色方案。组件使用下方共享角色，不创建页面特定的深色十六进制颜色。
+- 模态面板使用 `darkSurfaceBaseColor`；组件表现另有定义时可以使用其他深色表面，并继续保留浅色状态栏图标。
 - 平台或设备对比度强制保持默认行为。Avenor 不进入沉浸模式，也不隐藏系统导航。
 - 主题自定义属于当前契约外的未来增量能力。
+
+## 共享深色主题颜色
+
+以下 ARGB 数值定义当前可复用的 Avenor 深色主题颜色。Material 组件通过对应语义角色使用这些颜色；token 名称表达产品语义，不规定 Android 资源或 API 名称。
+
+| Token | ARGB 数值 | 当前语义用途 |
+| --- | --- | --- |
+| `darkSurfaceBaseColor` | `#FF202124` | Settings、Dialog、面板及其他不透明深色表面的基础底色；组件表现规范另有定义时除外 |
+| `primaryTextColor` | `#FFFFFFFF` | 主要文字与浅色单色前景内容；映射到当前 `onSurface` 和 `onBackground` 角色 |
+| `secondaryTextColor` | `#FFCAC4D0` | 深底上的支持文字、低强调文字和图标；映射到当前 `onSurfaceVariant` 角色 |
+
+`primaryTextColor` 与 `secondaryTextColor` 相对 `darkSurfaceBaseColor` 的近似对比度分别为 `16.10:1` 和 `9.44:1`。这些固定表面对比度不代表任意 Home 壁纸或透明 Drawer 壁纸下的对比度；这些界面继续适用各自的投影校准要求。`darkSurfaceBaseColor` 不会为 Home 或透明 Drawer 增加背景。
 
 ## 共享布局与字体
 
 - 间距、字体、颜色、形状和可见尺寸使用语义设计 token，不使用任意页面局部字面量。
+- 共享文字颜色与字号是两个相互独立的维度。组件组合适用的颜色、字号、行高和组件自有字重，不继承不可拆分的一体化文字样式。
+
+当前共享字号 token 为：
+
+| Token | 字号 | 行高 | 适用范围 |
+| --- | --- | --- | --- |
+| `primaryTextFontSize` | `16sp` | `24sp` | 标准标题、中号应用名称及其他普通高可读性文字 |
+| `secondaryTextFontSize` | `14sp` | `20sp` | 支持文字、紧凑控件、小号应用名称及其他次级字号文字 |
+| `largeAppNameFontSize` | `18sp` | `28sp` | 仅用于大号应用名称 |
+
+- `primaryTextFontSize` 根据组件字重对应 Material 3 `titleMedium` 或 `bodyLarge` 尺寸；`secondaryTextFontSize` 对应 `titleSmall` 或 `bodyMedium`。`largeAppNameFontSize` 是 Avenor 特有的中间字号，不对应 Material 3 标准字号角色。
 - 布局和可达性主要针对右手持机、右拇指操作，以及左手持机、右手点击进行优化。其他姿势属于次要考虑。
 - 字体遵循系统字体缩放。应用名称保持静态单行并使用尾部省略，不使用跑马灯。
 - 当前个人使用布局不单独优化极端字体缩放。如果极端缩放超过单行组件边界，文字仍裁剪在该边界内。
@@ -49,7 +72,7 @@
 - 按下、聚焦、选中和禁用状态不得仅依赖颜色。
 - 准确共享禁用内容透明度为 `To be decided`。禁用内容同时必须保留明确的无障碍禁用状态，并阻止可操作 Ripple 或激活；组件特定契约可以增加非颜色指示，但不得自行把独立透明度写成持久产品数值。
 - 除非组件契约定义其他可见按下状态，每个可用的点击或长按目标从首次按下开始提供有界 Material ripple。提示裁剪在实际目标内；当输入转为滚动、拖动、界面转换、取消或其他非点击交互时取消。
-- 当前深色主题 ripple 从浅色前景内容角色派生。未来浅色主题应从对应前景角色派生；该规则不会增加当前浅色主题支持。
+- 当前深色主题 ripple 从 `primaryTextColor` 派生。未来浅色主题应从对应前景角色派生；该规则不会增加当前浅色主题支持。
 - Ripple 表示按下，不表示操作成功。禁用目标不显示可操作 ripple。
 - 触觉反馈遵循系统能力和用户设置。准确平台常量需要实现验证。
 

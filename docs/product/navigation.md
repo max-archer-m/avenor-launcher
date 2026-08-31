@@ -51,7 +51,7 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 - In normal Home mode, the drag may begin anywhere inside Avenor's Home interaction area, including over the time, date, favorite entries, empty state, loading state, error state, and Retry control. System-reserved inset gestures remain governed by Android.
 - Vertical upward movement first scrolls the favorite main list toward its end. If the main list cannot consume displacement, its remaining displacement transfers from the same continuous gesture into the Home-to-Drawer transition without requiring the user to lift. Transition progress begins from the transferred displacement, not distance already consumed by list scrolling.
 - Downward dragging scrolls the favorite main list toward its start and does not initiate a Home surface transition. A horizontal favorite ribbon consumes a gesture only after horizontal intent is established.
-- Home-to-Drawer dragging is disabled while Home edit mode is active. Module- or application-handle drags own recognized movement; other vertical drags scroll the favorite main list.
+- Home-to-Drawer dragging is disabled while Home edit mode is active. A whole-application-item long press recognized while the style panel is collapsed, or a whole-module long press recognized while it is expanded, owns its corresponding movement; other vertical drags scroll the favorite main list.
 - A pointer sequence can resolve to only one Home action. Before an interactive element's selection or long-press action has been committed, recognition of an upward drag transfers ownership to the Home-to-Drawer transition and suppresses that element's selection, long-press, and haptic response.
 - In eligible basic-information blank space, two taps may resolve to the lock gesture defined in [double-tap-lock.md](features/double-tap-lock.md). Any drag that takes transition ownership cancels that recognition. Time, date-and-weekday, favorites, and other interactive targets never participate in double-tap locking.
 - Selection is committed only when the pointer is released without the sequence becoming an upward drag or a long-press. Once a long-press has been recognized and its action has opened, the same pointer sequence does not also begin the Drawer transition.
@@ -74,6 +74,12 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 - On the application action sheet, Back dismisses the sheet and returns to the unchanged underlying surface.
 - In Home edit mode, Back first collapses an expanded style panel; otherwise it exits to normal Home. In Drawer favorite multi-selection mode, Back first cancels the complete unconfirmed selection and returns through the reverse transition to Home edit mode; it does not also exit edit mode.
 - Process restoration begins at Home. Drawer, Settings, an action sheet, edit mode, and transient panel or selection state are not restored. Within the same process, ordinary Avenor round trips preserve the favorite main list's meaningful vertical position and each ribbon's meaningful horizontal position. Process recreation resets them to their content starts.
+
+## Home edit-mode interruption
+
+- Home edit mode remains valid only while Home is the fully foreground, interactive Avenor surface. A system or external interruption that covers Home input or moves interaction away from Home exits edit mode, including opening the notification shade or Quick Settings, showing Recents, locking or turning off the screen, opening another application, or presenting another system-owned surface.
+- The interruption cancels any in-progress gesture or unpublished application or module movement, collapses the style panel, clears module selection, and dismisses edit-only visual feedback. Successfully saved changes remain. An atomic mutation whose save already started follows its existing completion or failure rule, but neither result may restore edit mode. If Avenor can observe the interruption result only when Home becomes interactive again, it must complete this reset before accepting new Home input. Dismissing the interruption therefore reveals normal Home, never the previous application- or module-level edit state.
+- Avenor-owned steps that belong to the same editing journey are not external interruptions: expanding or collapsing the inline style panel, showing an Avenor confirmation or removal Snackbar, and entering or returning from Drawer favorite multi-selection follow their own documented state rules.
 
 ## Android system Home action and external application return
 
@@ -104,4 +110,5 @@ The reverse transition uses the same values in reverse. Rebound and completion a
 - Opening or closing Drawer does not accidentally launch, long-press, or scroll an application entry.
 - With Avenor selected as the default Launcher, the Android system Home action from Drawer and Settings displays Home; it does not depend on the Avenor Back action.
 - Returning from an ordinary application in the same process displays Home without Loading and without restoring Drawer.
+- Returning from a system or external interruption never restores Home edit mode, its expanded style panel, module selection, or an unpublished movement.
 - The implementation may choose any architecture that satisfies these observable behaviors.

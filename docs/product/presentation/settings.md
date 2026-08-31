@@ -4,22 +4,22 @@
 
 ## Responsibility
 
-This document owns exact Settings typography and row geometry. [Settings behavior](../surfaces/settings.md) owns page content, navigation, and action results.
+This document owns exact Settings typography and row geometry. [Settings behavior](../surfaces/settings.md) owns page content, navigation, and action results; [design foundations](../design-foundations.md) owns shared color and text-size tokens.
 
 ## Top app bar
 
 - The fixed top app bar is at least `56dp` high and uses `16dp` horizontal padding.
 - Its visible Back artwork uses the shared `24dp` functional-icon token in a standard `48dp x 48dp` icon-button target with a localized accessibility name.
-- The title uses Material 3 `titleLarge` and `onSurface`. A full-width divider using `onSurfaceVariant` separates the app bar from the scrolling item list.
+- The title uses Material 3 `titleLarge` and shared `primaryTextColor`. A full-width divider using shared `secondaryTextColor` separates the app bar from the scrolling item list.
 
 ## Primary items
 
-- Primary titles use Material 3 `titleMedium`: `16sp/24sp`, medium weight, and `onSurface`.
-- Supporting text uses `bodySmall`: `12sp/16sp`, normal weight, and `onSurfaceVariant`.
+- Primary titles use the shared `primaryTextFontSize` and line height, equivalent to Material 3 `titleMedium`, with medium weight and `primaryTextColor`.
+- Supporting text uses the shared `secondaryTextFontSize` and line height, equivalent to Material 3 `bodyMedium`, with normal weight and `secondaryTextColor`.
 - A two-line item is at least `72dp` high. A one-line item is at least `56dp` high and vertically centers its title.
 - Primary items use `16dp` horizontal content padding and a trailing `24dp` Android or Material arrow where the behavior contract includes one.
 
 ## Secondary items
 
-- Secondary items use centered Material 3 `titleSmall`: `14sp/20sp`, medium weight, and `onSurfaceVariant`.
+- Secondary items use the shared `secondaryTextFontSize` and line height, equivalent to centered Material 3 `titleSmall`, with medium weight and `secondaryTextColor`.
 - Each secondary item is at least `40dp` high and centers its content horizontally and vertically.

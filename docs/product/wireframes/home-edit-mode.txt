@@ -1,20 +1,18 @@
 +------------------------------------------------------------------------------+
-|...................HOME / EDIT MODE / COMPLETE SAFE CANVAS....................|
-|........................FIXED BASIC INFORMATION...............................|
-|    12:34.....................................................................|
-|    FEB 1  TUESDAY............................................................|
-|................FAVORITE MAIN LIST / SHORTENED VIEWPORT.......................|
-|  VERTICAL MODULE / COMPLETE SELECTION LAYER....................[MODULE HANDLE]|
+|..............HOME / EDIT MODE / EXPANDED PANEL / SAFE CANVAS.................|
+|.................BASIC INFORMATION REMOVED IN THIS STATE......................|
+|...............FAVORITE MAIN LIST / REMAINING VIEWPORT........................|
+|  [CORNER EDIT MARKS] VERTICAL MODULE / COMPLETE SELECTION LAYER..............|
 |  [APP 1] APPLICATION NAME....................................................|
 |  [APP 2] APPLICATION NAME....................................................|
-|  HORIZONTAL RIBBON / COMPLETE SELECTION LAYER..................[MODULE HANDLE]|
+|  [CORNER EDIT MARKS] HORIZONTAL RIBBON / COMPLETE SELECTION LAYER............|
 |  [APP] NAME   [APP] NAME   [APP] NAME........................................|
-|  MODULE DRAG REMOVES SOURCE; LIFTED PREVIEW + INSERTION LINE.................|
+|  LONG PRESS COMPLETE MODULE; LIFTED PREVIEW + INSERTION LINE.................|
 |  MAIN LIST REMAINS VERTICALLY SCROLLABLE.....................................|
 |......................EXPANDED NON-MODAL STYLE PANEL..........................|
 |  MODULE TYPE / READ ONLY.....................................................|
 |  APPLICABLE STYLE CONTROLS OR SELECTION PROMPT...............................|
 |  DELETE MODULE   ADD VERTICAL MODULE   ADD RIBBON............................|
-|...........................[DOWN AFFORDANCE]..................................|
+|........32DP EDIT DOCK: TAP TO SELECT - HOLD TO MOVE.............[24DP DOWN]..|
 |..............................BOTTOM SAFE AREA................................|
 +------------------------------------------------------------------------------+
