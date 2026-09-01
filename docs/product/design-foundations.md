@@ -8,6 +8,7 @@ This document defines shared theme, layout, typography, color, icon, interaction
 
 - [Home presentation](presentation/home.md)
 - [Drawer presentation](presentation/drawer.md)
+- [Style settings panel presentation](presentation/style-settings-panel.md)
 - [Application action sheet presentation](presentation/app-action-sheet.md)
 - [Settings presentation](presentation/settings.md)
 

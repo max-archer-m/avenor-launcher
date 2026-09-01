@@ -14,14 +14,15 @@
 | Favorite module | 收藏模块 | One persisted vertical favorite module or horizontal favorite ribbon containing at least one favorite |
 | Vertical favorite module | 纵向收藏模块 | A full-width module whose naturally expanded entries share one module-level size, name placement, and items-per-row style |
 | Horizontal favorite ribbon | 横向收藏织带 | A full-width, single-row module of fixed-style, content-measured favorite entries that scrolls horizontally only on overflow |
-| Edit dock | 编辑坞 | The fixed bottom Home edit region that remains visible in both panel states and contains the affordance that expands or collapses the non-modal module style panel |
-| Style panel | 样式面板 | The expandable Home edit panel used to select modules, change applicable vertical-module style, and add modules; it does not expose complete-module deletion |
+| Add-favorite entry | 新增收藏入口 | A non-persisted favorite-main-list or in-module entry in Home edit mode whose position alone determines whether it creates a module or adds to an existing one |
+| Edit dock | 编辑坞 | The fixed bottom Home edit region that remains visible in both panel states and contains the affordance that expands or collapses the non-modal Home style settings panel |
+| Style settings panel | 样式设置面板 | The shared rounded settings-panel presentation used by Drawer display settings and the expandable Home module-style editor; each host separately defines its content, modality, placement, and behavior |
 | Application shortcut | 应用快捷操作 | An action exposed by the application through the platform |
 | Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, edit, or uninstall |
 | Application action sheet | 应用操作面板 | The modal Bottom Sheet containing application identity, application shortcuts, and Launcher actions |
 | Section anchor | 分组锚点 | A Drawer section heading such as A or `#`; inline presentation scrolls above its section, while left-side presentation occupies its section's leading column and pins below the fixed top app bar only while that section crosses the viewport |
 | Alphabet index | 字母索引 | The fixed right-side Drawer index used to jump between anchors |
-| Edit mode | 编辑模式 | The Home state entered from a favorite action or eligible blank-space long press, exposing the edit dock, module movement, application editing, and destination-targeted add controls |
+| Edit mode | 编辑模式 | The Home state entered from a favorite action or eligible blank-space long press, exposing the edit dock, module movement, application editing, and add-favorite entries |
 | Favorite multi-selection | 收藏多选 | The temporary Drawer mode that collects an ordered set of previously unfavorited applications for one captured Home favorite destination |
 | Double-tap lock | 双击锁屏 | The optional Home gesture that requests one Android system lock action through Avenor's narrowly scoped accessibility service |
 | Privacy statement | 隐私声明 | The offline Settings presentation describing Avenor's current data handling, storage, deletion, permission, and external-link boundaries |
@@ -31,3 +32,14 @@
 | Private Space | 私密空间 | Android hidden-profile capability outside the current product contract; Avenor does not request `ACCESS_HIDDEN_PROFILES` to access it |
 
 Use these terms consistently in product documents. Technical names may differ only when an implementation distinction is necessary and documented.
+
+## User-facing label mapping
+
+Specification terms and user-facing interface labels are separate. Interface labels do not replace the canonical terms above, and a label change does not rename a specification term.
+
+| Specification term | Simplified Chinese interface label | English interface label |
+| --- | --- | --- |
+| Vertical favorite module | 收藏列表 | Favorite list |
+| Horizontal favorite ribbon | 收藏织带 | Favorite ribbon |
+
+`收藏主列表` is the canonical Chinese working term for the favorite main list. `home 收藏区` is an informal synonym for the same region and is not a separate term.

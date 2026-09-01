@@ -105,6 +105,7 @@ An additive capability does not enter current scope merely because it can be bui
 | Home exact layout, typography, geometry, and visual states | [Home presentation specification](../product/presentation/home.md) |
 | Drawer inventory, identity, search, sorting, selection, index behavior, and states | [Drawer interaction specification](../product/surfaces/drawer.md) |
 | Drawer exact layout, typography, geometry, and visual states | [Drawer presentation specification](../product/presentation/drawer.md) |
+| Visual surface and controls shared by Home and Drawer style settings panels | [Style settings panel presentation](../product/presentation/style-settings-panel.md) |
 | Application action availability, order, dismissal, and results | [Application action sheet](../product/surfaces/app-action-sheet.md) |
 | Application action sheet exact geometry | [Application action sheet presentation](../product/presentation/app-action-sheet.md) |
 | Settings content, navigation, modal behavior, and state refresh | [Settings interaction specification](../product/surfaces/settings.md) |

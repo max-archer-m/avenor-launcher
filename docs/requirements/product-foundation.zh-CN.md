@@ -105,6 +105,7 @@
 | Home 精确布局、字体、几何和视觉状态 | [Home 表现规范](../product/presentation/home.zh-CN.md) |
 | Drawer 清单、身份、搜索、排序、选择、索引行为和状态 | [Drawer 交互规格](../product/surfaces/drawer.zh-CN.md) |
 | Drawer 精确布局、字体、几何和视觉状态 | [Drawer 表现规范](../product/presentation/drawer.zh-CN.md) |
+| Home 与 Drawer 样式设置面板共用的视觉表面和控件 | [样式设置面板表现](../product/presentation/style-settings-panel.zh-CN.md) |
 | 应用操作可用性、顺序、关闭和结果 | [应用操作面板](../product/surfaces/app-action-sheet.zh-CN.md) |
 | 应用操作面板精确几何 | [应用操作面板表现](../product/presentation/app-action-sheet.zh-CN.md) |
 | Settings 内容、导航、模态行为和状态刷新 | [Settings 交互规格](../product/surfaces/settings.zh-CN.md) |

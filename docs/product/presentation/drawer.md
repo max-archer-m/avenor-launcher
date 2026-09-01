@@ -4,7 +4,7 @@
 
 ## Responsibility
 
-This document owns exact Drawer layout, typography, component geometry, and visual-state values. [Drawer behavior](../surfaces/drawer.md) owns inventory, sorting, state, selection, and action results; [navigation](../navigation.md) owns transition thresholds; [design foundations](../design-foundations.md) owns shared color and text-size tokens.
+This document owns exact Drawer layout, typography, component geometry, and visual-state values. [Drawer behavior](../surfaces/drawer.md) owns inventory, sorting, state, selection, and action results; [navigation](../navigation.md) owns transition thresholds; [design foundations](../design-foundations.md) owns shared color and text-size tokens; the [style settings panel presentation](style-settings-panel.md) owns the panel surface and controls shared with Home.
 
 ## Surface and application content
 
@@ -69,13 +69,6 @@ Calibration must compare both Samsung Galaxy S23 Ultra and Google Pixel 8 across
 
 ## Display settings
 
-- The panel may enter from the bottom as a compact custom surface. It uses a dark rounded surface, explicit side and bottom margins, and a clear edge shadow instead of dimming the exposed Drawer or system background. A transparent modal layer still blocks underlying input, and the shadow must preserve visible separation from both exposed layers.
-- At the Medium application-size sample, each compact title-and-control setting row is at least `56dp` high.
-- The section-anchor selector uses a `148dp x 44dp` dark rounded frame with a light border and `2dp` internal padding. It contains two equal `72dp x 40dp` light-filled borderless rounded thumbs. Centered option labels use medium-weight shared `secondaryTextFontSize` and line height.
-- Selector thumb and text-color transitions use the same platform or theme short-duration property-animation token, with approximately `200ms` as the reference duration rather than a hard-coded duration.
-- The arrangement title remains fixed. Only its complete trailing control region scrolls horizontally when that region overflows.
-- The Right-or-Below selector uses the same `148dp x 44dp` frame, `2dp` padding, and equal `72dp x 40dp` thumbs as the section-anchor selector.
-- Decrement and increment use localized text on approximately `32dp x 32dp` visible rounded backgrounds with `4dp` corners. The items-per-row value uses an approximately `36dp x 32dp` visible background. Each of the three controls retains its own interaction target of at least `48dp x 48dp`; visible background size does not define hit geometry.
-- The application-size selector occupies a `56dp` setting row. Each large, medium, or small option contains one selection indicator, generic icon preview, and localized label.
-- Preview sizes are `48dp`, `40dp`, and `32dp`. Indicator-to-icon gap is `4dp`, icon-to-label gap is `8dp`, and title-to-control-region gap is `16dp`. Options add no independent `16dp` inter-option gap and retain separate targets of at least `48dp x 48dp`.
+- Drawer hosts the shared [style settings panel](style-settings-panel.md) as a compact custom surface that may enter from the bottom. It uses the shared horizontal outer margin and adds a Drawer-specific bottom margin. A transparent modal layer blocks underlying input without dimming the exposed Drawer or system background; the shared edge shadow must preserve visible separation from both exposed layers.
+- The section-anchor and Right-or-Below controls use the shared compact two-option selector. Application size and items per row use the shared application-size selector and stepper. Drawer retains its own setting names, option labels, row order, availability, and save behavior.
 - The Drawer-background row presents `Transparent` and `Frosted glass` in one `224dp x 44dp` two-option single-selection frame with `2dp` internal padding and two equal `110dp x 40dp` visible thumbs. Simplified Chinese uses `透明` and `磨砂玻璃`. The complete localized labels remain visible without wrapping or abbreviation. Each option retains a distinct interaction target at least `48dp` high through the owning setting row; the visible thumb does not reduce that target.

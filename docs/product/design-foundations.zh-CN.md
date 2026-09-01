@@ -8,6 +8,7 @@
 
 - [Home 表现](presentation/home.zh-CN.md)
 - [Drawer 表现](presentation/drawer.zh-CN.md)
+- [样式设置面板表现](presentation/style-settings-panel.zh-CN.md)
 - [应用操作面板表现](presentation/app-action-sheet.zh-CN.md)
 - [Settings 表现](presentation/settings.zh-CN.md)
 

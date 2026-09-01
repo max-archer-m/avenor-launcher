@@ -5,14 +5,16 @@
 |  [CORNER EDIT MARKS] VERTICAL MODULE / COMPLETE SELECTION LAYER..............|
 |  [APP 1] APPLICATION NAME....................................................|
 |  [APP 2] APPLICATION NAME....................................................|
+|  [+] ADD FAVORITE (TRAILING MODULE ENTRY)....................................|
 |  [CORNER EDIT MARKS] HORIZONTAL RIBBON / COMPLETE SELECTION LAYER............|
-|  [APP] NAME   [APP] NAME   [APP] NAME........................................|
+|  [APP] NAME   [APP] NAME   [+] ADD FAVORITE..................................|
+|  [+] ADD VERTICAL MODULE   [+] ADD RIBBON....................................|
 |  LONG PRESS COMPLETE MODULE; LIFTED PREVIEW + INSERTION LINE.................|
+|  DROP ON MAIN LIST ADD ENTRY CREATES MODULE; OUTLINE EMPHASIS................|
 |  MAIN LIST REMAINS VERTICALLY SCROLLABLE.....................................|
-|......................EXPANDED NON-MODAL STYLE PANEL..........................|
-|  MODULE TYPE / READ ONLY.....................................................|
-|  APPLICABLE STYLE CONTROLS OR SELECTION PROMPT...............................|
-|  DELETE MODULE   ADD VERTICAL MODULE   ADD RIBBON............................|
+|................STYLE SETTINGS PANEL / EXPANDED / NON-MODAL...................|
+|  SELECTION PROMPT OR FIXED-RIBBON MESSAGE....................................|
+|  APPLICABLE VERTICAL-MODULE STYLE CONTROLS / NO ADD ACTIONS..................|
 |........32DP EDIT DOCK: TAP TO SELECT - HOLD TO MOVE.............[24DP DOWN]..|
 |..............................BOTTOM SAFE AREA................................|
 +------------------------------------------------------------------------------+
