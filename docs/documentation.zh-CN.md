@@ -87,6 +87,8 @@
 | 1.1.0 已完成交付 | [`docs/delivery/1.1.0/delivery.md`](delivery/1.1.0/delivery.md) | [`docs/delivery/1.1.0/delivery.zh-CN.md`](delivery/1.1.0/delivery.zh-CN.md) | 交付记录 | 记录已完成的作者日常使用基线，包括全宽主收藏编辑、应用快捷操作、基础 Settings、可选双击锁屏、静态名称清理和版本收尾 |
 | 1.2.0 已完成交付 | [`docs/delivery/1.2.0/delivery.md`](delivery/1.2.0/delivery.md) | [`docs/delivery/1.2.0/delivery.zh-CN.md`](delivery/1.2.0/delivery.zh-CN.md) | 交付记录 | 记录已关闭的迭代 12–14 边界、版本标识、可用产物证据、验证缺口和作者处置 |
 | 1.3.0 已完成交付 | [`docs/delivery/1.3.0/delivery.md`](delivery/1.3.0/delivery.md) | [`docs/delivery/1.3.0/delivery.zh-CN.md`](delivery/1.3.0/delivery.zh-CN.md) | 交付记录 | 记录已完成的统一收藏模型交付、纳入的迭代 15–21、证据、已知观察和作者处置 |
+| 1.4.0 计划交付 | [`docs/delivery/1.4.0/delivery.md`](delivery/1.4.0/delivery.md) | [`docs/delivery/1.4.0/delivery.zh-CN.md`](delivery/1.4.0/delivery.zh-CN.md) | 交付记录 | 通过迭代 22–25 规划有序收藏模块 Home 闭环和版本收尾范围 |
+| 1.5.0 计划交付 | [`docs/delivery/1.5.0/delivery.md`](delivery/1.5.0/delivery.md) | [`docs/delivery/1.5.0/delivery.zh-CN.md`](delivery/1.5.0/delivery.zh-CN.md) | 交付记录 | 通过迭代 26–28 规划 Drawer 搜索、普通导航、展示设置和版本收尾范围 |
 | 架构决定 | [`docs/decisions/`](decisions/) | - | 决策理由 | 记录重大、已实现且已接受的架构决定；只有 Active ADR 才建立其所述当前架构边界 |
 | 许可证 | [`LICENSE`](../LICENSE) | - | - | 包含 Apache License 2.0 原文 |
 
