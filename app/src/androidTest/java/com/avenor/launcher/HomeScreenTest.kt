@@ -73,6 +73,72 @@ class HomeScreenTest {
     }
 
     @Test
+    fun orderedVerticalModuleDisplaysAndLaunchesItsExactEntry() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 42,
+                componentName = ComponentName("com.example.ordered", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Ordered module application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val module = OrderedFavoriteModule(
+            id = "vertical-list-1",
+            type = OrderedFavoriteModuleType.Vertical,
+            identities = listOf(entry.identity),
+        )
+        var selectedAvailability: FavoriteAvailability? = null
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        aggregate = FavoriteAggregate(
+                            verticalLists = listOf(
+                                FavoriteContainer(
+                                    id = module.id,
+                                    type = FavoriteContainerType.VerticalList,
+                                    identities = module.identities,
+                                ),
+                            ),
+                        ),
+                        orderedModules = listOf(module),
+                    ),
+                    favoriteAvailability = mapOf(
+                        entry.identity to FavoriteAvailability.Available(entry),
+                    ),
+                    onLaunchFavorite = { selectedAvailability = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home_ordered_favorite_modules").assertIsDisplayed()
+        composeRule.onNodeWithText("Ordered module application").performClick()
+        composeRule.runOnIdle {
+            assertEquals(FavoriteAvailability.Available(entry), selectedAvailability)
+        }
+    }
+
+    @Test
+    fun emptyOrderedEditModeOffersOnlyTheVerticalModuleEntry() {
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        aggregate = FavoriteAggregate(),
+                        orderedModules = emptyList(),
+                    ),
+                    editMode = true,
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("favorite_provisional_add_0").assertIsDisplayed()
+        composeRule.onAllNodesWithTag("ordered_module_provisional_ribbon_add")
+            .assertCountEquals(0)
+    }
+
+    @Test
     fun oneVerticalListUsesOneFullWidthComposition() {
         val identity = LaunchableIdentity(
             profileSerialNumber = 42,
@@ -182,13 +248,12 @@ class HomeScreenTest {
     }
 
     @Test
-    fun editModeExposesExistingAndProvisionalFavoriteBarTargets() {
+    fun editModeDoesNotExposeProvisionalFavoriteBarTarget() {
         val identity = LaunchableIdentity(
             profileSerialNumber = 42,
             componentName = ComponentName("com.example.bar", "MainActivity"),
         )
         var existingTarget: String? = null
-        var provisionalRequested = false
         composeRule.setContent {
             AvenorTheme {
                 HomeScreen(
@@ -205,17 +270,13 @@ class HomeScreenTest {
                     ),
                     editMode = true,
                     onAddFavoritesToBar = { existingTarget = it },
-                    onAddProvisionalFavoriteBar = { provisionalRequested = true },
                 )
             }
         }
 
         composeRule.onNodeWithTag("favorite_bar_add_0").assertIsDisplayed().performClick()
         composeRule.runOnIdle { assertEquals("favorite-bar-1", existingTarget) }
-        composeRule.onNodeWithTag("favorite_bar_provisional_add")
-            .assertIsDisplayed()
-            .performClick()
-        composeRule.runOnIdle { assertEquals(true, provisionalRequested) }
+        composeRule.onAllNodesWithTag("favorite_bar_provisional_add").assertCountEquals(0)
     }
 
     @Test

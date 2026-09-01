@@ -114,7 +114,7 @@ internal fun AvenorApp(systemHomeEvents: Flow<Unit>? = null) {
     val entryLauncher = remember(context) {
         AndroidLaunchableEntryLauncher(context)
     }
-    val favoriteStore = remember(context) { AtomicFileFavoriteStore(context) }
+    val favoriteStore = remember(context) { OrderedFavoriteStoreAdapter(context) }
     val informationLauncher = remember(context) { AndroidApplicationInformationLauncher(context) }
     val shortcutController = remember(context) {
         AndroidApplicationShortcutController(context)
@@ -210,7 +210,6 @@ internal fun AvenorApp(
     val addToListLabel = stringResource(R.string.drawer_selection_add_to_list)
     val createListLabel = stringResource(R.string.drawer_selection_create_list)
     val addToFavoriteBarLabel = stringResource(R.string.drawer_selection_add_to_favorite_bar)
-    val createFavoriteBarLabel = stringResource(R.string.drawer_selection_create_favorite_bar)
 
     LaunchedEffect(effectiveFavoriteStore) {
         effectiveFavoriteStore.load()
@@ -406,11 +405,7 @@ internal fun AvenorApp(
 
     fun openProvisionalFavoriteSelection() {
         val state = favoriteState
-        if (state !is FavoriteReadState.Readable ||
-            state.aggregate.verticalLists.size >= 2
-        ) {
-            return
-        }
+        if (state !is FavoriteReadState.Readable) return
         favoriteAddTarget = FavoriteAddTarget(
             containerId = null,
             containerType = FavoriteContainerType.VerticalList,
@@ -438,21 +433,6 @@ internal fun AvenorApp(
         settleTo(AvenorSurface.Drawer)
     }
 
-    fun openProvisionalFavoriteBarSelection() {
-        val state = favoriteState
-        if (state !is FavoriteReadState.Readable || state.aggregate.favoriteBars.size >= 5) return
-        favoriteAddTarget = FavoriteAddTarget(
-            containerId = null,
-            containerType = FavoriteContainerType.FavoriteBar,
-            label = createFavoriteBarLabel,
-            provisional = true,
-        )
-        favoriteSelection = emptyList()
-        favoriteSelectionSaving = false
-        drawerActivated = true
-        settleTo(AvenorSurface.Drawer)
-    }
-
     fun confirmFavoriteSelection() {
         val target = favoriteAddTarget ?: return
         val selected = favoriteSelection
@@ -470,7 +450,6 @@ internal fun AvenorApp(
                 .orEmpty()
             var updatedAggregate: FavoriteAggregate? = null
             var targetInvalid = false
-            var noValidSelection = false
             val savedAggregate = inventorySnapshot?.let {
                 effectiveFavoriteStore.updateAggregate { aggregate ->
                     val targetContainers = when (target.containerType) {
@@ -481,7 +460,7 @@ internal fun AvenorApp(
                         targetContainers.firstOrNull { it.id == containerId }
                     }
                     val targetAtCapacity = when (target.containerType) {
-                        FavoriteContainerType.VerticalList -> aggregate.verticalLists.size >= 2
+                        FavoriteContainerType.VerticalList -> false
                         FavoriteContainerType.FavoriteBar -> aggregate.favoriteBars.size >= 5
                     }
                     if ((target.containerId != null && container == null) ||
@@ -496,7 +475,6 @@ internal fun AvenorApp(
                             identity !in aggregate.identities
                     }
                     if (appendable.isEmpty()) {
-                        noValidSelection = true
                         updatedAggregate = aggregate
                         return@updateAggregate aggregate
                     }
@@ -563,31 +541,6 @@ internal fun AvenorApp(
             }
             if (savedAggregate != null) {
                 updatedAggregate?.let { editMembership = it.identities.toSet() }
-                if (!noValidSelection) {
-                    updatedAggregate?.let { aggregate ->
-                        val targetContainers = when (target.containerType) {
-                            FavoriteContainerType.VerticalList -> aggregate.verticalLists
-                            FavoriteContainerType.FavoriteBar -> aggregate.favoriteBars
-                        }
-                        val targetContainerId = target.containerId
-                            ?: targetContainers.lastOrNull()?.id
-                        val revealedIdentity = selected.firstOrNull { identity ->
-                            targetContainerId?.let { containerId ->
-                                targetContainers
-                                    .firstOrNull { it.id == containerId }
-                                    ?.identities
-                                    ?.contains(identity) == true
-                            } == true
-                        }
-                        if (targetContainerId != null && revealedIdentity != null) {
-                            favoriteRevealRequest = FavoriteRevealRequest(
-                                containerId = targetContainerId,
-                                containerType = target.containerType,
-                                identity = revealedIdentity,
-                            )
-                        }
-                    }
-                }
                 closeFavoriteSelection()
             } else {
                 favoriteSelectionSaving = false
@@ -900,7 +853,6 @@ internal fun AvenorApp(
                 onAddFavoritesToList = ::openFavoriteSelection,
                 onAddProvisionalFavorites = ::openProvisionalFavoriteSelection,
                 onAddFavoritesToBar = ::openFavoriteBarSelection,
-                onAddProvisionalFavoriteBar = ::openProvisionalFavoriteBarSelection,
                 favoriteRevealContainerId = favoriteRevealRequest?.containerId,
                 favoriteRevealContainerType = favoriteRevealRequest?.containerType,
                 favoriteRevealIdentity = favoriteRevealRequest?.identity,

@@ -49,7 +49,7 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
-| [Iteration 22: Ordered Favorite Module Foundation](iteration-22-ordered-favorite-module-foundation.md) | `Planned` | 2026-09-01 | The author requested planning from the accepted current product contract; implementation is not authorized by this record. |
+| [Iteration 22: Ordered Favorite Module Foundation](iteration-22-ordered-favorite-module-foundation.md) | `Completed` | 2026-09-01 | The implementation, focused tests, static checks, author-reported compilation, and functional acceptance satisfy the iteration boundary. |
 | [Iteration 23: Module Style and Ordering](iteration-23-module-style-and-ordering.md) | `Planned` | 2026-09-01 | The product contract defines module selection, style editing, ribbon creation, and whole-module ordering on the Iteration 22 foundation. |
 | [Iteration 24: Application Editing and Cross-Module Movement](iteration-24-application-editing-and-cross-module-movement.md) | `Planned` | 2026-09-01 | The product contract defines collapsed-dock removal, Undo, and insertion movement after module types and destinations exist. |
 | [Iteration 25: Upgrade, Regression, and Version Closure](iteration-25-upgrade-regression-and-version-closure.md) | `Planned` | 2026-09-01 | Version completion requires integrated Home adoption, compatibility, artifact, and author-acceptance evidence after the selected Home loop is complete. |
@@ -58,7 +58,7 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 
 ### Iteration 22
 
-[Contract](iteration-22-ordered-favorite-module-foundation.md). No implementation or validation evidence exists. Status remains `Planned`; absent evidence is not a pass.
+[Contract](iteration-22-ordered-favorite-module-foundation.md). The implementation establishes the ordered-module store, one-time readable-legacy reset, initial vertical-module creation through Drawer, ordered Home rendering and launch, and focused store/UI tests. The final backup-source and retry-loading fixes preserve the required failure states, and the runtime Privacy text now reflects the adopted storage boundary. The author reported successful compilation and basic functional acceptance, including acceptance after the final fixes. Agent static checks passed for `git diff --check` and resource XML parsing; Gradle and instrumentation were not run by the agent. Status is `Completed`. The consequential persistence direction remains subject to the repository rule that an `Active` ADR is created only after its accepted implementation is committed and synchronized.
 
 ### Iteration 23
 
@@ -102,4 +102,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.4.0` identif
 
 ## Completion result
 
-No completion result exists. `1.4.0` and Iterations 22–25 remain `Planned`; this document does not authorize production implementation.
+No version completion result exists. Iteration 22 is `Completed`; Iterations 23–25 remain `Planned`. This document does not authorize push, release, or publication.

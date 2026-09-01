@@ -46,6 +46,7 @@ internal sealed interface FavoriteReadState {
     data object Loading : FavoriteReadState
     data class Readable(
         val aggregate: FavoriteAggregate,
+        val orderedModules: List<OrderedFavoriteModule>? = null,
     ) : FavoriteReadState {
         constructor(
             primaryIdentities: List<LaunchableIdentity>,

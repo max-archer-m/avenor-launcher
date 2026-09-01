@@ -49,7 +49,7 @@
 
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
-| [迭代 22：有序收藏模块基础](iteration-22-ordered-favorite-module-foundation.zh-CN.md) | `Planned` | 2026-09-01 | 作者要求从已接受的当前产品契约进行规划；本记录不授权实施。 |
+| [迭代 22：有序收藏模块基础](iteration-22-ordered-favorite-module-foundation.zh-CN.md) | `Completed` | 2026-09-01 | 实现、聚焦测试、静态检查、作者报告的编译结果和功能验收满足本迭代边界。 |
 | [迭代 23：模块样式与排序](iteration-23-module-style-and-ordering.zh-CN.md) | `Planned` | 2026-09-01 | 产品契约在迭代 22 基础上定义模块选择、样式编辑、条带创建和整模块排序。 |
 | [迭代 24：应用编辑与跨模块移动](iteration-24-application-editing-and-cross-module-movement.zh-CN.md) | `Planned` | 2026-09-01 | 产品契约在模块类型和目标位置存在后定义收起式 dock 移除、撤销和插入移动。 |
 | [迭代 25：升级、回归与版本收尾](iteration-25-upgrade-regression-and-version-closure.zh-CN.md) | `Planned` | 2026-09-01 | 所选 Home 闭环完成后，版本完成需要集成的 Home 采用、兼容性、产物和作者验收证据。 |
@@ -58,7 +58,7 @@
 
 ### 迭代 22
 
-[契约](iteration-22-ordered-favorite-module-foundation.zh-CN.md)。当前没有实施或验证证据。状态保持 `Planned`；缺少证据不代表通过。
+[契约](iteration-22-ordered-favorite-module-foundation.zh-CN.md)。实现已建立有序模块存储、对可读旧数据的一次性重置、通过 Drawer 创建首个纵向模块、有序 Home 渲染与启动，以及聚焦的存储/UI 测试。最终备份源与重试加载修复保持了要求的失败状态，运行时隐私文本也已反映采用后的存储边界。作者报告编译成功并完成基本功能验收，包括最终修复后的验收。Agent 对 `git diff --check` 和资源 XML 解析的静态检查通过；Agent 未运行 Gradle 和 instrumentation。状态为 `Completed`。后果重大的持久化方向仍遵循仓库规则：仅在已接受实现完成提交并同步后创建 `Active` ADR。
 
 ### 迭代 23
 
@@ -102,4 +102,4 @@
 
 ## 完成结果
 
-当前没有完成结果。`1.4.0` 和迭代 22–25 保持 `Planned`；本文件不授权生产实现。
+当前没有版本完成结果。迭代 22 为 `Completed`；迭代 23–25 保持 `Planned`。本文件不授权推送、发布或公开分发。

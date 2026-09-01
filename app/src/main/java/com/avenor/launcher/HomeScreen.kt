@@ -155,7 +155,6 @@ internal fun HomeScreen(
     onAddFavoritesToList: (String) -> Unit = {},
     onAddProvisionalFavorites: () -> Unit = {},
     onAddFavoritesToBar: (String) -> Unit = {},
-    onAddProvisionalFavoriteBar: () -> Unit = {},
     favoriteRevealContainerId: String? = null,
     favoriteRevealContainerType: FavoriteContainerType? = null,
     favoriteRevealIdentity: LaunchableIdentity? = null,
@@ -1109,8 +1108,11 @@ internal fun HomeScreen(
                     onRetry = onRetryFavorites,
                 )
 
-                    is FavoriteReadState.Readable -> {
-                    if (favoriteState.aggregate.verticalLists.isEmpty() && editMode) {
+                is FavoriteReadState.Readable -> {
+                    val orderedModules = favoriteState.orderedModules
+                    val hasFavorites = orderedModules?.isNotEmpty()
+                        ?: favoriteState.aggregate.identities.isNotEmpty()
+                    if (!hasFavorites && editMode) {
                         HomeFavoriteProvisionalList(
                             modifier = Modifier.fillMaxWidth(),
                             onClick = onAddProvisionalFavorites,
@@ -1120,17 +1122,17 @@ internal fun HomeScreen(
                                     PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
                                 ) == true,
                             onBoundsInWindow = {
-                            applicationContainerBoundsInWindow[
-                                PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0
-                            ] = it
-                            applicationContainerDescriptors[
-                                PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0
-                            ] = ApplicationDragContainerDescriptor(
-                                key = PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
-                                type = FavoriteContainerType.VerticalList,
-                                axis = ApplicationDragAxis.Vertical,
-                                bounds = it,
-                            )
+                                applicationContainerBoundsInWindow[
+                                    PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0
+                                ] = it
+                                applicationContainerDescriptors[
+                                    PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0
+                                ] = ApplicationDragContainerDescriptor(
+                                    key = PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
+                                    type = FavoriteContainerType.VerticalList,
+                                    axis = ApplicationDragAxis.Vertical,
+                                    bounds = it,
+                                )
                             },
                             onDisposed = {
                                 applicationContainerBoundsInWindow.remove(
@@ -1141,26 +1143,47 @@ internal fun HomeScreen(
                                 )
                             },
                         )
-                    } else if (favoriteState.aggregate.verticalLists.isEmpty() &&
-                        favoriteState.aggregate.favoriteBars.isEmpty()
-                    ) {
+                    } else if (!hasFavorites) {
                         Text(
                             text = stringResource(R.string.home_empty_favorites),
                             color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.testTag("home_favorites_empty"),
                         )
-                    } else if (!editMode && favoriteState.aggregate.verticalLists.isNotEmpty()) {
-                        HomeFavoriteComposition(
-                            verticalLists = favoriteState.aggregate.verticalLists,
+                    } else if (!editMode) {
+                        HomeOrderedModuleComposition(
+                            modules = orderedModules
+                                ?: (
+                                    favoriteState.aggregate.verticalLists.map { container ->
+                                        OrderedFavoriteModule(
+                                            id = container.id,
+                                            type = OrderedFavoriteModuleType.Vertical,
+                                            identities = container.identities,
+                                        )
+                                    } + favoriteState.aggregate.favoriteBars.map { container ->
+                                        OrderedFavoriteModule(
+                                            id = container.id,
+                                            type = OrderedFavoriteModuleType.Ribbon,
+                                            identities = container.identities,
+                                        )
+                                    }
+                                ),
                             availabilityByIdentity = favoriteAvailability,
-                            favoriteListState = favoriteListState,
-                            favoriteNestedScrollConnection = favoriteNestedScrollConnection,
-                            companionFavoriteListState = companionFavoriteListState,
-                            companionFavoriteNestedScrollConnection =
-                                companionFavoriteNestedScrollConnection,
+                            listState = favoriteListState,
+                            nestedScrollConnection = favoriteNestedScrollConnection,
+                            editMode = false,
                             onLaunchFavorite = onLaunchFavorite,
                             onLongPressFavorite = onLongPressFavorite,
+                        )
+                    } else if (orderedModules != null) {
+                        HomeOrderedModuleComposition(
+                            modules = orderedModules,
+                            availabilityByIdentity = favoriteAvailability,
+                            listState = favoriteListState,
+                            nestedScrollConnection = null,
+                            editMode = true,
+                            onLaunchFavorite = {},
+                            onLongPressFavorite = {},
                         )
                     } else if (editMode) {
                         val persistedEditAggregate = pendingEditAggregate
@@ -1665,8 +1688,9 @@ internal fun HomeScreen(
                 } ?: renderedAggregate.favoriteBars
                 val renderedBars = favoriteBarContainerDragSession?.displayedBars
                     ?: itemReorderedBars
-                if (renderedBars.isNotEmpty() ||
-                    (editMode && renderedBars.size < 5)
+                if (editMode &&
+                    favoriteState.orderedModules == null &&
+                    (renderedBars.isNotEmpty() || renderedBars.size < 5)
                 ) {
                     if (aggregate.verticalLists.isNotEmpty() || editMode) {
                         Spacer(Modifier.height(dimensionResource(R.dimen.home_module_spacing)))
@@ -1678,7 +1702,6 @@ internal fun HomeScreen(
                         onLaunchFavorite = onLaunchFavorite,
                         onLongPressFavorite = onLongPressFavorite,
                         onAddFavoritesToBar = onAddFavoritesToBar,
-                        onAddProvisionalFavoriteBar = onAddProvisionalFavoriteBar,
                         favoriteBarStates = favoriteBarStates,
                         favoriteBarBoundsInWindow = favoriteBarBoundsInWindow,
                         applicationContainerBoundsInWindow =
@@ -3533,7 +3556,6 @@ private fun HomeFavoriteBars(
     onLaunchFavorite: (FavoriteAvailability) -> Unit,
     onLongPressFavorite: (LaunchableEntry) -> Unit,
     onAddFavoritesToBar: (String) -> Unit,
-    onAddProvisionalFavoriteBar: () -> Unit,
     favoriteBarStates: MutableMap<String, LazyListState>,
     favoriteBarBoundsInWindow: MutableMap<String, Rect>,
     applicationContainerBoundsInWindow: MutableMap<String, Rect>,
@@ -3789,80 +3811,6 @@ private fun HomeFavoriteBars(
                         onDragCancel = onBarDragCancel,
                     )
                 }
-            }
-        }
-        if (editMode && favoriteBars.size < 5) {
-            DisposableEffect(PROVISIONAL_FAVORITE_BAR_DRAG_KEY) {
-                onDispose {
-                    applicationContainerBoundsInWindow.remove(
-                        PROVISIONAL_FAVORITE_BAR_DRAG_KEY,
-                    )
-                    applicationContainerDescriptors.remove(
-                        PROVISIONAL_FAVORITE_BAR_DRAG_KEY,
-                    )
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(dimensionResource(R.dimen.home_favorite_bar_height))
-                    .onGloballyPositioned { coordinates ->
-                        applicationContainerBoundsInWindow[
-                            PROVISIONAL_FAVORITE_BAR_DRAG_KEY
-                        ] = Rect(
-                            offset = coordinates.positionInWindow(),
-                            size = coordinates.size.toSize(),
-                        )
-                        applicationContainerDescriptors[
-                            PROVISIONAL_FAVORITE_BAR_DRAG_KEY
-                        ] = ApplicationDragContainerDescriptor(
-                            key = PROVISIONAL_FAVORITE_BAR_DRAG_KEY,
-                            type = FavoriteContainerType.FavoriteBar,
-                            axis = ApplicationDragAxis.Horizontal,
-                            bounds = Rect(
-                                offset = coordinates.positionInWindow(),
-                                size = coordinates.size.toSize(),
-                            ),
-                        )
-                    }
-                    .border(
-                        width = dimensionResource(R.dimen.home_favorite_bar_border_width),
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = borderAlpha),
-                        shape = RoundedCornerShape(
-                            dimensionResource(R.dimen.home_favorite_bar_corner_radius),
-                        ),
-                    )
-                    .clip(RoundedCornerShape(
-                        dimensionResource(R.dimen.home_favorite_bar_corner_radius),
-                    ))
-                    .then(
-                        if (applicationDropTargetKey ==
-                            PROVISIONAL_FAVORITE_BAR_DRAG_KEY
-                        ) {
-                            Modifier.border(
-                                width = dimensionResource(
-                                    R.dimen.home_favorite_exchange_border_width,
-                                ),
-                                color = colorResource(
-                                    R.color.home_favorite_exchange_border,
-                                ),
-                                shape = RoundedCornerShape(
-                                    dimensionResource(
-                                        R.dimen.home_favorite_exchange_border_radius,
-                                    ),
-                                ),
-                            )
-                        } else {
-                            Modifier
-                        },
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                HomeFavoriteAddControl(
-                    onClick = onAddProvisionalFavoriteBar,
-                    testTag = "favorite_bar_provisional_add",
-                    labelRes = R.string.new_favorite_bar,
-                )
             }
         }
     }
@@ -4291,7 +4239,7 @@ private fun HomeFavoriteProvisionalList(
     onBoundsInWindow: (Rect) -> Unit,
     onDisposed: () -> Unit,
 ) {
-    DisposableEffect(onDisposed) {
+    DisposableEffect(Unit) {
         onDispose(onDisposed)
     }
     Column(
@@ -4539,6 +4487,107 @@ private fun HomeFavoriteProvisionalList(
     }
 
     @Composable
+    private fun HomeOrderedModuleComposition(
+        modules: List<OrderedFavoriteModule>,
+        availabilityByIdentity: Map<LaunchableIdentity, FavoriteAvailability>,
+        listState: LazyListState,
+        nestedScrollConnection: NestedScrollConnection?,
+        editMode: Boolean,
+        onLaunchFavorite: (FavoriteAvailability) -> Unit,
+        onLongPressFavorite: (LaunchableEntry) -> Unit,
+    ) {
+        val ribbonListStates = remember {
+            mutableMapOf<String, LazyListState>()
+        }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(
+                    nestedScrollConnection?.let { Modifier.nestedScroll(it) } ?: Modifier,
+            )
+            .testTag("home_ordered_favorite_modules"),
+            state = listState,
+            verticalArrangement = Arrangement.spacedBy(
+                dimensionResource(R.dimen.home_module_spacing),
+            ),
+        ) {
+            items(
+                items = modules,
+                key = { it.id },
+            ) { module ->
+                when (module.type) {
+                    OrderedFavoriteModuleType.Vertical -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .editSurface(editMode),
+                        ) {
+                            module.identities.forEach { identity ->
+                                val availability = availabilityByIdentity[identity]
+                                    ?: FavoriteAvailability.Unknown(null)
+                                HomeFavoriteRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    availability = availability,
+                                    onClick = { onLaunchFavorite(availability) },
+                                    onLongClick = {
+                                        availability.presentationEntry?.let(onLongPressFavorite)
+                                    },
+                                    editMode = false,
+                                    compact = false,
+                                    listSize = FavoriteListSize.Medium,
+                                    exchangeHighlight = false,
+                                    onRowBoundsInWindow = { _, _ -> },
+                                    onHandleBoundsInWindow = {},
+                                )
+                            }
+                        }
+                    }
+
+                    OrderedFavoriteModuleType.Ribbon -> {
+                        val ribbonListState = ribbonListStates.getOrPut(module.id) {
+                            LazyListState()
+                        }
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(dimensionResource(R.dimen.home_favorite_bar_height))
+                                .editSurface(editMode),
+                            state = ribbonListState,
+                            horizontalArrangement = Arrangement.spacedBy(
+                                dimensionResource(R.dimen.home_favorite_bar_item_spacing),
+                            ),
+                        ) {
+                            items(
+                                items = module.identities,
+                                key = { it.stableKey() },
+                            ) { identity ->
+                                val availability = availabilityByIdentity[identity]
+                                    ?: FavoriteAvailability.Unknown(null)
+                                HomeFavoriteRow(
+                                    modifier = Modifier.width(
+                                        dimensionResource(R.dimen.home_favorite_bar_item_width),
+                                    ),
+                                    availability = availability,
+                                    onClick = { onLaunchFavorite(availability) },
+                                    onLongClick = {
+                                        availability.presentationEntry?.let(onLongPressFavorite)
+                                    },
+                                    editMode = false,
+                                    compact = true,
+                                    listSize = FavoriteListSize.Medium,
+                                    exchangeHighlight = false,
+                                    onRowBoundsInWindow = { _, _ -> },
+                                    onHandleBoundsInWindow = {},
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
     private fun HomeFavoriteComposition(
         verticalLists: List<FavoriteContainer>,
         availabilityByIdentity: Map<LaunchableIdentity, FavoriteAvailability>,
@@ -4639,6 +4688,9 @@ private fun HomeFavoriteProvisionalList(
         )
         val removeIconSize = dimensionResource(R.dimen.home_favorite_bar_remove_icon_size)
         val iconStartMargin = dimensionResource(R.dimen.home_favorite_list_icon_start_margin)
+        val ribbonShape = RoundedCornerShape(
+            dimensionResource(R.dimen.home_favorite_bar_corner_radius),
+        )
         val removeInteractionSource = remember(entry?.identity) { MutableInteractionSource() }
         Box(
             modifier = modifier
@@ -4654,6 +4706,30 @@ private fun HomeFavoriteProvisionalList(
                         )
                     } else {
                         Modifier.height(dimensionResource(listSize.rowHeightResource()))
+                    },
+                )
+                .then(
+                    if (compact) {
+                        Modifier
+                            .background(
+                                MaterialTheme.colorScheme.onBackground.copy(
+                                    alpha = integerResource(
+                                        R.integer.home_favorite_bar_item_background_alpha_percent,
+                                    ) / 100f,
+                                ),
+                                ribbonShape,
+                            )
+                            .border(
+                                width = dimensionResource(R.dimen.home_favorite_bar_border_width),
+                                color = MaterialTheme.colorScheme.onBackground.copy(
+                                    alpha = integerResource(
+                                        R.integer.home_favorite_bar_border_alpha_percent,
+                                    ) / 100f,
+                                ),
+                                shape = ribbonShape,
+                            )
+                    } else {
+                        Modifier
                     },
                 )
                 .onGloballyPositioned {
@@ -4701,7 +4777,11 @@ private fun HomeFavoriteProvisionalList(
                     .matchParentSize()
                     .padding(
                         start = iconStartMargin,
-                        end = if (editMode) handleTargetSize else 0.dp,
+                        end = when {
+                            editMode -> handleTargetSize
+                            compact -> dimensionResource(R.dimen.home_favorite_bar_item_inset)
+                            else -> 0.dp
+                        },
                     ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -4728,7 +4808,15 @@ private fun HomeFavoriteProvisionalList(
                     )
                 }
             }
-            Spacer(Modifier.width(dimensionResource(R.dimen.home_favorite_icon_label_gap)))
+            Spacer(
+                Modifier.width(
+                    if (compact) {
+                        dimensionResource(R.dimen.home_favorite_bar_icon_label_gap)
+                    } else {
+                        dimensionResource(R.dimen.home_favorite_icon_label_gap)
+                    },
+                ),
+            )
             val displayText = when (availability) {
                 is FavoriteAvailability.Available -> availability.entry.label
                 is FavoriteAvailability.Disabled -> entry?.let {
