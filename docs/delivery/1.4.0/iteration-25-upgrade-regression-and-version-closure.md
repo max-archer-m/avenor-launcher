@@ -8,7 +8,7 @@ Produce truthful evidence that the selected `1.4.0` Home-module journey adopts s
 
 ## Product and version references
 
-- Product-contract baseline: `48d5bd470c84d222b6e89e128f438da1f25e595b`
+- Product-contract baseline: `7cae837dafb188896dd24bd43aae58022c81fe11`
 - [1.4.0 delivery](delivery.md)
 - [1.3.0 completed delivery](../1.3.0/delivery.md)
 - [Validation guide](../../validation.md)

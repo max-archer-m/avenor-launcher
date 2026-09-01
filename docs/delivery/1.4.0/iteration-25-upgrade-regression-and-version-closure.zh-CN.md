@@ -8,7 +8,7 @@
 
 ## 产品和版本引用
 
-- 产品契约基线：`48d5bd470c84d222b6e89e128f438da1f25e595b`
+- 产品契约基线：`7cae837dafb188896dd24bd43aae58022c81fe11`
 - [1.4.0 交付](delivery.zh-CN.md)
 - [1.3.0 已完成交付](../1.3.0/delivery.zh-CN.md)
 - [验证指南](../../validation.zh-CN.md)

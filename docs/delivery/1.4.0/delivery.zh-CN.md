@@ -2,7 +2,7 @@
 
 > 英文语义源：[delivery.md](delivery.md)。
 >
-> 本记录规划从产品契约基线 `48d5bd470c84d222b6e89e128f438da1f25e595b` 中选择的行为。状态和证据不授权实施、版本变更、提交、推送、tag、产物移动、发布或发行。
+> 本记录规划从产品契约基线 `7cae837dafb188896dd24bd43aae58022c81fe11` 中选择的行为。状态和证据不授权实施、版本变更、提交、推送、tag、产物移动、发布或发行。
 
 ## 版本意图
 
@@ -50,8 +50,8 @@
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
 | [迭代 22：有序收藏模块基础](iteration-22-ordered-favorite-module-foundation.zh-CN.md) | `Completed` | 2026-09-01 | 实现、聚焦测试、静态检查、作者报告的编译结果和功能验收满足本迭代边界。 |
-| [迭代 23：模块样式与排序](iteration-23-module-style-and-ordering.zh-CN.md) | `Planned` | 2026-09-01 | 产品契约在迭代 22 基础上定义模块选择、样式编辑、条带创建和整模块排序。 |
-| [迭代 24：应用编辑与跨模块移动](iteration-24-application-editing-and-cross-module-movement.zh-CN.md) | `Planned` | 2026-09-01 | 产品契约在模块类型和目标位置存在后定义收起式 dock 移除、撤销和插入移动。 |
+| [迭代 23：模块样式与排序](iteration-23-module-style-and-ordering.zh-CN.md) | `Planned` | 2026-09-01 | 已接受的产品契约在迭代 22 基础上定义新增收藏入口、模块选择、样式编辑、条带创建和整模块排序。 |
+| [迭代 24：应用编辑与跨模块移动](iteration-24-application-editing-and-cross-module-movement.zh-CN.md) | `Planned` | 2026-09-01 | 已接受的产品契约在模块类型、目标位置和新增收藏入口存在后定义收起式 dock 移除、撤销、插入移动和拖动创建落点。 |
 | [迭代 25：升级、回归与版本收尾](iteration-25-upgrade-regression-and-version-closure.zh-CN.md) | `Planned` | 2026-09-01 | 所选 Home 闭环完成后，版本完成需要集成的 Home 采用、兼容性、产物和作者验收证据。 |
 
 ## 迭代证据和结果
@@ -62,11 +62,11 @@
 
 ### 迭代 23
 
-[契约](iteration-23-module-style-and-ordering.zh-CN.md)。当前没有实施或验证证据。状态保持 `Planned`；缺少证据不代表通过。
+[契约](iteration-23-module-style-and-ordering.zh-CN.md)。当前没有实施或验证证据。契约已重新基线到已接受的产品契约 commit `7cae837dafb188896dd24bd43aae58022c81fe11`：两个新增操作从样式设置面板移到收藏主列表，并在每个模块末尾增加一个新增收藏入口。状态保持 `Planned`；缺少证据不代表通过。
 
 ### 迭代 24
 
-[契约](iteration-24-application-editing-and-cross-module-movement.zh-CN.md)。当前没有实施或验证证据。状态保持 `Planned`；缺少证据不代表通过。
+[契约](iteration-24-application-editing-and-cross-module-movement.zh-CN.md)。当前没有实施或验证证据。契约已重新基线到已接受的产品契约 commit `7cae837dafb188896dd24bd43aae58022c81fe11`，纳入把应用松手在主列表新增收藏入口上的拖动创建落点。状态保持 `Planned`；缺少证据不代表通过。
 
 ### 迭代 25
 

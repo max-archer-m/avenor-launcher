@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [delivery.zh-CN.md](delivery.zh-CN.md).
 >
-> This record plans behavior selected from product-contract baseline `48d5bd470c84d222b6e89e128f438da1f25e595b`. Status and evidence do not authorize implementation, a version change, commit, push, tag, artifact movement, publication, or release.
+> This record plans behavior selected from product-contract baseline `7cae837dafb188896dd24bd43aae58022c81fe11`. Status and evidence do not authorize implementation, a version change, commit, push, tag, artifact movement, publication, or release.
 
 ## Version intent
 
@@ -50,8 +50,8 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
 | [Iteration 22: Ordered Favorite Module Foundation](iteration-22-ordered-favorite-module-foundation.md) | `Completed` | 2026-09-01 | The implementation, focused tests, static checks, author-reported compilation, and functional acceptance satisfy the iteration boundary. |
-| [Iteration 23: Module Style and Ordering](iteration-23-module-style-and-ordering.md) | `Planned` | 2026-09-01 | The product contract defines module selection, style editing, ribbon creation, and whole-module ordering on the Iteration 22 foundation. |
-| [Iteration 24: Application Editing and Cross-Module Movement](iteration-24-application-editing-and-cross-module-movement.md) | `Planned` | 2026-09-01 | The product contract defines collapsed-dock removal, Undo, and insertion movement after module types and destinations exist. |
+| [Iteration 23: Module Style and Ordering](iteration-23-module-style-and-ordering.md) | `Planned` | 2026-09-01 | The accepted product contract defines add-favorite entries, module selection, style editing, ribbon creation, and whole-module ordering on the Iteration 22 foundation. |
+| [Iteration 24: Application Editing and Cross-Module Movement](iteration-24-application-editing-and-cross-module-movement.md) | `Planned` | 2026-09-01 | The accepted product contract defines collapsed-dock removal, Undo, insertion movement, and the drop-to-create destination after module types, destinations, and add-favorite entries exist. |
 | [Iteration 25: Upgrade, Regression, and Version Closure](iteration-25-upgrade-regression-and-version-closure.md) | `Planned` | 2026-09-01 | Version completion requires integrated Home adoption, compatibility, artifact, and author-acceptance evidence after the selected Home loop is complete. |
 
 ## Iteration evidence and results
@@ -62,11 +62,11 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 
 ### Iteration 23
 
-[Contract](iteration-23-module-style-and-ordering.md). No implementation or validation evidence exists. Status remains `Planned`; absent evidence is not a pass.
+[Contract](iteration-23-module-style-and-ordering.md). No implementation or validation evidence exists. The contract is rebaselined to accepted product-contract commit `7cae837dafb188896dd24bd43aae58022c81fe11`: both add actions move from the style settings panel into the favorite main list, and every module gains one trailing add-favorite entry. Status remains `Planned`; absent evidence is not a pass.
 
 ### Iteration 24
 
-[Contract](iteration-24-application-editing-and-cross-module-movement.md). No implementation or validation evidence exists. Status remains `Planned`; absent evidence is not a pass.
+[Contract](iteration-24-application-editing-and-cross-module-movement.md). No implementation or validation evidence exists. The contract is rebaselined to accepted product-contract commit `7cae837dafb188896dd24bd43aae58022c81fe11`, including the drop-to-create destination when an application is released on a main-list add-favorite entry. Status remains `Planned`; absent evidence is not a pass.
 
 ### Iteration 25
 
