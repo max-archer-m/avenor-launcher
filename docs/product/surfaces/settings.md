@@ -30,6 +30,8 @@
 
 ### About
 
+This heading organizes the behavior contract and is not a visible Settings group heading.
+
 - **Privacy:** Opens the local Privacy Bottom Sheet defined by [privacy.md](../features/privacy.md).
 - **Avenor License:** Opens the local Avenor License Bottom Sheet; the English label uses `License`.
 - **Third-party License:** Its applicability to the current dependency set is `To be decided` pending a complete dependency-and-license inventory and any qualified review that inventory requires. The entry remains absent until the project author accepts both the inventory result and the exact local offline-readable notice content. Absence of the entry is not a claim that no third-party obligation exists.
@@ -43,6 +45,7 @@ Complex logs, update checks, backup, cloud synchronization, diagnostic export, a
 ## Privacy presentation
 
 - Selecting Privacy opens a dark modal Bottom Sheet containing a local, readable privacy statement. A dedicated Privacy page is not part of the current scope.
+- Its exterior shell, fixed title, and scrolling body follow the [Settings presentation specification](../presentation/settings.md#informational-bottom-sheets).
 - The statement must remain available offline.
 - The sheet uses the same scrim, top drag handle, drag-to-dismiss, scrim-tap dismissal, and Back dismissal behavior as the application action sheet.
 - Privacy content scrolls vertically when it exceeds the available sheet height. Closing returns to the same Settings position.
@@ -53,6 +56,7 @@ Complex logs, update checks, backup, cloud synchronization, diagnostic export, a
 
 - Avenor License and an author-accepted Third-party License, when applicable, are separate Settings entries.
 - Each opens a dark, local, offline-readable presentation. Long content scrolls vertically.
+- Their exterior shell, fixed title, and scrolling body follow the [Settings presentation specification](../presentation/settings.md#informational-bottom-sheets).
 - Their modal dismissal and Settings-position restoration match the Privacy Bottom Sheet.
 
 ## Settings item roles

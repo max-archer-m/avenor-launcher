@@ -166,7 +166,7 @@ The product lets users maintain Home favorites and use individual Settings entri
 - Durable user-content data consists of ordered favorite modules, module type, stable favorite identity and position, and applicable vertical-module size, name placement, and items-per-row values. A stable identity has one module destination and cannot be duplicated across modules.
 - Durable local configuration also includes the selected Drawer application size, name placement, items-per-row count, section-anchor presentation, and background mode. Each valid change is saved as one complete display-setting state.
 - Primary, cloned, and work-profile identities must remain distinguishable and must not be stored or deduplicated solely by package name.
-- The latest edit-mode removal snapshot is transient Undo state, not durable undo history.
+- The latest eligible application-removal snapshot is transient Undo state, not durable undo history.
 - Time and date come from the device system and are not retained historically.
 - Avenor does not collect or store accessibility window content or events, notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.
 - Avenor has no account, cloud synchronization, server, cloud backup, or cross-device backup. Android cloud backup and device-to-device transfer backup remain disabled for Avenor-owned favorite and display-setting data until an author-approved restoration contract exists.

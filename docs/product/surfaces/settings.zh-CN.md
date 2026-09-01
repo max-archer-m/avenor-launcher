@@ -30,6 +30,8 @@
 
 ### 关于
 
+该标题只用于组织行为契约，不是 Settings 中可见的分组标题。
+
 - **隐私：** 打开 [privacy.zh-CN.md](../features/privacy.zh-CN.md) 定义的本地隐私 Bottom Sheet。
 - **Avenor License：** 打开本地 Avenor License Bottom Sheet；英文统一使用 `License`。
 - **第三方 License：** 当前依赖集合是否适用该入口为 `To be decided`，需要先完成完整依赖与许可证盘点，并在盘点需要时取得专业复核。项目作者接受盘点结果和准确的本地离线可读通知正文前，该入口保持不显示。入口缺失不表示不存在第三方义务。
@@ -43,6 +45,7 @@
 ## 隐私呈现
 
 - 点击隐私后，打开深色模态 Bottom Sheet，展示本地可读的隐私声明；当前不建立独立隐私页面。
+- 其外框、固定标题和可滚动正文遵循 [Settings 表现规范](../presentation/settings.zh-CN.md#信息-bottom-sheet)。
 - 隐私声明必须支持离线阅读。
 - 面板的遮罩、顶部拖动柄、下拉关闭、点击遮罩关闭和 Back 关闭行为与应用操作面板一致。
 - 隐私内容超过面板可用高度时纵向滚动；关闭后返回 Settings 原位置。
@@ -53,6 +56,7 @@
 
 - Avenor License 与适用时经过作者接受的第三方 License 是两个独立 Settings 入口。
 - 两者均打开深色、本地且可离线阅读的内容；长内容可以纵向滚动。
+- 两者的外框、固定标题和可滚动正文遵循 [Settings 表现规范](../presentation/settings.zh-CN.md#信息-bottom-sheet)。
 - 模态关闭方式和 Settings 位置恢复行为与隐私 Bottom Sheet 一致。
 
 ## 设置项角色

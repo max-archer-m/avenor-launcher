@@ -26,6 +26,7 @@ Settings contains one primary item titled `Double-tap to lock`.
 
 - Supporting text is `On` when the required Avenor accessibility service is enabled and connected, and `Off` otherwise.
 - Selecting the item opens a local explanation surface showing the current state, purpose, privacy boundary, and an `Open accessibility settings` action.
+- The explanation surface uses the informational Bottom Sheet geometry defined by the [Settings presentation specification](../presentation/settings.md#informational-bottom-sheets). Its title remains fixed while an overflowing body scrolls.
 - Before a handoff intended to enable the service, Avenor presents the separate prominent disclosure defined in [privacy.md](privacy.md#double-tap-lock-prominent-disclosure), with `Cancel` and `Agree and continue`. Agree and continue confirms only the current handoff and opens the system destination; Avenor retains no disclosure-acknowledgement history, and continuing does not imply that Android enabled the service.
 - Returning from system settings refreshes the actual service state immediately. Android's state is authoritative; Avenor does not display an independent toggle that can become inconsistent with it.
 - When enabled, the explanation surface offers the same system-settings handoff so the user can review or disable the service.

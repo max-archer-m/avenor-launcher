@@ -15,11 +15,11 @@
 | Vertical favorite module | 纵向收藏模块 | 全宽模块，其自然展开的全部条目共享一组模块级尺寸、名称位置和每行数量样式 |
 | Horizontal favorite ribbon | 横向收藏织带 | 全宽单行模块，包含固定样式、按内容测量的收藏条目，仅在溢出时横向滚动 |
 | Edit dock | 编辑坞 | Home 编辑模式底部固定区域，在面板收起与展开时都保持可见，并包含展开或收起非模态模块样式面板的入口 |
-| Style panel | 样式面板 | 可展开的 Home 编辑面板，用于选择模块、修改适用模块样式、新增模块或删除已选模块 |
+| Style panel | 样式面板 | 可展开的 Home 编辑面板，用于选择模块、修改适用的纵向模块样式和新增模块；不提供完整模块删除操作 |
 | Application shortcut | 应用快捷操作 | 应用通过平台暴露的操作 |
 | Launcher action | 启动器操作 | Avenor 提供的操作，例如收藏、编辑或卸载 |
 | Application action sheet | 应用操作面板 | 包含应用身份、应用快捷操作和启动器操作的模态 Bottom Sheet |
-| Section anchor | 分组锚点 | Drawer 中的分组标题，例如 A 或 `#`；内嵌展示位于分组上方，左侧展示位于分组应用旁侧，两种展示均随应用列表滚动且不保持吸顶 |
+| Section anchor | 分组锚点 | Drawer 中的分组标题，例如 A 或 `#`；内嵌展示位于分组上方并随列表滚动，左侧展示占据所属分组的起始侧列，并只在该分组经过视口期间吸附于固定顶部应用栏下方 |
 | Alphabet index | 字母索引 | Drawer 右侧用于跳转到锚点的固定索引 |
 | Edit mode | 编辑模式 | 从收藏操作或合格空白区域长按进入，在 Home 中显示编辑坞、模块移动、应用编辑和面向明确目标的新增控件的状态 |
 | Favorite multi-selection | 收藏多选 | Drawer 的临时模式，为一个已记录的 Home 收藏目标收集一组有顺序且此前未收藏的应用 |

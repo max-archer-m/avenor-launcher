@@ -15,11 +15,11 @@
 | Vertical favorite module | 纵向收藏模块 | A full-width module whose naturally expanded entries share one module-level size, name placement, and items-per-row style |
 | Horizontal favorite ribbon | 横向收藏织带 | A full-width, single-row module of fixed-style, content-measured favorite entries that scrolls horizontally only on overflow |
 | Edit dock | 编辑坞 | The fixed bottom Home edit region that remains visible in both panel states and contains the affordance that expands or collapses the non-modal module style panel |
-| Style panel | 样式面板 | The expandable Home edit panel used to select modules, change applicable module style, add modules, or delete the selected module |
+| Style panel | 样式面板 | The expandable Home edit panel used to select modules, change applicable vertical-module style, and add modules; it does not expose complete-module deletion |
 | Application shortcut | 应用快捷操作 | An action exposed by the application through the platform |
 | Launcher action | 启动器操作 | An action supplied by Avenor, such as favorite, edit, or uninstall |
 | Application action sheet | 应用操作面板 | The modal Bottom Sheet containing application identity, application shortcuts, and Launcher actions |
-| Section anchor | 分组锚点 | A Drawer section heading such as A or `#`; inline presentation places it above its section and left-side presentation places it beside its section, with both presentations scrolling with the application list rather than remaining pinned |
+| Section anchor | 分组锚点 | A Drawer section heading such as A or `#`; inline presentation scrolls above its section, while left-side presentation occupies its section's leading column and pins below the fixed top app bar only while that section crosses the viewport |
 | Alphabet index | 字母索引 | The fixed right-side Drawer index used to jump between anchors |
 | Edit mode | 编辑模式 | The Home state entered from a favorite action or eligible blank-space long press, exposing the edit dock, module movement, application editing, and destination-targeted add controls |
 | Favorite multi-selection | 收藏多选 | The temporary Drawer mode that collects an ordered set of previously unfavorited applications for one captured Home favorite destination |

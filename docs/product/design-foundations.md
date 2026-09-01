@@ -58,7 +58,7 @@ The current shared text-size tokens are:
 
 - A standard functional icon is `24dp x 24dp`. This value describes visible artwork, not its complete interaction boundary.
 - An independently interactive standard functional icon remains inside a focusable target of at least `48dp x 48dp`. When an icon and label form one action, the combined item is one interaction and accessibility target.
-- A standalone non-interactive status icon is `40dp x 40dp`. It has no separate touch target or ripple.
+- A standalone non-interactive status icon or loading progress indicator is `48dp x 48dp`. It has no separate touch target or ripple.
 - Functional and status icons use the applicable semantic content color and consistent optical weight. An icon-only control has a localized accessibility name; decorative or already-labelled icons do not expose duplicate descriptions.
 - Defining a shared icon token does not add the corresponding control to a surface.
 - Native adaptive application icons follow the current device mask. Legacy icons are normalized within that mask while preserving recognizable artwork. Platform clone or profile badges are applied after normalization and remain consistent across application surfaces.
@@ -70,7 +70,7 @@ The current shared text-size tokens are:
 
 - Interactive controls should provide a focusable target of at least `48dp x 48dp`. A smaller component-specific target requires an author-accepted reason and focused device evidence; dense layouts should first separate visible size from hit geometry.
 - Pressed, focused, selected, and disabled states must not rely on color alone.
-- The exact shared disabled-content opacity is `To be decided`. Disabled content must meanwhile retain an explicit disabled accessibility state and suppress actionable ripple or activation; a component-specific contract may define an additional non-color indicator but must not invent an independent opacity as a durable product value.
+- Shared disabled content uses `38%` opacity, retains an explicit disabled accessibility state, and suppresses actionable ripple or activation. A component-specific contract may define an additional non-color indicator but must not invent an independent opacity as a durable product value.
 - Every enabled click or long-press target provides a bounded Material ripple from the initial press unless its component contract defines another visible press state. The indication is clipped to the actual target and cancelled when input becomes scrolling, dragging, a surface transition, cancellation, or another non-click interaction.
 - The current dark-theme ripple derives from `primaryTextColor`. A future light theme would derive it from that theme's foreground role; this does not add light-theme support now.
 - Ripple communicates a press, not successful completion. Disabled targets do not present an actionable ripple.

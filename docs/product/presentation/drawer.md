@@ -9,12 +9,12 @@ This document owns exact Drawer layout, typography, component geometry, and visu
 ## Surface and application content
 
 - Drawer uses a `56dp`-high top app bar below the status-bar safe inset. The bar remains visually transparent over the selected Drawer background rather than creating its own surface. Its Back arrow uses `24dp` artwork in a `48dp` interaction target.
-- At the Medium application size, an ordinary right-side-name row is at least `56dp` high and uses a visible `40dp x 40dp` application icon. The complete item remains the selection and long-press target.
-- In right-side-name arrangement, each item uses `8dp` leading inset, a `40dp` icon, `16dp` icon-to-name gap, and `8dp` trailing inset.
-- In below-icon-name arrangement, the `40dp` icon and name are centered as a unit with an `8dp` gap and at least `8dp` horizontal text insets.
-- Columns use `0dp` separate spacing and divide the available application-content width by the selected items-per-row count. Large, Medium, and Small names respectively use normal-weight shared `largeAppNameFontSize`, `primaryTextFontSize`, and `secondaryTextFontSize`, each with its shared line height and `primaryTextColor`. Every name uses one static line and end ellipsis.
+- Large, Medium, and Small right-side-name rows are exactly `64dp`, `56dp`, and `48dp` high and use visible `48dp`, `40dp`, and `32dp` application icons, respectively. Each icon is vertically centered, leaving `8dp` above and below it. The complete item remains the selection and long-press target.
+- In right-side-name arrangement, every size uses a `12dp` icon-to-name gap. Large, Medium, and Small names respectively use normal-weight shared `largeAppNameFontSize`, `primaryTextFontSize`, and `secondaryTextFontSize`, each with its shared line height and `primaryTextColor`.
+- In below-icon-name arrangement, each item uses `8dp` above its icon, a `12dp` icon-to-name gap, and `8dp` below the one-line name. The resulting exact Large, Medium, and Small item heights are `104dp`, `92dp`, and `80dp`, respectively. The icon-and-name unit is horizontally centered and retains at least `8dp` content inset on each side.
+- The application grid boundary begins `8dp` from the safe start edge and ends `8dp` before the safe-end AlphabetIndex reservation. Every cell adds its own `8dp` start and end visible-content inset. The resulting first and last visible-content boundaries are `16dp` from their applicable outer boundary, and adjacent cells produce `16dp` between visible content without a separate column gap. Implementations must not add another container and item inset that changes these observable totals.
+- Columns use `0dp` separate spacing and divide the available application-grid width by the selected items-per-row count. Every name uses one static line and end ellipsis.
 - At every application size, right-side-name arrangement supports one or two equal-width columns and below-icon-name arrangement supports one through four equal-width columns. The stepper's decrement and increment targets retain their ordinary geometry at a boundary but use the shared disabled presentation and expose disabled state rather than actionable Ripple. Their enabled or disabled presentation updates with the effective count in the same frame as a label-placement change; switching to Below at two enables increment, while switching to Right from three or four presents two with increment disabled.
-- The exact Large and Small application-row heights, arrangement insets, and below-icon-name item height are `To be decided`. Their icon sizes follow the confirmed `48dp`, `40dp`, and `32dp` Large-Medium-Small token sequence; unconfirmed values must not be derived by proportion.
 
 ## Background modes and contrast
 
@@ -22,6 +22,19 @@ This document owns exact Drawer layout, typography, component geometry, and visu
 - `Frosted glass` uses one fixed full-surface platform background blur when cross-window blur is available, combined with a low-opacity neutral glass tint. It does not sample the wallpaper or change blur, tint, or contrast by list position, pointer position, search result, or local luminance. Exact blur radius, tint role, and tint opacity are `To be decided` through Samsung Galaxy S23 Ultra and Google Pixel 8 calibration.
 - When platform blur is unavailable, the selected `Frosted glass` mode replaces blur with a more-opaque fixed neutral glass surface. Exact fallback role and opacity are `To be decided`; the fallback must preserve content contrast without presenting itself as an Error, warning, disabled setting, or automatic switch to `Transparent`.
 - Background mode changes only the Drawer background and applicable contrast treatment. Top-app-bar, application, anchor, search, AlphabetIndex, Settings, multi-selection, modal, and interaction geometry remain unchanged.
+
+### Device-calibration candidates
+
+The following experimental values are approved inputs for author-device comparison, not accepted final presentation values:
+
+| Treatment | Calibration candidate |
+| --- | --- |
+| Transparent foreground shadow | Black at `65%` opacity (`#A6000000`), `0dp` horizontal offset, `1dp` vertical offset, `2dp` blur radius |
+| Frosted-glass blur | Fixed `32dp` background-blur radius |
+| Frosted-glass tint | `darkSurfaceBaseColor` at `32%` opacity |
+| Blur-unavailable fallback | `darkSurfaceBaseColor` at `88%` opacity |
+
+Calibration must compare both Samsung Galaxy S23 Ultra and Google Pixel 8 across representative bright, dark, and visually complex wallpapers. Acceptance may replace any candidate independently. Until that evidence is recorded, the preceding `To be decided` values remain unresolved and an implementation must label results as experimental rather than claiming final visual acceptance.
 
 ## Search field and matching emphasis
 
@@ -35,14 +48,21 @@ This document owns exact Drawer layout, typography, component geometry, and visu
 
 ## Section anchors and alphabet index
 
-- Section anchors use bold shared `primaryTextFontSize`, its line height, and `primaryTextColor`. Inline anchors occupy a `32dp`-high row and use a `56dp` start inset so their text aligns with the application-name column; left-side anchors remain beside section entries. Both scroll with list content.
-- Alphabet index labels use `11sp` medium-weight text in fixed `20dp` slots. Its Settings gear uses `11dp` artwork inside one complete `20dp` slot.
+- Section anchors use bold shared `largeAppNameFontSize`, its line height, and `primaryTextColor`. An Inline anchor occupies a full-width `40dp` row, vertically centers its text, and places the text start exactly `16dp` from the safe start edge; it scrolls without pinning. A Left-side anchor occupies a `40dp`-wide column with `0dp` gap before the remaining application grid. Its text is horizontally centered and begins `8dp` below the owning section's top until section-bounded pinning places that same geometry below the top app bar. The Settings left-side anchor replaces text with `16dp x 16dp` `primaryTextColor` gear artwork, horizontally centered with the same `8dp` top offset. Neither anchor presentation changes layout while pinning or exposes an interaction target.
+- The AlphabetIndex occupies a fixed `32dp` width at the safe end edge and is vertically centered in the available application region. Labels use `11sp` medium-weight text in fixed `20dp` slots. Its Settings gear uses `11dp` artwork inside one complete `20dp` slot.
 - The maximum index model contains 28 fixed slots. The Drawer behavior contract owns the resulting available-height threshold and scrolling decision.
-- The active-token bubble uses at least `64dp x 64dp` and displays `32sp` medium-weight text or the corresponding Settings gear.
-- A non-interactive Drawer error icon uses the shared `40dp` status-icon token.
+- The active-token bubble is exactly `64dp x 64dp`, remains vertically centered in the available application region, and sits immediately before the AlphabetIndex with a `16dp` gap. It displays `32sp` medium-weight text or a `32dp` Settings gear and does not follow the active slot vertically.
+- Drawer Loading uses the shared `48dp x 48dp` progress-indicator size, and Error uses the shared `48dp x 48dp` non-interactive status-icon size. Their message uses normal-weight shared `primaryTextFontSize`, its line height, and `primaryTextColor`. Indicator or icon to message spacing is `16dp`; Error message to Retry spacing is also `16dp`.
+
+## Settings fixed row
+
+- The fixed Settings row is at least `56dp` high. It uses a `40dp` `primaryTextColor` gear, a `16dp` icon-to-name gap, and a normal-weight shared `primaryTextFontSize` name with its line height and `primaryTextColor`.
+- The row begins `16dp` from the safe start edge. Its content ends before the AlphabetIndex reservation, which consists of `16dp` safe-end content inset plus the fixed `32dp` index width. The complete row is the interaction target; the gear exposes no duplicate target or description.
 
 ## Favorite multi-selection
 
+- The multi-selection top app bar remains `56dp` high and uses start, center, and end content regions. The start `Cancel` and end `Confirm` controls each occupy a vertically centered `48dp`-high target flush with their applicable safe edge, with `12dp` start and end content padding inside that target. The text itself retains its shared font size and natural line height rather than being assigned a `48dp` text height.
+- The two side reservations use the wider measured width of the complete localized `Cancel` and `Confirm` targets, so they remain symmetric and the destination description stays centered on the physical screen. The center description uses the remaining width, remains one line with end ellipsis, and cannot overlap either action. All three regions are vertically centered.
 - Multi-selection reserves a `40dp` leading region before every application icon. A centered `24dp` circle uses a `1dp` Material `outline` border while available and unselected.
 - Selection fills the circle with `primaryTextColor` and shows its one-based order in medium-weight shared `secondaryTextFontSize` and line height using `darkSurfaceBaseColor`. The selected row uses `primaryTextColor` at `8%` opacity.
 - Disabled already-favorited rows retain the empty indicator and use the shared disabled semantic opacity for indicator, icon, and name.
@@ -58,4 +78,4 @@ This document owns exact Drawer layout, typography, component geometry, and visu
 - Decrement and increment use localized text on approximately `32dp x 32dp` visible rounded backgrounds with `4dp` corners. The items-per-row value uses an approximately `36dp x 32dp` visible background. Each of the three controls retains its own interaction target of at least `48dp x 48dp`; visible background size does not define hit geometry.
 - The application-size selector occupies a `56dp` setting row. Each large, medium, or small option contains one selection indicator, generic icon preview, and localized label.
 - Preview sizes are `48dp`, `40dp`, and `32dp`. Indicator-to-icon gap is `4dp`, icon-to-label gap is `8dp`, and title-to-control-region gap is `16dp`. Options add no independent `16dp` inter-option gap and retain separate targets of at least `48dp x 48dp`.
-- The Drawer-background row presents `Transparent` and `Frosted glass` in one two-option single-selection control. Simplified Chinese uses `透明` and `磨砂玻璃`. The complete localized labels remain visible without wrapping or abbreviation and retain separate targets of at least `48dp x 48dp`; exact control width and internal geometry are `To be decided` rather than forced into the narrower existing two-option selector frame.
+- The Drawer-background row presents `Transparent` and `Frosted glass` in one `224dp x 44dp` two-option single-selection frame with `2dp` internal padding and two equal `110dp x 40dp` visible thumbs. Simplified Chinese uses `透明` and `磨砂玻璃`. The complete localized labels remain visible without wrapping or abbreviation. Each option retains a distinct interaction target at least `48dp` high through the owning setting row; the visible thumb does not reduce that target.
