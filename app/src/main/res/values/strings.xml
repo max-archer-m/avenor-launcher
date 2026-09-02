@@ -70,6 +70,7 @@
     <string name="home_decrement_symbol">−</string>
     <string name="home_increment_symbol">＋</string>
     <string name="unable_to_save_module_style">Unable to save module style</string>
+    <string name="unable_to_save_module_order">Unable to save module order</string>
     <string name="drawer_selection_order_format">Selected, item %1$d</string>
     <string name="drawer_selection_not_selected">Not selected</string>
     <string name="drawer_selection_already_favorite_unavailable">Favorited; unavailable</string>

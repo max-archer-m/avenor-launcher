@@ -69,6 +69,7 @@
     <string name="home_decrement_symbol">−</string>
     <string name="home_increment_symbol">＋</string>
     <string name="unable_to_save_module_style">无法保存模块样式</string>
+    <string name="unable_to_save_module_order">无法保存模块顺序</string>
     <string name="drawer_selection_order_format">已选择，第 %1$d 项</string>
     <string name="drawer_selection_not_selected">未选择</string>
     <string name="drawer_selection_already_favorite_unavailable">已在收藏中，无法选择</string>

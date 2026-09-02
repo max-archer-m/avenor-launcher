@@ -100,6 +100,7 @@ internal interface FavoriteStore {
     suspend fun updateAggregate(
         transform: (FavoriteAggregate) -> FavoriteAggregate,
     ): FavoriteAggregate?
+    suspend fun replaceModuleOrder(moduleIds: List<String>): Boolean = false
 }
 
 internal class AtomicFileFavoriteStore private constructor(

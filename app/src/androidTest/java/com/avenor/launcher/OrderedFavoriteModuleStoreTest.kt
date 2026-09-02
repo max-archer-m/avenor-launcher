@@ -379,6 +379,74 @@ class OrderedFavoriteModuleStoreTest {
     }
 
     @Test
+    fun moduleOrderReplacementPersistsTheExactRequestedOrder() = runBlocking {
+        val file = temporaryFile()
+        val first = LaunchableIdentity(1, ComponentName("com.first", "Main"))
+        val second = LaunchableIdentity(2, ComponentName("com.second", "Main"))
+        val adapter = OrderedFavoriteStoreAdapter(file)
+        adapter.load()
+        assertTrue(
+            adapter.replaceAggregate(
+                FavoriteAggregate(
+                    verticalLists = listOf(
+                        FavoriteContainer(
+                            id = "vertical-1",
+                            type = FavoriteContainerType.VerticalList,
+                            identities = listOf(first),
+                        ),
+                    ),
+                    favoriteBars = listOf(
+                        FavoriteContainer(
+                            id = "ribbon-1",
+                            type = FavoriteContainerType.FavoriteBar,
+                            identities = listOf(second),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        assertTrue(adapter.replaceModuleOrder(listOf("ribbon-1", "vertical-1")))
+
+        val reloaded = OrderedFavoriteStoreAdapter(file)
+        reloaded.load()
+        val modules = (reloaded.state.value as FavoriteReadState.Readable).orderedModules
+        assertEquals(listOf("ribbon-1", "vertical-1"), modules?.map { it.id })
+        file.delete()
+    }
+
+    @Test
+    fun moduleOrderReplacementRejectsMissingOrUnknownModuleIds() = runBlocking {
+        val file = temporaryFile()
+        val identity = LaunchableIdentity(1, ComponentName("com.example", "Main"))
+        val adapter = OrderedFavoriteStoreAdapter(file)
+        adapter.load()
+        assertTrue(
+            adapter.replaceAggregate(
+                FavoriteAggregate(
+                    verticalLists = listOf(
+                        FavoriteContainer(
+                            id = "vertical-1",
+                            type = FavoriteContainerType.VerticalList,
+                            identities = listOf(identity),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        assertFalse(adapter.replaceModuleOrder(emptyList()))
+        assertFalse(adapter.replaceModuleOrder(listOf("unknown")))
+        assertEquals(
+            listOf("vertical-1"),
+            (adapter.state.value as FavoriteReadState.Readable)
+                .orderedModules
+                ?.map { it.id },
+        )
+        file.delete()
+    }
+
+    @Test
     fun concurrentAddsAreSerializedWithoutLosingIdentities() = runBlocking {
         val file = temporaryFile()
         val identities = (1L..12L).map { serial ->

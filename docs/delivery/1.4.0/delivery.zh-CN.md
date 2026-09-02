@@ -50,7 +50,7 @@
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
 | [迭代 22：有序收藏模块基础](iteration-22-ordered-favorite-module-foundation.zh-CN.md) | `Completed` | 2026-09-01 | 实现、聚焦测试、静态检查、作者报告的编译结果和功能验收满足本迭代边界。 |
-| [迭代 23：模块样式与排序](iteration-23-module-style-and-ordering.zh-CN.md) | `In progress` | 2026-09-01 | 已授权实现正在按已接受产品契约基线 `7cae837dafb188896dd24bd43aae58022c81fe11` 重新对齐。 |
+| [迭代 23：模块样式与排序](iteration-23-module-style-and-ordering.zh-CN.md) | `Completed` | 2026-09-02 | 实现、聚焦持久化测试源码、静态检查和作者报告的功能验收满足本迭代边界。 |
 | [迭代 24：应用编辑与跨模块移动](iteration-24-application-editing-and-cross-module-movement.zh-CN.md) | `Planned` | 2026-09-01 | 已接受的产品契约在模块类型、目标位置和新增收藏入口存在后定义收起式 dock 移除、撤销、插入移动和拖动创建落点。 |
 | [迭代 25：升级、回归与版本收尾](iteration-25-upgrade-regression-and-version-closure.zh-CN.md) | `Planned` | 2026-09-01 | 所选 Home 闭环完成后，版本完成需要集成的 Home 采用、兼容性、产物和作者验收证据。 |
 
@@ -62,7 +62,7 @@
 
 ### 迭代 23
 
-[契约](iteration-23-module-style-and-ordering.zh-CN.md)。实现正在已接受产品契约基线 `7cae837dafb188896dd24bd43aae58022c81fe11` 上进行。持久化样式 schema、向后可读默认值、模块选择、编辑 dock、初始内联面板和纵向样式即时持久化预览已存在于本地；作者报告持久化基础编译无错误。当前实现正在重新对齐，使新增收藏入口属于主列表和模块尾部而不是面板；共享面板和整模块移动契约仍未完成。当前未验证工作保持 `Not run` 或 `Unknown`。状态为 `In progress`。
+[契约](iteration-23-module-style-and-ordering.zh-CN.md)。基于已接受产品契约基线 `7cae837dafb188896dd24bd43aae58022c81fe11` 的实现现在已提供两种模块类型及既有模块的位置解析新增收藏入口、内容驱动且高度受限的共享内联样式面板、整模块选择、具备串行化和回滚的持久纵向模块样式变更，以及具备冻结拖影、源模块移除、边界反馈、边缘自动滚动、原子顺序持久化、取消、中断清理和本地化失败恢复的仅插入式整模块移动。聚焦有序存储测试源码覆盖准确模块顺序持久化和无效顺序拒绝。作者报告最终手势生命周期修复后的当前功能行为基本验收通过。Agent 对 `git diff --check` 和受影响资源 XML 的静态检查通过。Agent 未运行 Gradle 和 instrumentation；更广泛的建议设备、中断、失败注入、字体缩放、进程重建和兼容性场景保持 `Not run` 或 `Unknown`，且未被提升为迭代阻塞项。根据作者 2026-09-02 的决定，状态为 `Completed`。
 
 ### 迭代 24
 
@@ -102,4 +102,4 @@
 
 ## 完成结果
 
-当前没有版本完成结果。迭代 22 为 `Completed`；迭代 23 为 `In progress`；迭代 24–25 保持 `Planned`。本文件不授权推送、发布或公开分发。
+当前没有版本完成结果。迭代 22–23 为 `Completed`；迭代 24–25 保持 `Planned`。本文件不授权推送、发布或公开分发。

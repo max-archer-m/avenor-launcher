@@ -71,6 +71,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -99,6 +101,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -177,6 +181,7 @@ internal fun HomeScreen(
     onCommitFavoriteComposition: suspend (
         transform: (FavoriteAggregate) -> FavoriteAggregate,
     ) -> FavoriteAggregate? = { transform -> transform(FavoriteAggregate()) },
+    onCommitModuleOrder: suspend (List<String>) -> Boolean = { false },
     accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
 ) {
     val context = LocalContext.current
@@ -308,6 +313,12 @@ internal fun HomeScreen(
     var pendingEditAggregate by remember { mutableStateOf<FavoriteAggregate?>(null) }
     var committedEditAggregate by remember { mutableStateOf<FavoriteAggregate?>(null) }
     var editMutationJob by remember { mutableStateOf<Job?>(null) }
+    var moduleDragSession by remember { mutableStateOf<ModuleDragSession?>(null) }
+    var pendingModuleOrder by remember {
+        mutableStateOf<List<OrderedFavoriteModule>?>(null)
+    }
+    val moduleBoundsInWindow = remember { mutableStateMapOf<String, Rect>() }
+    var moduleListBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
     val currentFavoriteState by rememberUpdatedState(favoriteState)
     val snackbarHostState = remember { SnackbarHostState() }
     val editScope = rememberCoroutineScope()
@@ -341,12 +352,16 @@ internal fun HomeScreen(
     val moduleStyleSaveFailureMessage = stringResource(
         R.string.unable_to_save_module_style,
     )
+    val moduleOrderSaveFailureMessage = stringResource(
+        R.string.unable_to_save_module_order,
+    )
     fun cancelActiveDragSessions() {
         dragSession = null
         favoriteBarDragSession = null
         applicationDragTargetSession = null
         favoriteBarContainerDragSession = null
         listDragSession = null
+        moduleDragSession = null
     }
     val advanceDrag: (Offset) -> Unit = { amount ->
         applicationDragTargetSession = applicationDragTargetSession?.advanced(
@@ -395,6 +410,7 @@ internal fun HomeScreen(
             cancelActiveDragSessions()
             undoAggregate = null
             pendingEditAggregate = null
+            pendingModuleOrder = null
             committedEditAggregate = null
             editMutationJob?.cancel()
             snackbarHostState.currentSnackbarData?.dismiss()
@@ -403,6 +419,132 @@ internal fun HomeScreen(
             committedEditAggregate =
                 (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate
         }
+    }
+
+    fun startModuleDrag(
+        module: OrderedFavoriteModule,
+        modules: List<OrderedFavoriteModule>,
+        touchInWindow: Offset,
+    ): Boolean {
+        if (modules.size < 2 || editMutationJob?.isActive == true) return false
+        val sourceIndex = modules.indexOfFirst { it.id == module.id }
+        val sourceBounds = moduleBoundsInWindow[module.id] ?: return false
+        if (sourceIndex < 0) return false
+        moduleDragSession = ModuleDragSession(
+            sourceModule = module,
+            sourceSelected = module.id == selectedModuleId,
+            sourceAvailability = module.identities.associateWith { identity ->
+                favoriteAvailability[identity] ?: FavoriteAvailability.Unknown(null)
+            },
+            initialModules = modules,
+            remainingModules = modules.filterNot { it.id == module.id },
+            insertionIndex = sourceIndex,
+            originInWindow = sourceBounds.topLeft,
+            size = IntSize(
+                sourceBounds.width.roundToInt(),
+                sourceBounds.height.roundToInt(),
+            ),
+            touchStartInWindow = touchInWindow,
+        )
+        return true
+    }
+
+    fun advanceModuleDrag(amount: Offset) {
+        val previous = moduleDragSession ?: return
+        val moved = previous.copy(delta = previous.delta + amount)
+        if (!moduleListBoundsInWindow.contains(moved.touchInWindow)) {
+            moduleDragSession = moved.copy(insertionIndex = null)
+            return
+        }
+        val touchY = moved.touchInWindow.y
+        val insertionIndex = moved.remainingModules.indexOfFirst { module ->
+            val bounds = moduleBoundsInWindow[module.id] ?: return@indexOfFirst false
+            touchY < bounds.center.y
+        }.let { index ->
+            if (index < 0) moved.remainingModules.size else index
+        }
+        moduleDragSession = moved.copy(insertionIndex = insertionIndex)
+    }
+
+    fun finishModuleDrag() {
+        val session = moduleDragSession ?: return
+        moduleDragSession = null
+        val insertionIndex = session.insertionIndex ?: return
+        val reordered = session.remainingModules.toMutableList().apply {
+            add(insertionIndex.coerceIn(0, size), session.sourceModule)
+        }.toList()
+        if (reordered.map { it.id } == session.initialModules.map { it.id }) return
+
+        val previousJob = editMutationJob
+        val editSession = editSessionId
+        pendingModuleOrder = reordered
+        val mutationJob = editScope.launch(start = CoroutineStart.LAZY) {
+            previousJob?.join()
+            val persisted = onCommitModuleOrder(reordered.map { it.id })
+            if (editSession != editSessionId || !editMode) return@launch
+            pendingModuleOrder = null
+            if (!persisted) {
+                Toast.makeText(
+                    context,
+                    moduleOrderSaveFailureMessage,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        }
+        editMutationJob = mutationJob
+        mutationJob.invokeOnCompletion {
+            editScope.launch {
+                if (editMutationJob === mutationJob) editMutationJob = null
+            }
+        }
+        mutationJob.start()
+    }
+
+    val moduleEdgeScrollDirection = moduleDragSession?.let { session ->
+        val bounds = moduleListBoundsInWindow
+        val band = edgeScrollBandPx.coerceAtMost(bounds.height / 2f)
+        when {
+            bounds == Rect.Zero || !bounds.contains(session.touchInWindow) -> 0
+            session.touchInWindow.y < bounds.top + band -> -1
+            session.touchInWindow.y > bounds.bottom - band -> 1
+            else -> 0
+        }
+    } ?: 0
+
+    LaunchedEffect(moduleDragSession?.sourceModule?.id, moduleEdgeScrollDirection) {
+        if (moduleEdgeScrollDirection == 0) return@LaunchedEffect
+        delay(edgeScrollStartDelayMillis)
+        var previousFrameNanos = withFrameNanos { it }
+        while (moduleDragSession != null) {
+            val session = moduleDragSession ?: break
+            val bounds = moduleListBoundsInWindow
+            val band = edgeScrollBandPx.coerceAtMost(bounds.height / 2f)
+            val direction = when {
+                !bounds.contains(session.touchInWindow) -> 0
+                session.touchInWindow.y < bounds.top + band -> -1
+                session.touchInWindow.y > bounds.bottom - band -> 1
+                else -> 0
+            }
+            if (direction == 0 || direction != moduleEdgeScrollDirection) break
+            val frameNanos = withFrameNanos { it }
+            val elapsedSeconds = (frameNanos - previousFrameNanos) / 1_000_000_000f
+            previousFrameNanos = frameNanos
+            val edgeDistance = if (direction < 0) {
+                (session.touchInWindow.y - bounds.top).coerceIn(0f, band)
+            } else {
+                (bounds.bottom - session.touchInWindow.y).coerceIn(0f, band)
+            }
+            val proximity = if (band == 0f) 0f else 1f - (edgeDistance / band)
+            val consumed = favoriteListState.scrollBy(
+                direction * edgeScrollSpeedPxPerSecond * proximity * elapsedSeconds,
+            )
+            if (consumed == 0f) break
+            advanceModuleDrag(Offset.Zero)
+        }
+    }
+
+    LaunchedEffect(stylePanelExpanded) {
+        if (!stylePanelExpanded) moduleDragSession = null
     }
 
     LaunchedEffect(favoriteState, editMode) {
@@ -429,7 +571,13 @@ internal fun HomeScreen(
         message: String = "",
         recordUndo: Boolean = false,
         onCommitted: () -> Unit = {},
-        onFailed: () -> Unit = {},
+        onFailed: () -> Unit = {
+            Toast.makeText(
+                context,
+                R.string.favorite_reorder_unavailable,
+                Toast.LENGTH_SHORT,
+            ).show()
+        },
 ) {
         if (favoriteState !is FavoriteReadState.Readable) return
         val previousJob = editMutationJob
@@ -1034,13 +1182,18 @@ internal fun HomeScreen(
         }
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(dimensionResource(R.dimen.home_content_padding))
             .onGloballyPositioned { dragRootOriginInWindow = it.positionInWindow() },
     ) {
+        val stylePanelMaximumHeight = (
+            maxHeight -
+                dimensionResource(R.dimen.home_edit_dock_height) -
+                dimensionResource(R.dimen.home_style_panel_minimum_list_viewport)
+            ).coerceAtLeast(0.dp)
         Column(modifier = Modifier.fillMaxSize()) {
             if (!editMode || !stylePanelExpanded) Row(
                 modifier = Modifier
@@ -1234,17 +1387,24 @@ internal fun HomeScreen(
                         val previewAggregate = pendingEditAggregate
                             ?: committedEditAggregate
                             ?: favoriteState.aggregate
+                        val styledModules = orderedModules.withPresentationFrom(previewAggregate)
+                        val displayedModules = moduleDragSession?.remainingModules
+                            ?: pendingModuleOrder
+                            ?: styledModules
                         HomeOrderedModuleComposition(
-                            modules = orderedModules.withPresentationFrom(previewAggregate),
+                            modules = displayedModules,
                             availabilityByIdentity = favoriteAvailability,
                             listState = favoriteListState,
                             nestedScrollConnection = null,
                             editMode = true,
                             selectionEnabled = stylePanelExpanded,
-                            selectionInteractionEnabled = editMutationJob?.isActive != true,
+                            selectionInteractionEnabled = editMutationJob?.isActive != true &&
+                                moduleDragSession == null,
+                            selectionVisualEnabled = editMutationJob?.isActive != true,
                             selectedModuleId = selectedModuleId,
                             onSelectModule = onSelectModule,
-                            addEntriesEnabled = editMutationJob?.isActive != true,
+                            addEntriesEnabled = editMutationJob?.isActive != true &&
+                                moduleDragSession == null,
                             onAddToModule = { module ->
                                 when (module.type) {
                                     OrderedFavoriteModuleType.Vertical ->
@@ -1257,6 +1417,19 @@ internal fun HomeScreen(
                             onCreateRibbon = onAddProvisionalFavoriteBar,
                             onLaunchFavorite = {},
                             onLongPressFavorite = {},
+                            moduleEdgeScrollDirection = moduleEdgeScrollDirection,
+                            moduleInsertionIndex = moduleDragSession?.insertionIndex,
+                            onModuleBoundsInWindow = { id, bounds ->
+                                moduleBoundsInWindow[id] = bounds
+                            },
+                            onModuleDisposed = { id -> moduleBoundsInWindow.remove(id) },
+                            onModuleListBoundsInWindow = { moduleListBoundsInWindow = it },
+                            onModuleDragStart = { module, touch ->
+                                startModuleDrag(module, styledModules, touch)
+                            },
+                            onModuleDrag = ::advanceModuleDrag,
+                            onModuleDragEnd = ::finishModuleDrag,
+                            onModuleDragCancel = { moduleDragSession = null },
                         )
                     } else if (editMode) {
                         val persistedEditAggregate = pendingEditAggregate
@@ -1857,11 +2030,12 @@ internal fun HomeScreen(
                 val selectedModule = displayedModules.firstOrNull {
                     it.id == selectedModuleId
                 }
-                val styleSaving = editMutationJob?.isActive == true
+                val styleSaving = editMutationJob?.isActive == true || moduleDragSession != null
                 if (stylePanelExpanded) {
                     HomeModuleStylePanel(
                         selectedModule = selectedModule,
                         enabled = !styleSaving,
+                        maximumHeight = stylePanelMaximumHeight,
                         onChangeSize = { size ->
                             selectedModule?.let { module ->
                                 commitVerticalModuleStyle(module.id) {
@@ -1939,6 +2113,12 @@ internal fun HomeScreen(
                 rootOriginInWindow = dragRootOriginInWindow,
             )
         }
+        moduleDragSession?.let { session ->
+            HomeModuleDragPreview(
+                session = session,
+                rootOriginInWindow = dragRootOriginInWindow,
+            )
+        }
     }
 }
 
@@ -2000,6 +2180,51 @@ private data class FavoriteBarDragSession(
     val delta: Offset = Offset.Zero,
     val residualX: Float = 0f,
 )
+
+private data class ModuleDragSession(
+    val sourceModule: OrderedFavoriteModule,
+    val sourceSelected: Boolean,
+    val sourceAvailability: Map<LaunchableIdentity, FavoriteAvailability>,
+    val initialModules: List<OrderedFavoriteModule>,
+    val remainingModules: List<OrderedFavoriteModule>,
+    val insertionIndex: Int?,
+    val originInWindow: Offset,
+    val size: IntSize,
+    val touchStartInWindow: Offset,
+    val delta: Offset = Offset.Zero,
+) {
+    val touchInWindow: Offset get() = touchStartInWindow + delta
+}
+
+private fun DrawScope.drawCornerMark(
+    color: Color,
+    corner: Offset,
+    horizontalEnd: Offset,
+    verticalEnd: Offset,
+    radius: Float,
+    stroke: Float,
+    startAngle: Float,
+) {
+    val horizontalDirection = if (horizontalEnd.x >= corner.x) 1f else -1f
+    val verticalDirection = if (verticalEnd.y >= corner.y) 1f else -1f
+    val horizontalStart = Offset(corner.x + horizontalDirection * radius, corner.y)
+    val verticalStart = Offset(corner.x, corner.y + verticalDirection * radius)
+    val arcTopLeft = Offset(
+        x = if (horizontalDirection > 0f) corner.x else corner.x - radius * 2f,
+        y = if (verticalDirection > 0f) corner.y else corner.y - radius * 2f,
+    )
+    drawLine(color, horizontalStart, horizontalEnd, stroke, StrokeCap.Round)
+    drawLine(color, verticalStart, verticalEnd, stroke, StrokeCap.Round)
+    drawArc(
+        color = color,
+        startAngle = startAngle,
+        sweepAngle = 90f,
+        useCenter = false,
+        topLeft = arcTopLeft,
+        size = Size(radius * 2f, radius * 2f),
+        style = Stroke(width = stroke, cap = StrokeCap.Round),
+    )
+}
 
 internal enum class ApplicationDragAxis {
     Vertical,
@@ -4594,6 +4819,55 @@ private fun HomeFavoriteProvisionalList(
             }
         }
     }
+
+    private suspend fun PointerInputScope.detectModuleReorderDrag(
+        onLongPress: () -> Unit,
+        onDragStart: (Offset) -> Boolean,
+        onDrag: (Offset) -> Unit,
+        onDragEnd: () -> Unit,
+        onDragCancel: () -> Unit,
+    ) {
+        awaitEachGesture {
+            val down = awaitFirstDown(
+                requireUnconsumed = false,
+                pass = PointerEventPass.Initial,
+            )
+            val longPress = awaitHandleLongPress(down) ?: return@awaitEachGesture
+            var dragging = false
+            var cancelled = false
+            try {
+                longPress.consume()
+                if (!onDragStart(longPress.position)) return@awaitEachGesture
+                dragging = true
+                onLongPress()
+                while (true) {
+                    val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                    if (event.changes.any { it.id != down.id && it.pressed }) {
+                        cancelled = true
+                        break
+                    }
+                    val change = event.changes.firstOrNull { it.id == down.id }
+                    if (change == null) {
+                        cancelled = true
+                        break
+                    }
+                    val movement = change.positionChangeIgnoreConsumed()
+                    if (change.changedToUpIgnoreConsumed()) {
+                        if (movement != Offset.Zero) onDrag(movement)
+                        change.consume()
+                        break
+                    }
+                    change.consume()
+                    if (movement != Offset.Zero) onDrag(movement)
+                }
+                dragging = false
+                if (cancelled) onDragCancel() else onDragEnd()
+            } finally {
+                if (dragging) onDragCancel()
+            }
+        }
+    }
+
     @Composable
     private fun HomeEditDock(
         hasFavorites: Boolean,
@@ -4655,6 +4929,7 @@ private fun HomeFavoriteProvisionalList(
     private fun HomeModuleStylePanel(
         selectedModule: OrderedFavoriteModule?,
         enabled: Boolean,
+        maximumHeight: androidx.compose.ui.unit.Dp,
         onChangeSize: (FavoriteListSize) -> Unit,
         onChangeNamePlacement: (FavoriteNamePlacement) -> Unit,
         onChangeItemsPerRow: (Int) -> Unit,
@@ -4662,10 +4937,16 @@ private fun HomeFavoriteProvisionalList(
         val panelShape = RoundedCornerShape(
             dimensionResource(R.dimen.style_settings_panel_corner_radius),
         )
+        val animationDuration = integerResource(
+            R.integer.short_property_animation_duration_ms,
+        )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = dimensionResource(R.dimen.home_style_panel_max_height))
+                .heightIn(max = maximumHeight)
+                .animateContentSize(
+                    animationSpec = tween(durationMillis = animationDuration),
+                )
                 .shadow(
                     elevation = dimensionResource(R.dimen.style_settings_panel_elevation),
                     shape = panelShape,
@@ -4881,6 +5162,9 @@ private fun HomeFavoriteProvisionalList(
         enabled: Boolean,
         onSelect: (FavoriteNamePlacement) -> Unit,
     ) {
+        val animationDuration = integerResource(
+            R.integer.short_property_animation_duration_ms,
+        )
         val frameShape = RoundedCornerShape(
             dimensionResource(R.dimen.style_settings_selector_frame_radius),
         )
@@ -4910,6 +5194,7 @@ private fun HomeFavoriteProvisionalList(
                     } else {
                         Color.Transparent
                     },
+                    animationSpec = tween(durationMillis = animationDuration),
                     label = "home-name-placement-background",
                 )
                 val contentColor by animateColorAsState(
@@ -4918,6 +5203,7 @@ private fun HomeFavoriteProvisionalList(
                     } else {
                         MaterialTheme.colorScheme.onSurface
                     },
+                    animationSpec = tween(durationMillis = animationDuration),
                     label = "home-name-placement-content",
                 )
                 Box(
@@ -5066,6 +5352,7 @@ private fun HomeFavoriteProvisionalList(
         editMode: Boolean,
         selectionEnabled: Boolean,
         selectionInteractionEnabled: Boolean,
+        selectionVisualEnabled: Boolean = selectionInteractionEnabled,
         selectedModuleId: String?,
         onSelectModule: (String) -> Unit,
         addEntriesEnabled: Boolean,
@@ -5074,27 +5361,157 @@ private fun HomeFavoriteProvisionalList(
         onCreateRibbon: () -> Unit,
         onLaunchFavorite: (FavoriteAvailability) -> Unit,
         onLongPressFavorite: (LaunchableEntry) -> Unit,
+        modifier: Modifier = Modifier,
+        showModuleAddEntries: Boolean = editMode,
+        showMainAddEntries: Boolean = editMode,
+        moduleEdgeScrollDirection: Int = 0,
+        moduleInsertionIndex: Int? = null,
+        onModuleBoundsInWindow: (String, Rect) -> Unit = { _, _ -> },
+        onModuleDisposed: (String) -> Unit = {},
+        onModuleListBoundsInWindow: (Rect) -> Unit = {},
+        onModuleDragStart: (OrderedFavoriteModule, Offset) -> Boolean = { _, _ -> false },
+        onModuleDrag: (Offset) -> Unit = {},
+        onModuleDragEnd: () -> Unit = {},
+        onModuleDragCancel: () -> Unit = {},
     ) {
         val ribbonListStates = remember {
             mutableMapOf<String, LazyListState>()
         }
+        val localModuleBounds = remember { mutableMapOf<String, Rect>() }
+        var listOriginInWindow by remember { mutableStateOf(Offset.Zero) }
+        val currentModules by rememberUpdatedState(modules)
+        val currentOnModuleDragStart by rememberUpdatedState(onModuleDragStart)
+        val currentOnModuleDrag by rememberUpdatedState(onModuleDrag)
+        val currentOnModuleDragEnd by rememberUpdatedState(onModuleDragEnd)
+        val currentOnModuleDragCancel by rememberUpdatedState(onModuleDragCancel)
+        val moduleHapticFeedback = LocalHapticFeedback.current
+        val insertionLineColor = colorResource(R.color.home_favorite_insertion_line)
+        val insertionLineThickness = dimensionResource(
+            R.dimen.home_favorite_insertion_line_thickness,
+        )
+        val edgeFeedbackBand = dimensionResource(R.dimen.home_favorite_edge_scroll_band)
+        val edgeFeedbackColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f)
         LazyColumn(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .then(
                     nestedScrollConnection?.let { Modifier.nestedScroll(it) } ?: Modifier,
             )
-            .testTag("home_ordered_favorite_modules"),
+                .onGloballyPositioned { coordinates ->
+                    val origin = coordinates.positionInWindow()
+                    listOriginInWindow = origin
+                    onModuleListBoundsInWindow(Rect(origin, coordinates.size.toSize()))
+                }
+                .then(
+                    // Keep the pointer-input node stable for the complete expanded-panel
+                    // lifetime. Removing and recreating it when a drag disables other editing
+                    // actions would cancel the gesture that owns the active module movement.
+                    if (selectionEnabled) {
+                        Modifier.pointerInput(Unit) {
+                            detectModuleReorderDrag(
+                                onLongPress = {
+                                    moduleHapticFeedback.performHapticFeedback(
+                                        HapticFeedbackType.LongPress,
+                                    )
+                                },
+                                onDragStart = { localTouch ->
+                                    val touchInWindow = listOriginInWindow + localTouch
+                                    val module = currentModules.firstOrNull { candidate ->
+                                        localModuleBounds[candidate.id]
+                                            ?.contains(touchInWindow) == true
+                                    } ?: return@detectModuleReorderDrag false
+                                    currentOnModuleDragStart(module, touchInWindow)
+                                },
+                                onDrag = { currentOnModuleDrag(it) },
+                                onDragEnd = { currentOnModuleDragEnd() },
+                                onDragCancel = { currentOnModuleDragCancel() },
+                            )
+                        }
+                    } else {
+                        Modifier
+                    },
+                )
+                .drawWithContent {
+                    drawContent()
+                    if (moduleEdgeScrollDirection != 0) {
+                        val band = edgeFeedbackBand.toPx().coerceAtMost(size.height / 2f)
+                        if (moduleEdgeScrollDirection < 0) {
+                            drawRect(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        edgeFeedbackColor,
+                                        edgeFeedbackColor.copy(alpha = 0f),
+                                    ),
+                                    startY = 0f,
+                                    endY = band,
+                                ),
+                                size = Size(size.width, band),
+                            )
+                        } else {
+                            drawRect(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        edgeFeedbackColor.copy(alpha = 0f),
+                                        edgeFeedbackColor,
+                                    ),
+                                    startY = size.height - band,
+                                    endY = size.height,
+                                ),
+                                topLeft = Offset(0f, size.height - band),
+                                size = Size(size.width, band),
+                            )
+                        }
+                    }
+                }
+                .testTag("home_ordered_favorite_modules"),
             state = listState,
             verticalArrangement = Arrangement.spacedBy(
                 dimensionResource(R.dimen.home_module_spacing),
             ),
         ) {
-            items(
+            itemsIndexed(
                 items = modules,
-                key = { it.id },
-            ) { module ->
-                Box(modifier = Modifier.fillMaxWidth()) {
+                key = { _, module -> module.id },
+            ) { index, module ->
+                DisposableEffect(module.id) {
+                    onDispose {
+                        localModuleBounds.remove(module.id)
+                        onModuleDisposed(module.id)
+                    }
+                }
+                val showsTopInsertion = moduleInsertionIndex == index
+                val showsBottomInsertion = index == modules.lastIndex &&
+                    moduleInsertionIndex == modules.size
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onGloballyPositioned { coordinates ->
+                            val origin = coordinates.positionInWindow()
+                            val bounds = Rect(origin, coordinates.size.toSize())
+                            localModuleBounds[module.id] = bounds
+                            onModuleBoundsInWindow(module.id, bounds)
+                        }
+                        .drawWithContent {
+                            drawContent()
+                            val stroke = insertionLineThickness.toPx()
+                            if (showsTopInsertion) {
+                                drawLine(
+                                    insertionLineColor,
+                                    Offset(0f, stroke / 2f),
+                                    Offset(size.width, stroke / 2f),
+                                    stroke,
+                                )
+                            }
+                            if (showsBottomInsertion) {
+                                drawLine(
+                                    insertionLineColor,
+                                    Offset(0f, size.height - stroke / 2f),
+                                    Offset(size.width, size.height - stroke / 2f),
+                                    stroke,
+                                )
+                            }
+                        },
+                ) {
                 when (module.type) {
                     OrderedFavoriteModuleType.Vertical -> {
                         Column(
@@ -5104,7 +5521,7 @@ private fun HomeFavoriteProvisionalList(
                         ) {
                             val cells: List<LaunchableIdentity?> =
                                 module.identities.map { it } +
-                                    if (editMode) listOf(null) else emptyList()
+                                    if (showModuleAddEntries) listOf(null) else emptyList()
                             cells.chunked(module.itemsPerRow).forEach { rowItems ->
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     rowItems.forEach { identity ->
@@ -5196,7 +5613,7 @@ private fun HomeFavoriteProvisionalList(
                                     onHandleBoundsInWindow = {},
                                 )
                             }
-                            if (editMode) {
+                            if (showModuleAddEntries) {
                                 item(key = "add:${module.id}") {
                                     HomeModuleAddFavoriteEntry(
                                         modifier = Modifier.width(
@@ -5218,12 +5635,13 @@ private fun HomeFavoriteProvisionalList(
                         modifier = Modifier.matchParentSize(),
                         selected = module.id == selectedModuleId,
                         enabled = selectionInteractionEnabled,
+                        visualEnabled = selectionVisualEnabled,
                         onSelect = { onSelectModule(module.id) },
                     )
                 }
                 }
             }
-            if (editMode) {
+            if (showMainAddEntries) {
                 item(key = "main-list-add-entries") {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -5249,6 +5667,49 @@ private fun HomeFavoriteProvisionalList(
                 }
             }
         }
+    }
+
+    @Composable
+    private fun HomeModuleDragPreview(
+        session: ModuleDragSession,
+        rootOriginInWindow: Offset,
+    ) {
+        val density = LocalDensity.current
+        val width = with(density) { session.size.width.toDp() }
+        val height = with(density) { session.size.height.toDp() }
+        val shadowElevation = dimensionResource(R.dimen.home_module_drag_shadow_elevation)
+        val shape = RoundedCornerShape(
+            dimensionResource(R.dimen.home_module_selection_radius),
+        )
+        HomeOrderedModuleComposition(
+            modules = listOf(session.sourceModule),
+            availabilityByIdentity = session.sourceAvailability,
+            listState = rememberLazyListState(),
+            nestedScrollConnection = null,
+            editMode = true,
+            selectionEnabled = true,
+            selectionInteractionEnabled = false,
+            selectionVisualEnabled = true,
+            selectedModuleId = session.sourceModule.id.takeIf { session.sourceSelected },
+            onSelectModule = {},
+            addEntriesEnabled = true,
+            onAddToModule = {},
+            onCreateVerticalModule = {},
+            onCreateRibbon = {},
+            onLaunchFavorite = {},
+            onLongPressFavorite = {},
+            showModuleAddEntries = true,
+            showMainAddEntries = false,
+            modifier = Modifier
+                .offset {
+                    val position = session.originInWindow - rootOriginInWindow + session.delta
+                    IntOffset(position.x.roundToInt(), position.y.roundToInt())
+                }
+                .size(width, height)
+                .shadow(shadowElevation, shape, clip = false)
+                .clearAndSetSemantics { }
+                .testTag("home_module_drag_preview"),
+        )
     }
 
     @Composable
@@ -5441,23 +5902,29 @@ private fun HomeFavoriteProvisionalList(
         modifier: Modifier,
         selected: Boolean,
         enabled: Boolean,
+        visualEnabled: Boolean,
         onSelect: () -> Unit,
     ) {
         val selectedShape = RoundedCornerShape(
             dimensionResource(R.dimen.home_module_selection_radius),
         )
         val selectedBorder = dimensionResource(R.dimen.home_module_selection_stroke)
-        val markColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+        val markColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+            alpha = if (visualEnabled) 1f else 0.38f,
+        )
         val markInset = dimensionResource(R.dimen.home_module_mark_inset)
         val markArm = dimensionResource(R.dimen.home_module_mark_arm)
         val markStroke = dimensionResource(R.dimen.home_module_mark_stroke)
+        val markRadius = dimensionResource(R.dimen.home_module_mark_radius)
         Box(
             modifier = modifier
                 .then(
                     if (selected) {
                         Modifier.border(
                             width = selectedBorder,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = MaterialTheme.colorScheme.onBackground.copy(
+                                alpha = if (visualEnabled) 1f else 0.38f,
+                            ),
                             shape = selectedShape,
                         )
                     } else {
@@ -5466,22 +5933,50 @@ private fun HomeFavoriteProvisionalList(
                             val inset = markInset.toPx()
                             val arm = markArm.toPx()
                             val stroke = markStroke.toPx()
+                            val radius = markRadius.toPx()
                             val left = inset
                             val top = inset
                             val right = size.width - inset
                             val bottom = size.height - inset
-                            drawLine(markColor, Offset(left, top), Offset(left + arm, top), stroke, StrokeCap.Round)
-                            drawLine(markColor, Offset(left, top), Offset(left, top + arm), stroke, StrokeCap.Round)
-                            drawLine(markColor, Offset(right, top), Offset(right - arm, top), stroke, StrokeCap.Round)
-                            drawLine(markColor, Offset(right, top), Offset(right, top + arm), stroke, StrokeCap.Round)
-                            drawLine(markColor, Offset(left, bottom), Offset(left + arm, bottom), stroke, StrokeCap.Round)
-                            drawLine(markColor, Offset(left, bottom), Offset(left, bottom - arm), stroke, StrokeCap.Round)
-                            drawLine(markColor, Offset(right, bottom), Offset(right - arm, bottom), stroke, StrokeCap.Round)
-                            drawLine(markColor, Offset(right, bottom), Offset(right, bottom - arm), stroke, StrokeCap.Round)
+                            drawCornerMark(
+                                color = markColor,
+                                corner = Offset(left, top),
+                                horizontalEnd = Offset(left + arm, top),
+                                verticalEnd = Offset(left, top + arm),
+                                radius = radius,
+                                stroke = stroke,
+                                startAngle = 180f,
+                            )
+                            drawCornerMark(
+                                color = markColor,
+                                corner = Offset(right, top),
+                                horizontalEnd = Offset(right - arm, top),
+                                verticalEnd = Offset(right, top + arm),
+                                radius = radius,
+                                stroke = stroke,
+                                startAngle = 270f,
+                            )
+                            drawCornerMark(
+                                color = markColor,
+                                corner = Offset(left, bottom),
+                                horizontalEnd = Offset(left + arm, bottom),
+                                verticalEnd = Offset(left, bottom - arm),
+                                radius = radius,
+                                stroke = stroke,
+                                startAngle = 90f,
+                            )
+                            drawCornerMark(
+                                color = markColor,
+                                corner = Offset(right, bottom),
+                                horizontalEnd = Offset(right - arm, bottom),
+                                verticalEnd = Offset(right, bottom - arm),
+                                radius = radius,
+                                stroke = stroke,
+                                startAngle = 0f,
+                            )
                         }
                     },
                 )
-                .alpha(if (enabled) 1f else 0.38f)
                 .clickable(enabled = enabled, role = Role.Button, onClick = onSelect)
                 .testTag(if (selected) "home_module_selected" else "home_module_selectable"),
         )

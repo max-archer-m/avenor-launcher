@@ -91,7 +91,7 @@
     <dimen name="home_edit_dock_icon_size">24dp</dimen>
     <dimen name="home_edit_dock_text_padding">8dp</dimen>
     <dimen name="home_edit_dock_text_size">14sp</dimen>
-    <dimen name="home_style_panel_max_height">336dp</dimen>
+    <dimen name="home_style_panel_minimum_list_viewport">112dp</dimen>
     <dimen name="style_settings_panel_row_height">56dp</dimen>
     <dimen name="style_settings_panel_row_inset">12dp</dimen>
     <dimen name="style_settings_panel_corner_radius">12dp</dimen>
@@ -118,6 +118,8 @@
     <dimen name="home_module_mark_arm">16dp</dimen>
     <dimen name="home_module_mark_stroke">2dp</dimen>
     <dimen name="home_module_mark_inset">4dp</dimen>
+    <dimen name="home_module_mark_radius">8dp</dimen>
+    <dimen name="home_module_drag_shadow_elevation">12dp</dimen>
     <dimen name="home_module_selection_stroke">2dp</dimen>
     <dimen name="home_module_selection_radius">12dp</dimen>
     <dimen name="home_favorite_large_below_height">104dp</dimen>

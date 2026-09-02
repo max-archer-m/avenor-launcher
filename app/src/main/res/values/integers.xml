@@ -1,8 +1,9 @@
 <resources>
     <integer name="disabled_content_alpha_percent">38</integer>
+    <integer name="short_property_animation_duration_ms">200</integer>
     <integer name="home_drag_preview_alpha_percent">100</integer>
     <integer name="home_drag_source_slot_alpha_percent">0</integer>
-    <integer name="home_favorite_edge_scroll_dp_per_second">120</integer>
+    <integer name="home_favorite_edge_scroll_dp_per_second">180</integer>
     <integer name="home_favorite_edge_scroll_start_delay_ms">120</integer>
     <integer name="home_favorite_list_remove_pressed_alpha_percent">80</integer>
     <integer name="home_favorite_bar_item_background_alpha_percent">6</integer>

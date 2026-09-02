@@ -409,6 +409,24 @@ internal class OrderedFavoriteStoreAdapter private constructor(
         updated
     }
 
+    override suspend fun replaceModuleOrder(moduleIds: List<String>): Boolean =
+        mutationMutex.withLock {
+            val current = currentOrderedAggregate()
+            if (moduleIds.size != current.modules.size ||
+                moduleIds.toSet().size != moduleIds.size ||
+                moduleIds.toSet() != current.modules.mapTo(mutableSetOf()) { it.id }
+            ) {
+                return@withLock false
+            }
+            val modulesById = current.modules.associateBy(OrderedFavoriteModule::id)
+            val reordered = OrderedFavoriteAggregate(
+                moduleIds.map { id -> modulesById.getValue(id) },
+            )
+            store.replaceAggregate(reordered).also { succeeded ->
+                if (succeeded) publish()
+            }
+        }
+
     private suspend fun update(
         transform: (OrderedFavoriteAggregate) -> OrderedFavoriteAggregate,
     ): OrderedFavoriteAggregate? {

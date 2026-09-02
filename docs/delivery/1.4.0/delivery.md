@@ -50,7 +50,7 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
 | [Iteration 22: Ordered Favorite Module Foundation](iteration-22-ordered-favorite-module-foundation.md) | `Completed` | 2026-09-01 | The implementation, focused tests, static checks, author-reported compilation, and functional acceptance satisfy the iteration boundary. |
-| [Iteration 23: Module Style and Ordering](iteration-23-module-style-and-ordering.md) | `In progress` | 2026-09-01 | Authorized implementation is being realigned to accepted product-contract baseline `7cae837dafb188896dd24bd43aae58022c81fe11`. |
+| [Iteration 23: Module Style and Ordering](iteration-23-module-style-and-ordering.md) | `Completed` | 2026-09-02 | The implementation, focused persistence-test sources, static checks, and author-reported functional acceptance satisfy the iteration boundary. |
 | [Iteration 24: Application Editing and Cross-Module Movement](iteration-24-application-editing-and-cross-module-movement.md) | `Planned` | 2026-09-01 | The accepted product contract defines collapsed-dock removal, Undo, insertion movement, and the drop-to-create destination after module types, destinations, and add-favorite entries exist. |
 | [Iteration 25: Upgrade, Regression, and Version Closure](iteration-25-upgrade-regression-and-version-closure.md) | `Planned` | 2026-09-01 | Version completion requires integrated Home adoption, compatibility, artifact, and author-acceptance evidence after the selected Home loop is complete. |
 
@@ -62,7 +62,7 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 
 ### Iteration 23
 
-[Contract](iteration-23-module-style-and-ordering.md). Implementation is in progress on accepted product-contract baseline `7cae837dafb188896dd24bd43aae58022c81fe11`. The persisted style schema, backward-readable defaults, module selection, edit dock, initial inline panel, and immediate durable vertical-style preview exist locally; the author reported that the persistence foundation compiled without errors. The implementation is being realigned so add-favorite entries belong to the main list and module tails rather than the panel, and the shared panel and whole-module movement contracts remain incomplete. Current unvalidated work remains `Not run` or `Unknown`. Status is `In progress`.
+[Contract](iteration-23-module-style-and-ordering.md). The implementation on accepted product-contract baseline `7cae837dafb188896dd24bd43aae58022c81fe11` now provides position-resolved add-favorite entries for both module types and existing modules; the shared inline style panel with content-driven bounded height; complete-module selection; durable vertical-module style changes with serialization and rollback; and insertion-only whole-module movement with a frozen preview, source removal, boundary feedback, edge auto-scroll, atomic order persistence, cancellation, interruption cleanup, and localized failure recovery. Focused ordered-store test sources cover exact module-order persistence and invalid order rejection. The author reported that the current functional behavior was basically accepted after the final gesture-lifecycle fix. Agent static checks passed for `git diff --check` and affected resource XML parsing. Gradle and instrumentation were not run by the agent; broader recommended device, interruption, failure-injection, font-scale, process-recreation, and compatibility scenarios remain `Not run` or `Unknown` and are not promoted iteration blockers. Status is `Completed` by author decision on 2026-09-02.
 
 ### Iteration 24
 
@@ -102,4 +102,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.4.0` identif
 
 ## Completion result
 
-No version completion result exists. Iteration 22 is `Completed`; Iteration 23 is `In progress`; Iterations 24–25 remain `Planned`. This document does not authorize push, release, or publication.
+No version completion result exists. Iterations 22–23 are `Completed`; Iterations 24–25 remain `Planned`. This document does not authorize push, release, or publication.

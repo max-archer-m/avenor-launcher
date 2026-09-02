@@ -905,11 +905,6 @@ internal fun AvenorApp(
                 onCommitFavoriteComposition = { transform ->
                     val aggregate = effectiveFavoriteStore.updateAggregate(transform)
                     if (aggregate == null) {
-                        Toast.makeText(
-                            androidContext,
-                            R.string.favorite_reorder_unavailable,
-                            Toast.LENGTH_SHORT,
-                        ).show()
                         null
                     } else {
                         if (homeEditMode) {
@@ -918,6 +913,7 @@ internal fun AvenorApp(
                         aggregate
                     }
                 },
+                onCommitModuleOrder = effectiveFavoriteStore::replaceModuleOrder,
                 onLaunchFavorite = { availability ->
                     when {
                         availability !is FavoriteAvailability.Available -> {
