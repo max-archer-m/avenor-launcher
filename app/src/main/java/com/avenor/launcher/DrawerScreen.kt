@@ -10,8 +10,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
@@ -59,7 +57,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -71,24 +68,19 @@ import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.onClick
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import com.avenor.launcher.ui.drawer.components.DrawerAlphabetIndex
+import com.avenor.launcher.ui.drawer.components.DrawerIndexBubble
 
 private enum class DrawerLoadTrigger {
     Initial,
     ManualRetry,
     LiveUpdate,
 }
-
-private const val SETTINGS_INDEX_ENTRY = "settings"
 
 @Composable
 internal fun DrawerScreen(
@@ -768,175 +760,6 @@ private fun DrawerApplicationList(
                         end = indexWidth +
                             dimensionResource(R.dimen.drawer_index_bubble_index_gap),
                     ),
-            )
-        }
-    }
-}
-
-@Composable
-private fun DrawerAlphabetIndex(
-    labels: List<String>,
-    modifier: Modifier = Modifier,
-    onSelect: (String, Boolean) -> Unit,
-    onActiveLabelChange: (String?) -> Unit,
-    onSelectSettings: (Boolean) -> Unit,
-    includeSettings: Boolean = true,
-) {
-    val slotHeight = dimensionResource(R.dimen.drawer_index_slot_height)
-    val density = LocalDensity.current
-    val indexState = rememberLazyListState()
-    val indexEntries = remember(labels, includeSettings) {
-        if (includeSettings) labels + SETTINGS_INDEX_ENTRY else labels
-    }
-    LazyColumn(
-        modifier = modifier
-            .heightIn(max = dimensionResource(R.dimen.drawer_index_complete_height))
-            .height(slotHeight * indexEntries.size)
-            .width(dimensionResource(R.dimen.drawer_index_width))
-            .pointerInput(indexEntries, indexState) {
-                val edgeThresholdPx = with(density) { slotHeight.toPx() }
-
-                fun entryAt(y: Float): String? = indexState.layoutInfo.visibleItemsInfo
-                    .firstOrNull { item -> y >= item.offset && y < item.offset + item.size }
-                    ?.let { item -> indexEntries.getOrNull(item.index) }
-
-                try {
-                    awaitEachGesture {
-                        val down = awaitFirstDown(requireUnconsumed = false)
-                        var selectedLabel: String? = null
-                        var multiplePointersDetected = false
-
-                        fun select(entry: String?, immediate: Boolean) {
-                            if (entry == null || entry == selectedLabel) return
-                            selectedLabel = entry
-                            if (entry == SETTINGS_INDEX_ENTRY) {
-                                onActiveLabelChange(SETTINGS_INDEX_ENTRY)
-                                onSelectSettings(immediate)
-                            } else {
-                                onActiveLabelChange(entry)
-                                onSelect(entry, immediate)
-                            }
-                        }
-
-                        down.consume()
-                        select(entryAt(down.position.y), immediate = true)
-                        var pointersRemainPressed: Boolean
-                        do {
-                            val event = awaitPointerEvent()
-                            if (event.changes.count { it.pressed } > 1) {
-                                multiplePointersDetected = true
-                                selectedLabel = null
-                                onActiveLabelChange(null)
-                            }
-                            event.changes.forEach { change -> change.consume() }
-                            val activeChange = event.changes.firstOrNull { it.id == down.id }
-                            if (!multiplePointersDetected && activeChange?.pressed == true) {
-                                val viewportEnd = indexState.layoutInfo.viewportEndOffset.toFloat()
-                                when {
-                                    activeChange.position.y < edgeThresholdPx -> {
-                                        indexState.dispatchRawDelta(-edgeThresholdPx)
-                                    }
-
-                                    activeChange.position.y > viewportEnd - edgeThresholdPx -> {
-                                        indexState.dispatchRawDelta(edgeThresholdPx)
-                                    }
-                                }
-                                select(entryAt(activeChange.position.y), immediate = false)
-                            }
-                            pointersRemainPressed = event.changes.any { it.pressed }
-                        } while (pointersRemainPressed)
-                        onActiveLabelChange(null)
-                    }
-                } finally {
-                    onActiveLabelChange(null)
-                }
-            }
-            .testTag("drawer_alphabet_index"),
-        state = indexState,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        items(
-            items = labels,
-            key = { label -> "index:$label" },
-        ) { label ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(slotHeight)
-                    .semantics {
-                        role = Role.Button
-                        onClick {
-                            onSelect(label, true)
-                            true
-                        }
-                    }
-                    .testTag("drawer_index_$label"),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = label,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = dimensionResource(R.dimen.drawer_index_text_size).value.sp,
-                    fontWeight = FontWeight.Medium,
-                )
-            }
-        }
-        if (includeSettings) {
-            item(key = "index:settings") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(slotHeight)
-                        .semantics {
-                            role = Role.Button
-                            onClick {
-                                onSelectSettings(true)
-                                true
-                            }
-                        }
-                        .testTag("drawer_index_settings"),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_settings),
-                        contentDescription = stringResource(R.string.settings),
-                        modifier = Modifier.size(
-                            dimensionResource(R.dimen.drawer_index_settings_icon_size),
-                        ),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-            }
-        }
-}
-}
-
-@Composable
-private fun DrawerIndexBubble(
-    label: String,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .size(dimensionResource(R.dimen.drawer_index_bubble_size))
-            .testTag("drawer_index_bubble"),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (label == SETTINGS_INDEX_ENTRY) {
-            Icon(
-                painter = painterResource(R.drawable.ic_settings),
-                contentDescription = stringResource(R.string.settings),
-                modifier = Modifier.size(
-                    dimensionResource(R.dimen.drawer_index_bubble_settings_icon_size),
-                ),
-                tint = MaterialTheme.colorScheme.onBackground,
-            )
-        } else {
-            Text(
-                text = label,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = dimensionResource(R.dimen.drawer_index_bubble_text_size).value.sp,
-                fontWeight = FontWeight.Medium,
             )
         }
     }

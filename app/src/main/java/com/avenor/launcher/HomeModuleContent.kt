@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import com.avenor.launcher.ui.home.components.homeEditSurface
 
 @Composable
 internal fun HomeOrderedModuleContent(
@@ -31,7 +32,7 @@ internal fun HomeOrderedModuleContent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .editSurface(editMode),
+                    .homeEditSurface(enabled = editMode),
             ) {
                 val cells: List<LaunchableIdentity?> =
                     module.identities.map { it } + if (showAddEntry) listOf(null) else emptyList()
@@ -91,7 +92,7 @@ internal fun HomeOrderedModuleContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(dimensionResource(R.dimen.home_favorite_bar_height))
-                    .editSurface(editMode),
+                    .homeEditSurface(enabled = editMode),
                 state = state,
                 horizontalArrangement = Arrangement.spacedBy(
                     dimensionResource(R.dimen.home_favorite_bar_item_spacing),

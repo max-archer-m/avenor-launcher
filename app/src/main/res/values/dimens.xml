@@ -1,50 +1,46 @@
 <resources>
+    <!-- Home screen / Root content container -->
     <dimen name="home_horizontal_padding">16dp</dimen>
     <dimen name="home_vertical_padding">32dp</dimen>
     <dimen name="home_content_padding">8dp</dimen>
+    <dimen name="home_module_spacing">8dp</dimen>
+
+    <!-- Home screen / Basic information module / Time and date -->
     <dimen name="home_information_margin">8dp</dimen>
     <dimen name="home_time_min_height">64dp</dimen>
-    <dimen name="home_date_height">48dp</dimen>
     <dimen name="home_time_text_size">57sp</dimen>
     <dimen name="home_time_line_height">64sp</dimen>
+    <dimen name="home_date_height">48dp</dimen>
     <dimen name="home_date_text_size">16sp</dimen>
     <dimen name="home_date_line_height">24sp</dimen>
     <dimen name="home_date_text_start_inset">8dp</dimen>
-    <dimen name="drawer_entry_drag_threshold">120dp</dimen>
-    <dimen name="drawer_transition_full_gesture_distance">200dp</dimen>
-    <dimen name="drawer_horizontal_padding">16dp</dimen>
-    <dimen name="drawer_application_row_min_height">56dp</dimen>
-    <dimen name="drawer_application_icon_size">40dp</dimen>
-    <dimen name="drawer_application_icon_label_gap">16dp</dimen>
-    <dimen name="drawer_section_header_min_height">32dp</dimen>
-    <dimen name="drawer_section_header_vertical_padding">4dp</dimen>
-    <dimen name="drawer_index_width">32dp</dimen>
-    <dimen name="drawer_index_slot_height">20dp</dimen>
-    <dimen name="drawer_index_text_size">11sp</dimen>
-    <dimen name="drawer_index_complete_height">560dp</dimen>
-    <dimen name="drawer_index_bubble_size">64dp</dimen>
-    <dimen name="drawer_index_bubble_text_size">32sp</dimen>
-    <dimen name="drawer_index_bubble_index_gap">16dp</dimen>
-    <dimen name="drawer_error_icon_size">48dp</dimen>
-    <dimen name="home_favorite_row_min_height">56dp</dimen>
-    <dimen name="home_favorite_icon_size">40dp</dimen>
+
+    <!-- Home screen / Favorite modules / Shared application rows -->
+    <dimen name="home_favorite_group_spacing">8dp</dimen>
     <dimen name="home_favorite_large_row_min_height">64dp</dimen>
     <dimen name="home_favorite_large_icon_size">48dp</dimen>
     <dimen name="home_favorite_large_text_size">18sp</dimen>
     <dimen name="home_favorite_large_line_height">28sp</dimen>
-    <dimen name="home_companion_favorite_row_min_height">48dp</dimen>
-    <dimen name="home_companion_favorite_icon_size">32dp</dimen>
+    <dimen name="home_favorite_row_min_height">56dp</dimen>
+    <dimen name="home_favorite_icon_size">40dp</dimen>
     <dimen name="home_favorite_text_size">16sp</dimen>
     <dimen name="home_favorite_line_height">24sp</dimen>
+    <dimen name="home_companion_favorite_row_min_height">48dp</dimen>
+    <dimen name="home_companion_favorite_icon_size">32dp</dimen>
     <dimen name="home_companion_favorite_text_size">14sp</dimen>
     <dimen name="home_companion_favorite_line_height">20sp</dimen>
     <dimen name="home_favorite_icon_label_gap">16dp</dimen>
     <dimen name="home_favorite_error_icon_size">48dp</dimen>
+
+    <!-- Home screen / Favorite modules / Module removal target -->
     <dimen name="home_favorite_remove_target_size">48dp</dimen>
     <dimen name="home_favorite_remove_badge_size">24dp</dimen>
     <dimen name="home_favorite_remove_icon_size">16dp</dimen>
+
+    <!-- Home screen / Vertical favorite list / Content and edit controls -->
     <dimen name="home_favorite_edge_margin">8dp</dimen>
     <dimen name="home_favorite_list_icon_start_margin">8dp</dimen>
+    <dimen name="home_favorite_list_control_bar_height">40dp</dimen>
     <dimen name="home_favorite_list_control_target_width">40dp</dimen>
     <dimen name="home_favorite_list_control_surface_radius">8dp</dimen>
     <dimen name="home_favorite_list_control_border_width">1dp</dimen>
@@ -53,25 +49,26 @@
     <dimen name="home_favorite_list_remove_icon_size">12dp</dimen>
     <dimen name="home_favorite_list_reorder_icon_size">24dp</dimen>
     <dimen name="home_favorite_list_size_control_text_size">16sp</dimen>
+    <dimen name="home_favorite_add_control_height">48dp</dimen>
+
+    <!-- Home screen / Vertical favorite list / Size selection menu -->
     <dimen name="home_favorite_list_size_menu_item_height">64dp</dimen>
     <dimen name="home_favorite_list_size_menu_corner_radius">8dp</dimen>
     <dimen name="home_favorite_list_size_menu_indicator_icon_gap">8dp</dimen>
-    <dimen name="home_favorite_list_control_bar_height">40dp</dimen>
-    <dimen name="home_favorite_add_control_height">48dp</dimen>
-    <dimen name="drawer_top_app_bar_height">56dp</dimen>
-    <dimen name="drawer_selection_indicator_region_width">40dp</dimen>
-    <dimen name="drawer_selection_indicator_size">24dp</dimen>
-    <dimen name="drawer_selection_indicator_border_width">1dp</dimen>
-    <dimen name="home_module_spacing">8dp</dimen>
-    <dimen name="home_add_favorite_entry_min_height">48dp</dimen>
-    <dimen name="home_add_favorite_entry_gap">8dp</dimen>
-    <dimen name="home_add_favorite_icon_size">24dp</dimen>
-    <dimen name="home_favorite_group_spacing">8dp</dimen>
+
+    <!-- Home screen / Horizontal favorite ribbon / Container and application items -->
     <dimen name="home_favorite_bar_height">56dp</dimen>
     <dimen name="home_favorite_bar_item_width">128dp</dimen>
     <dimen name="home_favorite_bar_label_max_width">64dp</dimen>
     <dimen name="home_favorite_bar_item_inset">8dp</dimen>
     <dimen name="home_favorite_bar_icon_label_gap">8dp</dimen>
+    <dimen name="home_favorite_bar_spacing">8dp</dimen>
+    <dimen name="home_favorite_bar_item_spacing">8dp</dimen>
+    <dimen name="home_favorite_bar_corner_radius">12dp</dimen>
+    <dimen name="home_favorite_bar_border_width">1dp</dimen>
+    <dimen name="home_favorite_bar_overflow_fade_width">24dp</dimen>
+
+    <!-- Home screen / Horizontal favorite ribbon / Edit rail and item controls -->
     <dimen name="home_favorite_bar_drag_target_width">40dp</dimen>
     <dimen name="home_favorite_bar_control_target_width">40dp</dimen>
     <dimen name="home_favorite_bar_reorder_target_width">40dp</dimen>
@@ -80,17 +77,49 @@
     <dimen name="home_favorite_bar_rail_divider_width">1dp</dimen>
     <dimen name="home_favorite_bar_remove_target_size">20dp</dimen>
     <dimen name="home_favorite_bar_remove_icon_size">12dp</dimen>
-    <dimen name="home_favorite_bar_spacing">8dp</dimen>
-    <dimen name="home_favorite_bar_item_spacing">8dp</dimen>
-    <dimen name="home_favorite_bar_corner_radius">12dp</dimen>
-    <dimen name="home_favorite_bar_border_width">1dp</dimen>
-    <dimen name="home_favorite_bar_overflow_fade_width">24dp</dimen>
+
+    <!-- Home screen / Favorite module / Applications displayed below the module title -->
+    <dimen name="home_favorite_large_below_height">104dp</dimen>
+    <dimen name="home_favorite_medium_below_height">92dp</dimen>
+    <dimen name="home_favorite_small_below_height">80dp</dimen>
+    <dimen name="home_favorite_below_top_inset">8dp</dimen>
+    <dimen name="home_favorite_below_bottom_inset">8dp</dimen>
+    <dimen name="home_favorite_below_horizontal_inset">8dp</dimen>
+    <dimen name="home_favorite_below_icon_label_gap">12dp</dimen>
+
+    <!-- Home screen / Empty favorite module / Add-application entry -->
+    <dimen name="home_add_favorite_entry_min_height">48dp</dimen>
+    <dimen name="home_add_favorite_entry_gap">8dp</dimen>
+    <dimen name="home_add_favorite_icon_size">24dp</dimen>
+
+    <!-- Home screen / Edit mode / Module surface and bottom dock -->
     <dimen name="home_edit_surface_radius">8dp</dimen>
     <dimen name="home_edit_dock_height">32dp</dimen>
     <dimen name="home_edit_dock_affordance_width">48dp</dimen>
     <dimen name="home_edit_dock_icon_size">24dp</dimen>
     <dimen name="home_edit_dock_text_padding">8dp</dimen>
     <dimen name="home_edit_dock_text_size">14sp</dimen>
+
+    <!-- Home screen / Edit mode / Module selection and drag decoration -->
+    <dimen name="home_module_mark_arm">16dp</dimen>
+    <dimen name="home_module_mark_stroke">2dp</dimen>
+    <dimen name="home_module_mark_inset">4dp</dimen>
+    <dimen name="home_module_mark_radius">8dp</dimen>
+    <dimen name="home_module_drag_shadow_elevation">12dp</dimen>
+    <dimen name="home_module_selection_stroke">2dp</dimen>
+    <dimen name="home_module_selection_radius">12dp</dimen>
+
+    <!-- Home screen / Edit mode / Favorite application reordering feedback -->
+    <dimen name="home_reorder_handle_size">24dp</dimen>
+    <dimen name="home_reorder_handle_target_size">40dp</dimen>
+    <dimen name="home_favorite_edge_scroll_band">48dp</dimen>
+    <dimen name="home_reorder_drag_elevation">12dp</dimen>
+    <dimen name="home_favorite_exchange_border_width">2dp</dimen>
+    <dimen name="home_favorite_exchange_border_radius">8dp</dimen>
+    <dimen name="home_favorite_insertion_line_thickness">2dp</dimen>
+    <dimen name="home_favorite_insertion_boundary_band">12dp</dimen>
+
+    <!-- Home screen / Module style editor / Panel container and rows -->
     <dimen name="home_style_panel_minimum_list_viewport">112dp</dimen>
     <dimen name="style_settings_panel_row_height">56dp</dimen>
     <dimen name="style_settings_panel_row_inset">12dp</dimen>
@@ -103,60 +132,88 @@
     <dimen name="style_settings_indicator_size">24dp</dimen>
     <dimen name="style_settings_indicator_icon_gap">4dp</dimen>
     <dimen name="style_settings_icon_label_gap">8dp</dimen>
+
+    <!-- Home screen / Module style editor / Arrangement selector -->
     <dimen name="style_settings_selector_width">148dp</dimen>
     <dimen name="style_settings_selector_height">44dp</dimen>
     <dimen name="style_settings_selector_border_width">1dp</dimen>
     <dimen name="style_settings_selector_inner_padding">2dp</dimen>
     <dimen name="style_settings_selector_frame_radius">22dp</dimen>
     <dimen name="style_settings_selector_thumb_radius">20dp</dimen>
+
+    <!-- Home screen / Module style editor / Quantity stepper -->
     <dimen name="style_settings_control_gap">8dp</dimen>
     <dimen name="style_settings_stepper_target_size">48dp</dimen>
     <dimen name="style_settings_stepper_visible_size">32dp</dimen>
     <dimen name="style_settings_stepper_value_width">36dp</dimen>
     <dimen name="style_settings_stepper_visible_height">32dp</dimen>
     <dimen name="style_settings_stepper_radius">4dp</dimen>
-    <dimen name="home_module_mark_arm">16dp</dimen>
-    <dimen name="home_module_mark_stroke">2dp</dimen>
-    <dimen name="home_module_mark_inset">4dp</dimen>
-    <dimen name="home_module_mark_radius">8dp</dimen>
-    <dimen name="home_module_drag_shadow_elevation">12dp</dimen>
-    <dimen name="home_module_selection_stroke">2dp</dimen>
-    <dimen name="home_module_selection_radius">12dp</dimen>
-    <dimen name="home_favorite_large_below_height">104dp</dimen>
-    <dimen name="home_favorite_medium_below_height">92dp</dimen>
-    <dimen name="home_favorite_small_below_height">80dp</dimen>
-    <dimen name="home_favorite_below_top_inset">8dp</dimen>
-    <dimen name="home_favorite_below_bottom_inset">8dp</dimen>
-    <dimen name="home_favorite_below_horizontal_inset">8dp</dimen>
-    <dimen name="home_favorite_below_icon_label_gap">12dp</dimen>
-    <dimen name="home_reorder_handle_size">24dp</dimen>
-    <dimen name="home_reorder_handle_target_size">40dp</dimen>
-    <dimen name="home_favorite_edge_scroll_band">48dp</dimen>
-    <dimen name="home_reorder_drag_elevation">12dp</dimen>
-    <dimen name="home_favorite_exchange_border_width">2dp</dimen>
-    <dimen name="home_favorite_exchange_border_radius">8dp</dimen>
-    <dimen name="home_favorite_insertion_line_thickness">2dp</dimen>
-    <dimen name="home_favorite_insertion_boundary_band">12dp</dimen>
+
+    <!-- Drawer / Transition gesture from Home -->
+    <dimen name="drawer_entry_drag_threshold">120dp</dimen>
+    <dimen name="drawer_transition_full_gesture_distance">200dp</dimen>
+
+    <!-- Drawer / Application list / Root content and loading result -->
+    <dimen name="drawer_horizontal_padding">16dp</dimen>
+    <dimen name="drawer_error_icon_size">48dp</dimen>
+
+    <!-- Drawer / Application list / Application row -->
+    <dimen name="drawer_application_row_min_height">56dp</dimen>
+    <dimen name="drawer_application_icon_size">40dp</dimen>
+    <dimen name="drawer_application_icon_label_gap">16dp</dimen>
+
+    <!-- Drawer / Application list / Alphabet section header -->
+    <dimen name="drawer_section_header_min_height">32dp</dimen>
+    <dimen name="drawer_section_header_vertical_padding">4dp</dimen>
+
+    <!-- Drawer / Application list / Alphabet index rail -->
+    <dimen name="drawer_index_width">32dp</dimen>
+    <dimen name="drawer_index_slot_height">20dp</dimen>
+    <dimen name="drawer_index_text_size">11sp</dimen>
+    <dimen name="drawer_index_complete_height">560dp</dimen>
+    <dimen name="drawer_index_settings_icon_size">11dp</dimen>
+
+    <!-- Drawer / Application list / Alphabet index active-label bubble -->
+    <dimen name="drawer_index_bubble_size">64dp</dimen>
+    <dimen name="drawer_index_bubble_text_size">32sp</dimen>
+    <dimen name="drawer_index_bubble_index_gap">16dp</dimen>
+    <dimen name="drawer_index_bubble_settings_icon_size">32dp</dimen>
+
+    <!-- Drawer / Favorite selection mode / Top app bar and row indicator -->
+    <dimen name="drawer_top_app_bar_height">56dp</dimen>
+    <dimen name="drawer_selection_indicator_region_width">40dp</dimen>
+    <dimen name="drawer_selection_indicator_size">24dp</dimen>
+    <dimen name="drawer_selection_indicator_border_width">1dp</dimen>
+
+    <!-- Settings screen / Root layout and top app bar -->
+    <dimen name="settings_top_bar_min_height">56dp</dimen>
+    <dimen name="settings_horizontal_padding">16dp</dimen>
+
+    <!-- Settings screen / Primary and nested preference rows -->
+    <dimen name="settings_primary_one_line_min_height">56dp</dimen>
+    <dimen name="settings_primary_two_line_min_height">72dp</dimen>
+    <dimen name="settings_secondary_item_min_height">40dp</dimen>
+    <dimen name="settings_trailing_icon_size">24dp</dimen>
+
+    <!-- Settings screen / Modal content and open-source license title -->
+    <dimen name="settings_modal_content_spacing">16dp</dimen>
+    <dimen name="settings_license_title_vertical_padding">12dp</dimen>
+
+    <!-- Shared UI / Application action sheet / Container and drag handle -->
     <dimen name="action_sheet_horizontal_padding">16dp</dimen>
     <dimen name="action_sheet_divider_inset">16dp</dimen>
     <dimen name="action_sheet_handle_width">32dp</dimen>
     <dimen name="action_sheet_handle_height">4dp</dimen>
     <dimen name="action_sheet_handle_padding">12dp</dimen>
+
+    <!-- Shared UI / Application action sheet / Primary actions -->
     <dimen name="action_sheet_actions_vertical_padding">16dp</dimen>
     <dimen name="action_sheet_action_icon_size">24dp</dimen>
     <dimen name="action_sheet_icon_label_gap">4dp</dimen>
     <dimen name="action_sheet_badge_size">12dp</dimen>
+
+    <!-- Shared UI / Application action sheet / Application shortcuts -->
     <dimen name="action_sheet_shortcut_icon_size">24dp</dimen>
     <dimen name="action_sheet_shortcut_icon_label_gap">16dp</dimen>
     <dimen name="action_sheet_shortcut_row_min_height">48dp</dimen>
-    <dimen name="drawer_index_settings_icon_size">11dp</dimen>
-    <dimen name="drawer_index_bubble_settings_icon_size">32dp</dimen>
-    <dimen name="settings_top_bar_min_height">56dp</dimen>
-    <dimen name="settings_horizontal_padding">16dp</dimen>
-    <dimen name="settings_primary_one_line_min_height">56dp</dimen>
-    <dimen name="settings_primary_two_line_min_height">72dp</dimen>
-    <dimen name="settings_secondary_item_min_height">40dp</dimen>
-    <dimen name="settings_modal_content_spacing">16dp</dimen>
-    <dimen name="settings_trailing_icon_size">24dp</dimen>
-    <dimen name="settings_license_title_vertical_padding">12dp</dimen>
 </resources>

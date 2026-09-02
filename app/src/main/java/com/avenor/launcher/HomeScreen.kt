@@ -1,13 +1,6 @@
 package com.avenor.launcher
 
 import android.annotation.SuppressLint
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
-import android.provider.AlarmClock
-import android.provider.CalendarContract
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
@@ -17,7 +10,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -25,7 +17,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,7 +29,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
@@ -138,18 +128,19 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.graphics.drawable.toBitmap
-import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration.Companion.milliseconds
+import com.avenor.launcher.ui.home.components.HomeBasicInformation
+import com.avenor.launcher.ui.home.components.homeEditSurface
 
 
 @Composable
 internal fun HomeScreen(
-    clock: () -> ZonedDateTime = { ZonedDateTime.now() },
     favoriteState: FavoriteReadState = FavoriteReadState.Readable(emptyList()),
     favoriteAvailability: Map<LaunchableIdentity, FavoriteAvailability> = emptyMap(),
     favoriteListState: LazyListState = rememberLazyListState(),
@@ -180,7 +171,6 @@ internal fun HomeScreen(
     accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
 ) {
     val context = LocalContext.current
-    var now by remember { mutableStateOf(clock()) }
     var dragSession by remember { mutableStateOf<FavoriteDragSession?>(null) }
     var favoriteBarDragSession by remember {
         mutableStateOf<FavoriteBarDragSession?>(null)
@@ -384,14 +374,6 @@ internal fun HomeScreen(
         favoriteBarStates = favoriteBarStates,
     )
 
-    LaunchedEffect(clock) {
-        while (true) {
-            val remainingMillis = 60_000L - (System.currentTimeMillis() % 60_000L)
-            delay(remainingMillis)
-            now = clock()
-        }
-    }
-
     LaunchedEffect(editMode) {
         if (!editMode) {
             editTransaction.leave()
@@ -493,7 +475,7 @@ internal fun HomeScreen(
 
     LaunchedEffect(moduleDragSession?.sourceModule?.id, moduleEdgeScrollDirection) {
         if (moduleEdgeScrollDirection == 0) return@LaunchedEffect
-        delay(edgeScrollStartDelayMillis)
+        delay(duration = edgeScrollStartDelayMillis.milliseconds)
         var previousFrameNanos = withFrameNanos { it }
         while (moduleDragSession != null) {
             val session = moduleDragSession ?: break
@@ -1086,7 +1068,7 @@ internal fun HomeScreen(
         applicationEdgeScroll?.forward,
     ) {
         val initialRequest = applicationEdgeScroll ?: return@LaunchedEffect
-        delay(edgeScrollStartDelayMillis)
+        delay(duration = edgeScrollStartDelayMillis.milliseconds)
         var previousFrame = 0L
         while (true) {
             val request = applicationDragTargetSession?.edgeScroll(
@@ -1153,96 +1135,11 @@ internal fun HomeScreen(
                 dimensionResource(R.dimen.home_style_panel_minimum_list_viewport)
             ).coerceAtLeast(0.dp)
         Column(modifier = Modifier.fillMaxSize()) {
-            if (!editMode || !stylePanelExpanded) Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min)
-                    .editSurface(editMode),
-            ) {
-                Column(
-                    modifier = Modifier.padding(
-                        start = dimensionResource(R.dimen.home_information_margin),
-                        top = dimensionResource(R.dimen.home_information_margin),
-                        end = dimensionResource(R.dimen.home_information_margin),
-                    ),
-                ) {
-                    Text(
-                        text = HomeDateTimeFormatter.time(context, now),
-                        modifier = Modifier
-                            .heightIn(min = dimensionResource(R.dimen.home_time_min_height))
-                            .testTag("home_time")
-                            .clickable(enabled = !editMode, role = Role.Button) {
-                                context.launchClockDestination()
-                            },
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = dimensionResource(R.dimen.home_time_text_size).value.sp,
-                        fontWeight = FontWeight.Bold,
-                        lineHeight = dimensionResource(R.dimen.home_time_line_height).value.sp,
-                        textAlign = TextAlign.Start,
-                    )
-                    Text(
-                        text = HomeDateTimeFormatter.dateAndWeekday(context, now),
-                        modifier = Modifier
-                            .heightIn(min = dimensionResource(R.dimen.home_date_height))
-                            .testTag("home_date")
-                            .clickable(enabled = !editMode, role = Role.Button) {
-                                val calendarUri = CalendarContract.CONTENT_URI
-                                    .buildUpon()
-                                    .appendPath("time")
-                                    .appendPath(now.toInstant().toEpochMilli().toString())
-                                    .build()
-                                context.launchPlatformDestination(
-                                    intent = Intent(Intent.ACTION_VIEW, calendarUri),
-                                    failureMessage = R.string.calendar_unavailable,
-                                )
-                            }
-                            // The inset only shifts the visible text; the clickable stays outside
-                            // it so the whole date row remains the focusable touch target.
-                            .padding(
-                                start = dimensionResource(R.dimen.home_date_text_start_inset),
-                            )
-                            .wrapContentHeight(align = Alignment.CenterVertically),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = dimensionResource(R.dimen.home_date_text_size).value.sp,
-                        fontWeight = FontWeight.Normal,
-                        lineHeight = dimensionResource(R.dimen.home_date_line_height).value.sp,
-                        textAlign = TextAlign.Start,
-                    )
-                }
-                Spacer(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .pointerInput(accessibilityLockController, editMode) {
-                            detectTapGestures(
-                                onDoubleTap = {
-                                    if (!accessibilityLockController.availableForValidation ||
-                                        editMode ||
-                                        !accessibilityLockController.isSystemEnabled()
-                                    ) {
-                                        return@detectTapGestures
-                                    }
-                                    if (accessibilityLockController.requestLock() !=
-                                        LockRequestResult.Requested
-                                    ) {
-                                        Toast.makeText(
-                                            context,
-                                            R.string.unable_to_lock_screen,
-                                            Toast.LENGTH_SHORT,
-                                        ).show()
-                                    }
-                                },
-                                onLongPress = {
-                                    if (!editMode) {
-                                        hapticFeedback.performHapticFeedback(
-                                            HapticFeedbackType.LongPress,
-                                        )
-                                        onRequestEditMode()
-                                    }
-                                },
-                            )
-                        }
-                        .testTag("home_double_tap_lock_region"),
+            if (!editMode || !stylePanelExpanded) {
+                HomeBasicInformation(
+                    editMode = editMode,
+                    accessibilityLockController = accessibilityLockController,
+                    onRequestEditMode = onRequestEditMode,
                 )
             }
             if (!editMode || !stylePanelExpanded) {
@@ -2966,7 +2863,7 @@ private fun HomeFavoriteList(
                     ),
                 )
             }
-            .editSurface(editMode)
+            .homeEditSurface(enabled = editMode)
             .then(
                 if (!listExchangeHighlight && !applicationDropHighlight) {
                     Modifier
@@ -3256,7 +3153,7 @@ private fun HomeFavoriteBars(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .editSurface(editMode),
+            .homeEditSurface(enabled = editMode),
         verticalArrangement = Arrangement.spacedBy(
             dimensionResource(R.dimen.home_favorite_bar_spacing),
         ),
@@ -3917,7 +3814,7 @@ private fun HomeFavoriteProvisionalList(
                     ),
                 )
             }
-            .editSurface(enabled = true)
+            .homeEditSurface(enabled = true)
             .then(
                 if (applicationDropHighlight) {
                     Modifier.border(
@@ -5217,14 +5114,6 @@ private fun HomeFavoriteProvisionalList(
         }
     }
 
-    @Composable
-    internal fun Modifier.editSurface(enabled: Boolean): Modifier = if (!enabled) this else {
-        background(
-            colorResource(R.color.home_edit_surface),
-            RoundedCornerShape(dimensionResource(R.dimen.home_edit_surface_radius)),
-        )
-    }
-
     internal fun LaunchableIdentity.stableKey(): String =
         "$profileSerialNumber:${componentName.flattenToString()}"
 
@@ -5256,46 +5145,4 @@ private fun HomeFavoriteProvisionalList(
         FavoriteListSize.Large -> R.dimen.home_favorite_large_line_height
         FavoriteListSize.Medium -> R.dimen.home_favorite_line_height
         FavoriteListSize.Small -> R.dimen.home_companion_favorite_line_height
-    }
-
-    private fun Context.launchClockDestination() {
-        val alarmIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
-        val clockMainIntent = try {
-            packageManager
-                .resolveDefaultActivity(alarmIntent)
-                ?.activityInfo
-                ?.packageName
-                ?.let { packageManager.getLaunchIntentForPackage(it) }
-        } catch (_: SecurityException) {
-            null
-        }
-
-        launchPlatformDestination(
-            intent = clockMainIntent ?: alarmIntent,
-            failureMessage = R.string.clock_unavailable,
-        )
-    }
-
-    private fun PackageManager.resolveDefaultActivity(intent: Intent) =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            resolveActivity(
-                intent,
-                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong()),
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
-        }
-
-    private fun Context.launchPlatformDestination(
-        intent: Intent,
-        @StringRes failureMessage: Int,
-    ) {
-        try {
-            startActivity(intent)
-        } catch (_: ActivityNotFoundException) {
-            Toast.makeText(this, failureMessage, Toast.LENGTH_SHORT).show()
-        } catch (_: SecurityException) {
-            Toast.makeText(this, failureMessage, Toast.LENGTH_SHORT).show()
-        }
     }
