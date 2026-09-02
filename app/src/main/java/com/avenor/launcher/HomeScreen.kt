@@ -40,7 +40,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -70,8 +69,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -101,8 +98,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -307,16 +302,9 @@ internal fun HomeScreen(
         onFavoriteRevealComplete()
     }
     var dragGeneration by remember { mutableIntStateOf(0) }
-    var undoAggregate by remember { mutableStateOf<FavoriteAggregate?>(null) }
-    var editSessionId by remember { mutableIntStateOf(0) }
-    var undoSequence by remember { mutableIntStateOf(0) }
-    var pendingEditAggregate by remember { mutableStateOf<FavoriteAggregate?>(null) }
-    var committedEditAggregate by remember { mutableStateOf<FavoriteAggregate?>(null) }
+    val editTransaction = remember { HomeEditTransaction() }
     var editMutationJob by remember { mutableStateOf<Job?>(null) }
     var moduleDragSession by remember { mutableStateOf<ModuleDragSession?>(null) }
-    var pendingModuleOrder by remember {
-        mutableStateOf<List<OrderedFavoriteModule>?>(null)
-    }
     val moduleBoundsInWindow = remember { mutableStateMapOf<String, Rect>() }
     var moduleListBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
     val currentFavoriteState by rememberUpdatedState(favoriteState)
@@ -406,18 +394,14 @@ internal fun HomeScreen(
 
     LaunchedEffect(editMode) {
         if (!editMode) {
-            editSessionId += 1
+            editTransaction.leave()
             cancelActiveDragSessions()
-            undoAggregate = null
-            pendingEditAggregate = null
-            pendingModuleOrder = null
-            committedEditAggregate = null
             editMutationJob?.cancel()
             snackbarHostState.currentSnackbarData?.dismiss()
         } else {
-            editSessionId += 1
-            committedEditAggregate =
-                (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate
+            editTransaction.enter(
+                (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate,
+            )
         }
     }
 
@@ -451,45 +435,18 @@ internal fun HomeScreen(
 
     fun advanceModuleDrag(amount: Offset) {
         val previous = moduleDragSession ?: return
-        val moved = previous.copy(delta = previous.delta + amount)
-        if (!moduleListBoundsInWindow.contains(moved.touchInWindow)) {
-            moduleDragSession = moved.copy(insertionIndex = null)
-            return
-        }
-        val touchY = moved.touchInWindow.y
-        val insertionIndex = moved.remainingModules.indexOfFirst { module ->
-            val bounds = moduleBoundsInWindow[module.id] ?: return@indexOfFirst false
-            touchY < bounds.center.y
-        }.let { index ->
-            if (index < 0) moved.remainingModules.size else index
-        }
-        moduleDragSession = moved.copy(insertionIndex = insertionIndex)
+        moduleDragSession = previous.advanced(
+            amount = amount,
+            listBoundsInWindow = moduleListBoundsInWindow,
+            moduleBoundsInWindow = moduleBoundsInWindow,
+        )
     }
 
-    fun finishModuleDrag() {
-        val session = moduleDragSession ?: return
-        moduleDragSession = null
-        val insertionIndex = session.insertionIndex ?: return
-        val reordered = session.remainingModules.toMutableList().apply {
-            add(insertionIndex.coerceIn(0, size), session.sourceModule)
-        }.toList()
-        if (reordered.map { it.id } == session.initialModules.map { it.id }) return
-
+    fun enqueueEditMutation(mutation: suspend () -> Unit) {
         val previousJob = editMutationJob
-        val editSession = editSessionId
-        pendingModuleOrder = reordered
         val mutationJob = editScope.launch(start = CoroutineStart.LAZY) {
             previousJob?.join()
-            val persisted = onCommitModuleOrder(reordered.map { it.id })
-            if (editSession != editSessionId || !editMode) return@launch
-            pendingModuleOrder = null
-            if (!persisted) {
-                Toast.makeText(
-                    context,
-                    moduleOrderSaveFailureMessage,
-                    Toast.LENGTH_SHORT,
-                ).show()
-            }
+            mutation()
         }
         editMutationJob = mutationJob
         mutationJob.invokeOnCompletion {
@@ -498,6 +455,29 @@ internal fun HomeScreen(
             }
         }
         mutationJob.start()
+    }
+
+    fun finishModuleDrag() {
+        val session = moduleDragSession ?: return
+        moduleDragSession = null
+        val reordered = session.completedModules() ?: return
+
+        val editSession = editTransaction.sessionId
+        editTransaction.beginModuleOrder(reordered)
+        enqueueEditMutation moduleOrderMutation@{
+            val persisted = onCommitModuleOrder(reordered.map { it.id })
+            if (editSession != editTransaction.sessionId || !editMode) {
+                return@moduleOrderMutation
+            }
+            editTransaction.completeModuleOrder()
+            if (!persisted) {
+                Toast.makeText(
+                    context,
+                    moduleOrderSaveFailureMessage,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        }
     }
 
     val moduleEdgeScrollDirection = moduleDragSession?.let { session ->
@@ -550,19 +530,15 @@ internal fun HomeScreen(
     LaunchedEffect(favoriteState, editMode) {
         val readable = favoriteState as? FavoriteReadState.Readable
             ?: return@LaunchedEffect
-        val committed = committedEditAggregate ?: return@LaunchedEffect
+        val committed = editTransaction.committedAggregate ?: return@LaunchedEffect
         if (editMode &&
             readable.aggregate != committed &&
             editMutationJob?.isActive != true
         ) {
             cancelActiveDragSessions()
-            if (undoAggregate != null) {
-                undoSequence += 1
-                undoAggregate = null
+            if (editTransaction.reconcileExternal(readable.aggregate)) {
                 snackbarHostState.currentSnackbarData?.dismiss()
             }
-            pendingEditAggregate = null
-            committedEditAggregate = readable.aggregate
         }
     }
 
@@ -580,42 +556,36 @@ internal fun HomeScreen(
         },
 ) {
         if (favoriteState !is FavoriteReadState.Readable) return
-        val previousJob = editMutationJob
-        val session = editSessionId
-        val mutationJob = editScope.launch(start = CoroutineStart.LAZY) {
-            previousJob?.join()
-            val base = pendingEditAggregate
-                ?: committedEditAggregate
-                ?: (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate
-                ?: return@launch
+        val session = editTransaction.sessionId
+        enqueueEditMutation mutation@{
+            val base = editTransaction.baseAggregate(
+                (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate,
+            )
+                ?: return@mutation
             val updated = transform(base)
-            if (!isValidAggregate(updated)) return@launch
-            pendingEditAggregate = updated
+            if (!isValidAggregate(updated)) return@mutation
+            editTransaction.beginMutation(updated)
             val persisted = onCommitFavoriteComposition(transform)
-            if (session != editSessionId || !editMode) return@launch
+            if (session != editTransaction.sessionId || !editMode) return@mutation
             if (persisted == null) {
-                if (pendingEditAggregate == updated) pendingEditAggregate = null
+                editTransaction.discardPending(updated)
                 withFrameNanos { }
-                if (session != editSessionId || !editMode) return@launch
-                committedEditAggregate =
-                    (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate
-                        ?: committedEditAggregate
+                if (session != editTransaction.sessionId || !editMode) return@mutation
+                editTransaction.restoreCommitted(
+                    (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate,
+                )
                 cancelActiveDragSessions()
                 onFailed()
-                return@launch
+                return@mutation
             }
-            committedEditAggregate = persisted
-            pendingEditAggregate = null
+            editTransaction.completeMutation(persisted)
             onCommitted()
             if (!recordUndo) {
-                undoSequence += 1
-                undoAggregate = null
+                editTransaction.clearUndo()
                 snackbarHostState.currentSnackbarData?.dismiss()
-                return@launch
+                return@mutation
             }
-            undoSequence += 1
-            val sequence = undoSequence
-            undoAggregate = base
+            val sequence = editTransaction.recordUndo(base)
             snackbarHostState.currentSnackbarData?.dismiss()
             editScope.launch {
                 val result = snackbarHostState.showSnackbar(
@@ -624,12 +594,9 @@ internal fun HomeScreen(
                     duration = SnackbarDuration.Long,
                 )
                 if (result == SnackbarResult.ActionPerformed &&
-                    sequence == undoSequence &&
-                    session == editSessionId
+                    session == editTransaction.sessionId
                 ) {
-                    val snapshot = undoAggregate ?: return@launch
-                    undoAggregate = null
-                    undoSequence += 1
+                    val snapshot = editTransaction.consumeUndo(sequence) ?: return@launch
                     commitEditAggregate(
                         transform = { snapshot },
                         onFailed = {
@@ -644,15 +611,6 @@ internal fun HomeScreen(
                 }
             }
         }
-        editMutationJob = mutationJob
-        mutationJob.invokeOnCompletion {
-            editScope.launch {
-                if (editMutationJob === mutationJob) {
-                    editMutationJob = null
-                }
-            }
-        }
-        mutationJob.start()
     }
 
     fun removeFavoriteFromContainer(
@@ -1384,12 +1342,12 @@ internal fun HomeScreen(
                             onLongPressFavorite = onLongPressFavorite,
                         )
                     } else if (orderedModules != null) {
-                        val previewAggregate = pendingEditAggregate
-                            ?: committedEditAggregate
-                            ?: favoriteState.aggregate
+                        val previewAggregate = editTransaction.previewAggregate(
+                            favoriteState.aggregate,
+                        )
                         val styledModules = orderedModules.withPresentationFrom(previewAggregate)
                         val displayedModules = moduleDragSession?.remainingModules
-                            ?: pendingModuleOrder
+                            ?: editTransaction.pendingModuleOrder
                             ?: styledModules
                         HomeOrderedModuleComposition(
                             modules = displayedModules,
@@ -1432,9 +1390,9 @@ internal fun HomeScreen(
                             onModuleDragCancel = { moduleDragSession = null },
                         )
                     } else if (editMode) {
-                        val persistedEditAggregate = pendingEditAggregate
-                            ?: committedEditAggregate
-                            ?: favoriteState.aggregate
+                        val persistedEditAggregate = editTransaction.previewAggregate(
+                            favoriteState.aggregate,
+                        )
                         val editAggregate = listDragSession?.let { session ->
                             persistedEditAggregate.copy(
                                 verticalLists = session.displayedLists,
@@ -1919,7 +1877,7 @@ internal fun HomeScreen(
             }
             (favoriteState as? FavoriteReadState.Readable)?.aggregate?.let { aggregate ->
                 val renderedAggregate = if (editMode) {
-                    pendingEditAggregate ?: committedEditAggregate ?: aggregate
+                    editTransaction.previewAggregate(aggregate)
                 } else {
                     aggregate
                 }
@@ -2022,10 +1980,10 @@ internal fun HomeScreen(
                 val orderedModules = (favoriteState as? FavoriteReadState.Readable)
                     ?.orderedModules
                     .orEmpty()
-                val previewAggregate = pendingEditAggregate
-                    ?: committedEditAggregate
-                    ?: (favoriteState as? FavoriteReadState.Readable)?.aggregate
-                    ?: FavoriteAggregate()
+                val previewAggregate = editTransaction.previewAggregate(
+                    (favoriteState as? FavoriteReadState.Readable)?.aggregate
+                        ?: FavoriteAggregate(),
+                )
                 val displayedModules = orderedModules.withPresentationFrom(previewAggregate)
                 val selectedModule = displayedModules.firstOrNull {
                     it.id == selectedModuleId
@@ -2122,330 +2080,6 @@ internal fun HomeScreen(
     }
 }
 
-/**
- * State of an active favorite drag: the source geometry, the accumulated pointer delta, the touch
- * point that started the gesture, and the live visible order of both groups. In-group exchanges
- * change the visible order during the drag; a released session keeps that order visible until the
- * persistence callback completes.
- */
-private data class FavoriteDragSession(
-    val generation: Int,
-    val identity: LaunchableIdentity,
-    val listSize: FavoriteListSize,
-    val originInWindow: Offset,
-    val size: IntSize,
-    val touchStartInWindow: Offset,
-    val displayedPrimary: List<LaunchableIdentity>,
-    val displayedCompanion: List<LaunchableIdentity>,
-    val delta: Offset = Offset.Zero,
-    val hasInGroupExchange: Boolean = false,
-    val lastInGroupExchangeTouchY: Float? = null,
-    val released: Boolean = false,
-    val crossGroupTarget: LaunchableIdentity? = null,
-    val insertion: FavoriteInsertionTarget? = null,
-) {
-    /** Live position of the finger, derived from the start point so a row swap cannot shift it. */
-    val touchInWindow: Offset get() = touchStartInWindow + delta
-
-    /** Group that shows the dragged favorite, which the drag keeps unchanged until the release. */
-    val inCompanion: Boolean get() = identity in displayedCompanion
-
-    /** Whether a cross-group insertion boundary is currently marked. */
-    val hasInsertion: Boolean get() = insertion != null
-
-    /** Whether a release would produce a composition that differs from the saved one. */
-    val hasPendingChange: Boolean
-        get() = hasInGroupExchange || crossGroupTarget != null || hasInsertion
-
-    /** Boundary the requested group should mark with an insertion line, if any. */
-    fun insertionBoundaryIn(companion: Boolean): Int? =
-        insertion?.takeIf { it.intoCompanion == companion }?.boundaryIndex
-
-    /** Returns this session with cross-group feedback dropped and visible orders untouched. */
-    fun withoutCrossGroupFeedback(): FavoriteDragSession =
-        if (crossGroupTarget == null && insertion == null) {
-            this
-        } else {
-            copy(crossGroupTarget = null, insertion = null)
-        }
-}
-
-private data class FavoriteBarDragSession(
-    val generation: Int,
-    val barId: String,
-    val identity: LaunchableIdentity,
-    val displayedIdentities: List<LaunchableIdentity>,
-    val originInWindow: Offset,
-    val size: IntSize,
-    val delta: Offset = Offset.Zero,
-    val residualX: Float = 0f,
-)
-
-private data class ModuleDragSession(
-    val sourceModule: OrderedFavoriteModule,
-    val sourceSelected: Boolean,
-    val sourceAvailability: Map<LaunchableIdentity, FavoriteAvailability>,
-    val initialModules: List<OrderedFavoriteModule>,
-    val remainingModules: List<OrderedFavoriteModule>,
-    val insertionIndex: Int?,
-    val originInWindow: Offset,
-    val size: IntSize,
-    val touchStartInWindow: Offset,
-    val delta: Offset = Offset.Zero,
-) {
-    val touchInWindow: Offset get() = touchStartInWindow + delta
-}
-
-private fun DrawScope.drawCornerMark(
-    color: Color,
-    corner: Offset,
-    horizontalEnd: Offset,
-    verticalEnd: Offset,
-    radius: Float,
-    stroke: Float,
-    startAngle: Float,
-) {
-    val horizontalDirection = if (horizontalEnd.x >= corner.x) 1f else -1f
-    val verticalDirection = if (verticalEnd.y >= corner.y) 1f else -1f
-    val horizontalStart = Offset(corner.x + horizontalDirection * radius, corner.y)
-    val verticalStart = Offset(corner.x, corner.y + verticalDirection * radius)
-    val arcTopLeft = Offset(
-        x = if (horizontalDirection > 0f) corner.x else corner.x - radius * 2f,
-        y = if (verticalDirection > 0f) corner.y else corner.y - radius * 2f,
-    )
-    drawLine(color, horizontalStart, horizontalEnd, stroke, StrokeCap.Round)
-    drawLine(color, verticalStart, verticalEnd, stroke, StrokeCap.Round)
-    drawArc(
-        color = color,
-        startAngle = startAngle,
-        sweepAngle = 90f,
-        useCenter = false,
-        topLeft = arcTopLeft,
-        size = Size(radius * 2f, radius * 2f),
-        style = Stroke(width = stroke, cap = StrokeCap.Round),
-    )
-}
-
-internal enum class ApplicationDragAxis {
-    Vertical,
-    Horizontal,
-}
-
-internal enum class ApplicationDragTargetMode {
-    Exchange,
-    Insertion,
-}
-
-internal data class ApplicationDragContainerDescriptor(
-    val key: String,
-    val type: FavoriteContainerType,
-    val axis: ApplicationDragAxis,
-    val bounds: Rect,
-    val identities: List<LaunchableIdentity> = emptyList(),
-)
-
-internal data class ApplicationDragTargetSession(
-    val sourceContainerKey: String,
-    val sourceIdentity: LaunchableIdentity,
-    val sourceContainerType: FavoriteContainerType,
-    val sourceAxis: ApplicationDragAxis,
-    val touchStartInWindow: Offset,
-    val delta: Offset = Offset.Zero,
-    val targetContainerKey: String? = null,
-    val targetContainerType: FavoriteContainerType? = null,
-    val targetAxis: ApplicationDragAxis? = null,
-    val targetMode: ApplicationDragTargetMode? = null,
-    val targetIdentity: LaunchableIdentity? = null,
-    val targetIndex: Int? = null,
-) {
-    val touchInWindow: Offset get() = touchStartInWindow + delta
-
-    fun advanced(
-        amount: Offset,
-        containerDescriptors: Map<String, ApplicationDragContainerDescriptor>,
-        itemBoundsInWindow: Map<String, Rect>,
-    ): ApplicationDragTargetSession {
-        val moved = copy(delta = delta + amount)
-        val descriptor = containerDescriptors.values.firstOrNull { candidate ->
-            candidate.key != sourceContainerKey &&
-                candidate.bounds.contains(moved.touchInWindow)
-        }
-        if (descriptor == null) {
-            return moved.copy(
-                targetContainerKey = null,
-                targetContainerType = null,
-                targetAxis = null,
-                targetMode = null,
-                targetIdentity = null,
-                targetIndex = null,
-            )
-        }
-        val itemIndex = descriptor.identities.indexOfFirst { identity ->
-            itemBoundsInWindow[
-                "${descriptor.key}:${identity.stableKey()}"
-            ]?.contains(moved.touchInWindow) == true
-        }
-        val coordinate = if (descriptor.axis == ApplicationDragAxis.Vertical) {
-            moved.touchInWindow.y
-        } else {
-            moved.touchInWindow.x
-        }
-        val orderedBounds = descriptor.identities.mapIndexedNotNull { index, identity ->
-            itemBoundsInWindow[
-                "${descriptor.key}:${identity.stableKey()}"
-            ]?.let { index to it }
-        }
-        val insertionIndex = if (itemIndex >= 0) {
-            val identity = descriptor.identities[itemIndex]
-            val bounds = itemBoundsInWindow[
-                "${descriptor.key}:${identity.stableKey()}"
-            ] ?: Rect.Zero
-            val center = if (descriptor.axis == ApplicationDragAxis.Vertical) {
-                (bounds.top + bounds.bottom) / 2f
-            } else {
-                (bounds.left + bounds.right) / 2f
-            }
-            val edgeBand = if (descriptor.axis == ApplicationDragAxis.Vertical) {
-                bounds.height / 3f
-            } else {
-                bounds.width / 3f
-            }
-            when {
-                coordinate < center - edgeBand -> itemIndex
-                coordinate > center + edgeBand -> itemIndex + 1
-                else -> null
-            }
-        } else {
-            val before = orderedBounds.firstOrNull { (_, bounds) ->
-                coordinate < if (descriptor.axis == ApplicationDragAxis.Vertical) {
-                    bounds.top
-                } else {
-                    bounds.left
-                }
-            }?.first
-            before ?: orderedBounds.lastOrNull()?.first?.plus(1) ?: 0
-        }
-        return moved.copy(
-            targetContainerKey = descriptor.key,
-            targetContainerType = descriptor.type,
-            targetAxis = descriptor.axis,
-            targetMode = if (itemIndex >= 0 && insertionIndex == null) {
-                ApplicationDragTargetMode.Exchange
-            } else {
-                ApplicationDragTargetMode.Insertion
-            },
-            targetIdentity = if (insertionIndex == null) {
-                descriptor.identities.getOrNull(itemIndex)
-            } else {
-                null
-            },
-            targetIndex = insertionIndex ?: itemIndex.coerceAtLeast(0),
-        )
-    }
-
-    fun showsContainerHighlight(containerKey: String): Boolean =
-        targetContainerKey == containerKey
-
-    fun edgeScroll(
-        descriptors: Map<String, ApplicationDragContainerDescriptor>,
-        bandPx: Float,
-        primaryListState: LazyListState,
-        companionListState: LazyListState,
-        editListStates: Map<String, LazyListState>,
-        favoriteBarStates: Map<String, LazyListState>,
-    ): ApplicationEdgeScroll? {
-        val request = edgeScrollCandidate(descriptors, bandPx) ?: return null
-        val state = when (request.axis) {
-            ApplicationDragAxis.Vertical ->
-                editListStates[request.containerKey.substringAfter(':')]
-                ?: if (request.containerKey == "vertical-list:${PRIMARY_LIST_ID}") {
-                    primaryListState
-                } else {
-                    companionListState
-                }
-            ApplicationDragAxis.Horizontal ->
-                favoriteBarStates[request.containerKey.substringAfter(':')]
-        } ?: return null
-        return request.takeIf { state.canScroll(it.forward) }
-    }
-}
-
-internal fun ApplicationDragTargetSession.edgeScrollCandidate(
-    descriptors: Map<String, ApplicationDragContainerDescriptor>,
-    bandPx: Float,
-): ApplicationEdgeScroll? {
-    val activeKey = targetContainerKey ?: sourceContainerKey
-    val descriptor = descriptors[activeKey] ?: return null
-    if (!descriptor.bounds.contains(touchInWindow)) return null
-    val axis = descriptor.axis
-    val coordinate = if (axis == ApplicationDragAxis.Vertical) {
-        touchInWindow.y
-    } else {
-        touchInWindow.x
-    }
-    val start = if (axis == ApplicationDragAxis.Vertical) {
-        descriptor.bounds.top
-    } else {
-        descriptor.bounds.left
-    }
-    val end = if (axis == ApplicationDragAxis.Vertical) {
-        descriptor.bounds.bottom
-    } else {
-        descriptor.bounds.right
-    }
-    val band = bandPx.coerceAtMost((end - start) / 2f)
-    if (band <= 0f) return null
-    val distanceFromEdge = when {
-        coordinate < start + band -> start + band - coordinate
-        coordinate >= end - band -> coordinate - (end - band)
-        else -> return null
-    }
-    val forward = coordinate >= end - band
-    return ApplicationEdgeScroll(
-        containerKey = activeKey,
-        axis = axis,
-        forward = forward,
-        proximity = (distanceFromEdge / band).coerceIn(0f, 1f),
-        touchInWindow = touchInWindow,
-    )
-}
-
-internal data class ApplicationEdgeScroll(
-    val containerKey: String,
-    val axis: ApplicationDragAxis,
-    val forward: Boolean,
-    val proximity: Float,
-    val touchInWindow: Offset,
-)
-
-private fun LazyListState.canScroll(forward: Boolean): Boolean =
-    if (forward) canScrollForward else canScrollBackward
-
-private fun FavoriteContainer.applicationDragKey(): String = when (type) {
-    FavoriteContainerType.VerticalList -> "vertical-list:$id"
-    FavoriteContainerType.FavoriteBar -> "favorite-bar:$id"
-}
-
-private fun FavoriteContainer.applicationDragDescriptor(
-    bounds: Rect,
-): ApplicationDragContainerDescriptor =
-    ApplicationDragContainerDescriptor(
-        key = applicationDragKey(),
-        type = type,
-        axis = when (type) {
-            FavoriteContainerType.VerticalList -> ApplicationDragAxis.Vertical
-            FavoriteContainerType.FavoriteBar -> ApplicationDragAxis.Horizontal
-        },
-        bounds = bounds,
-        identities = identities,
-    )
-
-private const val PROVISIONAL_VERTICAL_LIST_DRAG_KEY_PREFIX = "vertical-list:provisional:"
-private const val PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0 =
-    "${PROVISIONAL_VERTICAL_LIST_DRAG_KEY_PREFIX}0"
-private const val PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1 =
-    "${PROVISIONAL_VERTICAL_LIST_DRAG_KEY_PREFIX}1"
-private const val PROVISIONAL_FAVORITE_BAR_DRAG_KEY = "favorite-bar:provisional"
 
 private data class FavoriteBarContainerDragSession(
     val sourceContainer: FavoriteContainer,
@@ -2467,167 +2101,7 @@ private data class FavoriteBarContainerDragSession(
     val touchInWindow: Offset get() = touchStartInWindow + delta
 }
 
-/**
- * Cross-group insertion boundary of an active drag. A boundary is pure feedback: it marks where a
- * release would insert the dragged favorite, and the lists are not changed before that release.
- */
-private data class FavoriteInsertionTarget(
-    val intoCompanion: Boolean,
-    val boundaryIndex: Int,
-)
 
-/**
- * Composition a release commits, starting from the currently visible orders. A pending cross-group
- * target exchanges position and group membership with the dragged favorite, so both group counts
- * stay unchanged. A pending insertion instead removes the dragged favorite from its group and
- * inserts it at the marked boundary of the other group, which keeps the relative order of that
- * group's existing favorites.
- */
-private fun FavoriteDragSession.committedComposition():
-    Pair<List<LaunchableIdentity>, List<LaunchableIdentity>> {
-    val sourceInCompanion = inCompanion
-    val exchanged = crossGroupTarget
-    if (exchanged != null) {
-        val sourceOrder = displayedOrder(sourceInCompanion)
-        val targetOrder = displayedOrder(!sourceInCompanion)
-        val sourceSlot = sourceOrder.indexOf(identity)
-        val targetSlot = targetOrder.indexOf(exchanged)
-        if (sourceSlot < 0 || targetSlot < 0) return displayedPrimary to displayedCompanion
-        val committedSource = sourceOrder.replacedAt(sourceSlot, exchanged)
-        val committedTarget = targetOrder.replacedAt(targetSlot, identity)
-        return if (sourceInCompanion) {
-            committedTarget to committedSource
-        } else {
-            committedSource to committedTarget
-        }
-    }
-    val target = insertion ?: return displayedPrimary to displayedCompanion
-    val sourceOrder = displayedOrder(sourceInCompanion).filterNot { it == identity }
-    val targetOrder = displayedOrder(target.intoCompanion).toMutableList().also {
-        it.add(target.boundaryIndex.coerceIn(0, it.size), identity)
-    }
-    return if (target.intoCompanion) {
-        sourceOrder to targetOrder
-    } else {
-        targetOrder to sourceOrder
-    }
-}
-/**
- * Applies a pointer movement and resolves the target under the touch point. A favorite body in the
- * dragged favorite's own group exchanges positions immediately. In the other group, a favorite body
- * only marks a cross-group exchange and a gap only marks a cross-group insertion; both stay pure
- * feedback that a release performs. The slot is compared with the source's current visible index,
- * so the dragged favorite, the source slot, and invalid areas produce no in-group exchange.
- */
-private fun FavoriteDragSession.advanced(
-    amount: Offset,
-    primaryBoundsInWindow: Rect,
-    primaryListState: LazyListState,
-    companionBoundsInWindow: Rect,
-    companionListState: LazyListState,
-    boundaryBandPx: Float,
-): FavoriteDragSession {
-    val moved = copy(delta = delta + amount)
-    val targetInCompanion = when {
-        primaryBoundsInWindow.contains(moved.touchInWindow) -> false
-        companionBoundsInWindow.contains(moved.touchInWindow) -> true
-        else -> return moved.withoutCrossGroupFeedback()
-    }
-    val sourceInCompanion = moved.inCompanion
-    val sameGroup = targetInCompanion == sourceInCompanion
-    val target = resolveGroupTarget(
-        touchInWindow = moved.touchInWindow,
-        listBoundsInWindow = if (targetInCompanion) {
-            companionBoundsInWindow
-        } else {
-            primaryBoundsInWindow
-        },
-        listState = if (targetInCompanion) companionListState else primaryListState,
-        // The source group only accepts exchanges, so its rows keep their full body.
-        boundaryBandPx = if (sameGroup) 0f else boundaryBandPx,
-    ) ?: return moved.withoutCrossGroupFeedback()
-    val sourceOrder = moved.displayedOrder(sourceInCompanion)
-    val sourceSlot = sourceOrder.indexOf(identity)
-    if (sourceSlot < 0) return moved
-    if (sameGroup) {
-        // An in-group gap accepts neither an exchange nor an insertion.
-        val slot = (target as? FavoriteDragTarget.Body)?.slot
-            ?: return moved.withoutCrossGroupFeedback()
-        if (slot == sourceSlot || slot !in sourceOrder.indices) {
-            return moved.withoutCrossGroupFeedback()
-        }
-        val adjacentSlot = sourceSlot + if (slot > sourceSlot) 1 else -1
-        if (adjacentSlot !in sourceOrder.indices) {
-            return moved.withoutCrossGroupFeedback()
-        }
-        val sourceListState = if (sourceInCompanion) {
-            companionListState
-        } else {
-            primaryListState
-        }
-        if (!sourceListState.hasCrossedExchangeThreshold(
-                touchInWindow = moved.touchInWindow,
-                listBoundsInWindow = if (sourceInCompanion) {
-                    companionBoundsInWindow
-                } else {
-                    primaryBoundsInWindow
-                },
-                sourceSlot = sourceSlot,
-                targetSlot = adjacentSlot,
-                lastExchangeTouchY = moved.lastInGroupExchangeTouchY,
-            )
-        ) {
-            return moved.withoutCrossGroupFeedback()
-        }
-        return moved
-            .withDisplayedOrder(
-                sourceInCompanion,
-                sourceOrder.exchangedAt(sourceSlot, adjacentSlot),
-            )
-            .copy(
-                hasInGroupExchange = true,
-                lastInGroupExchangeTouchY = moved.touchInWindow.y,
-                crossGroupTarget = null,
-                insertion = null,
-            )
-    }
-    val targetOrder = moved.displayedOrder(targetInCompanion)
-    return when (target) {
-        is FavoriteDragTarget.Boundary -> moved.copy(
-            crossGroupTarget = null,
-            insertion = FavoriteInsertionTarget(
-                intoCompanion = targetInCompanion,
-                boundaryIndex = target.index.coerceIn(0, targetOrder.size),
-            ),
-            lastInGroupExchangeTouchY = null,
-        )
-
-        is FavoriteDragTarget.Body -> {
-            if (target.slot !in targetOrder.indices) return moved.withoutCrossGroupFeedback()
-            moved.copy(
-                crossGroupTarget = targetOrder[target.slot],
-                insertion = null,
-                lastInGroupExchangeTouchY = null,
-            )
-        }
-    }
-}
-
-/** Nanoseconds in a second, which turns a frame interval into an edge-scroll distance. */
-private const val NANOS_PER_SECOND = 1_000_000_000f
-
-/**
- * Whether the target feedback differs from [previous]: the visible order of a group changed, or the
- * marked cross-group exchange target or insertion boundary moved. Pointer movement on its own
- * leaves
- * the feedback untouched, so this marks exactly the moments at which a release would produce a
- * different composition.
- */
-private fun FavoriteDragSession.feedbackChangedFrom(previous: FavoriteDragSession): Boolean =
-    displayedPrimary != previous.displayedPrimary ||
-        displayedCompanion != previous.displayedCompanion ||
-        crossGroupTarget != previous.crossGroupTarget ||
-        insertion != previous.insertion
 
 private data class FavoriteListDragSession(
     val sourceContainer: FavoriteContainer,
@@ -2644,171 +2118,6 @@ private data class FavoriteListDragSession(
     val delta: Offset = Offset.Zero,
 ) {
     val touchInWindow: Offset get() = touchStartInWindow + delta
-}
-
-/** Visible order of the requested group. */
-private fun FavoriteDragSession.displayedOrder(companion: Boolean): List<LaunchableIdentity> =
-    if (companion) displayedCompanion else displayedPrimary
-
-/** Returns this session with the requested group's visible order replaced. */
-private fun FavoriteDragSession.withDisplayedOrder(
-    companion: Boolean,
-    order: List<LaunchableIdentity>,
-): FavoriteDragSession =
-    if (companion) copy(displayedCompanion = order) else copy(displayedPrimary = order)
-
-/**
- * Target a drag resolves inside a group: an existing favorite's body, or a boundary between rows.
- */
-private sealed interface FavoriteDragTarget {
-    data class Body(val slot: Int) : FavoriteDragTarget
-    data class Boundary(val index: Int) : FavoriteDragTarget
-}
-
-/**
- * Resolves the target the touch point addresses in a group. Slot geometry does not change when two
- * favorites exchange places, so the resolved body stays correct even while the exchange target is
- * still moving into the source slot. A row's leading and trailing band resolves to the boundary on
- * that side, so every boundary a cross-group insertion may use is reachable without spacing the
- * rows apart; the band is capped at a third of the row so a body always remains. Space that no row
- * covers
- * resolves to the first or last boundary, which also makes an empty group a valid insertion target.
- * Returns null only when the touch point is outside the group.
- */
-private fun resolveGroupTarget(
-    touchInWindow: Offset,
-    listBoundsInWindow: Rect,
-    listState: LazyListState,
-    boundaryBandPx: Float,
-): FavoriteDragTarget? {
-    if (!listBoundsInWindow.contains(touchInWindow)) return null
-    val localY = touchInWindow.y - listBoundsInWindow.top
-    val visibleItems = listState.layoutInfo.visibleItemsInfo
-    val first = visibleItems.firstOrNull() ?: return FavoriteDragTarget.Boundary(0)
-    val last = visibleItems.last()
-    if (localY < first.offset) return FavoriteDragTarget.Boundary(first.index)
-    if (localY >= last.offset + last.size) return FavoriteDragTarget.Boundary(last.index + 1)
-    val item = visibleItems.firstOrNull { info ->
-        localY >= info.offset && localY < info.offset + info.size
-    } ?: return null
-    val band = boundaryBandPx.coerceAtMost(item.size / 3f)
-    return when {
-        localY < item.offset + band -> FavoriteDragTarget.Boundary(item.index)
-        localY >= item.offset + item.size - band -> FavoriteDragTarget.Boundary(item.index + 1)
-        else -> FavoriteDragTarget.Body(item.index)
-    }
-}
-
-/**
- * Prevents one pointer position from cascading through multiple rows after an exchange. The next
- * exchange needs another half-row of movement in the same direction; edge scrolling remains the
- * only mechanism that moves the list without continued pointer movement.
- */
-private fun LazyListState.hasCrossedExchangeThreshold(
-    touchInWindow: Offset,
-    listBoundsInWindow: Rect,
-    sourceSlot: Int,
-    targetSlot: Int,
-    lastExchangeTouchY: Float?,
-): Boolean {
-    val targetItem = layoutInfo.visibleItemsInfo.firstOrNull { it.index == targetSlot }
-        ?: return false
-    if (lastExchangeTouchY != null) {
-        val requiredDistance = targetItem.size / 2f
-        return if (targetSlot > sourceSlot) {
-            touchInWindow.y >= lastExchangeTouchY + requiredDistance
-        } else {
-            touchInWindow.y <= lastExchangeTouchY - requiredDistance
-        }
-    }
-    val localY = touchInWindow.y - listBoundsInWindow.top
-    val targetCenter = targetItem.offset + targetItem.size / 2f
-    return if (targetSlot < sourceSlot) {
-        localY < targetCenter
-    } else {
-        localY >= targetCenter
-    }
-}
-
-/** Returns this list with the entries at the two given positions swapped. */
-private fun List<LaunchableIdentity>.exchangedAt(
-    firstIndex: Int,
-    secondIndex: Int,
-): List<LaunchableIdentity> = toMutableList().also {
-    val first = it[firstIndex]
-    it[firstIndex] = it[secondIndex]
-    it[secondIndex] = first
-}
-
-/** Returns this list with the entry at the given position replaced. */
-private fun List<LaunchableIdentity>.replacedAt(
-    index: Int,
-    identity: LaunchableIdentity,
-): List<LaunchableIdentity> = toMutableList().also { it[index] = identity }
-
-@Composable
-private fun HomeFavoriteDragPreview(
-    session: FavoriteDragSession,
-    availability: FavoriteAvailability,
-    rootOriginInWindow: Offset,
-) {
-    val density = LocalDensity.current
-    val previewAlpha = integerResource(R.integer.home_drag_preview_alpha_percent) / 100f
-    val previewElevation = with(density) {
-        dimensionResource(R.dimen.home_reorder_drag_elevation).toPx()
-    }
-    val topLeft = session.originInWindow +
-        session.delta -
-        rootOriginInWindow
-    Box(
-        modifier = Modifier
-            .offset { IntOffset(topLeft.x.roundToInt(), topLeft.y.roundToInt()) }
-            .size(
-                width = with(density) { session.size.width.toDp() },
-                height = with(density) { session.size.height.toDp() },
-            )
-            .alpha(previewAlpha)
-            .testTag("home_favorite_drag_preview"),
-    ) {
-        HomeFavoritePreviewContent(
-            availability = availability,
-            listSize = session.listSize,
-            maxWidth = with(density) { session.size.width.toDp() },
-            shadowElevation = previewElevation,
-        )
-    }
-}
-
-@Composable
-private fun HomeFavoriteBarDragPreview(
-    session: FavoriteBarDragSession,
-    availability: FavoriteAvailability,
-    rootOriginInWindow: Offset,
-) {
-    val density = LocalDensity.current
-    val topLeft = session.originInWindow + session.delta - rootOriginInWindow
-    val previewAlpha = integerResource(R.integer.home_drag_preview_alpha_percent) / 100f
-    val previewElevation = with(density) {
-        dimensionResource(R.dimen.home_reorder_drag_elevation).toPx()
-    }
-    Box(
-        modifier = Modifier
-            .offset { IntOffset(topLeft.x.roundToInt(), topLeft.y.roundToInt()) }
-            .size(
-                width = with(density) { session.size.width.toDp() },
-                height = with(density) { session.size.height.toDp() },
-            )
-            .alpha(previewAlpha)
-            .clearAndSetSemantics {}
-            .testTag("home_favorite_bar_drag_preview"),
-    ) {
-        HomeFavoritePreviewContent(
-            availability = availability,
-            listSize = FavoriteListSize.Medium,
-            maxWidth = dimensionResource(R.dimen.home_favorite_bar_item_width),
-            shadowElevation = previewElevation,
-        )
-    }
 }
 
 @Composable
@@ -3159,7 +2468,7 @@ private fun HomeFavoriteListDragPreview(
     }
 }
 @Composable
-private fun HomeFavoritePreviewContent(
+internal fun HomeFavoritePreviewContent(
     availability: FavoriteAvailability,
     listSize: FavoriteListSize,
     maxWidth: androidx.compose.ui.unit.Dp,
@@ -4924,425 +4233,6 @@ private fun HomeFavoriteProvisionalList(
             }
         }
     }
-
-    @Composable
-    private fun HomeModuleStylePanel(
-        selectedModule: OrderedFavoriteModule?,
-        enabled: Boolean,
-        maximumHeight: androidx.compose.ui.unit.Dp,
-        onChangeSize: (FavoriteListSize) -> Unit,
-        onChangeNamePlacement: (FavoriteNamePlacement) -> Unit,
-        onChangeItemsPerRow: (Int) -> Unit,
-    ) {
-        val panelShape = RoundedCornerShape(
-            dimensionResource(R.dimen.style_settings_panel_corner_radius),
-        )
-        val animationDuration = integerResource(
-            R.integer.short_property_animation_duration_ms,
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = maximumHeight)
-                .animateContentSize(
-                    animationSpec = tween(durationMillis = animationDuration),
-                )
-                .shadow(
-                    elevation = dimensionResource(R.dimen.style_settings_panel_elevation),
-                    shape = panelShape,
-                    clip = false,
-                )
-                .clip(panelShape)
-                .background(colorResource(R.color.avenor_sheet_surface))
-                .verticalScroll(rememberScrollState())
-                .testTag("home_style_panel"),
-        ) {
-            if (selectedModule == null) {
-                HomeStylePanelRow(
-                    label = stringResource(R.string.home_select_favorite_list_prompt),
-                )
-            } else if (selectedModule.type == OrderedFavoriteModuleType.Vertical) {
-                    HomeApplicationSizeRow(
-                        selected = selectedModule.applicationSize,
-                        enabled = enabled,
-                        onSelect = onChangeSize,
-                    )
-                    HomeStyleArrangementRow(
-                        placement = selectedModule.namePlacement,
-                        value = selectedModule.itemsPerRow,
-                        maximum = if (
-                            selectedModule.namePlacement == FavoriteNamePlacement.Right
-                        ) {
-                            2
-                        } else {
-                            4
-                        },
-                        enabled = enabled,
-                        onChangePlacement = onChangeNamePlacement,
-                        onChangeCount = onChangeItemsPerRow,
-                    )
-            } else {
-                HomeStylePanelRow(
-                    label = stringResource(R.string.home_ribbon_fixed_style),
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun HomeStylePanelRow(
-        label: String,
-        value: String? = null,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dimensionResource(R.dimen.style_settings_panel_row_height))
-                .padding(horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset)),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = label,
-                modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Medium,
-                fontSize = dimensionResource(R.dimen.style_settings_secondary_text_size).value.sp,
-                lineHeight = dimensionResource(
-                    R.dimen.style_settings_secondary_line_height,
-                ).value.sp,
-            )
-            value?.let {
-                Text(text = it, color = MaterialTheme.colorScheme.onSurface)
-            }
-        }
-    }
-
-    @Composable
-    private fun HomeApplicationSizeRow(
-        selected: FavoriteListSize,
-        enabled: Boolean,
-        onSelect: (FavoriteListSize) -> Unit,
-    ) {
-        val context = LocalContext.current
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dimensionResource(R.dimen.style_settings_panel_row_height))
-                .padding(horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset)),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.home_application_size),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.width(dimensionResource(R.dimen.style_settings_title_control_gap)))
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .horizontalScroll(rememberScrollState()),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                FavoriteListSize.values().forEach { option ->
-                    val iconSize = dimensionResource(option.iconSizeResource())
-                    val iconPixels = with(LocalDensity.current) { iconSize.roundToPx() }
-                    val icon = remember(option, iconPixels) {
-                        context.packageManager.defaultActivityIcon
-                            .toBitmap(iconPixels, iconPixels)
-                            .asImageBitmap()
-                    }
-                    Row(
-                        modifier = Modifier
-                            .height(dimensionResource(R.dimen.style_settings_panel_row_height))
-                            .clickable(
-                                enabled = enabled && option != selected,
-                                role = Role.RadioButton,
-                                onClick = { onSelect(option) },
-                            )
-                            .alpha(if (enabled) 1f else 0.38f)
-                            .padding(
-                                horizontal = dimensionResource(
-                                    R.dimen.style_settings_size_option_horizontal_padding,
-                                ),
-                            ),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RadioButton(
-                            selected = option == selected,
-                            onClick = null,
-                            modifier = Modifier.size(
-                                dimensionResource(R.dimen.style_settings_indicator_size),
-                            ),
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = MaterialTheme.colorScheme.onSurface,
-                                unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                disabledSelectedColor = MaterialTheme.colorScheme.onSurface,
-                                disabledUnselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            ),
-                        )
-                        Spacer(
-                            Modifier.width(
-                                dimensionResource(R.dimen.style_settings_indicator_icon_gap),
-                            ),
-                        )
-                        Image(
-                            bitmap = icon,
-                            contentDescription = null,
-                            modifier = Modifier.size(iconSize),
-                        )
-                        Spacer(
-                            Modifier.width(
-                                dimensionResource(R.dimen.style_settings_icon_label_gap),
-                            ),
-                        )
-                        Text(
-                            text = stringResource(
-                                when (option) {
-                                    FavoriteListSize.Large -> R.string.favorite_list_large
-                                    FavoriteListSize.Medium -> R.string.favorite_list_medium
-                                    FavoriteListSize.Small -> R.string.favorite_list_small
-                                },
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun HomeStyleArrangementRow(
-        placement: FavoriteNamePlacement,
-        value: Int,
-        maximum: Int,
-        enabled: Boolean,
-        onChangePlacement: (FavoriteNamePlacement) -> Unit,
-        onChangeCount: (Int) -> Unit,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dimensionResource(R.dimen.style_settings_panel_row_height))
-                .padding(horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset))
-                .testTag("home_application_arrangement"),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.home_application_arrangement),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-            )
-            Spacer(Modifier.width(dimensionResource(R.dimen.style_settings_title_control_gap)))
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .horizontalScroll(rememberScrollState()),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                HomeNamePlacementSelector(
-                    selected = placement,
-                    enabled = enabled,
-                    onSelect = onChangePlacement,
-                )
-                Spacer(Modifier.width(dimensionResource(R.dimen.style_settings_control_gap)))
-                HomeItemsPerRowStepper(
-                    value = value,
-                    maximum = maximum,
-                    enabled = enabled,
-                    onChange = onChangeCount,
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun HomeNamePlacementSelector(
-        selected: FavoriteNamePlacement,
-        enabled: Boolean,
-        onSelect: (FavoriteNamePlacement) -> Unit,
-    ) {
-        val animationDuration = integerResource(
-            R.integer.short_property_animation_duration_ms,
-        )
-        val frameShape = RoundedCornerShape(
-            dimensionResource(R.dimen.style_settings_selector_frame_radius),
-        )
-        Row(
-            modifier = Modifier
-                .size(
-                    width = dimensionResource(R.dimen.style_settings_selector_width),
-                    height = dimensionResource(R.dimen.style_settings_selector_height),
-                )
-                .clip(frameShape)
-                .background(colorResource(R.color.avenor_sheet_surface))
-                .border(
-                    width = dimensionResource(R.dimen.style_settings_selector_border_width),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    shape = frameShape,
-                )
-                .padding(dimensionResource(R.dimen.style_settings_selector_inner_padding)),
-        ) {
-            listOf(
-                FavoriteNamePlacement.Right to stringResource(R.string.home_name_right),
-                FavoriteNamePlacement.Below to stringResource(R.string.home_name_below),
-            ).forEach { (option, label) ->
-                val isSelected = option == selected
-                val background by animateColorAsState(
-                    targetValue = if (isSelected) {
-                        MaterialTheme.colorScheme.onSurface
-                    } else {
-                        Color.Transparent
-                    },
-                    animationSpec = tween(durationMillis = animationDuration),
-                    label = "home-name-placement-background",
-                )
-                val contentColor by animateColorAsState(
-                    targetValue = if (isSelected) {
-                        colorResource(R.color.avenor_sheet_surface)
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
-                    animationSpec = tween(durationMillis = animationDuration),
-                    label = "home-name-placement-content",
-                )
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clip(
-                            RoundedCornerShape(
-                                dimensionResource(R.dimen.style_settings_selector_thumb_radius),
-                            ),
-                        )
-                        .background(background)
-                        .clickable(
-                            enabled = enabled && !isSelected,
-                            role = Role.RadioButton,
-                            onClick = { onSelect(option) },
-                        )
-                        .alpha(if (enabled) 1f else 0.38f),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = label,
-                        color = contentColor,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = dimensionResource(
-                            R.dimen.style_settings_secondary_text_size,
-                        ).value.sp,
-                        lineHeight = dimensionResource(
-                            R.dimen.style_settings_secondary_line_height,
-                        ).value.sp,
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun HomeItemsPerRowStepper(
-        value: Int,
-        maximum: Int,
-        enabled: Boolean,
-        onChange: (Int) -> Unit,
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            HomeStepperControl(
-                text = stringResource(R.string.home_decrement_symbol),
-                enabled = enabled && value > 1,
-                testTag = "home_items_per_row_decrement",
-                onClick = { onChange(value - 1) },
-            )
-            Box(
-                modifier = Modifier
-                    .size(dimensionResource(R.dimen.style_settings_stepper_target_size))
-                    .testTag("home_items_per_row_value"),
-                contentAlignment = Alignment.Center,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(
-                            width = dimensionResource(R.dimen.style_settings_stepper_value_width),
-                            height = dimensionResource(R.dimen.style_settings_stepper_visible_height),
-                        )
-                        .clip(
-                            RoundedCornerShape(
-                                dimensionResource(R.dimen.style_settings_stepper_radius),
-                            ),
-                        )
-                        .background(colorResource(R.color.style_settings_control_surface)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = value.toString(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-            HomeStepperControl(
-                text = stringResource(R.string.home_increment_symbol),
-                enabled = enabled && value < maximum,
-                testTag = "home_items_per_row_increment",
-                onClick = { onChange(value + 1) },
-            )
-        }
-    }
-
-    @Composable
-    private fun HomeStepperControl(
-        text: String,
-        enabled: Boolean,
-        testTag: String,
-        onClick: () -> Unit,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(dimensionResource(R.dimen.style_settings_stepper_target_size))
-                .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-                .alpha(if (enabled) 1f else 0.38f)
-                .testTag(testTag),
-            contentAlignment = Alignment.Center,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(dimensionResource(R.dimen.style_settings_stepper_visible_size))
-                    .clip(
-                        RoundedCornerShape(
-                            dimensionResource(R.dimen.style_settings_stepper_radius),
-                        ),
-                    )
-                    .background(colorResource(R.color.style_settings_control_surface)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text = text, color = MaterialTheme.colorScheme.onSurface)
-            }
-        }
-    }
-
-    @Composable
-    private fun HomeFavoriteMessage(
-        message: String,
-        showProgress: Boolean,
-        onRetry: (() -> Unit)?,
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            if (showProgress) CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
-            if (!showProgress) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_inventory_error),
-                    contentDescription = null,
-                    modifier = Modifier.size(dimensionResource(R.dimen.home_favorite_error_icon_size)),
-                )
-            }
-            Text(text = message, color = MaterialTheme.colorScheme.onBackground)
-            onRetry?.let { retry ->
-                TextButton(onClick = retry) { Text(stringResource(R.string.retry)) }
-            }
-        }
-    }
-
     @Composable
     private fun HomeOrderedModuleComposition(
         modules: List<OrderedFavoriteModule>,
@@ -5512,124 +4402,22 @@ private fun HomeFavoriteProvisionalList(
                             }
                         },
                 ) {
-                when (module.type) {
-                    OrderedFavoriteModuleType.Vertical -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .editSurface(editMode),
-                        ) {
-                            val cells: List<LaunchableIdentity?> =
-                                module.identities.map { it } +
-                                    if (showModuleAddEntries) listOf(null) else emptyList()
-                            cells.chunked(module.itemsPerRow).forEach { rowItems ->
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    rowItems.forEach { identity ->
-                                        val itemModifier = Modifier.weight(1f)
-                                        if (identity == null) {
-                                            HomeModuleAddFavoriteEntry(
-                                                modifier = itemModifier,
-                                                module = module,
-                                                enabled = addEntriesEnabled,
-                                                onClick = { onAddToModule(module) },
-                                            )
-                                        } else if (
-                                            module.namePlacement == FavoriteNamePlacement.Below
-                                        ) {
-                                            val availability = availabilityByIdentity[identity]
-                                                ?: FavoriteAvailability.Unknown(null)
-                                            HomeFavoriteBelowItem(
-                                                modifier = itemModifier,
-                                                availability = availability,
-                                                listSize = module.applicationSize,
-                                                onClick = { onLaunchFavorite(availability) },
-                                                onLongClick = {
-                                                    availability.presentationEntry
-                                                        ?.let(onLongPressFavorite)
-                                                },
-                                            )
-                                        } else {
-                                            val availability = availabilityByIdentity[identity]
-                                                ?: FavoriteAvailability.Unknown(null)
-                                            HomeFavoriteRow(
-                                                modifier = itemModifier,
-                                                availability = availability,
-                                                onClick = { onLaunchFavorite(availability) },
-                                                onLongClick = {
-                                                    availability.presentationEntry
-                                                        ?.let(onLongPressFavorite)
-                                                },
-                                                editMode = false,
-                                                compact = false,
-                                                listSize = module.applicationSize,
-                                                exchangeHighlight = false,
-                                                onRowBoundsInWindow = { _, _ -> },
-                                                onHandleBoundsInWindow = {},
-                                            )
-                                        }
-                                    }
-                                    repeat(module.itemsPerRow - rowItems.size) {
-                                        Spacer(Modifier.weight(1f))
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    OrderedFavoriteModuleType.Ribbon -> {
-                        val ribbonListState = ribbonListStates.getOrPut(module.id) {
-                            LazyListState()
-                        }
-                        LazyRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(dimensionResource(R.dimen.home_favorite_bar_height))
-                                .editSurface(editMode),
-                            state = ribbonListState,
-                            horizontalArrangement = Arrangement.spacedBy(
-                                dimensionResource(R.dimen.home_favorite_bar_item_spacing),
-                            ),
-                        ) {
-                            items(
-                                items = module.identities,
-                                key = { it.stableKey() },
-                            ) { identity ->
-                                val availability = availabilityByIdentity[identity]
-                                    ?: FavoriteAvailability.Unknown(null)
-                                HomeFavoriteRow(
-                                    modifier = Modifier.width(
-                                        dimensionResource(R.dimen.home_favorite_bar_item_width),
-                                    ),
-                                    availability = availability,
-                                    onClick = { onLaunchFavorite(availability) },
-                                    onLongClick = {
-                                        availability.presentationEntry?.let(onLongPressFavorite)
-                                    },
-                                    editMode = false,
-                                    compact = true,
-                                    listSize = FavoriteListSize.Medium,
-                                    exchangeHighlight = false,
-                                    onRowBoundsInWindow = { _, _ -> },
-                                    onHandleBoundsInWindow = {},
-                                )
-                            }
-                            if (showModuleAddEntries) {
-                                item(key = "add:${module.id}") {
-                                    HomeModuleAddFavoriteEntry(
-                                        modifier = Modifier.width(
-                                            dimensionResource(
-                                                R.dimen.home_favorite_bar_item_width,
-                                            ),
-                                        ),
-                                        module = module,
-                                        enabled = addEntriesEnabled,
-                                        onClick = { onAddToModule(module) },
-                                    )
-                                }
-                            }
-                        }
-                    }
+                val ribbonListState = if (module.type == OrderedFavoriteModuleType.Ribbon) {
+                    ribbonListStates.getOrPut(module.id) { LazyListState() }
+                } else {
+                    null
                 }
+                HomeOrderedModuleContent(
+                    module = module,
+                    availabilityByIdentity = availabilityByIdentity,
+                    ribbonListState = ribbonListState,
+                    editMode = editMode,
+                    showAddEntry = showModuleAddEntries,
+                    addEntryEnabled = addEntriesEnabled,
+                    onAddToModule = { onAddToModule(module) },
+                    onLaunchFavorite = onLaunchFavorite,
+                    onLongPressFavorite = onLongPressFavorite,
+                )
                 if (selectionEnabled) {
                     HomeModuleSelectionLayer(
                         modifier = Modifier.matchParentSize(),
@@ -5763,7 +4551,7 @@ private fun HomeFavoriteProvisionalList(
     }
 
     @Composable
-    private fun HomeModuleAddFavoriteEntry(
+    internal fun HomeModuleAddFavoriteEntry(
         modifier: Modifier,
         module: OrderedFavoriteModule,
         enabled: Boolean,
@@ -5983,6 +4771,31 @@ private fun HomeFavoriteProvisionalList(
     }
 
     @Composable
+    private fun HomeFavoriteMessage(
+        message: String,
+        showProgress: Boolean,
+        onRetry: (() -> Unit)?,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (showProgress) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.ic_inventory_error),
+                    contentDescription = null,
+                    modifier = Modifier.size(
+                        dimensionResource(R.dimen.home_favorite_error_icon_size),
+                    ),
+                )
+            }
+            Text(text = message, color = MaterialTheme.colorScheme.onBackground)
+            onRetry?.let { retry ->
+                TextButton(onClick = retry) { Text(stringResource(R.string.retry)) }
+            }
+        }
+    }
+
+    @Composable
     private fun HomeFavoriteComposition(
         verticalLists: List<FavoriteContainer>,
         availabilityByIdentity: Map<LaunchableIdentity, FavoriteAvailability>,
@@ -6054,7 +4867,7 @@ private fun HomeFavoriteProvisionalList(
 
     @Composable
     @OptIn(ExperimentalFoundationApi::class)
-    private fun HomeFavoriteBelowItem(
+    internal fun HomeFavoriteBelowItem(
         modifier: Modifier,
         availability: FavoriteAvailability,
         listSize: FavoriteListSize,
@@ -6135,7 +4948,7 @@ private fun HomeFavoriteProvisionalList(
 
     @Composable
     @OptIn(ExperimentalFoundationApi::class)
-    private fun HomeFavoriteRow(
+    internal fun HomeFavoriteRow(
         modifier: Modifier,
         availability: FavoriteAvailability,
         onClick: () -> Unit,
@@ -6405,17 +5218,17 @@ private fun HomeFavoriteProvisionalList(
     }
 
     @Composable
-    private fun Modifier.editSurface(enabled: Boolean): Modifier = if (!enabled) this else {
+    internal fun Modifier.editSurface(enabled: Boolean): Modifier = if (!enabled) this else {
         background(
             colorResource(R.color.home_edit_surface),
             RoundedCornerShape(dimensionResource(R.dimen.home_edit_surface_radius)),
         )
     }
 
-    private fun LaunchableIdentity.stableKey(): String =
+    internal fun LaunchableIdentity.stableKey(): String =
         "$profileSerialNumber:${componentName.flattenToString()}"
 
-    private fun FavoriteListSize.iconSizeResource(): Int = when (this) {
+    internal fun FavoriteListSize.iconSizeResource(): Int = when (this) {
         FavoriteListSize.Large -> R.dimen.home_favorite_large_icon_size
         FavoriteListSize.Medium -> R.dimen.home_favorite_icon_size
         FavoriteListSize.Small -> R.dimen.home_companion_favorite_icon_size
