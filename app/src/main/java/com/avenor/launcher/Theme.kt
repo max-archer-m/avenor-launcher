@@ -9,6 +9,7 @@ import androidx.compose.ui.res.colorResource
 internal fun AvenorTheme(content: @Composable () -> Unit) {
     val transparent = colorResource(R.color.avenor_transparent)
     val foreground = colorResource(R.color.avenor_foreground)
+    val secondaryForeground = colorResource(R.color.avenor_secondary_foreground)
     val sheetSurface = colorResource(R.color.avenor_sheet_surface)
     val sheetScrim = colorResource(R.color.avenor_sheet_scrim)
     val error = colorResource(R.color.avenor_error)
@@ -19,6 +20,7 @@ internal fun AvenorTheme(content: @Composable () -> Unit) {
             surface = sheetSurface,
             onBackground = foreground,
             onSurface = foreground,
+            onSurfaceVariant = secondaryForeground,
             scrim = sheetScrim,
         ),
         content = content,

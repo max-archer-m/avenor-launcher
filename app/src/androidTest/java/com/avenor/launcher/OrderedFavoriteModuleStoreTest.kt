@@ -10,6 +10,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -162,6 +163,9 @@ class OrderedFavoriteModuleStoreTest {
                     id = "vertical-1",
                     type = OrderedFavoriteModuleType.Vertical,
                     identities = listOf(first),
+                    applicationSize = FavoriteListSize.Large,
+                    namePlacement = FavoriteNamePlacement.Below,
+                    itemsPerRow = 4,
                 ),
                 OrderedFavoriteModule(
                     id = "ribbon-1",
@@ -182,6 +186,41 @@ class OrderedFavoriteModuleStoreTest {
             reloadedStore.state.value,
         )
         assertEquals(listOf(first, second), aggregate.identities)
+        file.delete()
+    }
+
+    @Test
+    fun versionOneOrderedModuleLoadsWithCurrentVerticalDefaults() = runBlocking {
+        val file = temporaryFile()
+        val identity = LaunchableIdentity(1, ComponentName("com.example", "Main"))
+        DataOutputStream(file.outputStream()).use { output ->
+            output.writeInt(0x41464D31)
+            output.writeInt(1)
+            output.writeInt(1)
+            output.writeUTF("vertical-1")
+            output.writeInt(OrderedFavoriteModuleType.Vertical.ordinal)
+            output.writeInt(1)
+            output.writeLong(identity.profileSerialNumber)
+            output.writeUTF(identity.componentName.flattenToString())
+        }
+
+        val store = OrderedFavoriteModuleStore(file)
+        store.load()
+
+        assertEquals(
+            OrderedFavoriteReadState.Readable(
+                OrderedFavoriteAggregate(
+                    listOf(
+                        OrderedFavoriteModule(
+                            id = "vertical-1",
+                            type = OrderedFavoriteModuleType.Vertical,
+                            identities = listOf(identity),
+                        ),
+                    ),
+                ),
+            ),
+            store.state.value,
+        )
         file.delete()
     }
 
@@ -294,6 +333,48 @@ class OrderedFavoriteModuleStoreTest {
         val readable = adapter.state.value as FavoriteReadState.Readable
         assertEquals(listOf(ribbonIdentity, addedIdentity), readable.identities)
         assertEquals(2, readable.orderedModules?.size)
+        file.delete()
+    }
+
+    @Test
+    fun styleUpdatePreservesUnchangedModuleInstances() = runBlocking {
+        val file = temporaryFile()
+        val firstIdentity = LaunchableIdentity(1, ComponentName("com.first", "Main"))
+        val secondIdentity = LaunchableIdentity(2, ComponentName("com.second", "Main"))
+        val adapter = OrderedFavoriteStoreAdapter(file)
+        adapter.load()
+        assertTrue(
+            adapter.replaceAggregate(
+                FavoriteAggregate(
+                    verticalLists = listOf(
+                        FavoriteContainer(
+                            id = "vertical-1",
+                            type = FavoriteContainerType.VerticalList,
+                            identities = listOf(firstIdentity),
+                        ),
+                        FavoriteContainer(
+                            id = "vertical-2",
+                            type = FavoriteContainerType.VerticalList,
+                            identities = listOf(secondIdentity),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        val unchangedBefore = (adapter.state.value as FavoriteReadState.Readable)
+            .orderedModules
+            ?.single { it.id == "vertical-2" }
+
+        adapter.updateAggregate { aggregate ->
+            aggregate.updateVerticalList("vertical-1") {
+                it.copy(listSize = FavoriteListSize.Large)
+            }
+        }
+
+        val unchangedAfter = (adapter.state.value as FavoriteReadState.Readable)
+            .orderedModules
+            ?.single { it.id == "vertical-2" }
+        assertSame(unchangedBefore, unchangedAfter)
         file.delete()
     }
 

@@ -27,11 +27,18 @@ enum class FavoriteListSize {
     Small,
 }
 
+enum class FavoriteNamePlacement {
+    Right,
+    Below,
+}
+
 data class FavoriteContainer(
     val id: String,
     val type: FavoriteContainerType,
     val identities: List<LaunchableIdentity>,
     val listSize: FavoriteListSize = FavoriteListSize.Medium,
+    val namePlacement: FavoriteNamePlacement = FavoriteNamePlacement.Right,
+    val itemsPerRow: Int = 1,
 )
 
 data class FavoriteAggregate(
@@ -652,7 +659,6 @@ private fun FavoriteAggregate.replaceLegacyComposition(
 
 internal fun isValidAggregate(aggregate: FavoriteAggregate): Boolean {
     val containers = aggregate.verticalLists + aggregate.favoriteBars
-    if (aggregate.verticalLists.size > 2 || aggregate.favoriteBars.size > 5) return false
     if (containers.any { it.identities.isEmpty() || it.id.isBlank() }) return false
     if (containers.map(FavoriteContainer::id).distinct().size != containers.size) return false
     val identities = containers.flatMap(FavoriteContainer::identities)
@@ -662,8 +668,15 @@ internal fun isValidAggregate(aggregate: FavoriteAggregate): Boolean {
         containers.all { container ->
             when (container.type) {
                 FavoriteContainerType.VerticalList ->
-                    container.listSize in FavoriteListSize.values()
-                FavoriteContainerType.FavoriteBar -> container.listSize == FavoriteListSize.Medium
+                    container.listSize in FavoriteListSize.values() &&
+                        container.itemsPerRow in when (container.namePlacement) {
+                            FavoriteNamePlacement.Right -> 1..2
+                            FavoriteNamePlacement.Below -> 1..4
+                        }
+                FavoriteContainerType.FavoriteBar ->
+                    container.listSize == FavoriteListSize.Medium &&
+                        container.namePlacement == FavoriteNamePlacement.Right &&
+                        container.itemsPerRow == 1
             }
         }
 }

@@ -193,6 +193,8 @@ internal fun AvenorApp(
     var selectedEntry by remember { mutableStateOf<LaunchableEntry?>(null) }
     var selectedEntryFromHome by remember { mutableStateOf(false) }
     var homeEditMode by remember { mutableStateOf(false) }
+    var homeStylePanelExpanded by remember { mutableStateOf(false) }
+    var selectedHomeModuleId by remember { mutableStateOf<String?>(null) }
     var favoriteAddTarget by remember { mutableStateOf<FavoriteAddTarget?>(null) }
     var favoriteSelection by remember { mutableStateOf<List<LaunchableIdentity>>(emptyList()) }
     var favoriteSelectionSaving by remember { mutableStateOf(false) }
@@ -210,6 +212,9 @@ internal fun AvenorApp(
     val addToListLabel = stringResource(R.string.drawer_selection_add_to_list)
     val createListLabel = stringResource(R.string.drawer_selection_create_list)
     val addToFavoriteBarLabel = stringResource(R.string.drawer_selection_add_to_favorite_bar)
+    val createFavoriteBarLabel = stringResource(
+        R.string.drawer_selection_create_favorite_bar,
+    )
 
     LaunchedEffect(effectiveFavoriteStore) {
         effectiveFavoriteStore.load()
@@ -241,6 +246,24 @@ internal fun AvenorApp(
                 homeEditMode = false
                 Toast.makeText(androidContext, favoritesChangedMessage, Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    LaunchedEffect(homeEditMode) {
+        if (!homeEditMode) {
+            homeStylePanelExpanded = false
+            selectedHomeModuleId = null
+        }
+    }
+
+    LaunchedEffect(favoriteState, selectedHomeModuleId) {
+        val selectedId = selectedHomeModuleId
+        val moduleIds = (favoriteState as? FavoriteReadState.Readable)
+            ?.orderedModules
+            ?.mapTo(mutableSetOf(), OrderedFavoriteModule::id)
+            .orEmpty()
+        if (selectedId != null && selectedId !in moduleIds) {
+            selectedHomeModuleId = null
         }
     }
 
@@ -373,6 +396,8 @@ internal fun AvenorApp(
         selectedEntryFromHome = false
         settingsOpen = false
         homeEditMode = false
+        homeStylePanelExpanded = false
+        selectedHomeModuleId = null
         favoriteRevealRequest = null
         if (!favoriteSelectionSaving) {
             favoriteAddTarget = null
@@ -433,6 +458,20 @@ internal fun AvenorApp(
         settleTo(AvenorSurface.Drawer)
     }
 
+    fun openProvisionalFavoriteBarSelection() {
+        if (favoriteState !is FavoriteReadState.Readable) return
+        favoriteAddTarget = FavoriteAddTarget(
+            containerId = null,
+            containerType = FavoriteContainerType.FavoriteBar,
+            label = createFavoriteBarLabel,
+            provisional = true,
+        )
+        favoriteSelection = emptyList()
+        favoriteSelectionSaving = false
+        drawerActivated = true
+        settleTo(AvenorSurface.Drawer)
+    }
+
     fun confirmFavoriteSelection() {
         val target = favoriteAddTarget ?: return
         val selected = favoriteSelection
@@ -459,13 +498,7 @@ internal fun AvenorApp(
                     val container = target.containerId?.let { containerId ->
                         targetContainers.firstOrNull { it.id == containerId }
                     }
-                    val targetAtCapacity = when (target.containerType) {
-                        FavoriteContainerType.VerticalList -> false
-                        FavoriteContainerType.FavoriteBar -> aggregate.favoriteBars.size >= 5
-                    }
-                    if ((target.containerId != null && container == null) ||
-                        (target.provisional && targetAtCapacity)
-                    ) {
+                    if (target.containerId != null && container == null) {
                         targetInvalid = true
                         return@updateAggregate aggregate
                     }
@@ -605,7 +638,12 @@ internal fun AvenorApp(
     BackHandler(enabled = favoriteAddTarget != null && favoriteSelectionSaving) {}
 
     BackHandler(enabled = homeEditMode && favoriteAddTarget == null) {
-        homeEditMode = false
+        if (homeStylePanelExpanded) {
+            homeStylePanelExpanded = false
+        } else {
+            homeEditMode = false
+            selectedHomeModuleId = null
+        }
     }
 
     BackHandler(enabled = !homeEditMode && !settingsOpen &&
@@ -838,6 +876,8 @@ internal fun AvenorApp(
                 accessibilityLockController = accessibilityLockController,
                 favoriteAvailability = favoriteAvailability,
                 editMode = homeEditMode,
+                stylePanelExpanded = homeStylePanelExpanded,
+                selectedModuleId = selectedHomeModuleId,
                 onRetryFavorites = { scope.launch { effectiveFavoriteStore.load() } },
                 onRequestEditMode = {
                     editMembership = (favoriteState as? FavoriteReadState.Readable)
@@ -846,6 +886,10 @@ internal fun AvenorApp(
                         .orEmpty()
                     homeEditMode = true
                 },
+                onStylePanelExpandedChange = { expanded ->
+                    homeStylePanelExpanded = expanded
+                },
+                onSelectModule = { moduleId -> selectedHomeModuleId = moduleId },
                 onLongPressFavorite = { entry ->
                     selectedEntryFromHome = true
                     selectedEntry = entry
@@ -853,6 +897,7 @@ internal fun AvenorApp(
                 onAddFavoritesToList = ::openFavoriteSelection,
                 onAddProvisionalFavorites = ::openProvisionalFavoriteSelection,
                 onAddFavoritesToBar = ::openFavoriteBarSelection,
+                onAddProvisionalFavoriteBar = ::openProvisionalFavoriteBarSelection,
                 favoriteRevealContainerId = favoriteRevealRequest?.containerId,
                 favoriteRevealContainerType = favoriteRevealRequest?.containerType,
                 favoriteRevealIdentity = favoriteRevealRequest?.identity,
@@ -970,6 +1015,8 @@ internal fun AvenorApp(
                         ?.toSet()
                         .orEmpty()
                     homeEditMode = true
+                    homeStylePanelExpanded = false
+                    selectedHomeModuleId = null
                     selectedEntry = null
                     selectedEntryFromHome = false
                 },

@@ -50,7 +50,7 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
 | [Iteration 22: Ordered Favorite Module Foundation](iteration-22-ordered-favorite-module-foundation.md) | `Completed` | 2026-09-01 | The implementation, focused tests, static checks, author-reported compilation, and functional acceptance satisfy the iteration boundary. |
-| [Iteration 23: Module Style and Ordering](iteration-23-module-style-and-ordering.md) | `Planned` | 2026-09-01 | The accepted product contract defines add-favorite entries, module selection, style editing, ribbon creation, and whole-module ordering on the Iteration 22 foundation. |
+| [Iteration 23: Module Style and Ordering](iteration-23-module-style-and-ordering.md) | `In progress` | 2026-09-01 | Authorized implementation is being realigned to accepted product-contract baseline `7cae837dafb188896dd24bd43aae58022c81fe11`. |
 | [Iteration 24: Application Editing and Cross-Module Movement](iteration-24-application-editing-and-cross-module-movement.md) | `Planned` | 2026-09-01 | The accepted product contract defines collapsed-dock removal, Undo, insertion movement, and the drop-to-create destination after module types, destinations, and add-favorite entries exist. |
 | [Iteration 25: Upgrade, Regression, and Version Closure](iteration-25-upgrade-regression-and-version-closure.md) | `Planned` | 2026-09-01 | Version completion requires integrated Home adoption, compatibility, artifact, and author-acceptance evidence after the selected Home loop is complete. |
 
@@ -62,7 +62,7 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 
 ### Iteration 23
 
-[Contract](iteration-23-module-style-and-ordering.md). No implementation or validation evidence exists. The contract is rebaselined to accepted product-contract commit `7cae837dafb188896dd24bd43aae58022c81fe11`: both add actions move from the style settings panel into the favorite main list, and every module gains one trailing add-favorite entry. Status remains `Planned`; absent evidence is not a pass.
+[Contract](iteration-23-module-style-and-ordering.md). Implementation is in progress on accepted product-contract baseline `7cae837dafb188896dd24bd43aae58022c81fe11`. The persisted style schema, backward-readable defaults, module selection, edit dock, initial inline panel, and immediate durable vertical-style preview exist locally; the author reported that the persistence foundation compiled without errors. The implementation is being realigned so add-favorite entries belong to the main list and module tails rather than the panel, and the shared panel and whole-module movement contracts remain incomplete. Current unvalidated work remains `Not run` or `Unknown`. Status is `In progress`.
 
 ### Iteration 24
 
@@ -102,4 +102,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.4.0` identif
 
 ## Completion result
 
-No version completion result exists. Iteration 22 is `Completed`; Iterations 23–25 remain `Planned`. This document does not authorize push, release, or publication.
+No version completion result exists. Iteration 22 is `Completed`; Iteration 23 is `In progress`; Iterations 24–25 remain `Planned`. This document does not authorize push, release, or publication.

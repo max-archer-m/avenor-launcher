@@ -50,7 +50,7 @@
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
 | [迭代 22：有序收藏模块基础](iteration-22-ordered-favorite-module-foundation.zh-CN.md) | `Completed` | 2026-09-01 | 实现、聚焦测试、静态检查、作者报告的编译结果和功能验收满足本迭代边界。 |
-| [迭代 23：模块样式与排序](iteration-23-module-style-and-ordering.zh-CN.md) | `Planned` | 2026-09-01 | 已接受的产品契约在迭代 22 基础上定义新增收藏入口、模块选择、样式编辑、条带创建和整模块排序。 |
+| [迭代 23：模块样式与排序](iteration-23-module-style-and-ordering.zh-CN.md) | `In progress` | 2026-09-01 | 已授权实现正在按已接受产品契约基线 `7cae837dafb188896dd24bd43aae58022c81fe11` 重新对齐。 |
 | [迭代 24：应用编辑与跨模块移动](iteration-24-application-editing-and-cross-module-movement.zh-CN.md) | `Planned` | 2026-09-01 | 已接受的产品契约在模块类型、目标位置和新增收藏入口存在后定义收起式 dock 移除、撤销、插入移动和拖动创建落点。 |
 | [迭代 25：升级、回归与版本收尾](iteration-25-upgrade-regression-and-version-closure.zh-CN.md) | `Planned` | 2026-09-01 | 所选 Home 闭环完成后，版本完成需要集成的 Home 采用、兼容性、产物和作者验收证据。 |
 
@@ -62,7 +62,7 @@
 
 ### 迭代 23
 
-[契约](iteration-23-module-style-and-ordering.zh-CN.md)。当前没有实施或验证证据。契约已重新基线到已接受的产品契约 commit `7cae837dafb188896dd24bd43aae58022c81fe11`：两个新增操作从样式设置面板移到收藏主列表，并在每个模块末尾增加一个新增收藏入口。状态保持 `Planned`；缺少证据不代表通过。
+[契约](iteration-23-module-style-and-ordering.zh-CN.md)。实现正在已接受产品契约基线 `7cae837dafb188896dd24bd43aae58022c81fe11` 上进行。持久化样式 schema、向后可读默认值、模块选择、编辑 dock、初始内联面板和纵向样式即时持久化预览已存在于本地；作者报告持久化基础编译无错误。当前实现正在重新对齐，使新增收藏入口属于主列表和模块尾部而不是面板；共享面板和整模块移动契约仍未完成。当前未验证工作保持 `Not run` 或 `Unknown`。状态为 `In progress`。
 
 ### 迭代 24
 
@@ -102,4 +102,4 @@
 
 ## 完成结果
 
-当前没有版本完成结果。迭代 22 为 `Completed`；迭代 23–25 保持 `Planned`。本文件不授权推送、发布或公开分发。
+当前没有版本完成结果。迭代 22 为 `Completed`；迭代 23 为 `In progress`；迭代 24–25 保持 `Planned`。本文件不授权推送、发布或公开分发。

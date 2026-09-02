@@ -39,6 +39,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -58,6 +61,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -66,6 +70,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -83,6 +88,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -90,6 +97,8 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -133,6 +142,7 @@ import androidx.core.graphics.drawable.toBitmap
 import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -148,13 +158,18 @@ internal fun HomeScreen(
     companionFavoriteListState: LazyListState = rememberLazyListState(),
     companionFavoriteNestedScrollConnection: NestedScrollConnection? = null,
     editMode: Boolean = false,
+    stylePanelExpanded: Boolean = false,
+    selectedModuleId: String? = null,
     onRetryFavorites: () -> Unit = {},
     onRequestEditMode: () -> Unit = {},
+    onStylePanelExpandedChange: (Boolean) -> Unit = {},
+    onSelectModule: (String) -> Unit = {},
     onLaunchFavorite: (FavoriteAvailability) -> Unit = {},
     onLongPressFavorite: (LaunchableEntry) -> Unit = {},
     onAddFavoritesToList: (String) -> Unit = {},
     onAddProvisionalFavorites: () -> Unit = {},
     onAddFavoritesToBar: (String) -> Unit = {},
+    onAddProvisionalFavoriteBar: () -> Unit = {},
     favoriteRevealContainerId: String? = null,
     favoriteRevealContainerType: FavoriteContainerType? = null,
     favoriteRevealIdentity: LaunchableIdentity? = null,
@@ -323,6 +338,9 @@ internal fun HomeScreen(
     val favoriteBarRemovedMessage = stringResource(R.string.favorite_bar_removed)
     val favoriteRemovedMessage = stringResource(R.string.favorite_removed)
     val undoUnavailableMessage = stringResource(R.string.favorite_undo_unavailable)
+    val moduleStyleSaveFailureMessage = stringResource(
+        R.string.unable_to_save_module_style,
+    )
     fun cancelActiveDragSessions() {
         dragSession = null
         favoriteBarDragSession = null
@@ -416,7 +434,7 @@ internal fun HomeScreen(
         if (favoriteState !is FavoriteReadState.Readable) return
         val previousJob = editMutationJob
         val session = editSessionId
-        editMutationJob = editScope.launch {
+        val mutationJob = editScope.launch(start = CoroutineStart.LAZY) {
             previousJob?.join()
             val base = pendingEditAggregate
                 ?: committedEditAggregate
@@ -438,9 +456,8 @@ internal fun HomeScreen(
                 onFailed()
                 return@launch
             }
-            pendingEditAggregate = persisted
             committedEditAggregate = persisted
-            if (pendingEditAggregate == persisted) pendingEditAggregate = null
+            pendingEditAggregate = null
             onCommitted()
             if (!recordUndo) {
                 undoSequence += 1
@@ -479,6 +496,15 @@ internal fun HomeScreen(
                 }
             }
         }
+        editMutationJob = mutationJob
+        mutationJob.invokeOnCompletion {
+            editScope.launch {
+                if (editMutationJob === mutationJob) {
+                    editMutationJob = null
+                }
+            }
+        }
+        mutationJob.start()
     }
 
     fun removeFavoriteFromContainer(
@@ -510,6 +536,25 @@ internal fun HomeScreen(
             },
             favoriteRemovedMessage,
             recordUndo = true,
+        )
+    }
+
+    fun commitVerticalModuleStyle(
+        moduleId: String,
+        transform: (FavoriteContainer) -> FavoriteContainer,
+    ) {
+        if (editMutationJob?.isActive == true) return
+        commitEditAggregate(
+            transform = { aggregate ->
+                aggregate.updateVerticalList(moduleId, transform)
+            },
+            onFailed = {
+                Toast.makeText(
+                    context,
+                    moduleStyleSaveFailureMessage,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            },
         )
     }
 
@@ -997,7 +1042,7 @@ internal fun HomeScreen(
             .onGloballyPositioned { dragRootOriginInWindow = it.positionInWindow() },
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(
+            if (!editMode || !stylePanelExpanded) Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(IntrinsicSize.Min)
@@ -1089,10 +1134,12 @@ internal fun HomeScreen(
                         .testTag("home_double_tap_lock_region"),
                 )
             }
-            Spacer(Modifier.height(dimensionResource(R.dimen.home_module_spacing)))
+            if (!editMode || !stylePanelExpanded) {
+                Spacer(Modifier.height(dimensionResource(R.dimen.home_module_spacing)))
+            }
             Box(
                 modifier = Modifier
-                    .weight(1f, fill = false)
+                    .weight(1f)
                     .fillMaxWidth(),
             ) {
                 when (favoriteState) {
@@ -1112,7 +1159,7 @@ internal fun HomeScreen(
                     val orderedModules = favoriteState.orderedModules
                     val hasFavorites = orderedModules?.isNotEmpty()
                         ?: favoriteState.aggregate.identities.isNotEmpty()
-                    if (!hasFavorites && editMode) {
+                    if (!hasFavorites && editMode && orderedModules == null) {
                         HomeFavoriteProvisionalList(
                             modifier = Modifier.fillMaxWidth(),
                             onClick = onAddProvisionalFavorites,
@@ -1143,7 +1190,7 @@ internal fun HomeScreen(
                                 )
                             },
                         )
-                    } else if (!hasFavorites) {
+                    } else if (!hasFavorites && !editMode) {
                         Text(
                             text = stringResource(R.string.home_empty_favorites),
                             color = MaterialTheme.colorScheme.onBackground,
@@ -1172,16 +1219,42 @@ internal fun HomeScreen(
                             listState = favoriteListState,
                             nestedScrollConnection = favoriteNestedScrollConnection,
                             editMode = false,
+                            selectionEnabled = false,
+                            selectionInteractionEnabled = false,
+                            selectedModuleId = null,
+                            onSelectModule = {},
+                            addEntriesEnabled = false,
+                            onAddToModule = {},
+                            onCreateVerticalModule = {},
+                            onCreateRibbon = {},
                             onLaunchFavorite = onLaunchFavorite,
                             onLongPressFavorite = onLongPressFavorite,
                         )
                     } else if (orderedModules != null) {
+                        val previewAggregate = pendingEditAggregate
+                            ?: committedEditAggregate
+                            ?: favoriteState.aggregate
                         HomeOrderedModuleComposition(
-                            modules = orderedModules,
+                            modules = orderedModules.withPresentationFrom(previewAggregate),
                             availabilityByIdentity = favoriteAvailability,
                             listState = favoriteListState,
                             nestedScrollConnection = null,
                             editMode = true,
+                            selectionEnabled = stylePanelExpanded,
+                            selectionInteractionEnabled = editMutationJob?.isActive != true,
+                            selectedModuleId = selectedModuleId,
+                            onSelectModule = onSelectModule,
+                            addEntriesEnabled = editMutationJob?.isActive != true,
+                            onAddToModule = { module ->
+                                when (module.type) {
+                                    OrderedFavoriteModuleType.Vertical ->
+                                        onAddFavoritesToList(module.id)
+                                    OrderedFavoriteModuleType.Ribbon ->
+                                        onAddFavoritesToBar(module.id)
+                                }
+                            },
+                            onCreateVerticalModule = onAddProvisionalFavorites,
+                            onCreateRibbon = onAddProvisionalFavoriteBar,
                             onLaunchFavorite = {},
                             onLongPressFavorite = {},
                         )
@@ -1771,6 +1844,63 @@ internal fun HomeScreen(
                         },
                     )
                 }
+            }
+            if (editMode) {
+                val orderedModules = (favoriteState as? FavoriteReadState.Readable)
+                    ?.orderedModules
+                    .orEmpty()
+                val previewAggregate = pendingEditAggregate
+                    ?: committedEditAggregate
+                    ?: (favoriteState as? FavoriteReadState.Readable)?.aggregate
+                    ?: FavoriteAggregate()
+                val displayedModules = orderedModules.withPresentationFrom(previewAggregate)
+                val selectedModule = displayedModules.firstOrNull {
+                    it.id == selectedModuleId
+                }
+                val styleSaving = editMutationJob?.isActive == true
+                if (stylePanelExpanded) {
+                    HomeModuleStylePanel(
+                        selectedModule = selectedModule,
+                        enabled = !styleSaving,
+                        onChangeSize = { size ->
+                            selectedModule?.let { module ->
+                                commitVerticalModuleStyle(module.id) {
+                                    it.copy(listSize = size)
+                                }
+                            }
+                        },
+                        onChangeNamePlacement = { placement ->
+                            selectedModule?.let { module ->
+                                commitVerticalModuleStyle(module.id) { container ->
+                                    container.copy(
+                                        namePlacement = placement,
+                                        itemsPerRow = if (
+                                            placement == FavoriteNamePlacement.Right
+                                        ) {
+                                            container.itemsPerRow.coerceAtMost(2)
+                                        } else {
+                                            container.itemsPerRow
+                                        },
+                                    )
+                                }
+                            }
+                        },
+                        onChangeItemsPerRow = { count ->
+                            selectedModule?.let { module ->
+                                commitVerticalModuleStyle(module.id) {
+                                    it.copy(itemsPerRow = count)
+                                }
+                            }
+                        },
+                    )
+                }
+                HomeEditDock(
+                    hasFavorites = orderedModules.isNotEmpty(),
+                    expanded = stylePanelExpanded,
+                    onToggleExpanded = {
+                        onStylePanelExpandedChange(!stylePanelExpanded)
+                    },
+                )
             }
         }
         SnackbarHost(
@@ -4465,6 +4595,447 @@ private fun HomeFavoriteProvisionalList(
         }
     }
     @Composable
+    private fun HomeEditDock(
+        hasFavorites: Boolean,
+        expanded: Boolean,
+        onToggleExpanded: () -> Unit,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(R.dimen.home_edit_dock_height))
+                .testTag("home_edit_dock"),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(
+                    when {
+                        !hasFavorites -> R.string.home_edit_add_favorites
+                        expanded -> R.string.home_edit_select_and_move_modules
+                        else -> R.string.home_edit_move_applications
+                    },
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = dimensionResource(R.dimen.home_edit_dock_text_padding)),
+                maxLines = 1,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium,
+                fontSize = dimensionResource(R.dimen.home_edit_dock_text_size).value.sp,
+            )
+            Box(
+                modifier = Modifier
+                    .size(
+                        width = dimensionResource(R.dimen.home_edit_dock_affordance_width),
+                        height = dimensionResource(R.dimen.home_edit_dock_height),
+                    )
+                    .clickable(role = Role.Button, onClick = onToggleExpanded)
+                    .testTag(if (expanded) "home_style_panel_collapse" else "home_style_panel_expand"),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_chevron_right),
+                    contentDescription = stringResource(
+                        if (expanded) {
+                            R.string.home_collapse_style_panel
+                        } else {
+                            R.string.home_expand_style_panel
+                        },
+                    ),
+                    modifier = Modifier
+                        .size(dimensionResource(R.dimen.home_edit_dock_icon_size))
+                        .rotate(if (expanded) 90f else -90f),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun HomeModuleStylePanel(
+        selectedModule: OrderedFavoriteModule?,
+        enabled: Boolean,
+        onChangeSize: (FavoriteListSize) -> Unit,
+        onChangeNamePlacement: (FavoriteNamePlacement) -> Unit,
+        onChangeItemsPerRow: (Int) -> Unit,
+    ) {
+        val panelShape = RoundedCornerShape(
+            dimensionResource(R.dimen.style_settings_panel_corner_radius),
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = dimensionResource(R.dimen.home_style_panel_max_height))
+                .shadow(
+                    elevation = dimensionResource(R.dimen.style_settings_panel_elevation),
+                    shape = panelShape,
+                    clip = false,
+                )
+                .clip(panelShape)
+                .background(colorResource(R.color.avenor_sheet_surface))
+                .verticalScroll(rememberScrollState())
+                .testTag("home_style_panel"),
+        ) {
+            if (selectedModule == null) {
+                HomeStylePanelRow(
+                    label = stringResource(R.string.home_select_favorite_list_prompt),
+                )
+            } else if (selectedModule.type == OrderedFavoriteModuleType.Vertical) {
+                    HomeApplicationSizeRow(
+                        selected = selectedModule.applicationSize,
+                        enabled = enabled,
+                        onSelect = onChangeSize,
+                    )
+                    HomeStyleArrangementRow(
+                        placement = selectedModule.namePlacement,
+                        value = selectedModule.itemsPerRow,
+                        maximum = if (
+                            selectedModule.namePlacement == FavoriteNamePlacement.Right
+                        ) {
+                            2
+                        } else {
+                            4
+                        },
+                        enabled = enabled,
+                        onChangePlacement = onChangeNamePlacement,
+                        onChangeCount = onChangeItemsPerRow,
+                    )
+            } else {
+                HomeStylePanelRow(
+                    label = stringResource(R.string.home_ribbon_fixed_style),
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun HomeStylePanelRow(
+        label: String,
+        value: String? = null,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(R.dimen.style_settings_panel_row_height))
+                .padding(horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset)),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = label,
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium,
+                fontSize = dimensionResource(R.dimen.style_settings_secondary_text_size).value.sp,
+                lineHeight = dimensionResource(
+                    R.dimen.style_settings_secondary_line_height,
+                ).value.sp,
+            )
+            value?.let {
+                Text(text = it, color = MaterialTheme.colorScheme.onSurface)
+            }
+        }
+    }
+
+    @Composable
+    private fun HomeApplicationSizeRow(
+        selected: FavoriteListSize,
+        enabled: Boolean,
+        onSelect: (FavoriteListSize) -> Unit,
+    ) {
+        val context = LocalContext.current
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(R.dimen.style_settings_panel_row_height))
+                .padding(horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset)),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.home_application_size),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.width(dimensionResource(R.dimen.style_settings_title_control_gap)))
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .horizontalScroll(rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                FavoriteListSize.values().forEach { option ->
+                    val iconSize = dimensionResource(option.iconSizeResource())
+                    val iconPixels = with(LocalDensity.current) { iconSize.roundToPx() }
+                    val icon = remember(option, iconPixels) {
+                        context.packageManager.defaultActivityIcon
+                            .toBitmap(iconPixels, iconPixels)
+                            .asImageBitmap()
+                    }
+                    Row(
+                        modifier = Modifier
+                            .height(dimensionResource(R.dimen.style_settings_panel_row_height))
+                            .clickable(
+                                enabled = enabled && option != selected,
+                                role = Role.RadioButton,
+                                onClick = { onSelect(option) },
+                            )
+                            .alpha(if (enabled) 1f else 0.38f)
+                            .padding(
+                                horizontal = dimensionResource(
+                                    R.dimen.style_settings_size_option_horizontal_padding,
+                                ),
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = option == selected,
+                            onClick = null,
+                            modifier = Modifier.size(
+                                dimensionResource(R.dimen.style_settings_indicator_size),
+                            ),
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = MaterialTheme.colorScheme.onSurface,
+                                unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                disabledSelectedColor = MaterialTheme.colorScheme.onSurface,
+                                disabledUnselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                        )
+                        Spacer(
+                            Modifier.width(
+                                dimensionResource(R.dimen.style_settings_indicator_icon_gap),
+                            ),
+                        )
+                        Image(
+                            bitmap = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(iconSize),
+                        )
+                        Spacer(
+                            Modifier.width(
+                                dimensionResource(R.dimen.style_settings_icon_label_gap),
+                            ),
+                        )
+                        Text(
+                            text = stringResource(
+                                when (option) {
+                                    FavoriteListSize.Large -> R.string.favorite_list_large
+                                    FavoriteListSize.Medium -> R.string.favorite_list_medium
+                                    FavoriteListSize.Small -> R.string.favorite_list_small
+                                },
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun HomeStyleArrangementRow(
+        placement: FavoriteNamePlacement,
+        value: Int,
+        maximum: Int,
+        enabled: Boolean,
+        onChangePlacement: (FavoriteNamePlacement) -> Unit,
+        onChangeCount: (Int) -> Unit,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(R.dimen.style_settings_panel_row_height))
+                .padding(horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset))
+                .testTag("home_application_arrangement"),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.home_application_arrangement),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+            )
+            Spacer(Modifier.width(dimensionResource(R.dimen.style_settings_title_control_gap)))
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .horizontalScroll(rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HomeNamePlacementSelector(
+                    selected = placement,
+                    enabled = enabled,
+                    onSelect = onChangePlacement,
+                )
+                Spacer(Modifier.width(dimensionResource(R.dimen.style_settings_control_gap)))
+                HomeItemsPerRowStepper(
+                    value = value,
+                    maximum = maximum,
+                    enabled = enabled,
+                    onChange = onChangeCount,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun HomeNamePlacementSelector(
+        selected: FavoriteNamePlacement,
+        enabled: Boolean,
+        onSelect: (FavoriteNamePlacement) -> Unit,
+    ) {
+        val frameShape = RoundedCornerShape(
+            dimensionResource(R.dimen.style_settings_selector_frame_radius),
+        )
+        Row(
+            modifier = Modifier
+                .size(
+                    width = dimensionResource(R.dimen.style_settings_selector_width),
+                    height = dimensionResource(R.dimen.style_settings_selector_height),
+                )
+                .clip(frameShape)
+                .background(colorResource(R.color.avenor_sheet_surface))
+                .border(
+                    width = dimensionResource(R.dimen.style_settings_selector_border_width),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    shape = frameShape,
+                )
+                .padding(dimensionResource(R.dimen.style_settings_selector_inner_padding)),
+        ) {
+            listOf(
+                FavoriteNamePlacement.Right to stringResource(R.string.home_name_right),
+                FavoriteNamePlacement.Below to stringResource(R.string.home_name_below),
+            ).forEach { (option, label) ->
+                val isSelected = option == selected
+                val background by animateColorAsState(
+                    targetValue = if (isSelected) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        Color.Transparent
+                    },
+                    label = "home-name-placement-background",
+                )
+                val contentColor by animateColorAsState(
+                    targetValue = if (isSelected) {
+                        colorResource(R.color.avenor_sheet_surface)
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    label = "home-name-placement-content",
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(
+                            RoundedCornerShape(
+                                dimensionResource(R.dimen.style_settings_selector_thumb_radius),
+                            ),
+                        )
+                        .background(background)
+                        .clickable(
+                            enabled = enabled && !isSelected,
+                            role = Role.RadioButton,
+                            onClick = { onSelect(option) },
+                        )
+                        .alpha(if (enabled) 1f else 0.38f),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = label,
+                        color = contentColor,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = dimensionResource(
+                            R.dimen.style_settings_secondary_text_size,
+                        ).value.sp,
+                        lineHeight = dimensionResource(
+                            R.dimen.style_settings_secondary_line_height,
+                        ).value.sp,
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun HomeItemsPerRowStepper(
+        value: Int,
+        maximum: Int,
+        enabled: Boolean,
+        onChange: (Int) -> Unit,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            HomeStepperControl(
+                text = stringResource(R.string.home_decrement_symbol),
+                enabled = enabled && value > 1,
+                testTag = "home_items_per_row_decrement",
+                onClick = { onChange(value - 1) },
+            )
+            Box(
+                modifier = Modifier
+                    .size(dimensionResource(R.dimen.style_settings_stepper_target_size))
+                    .testTag("home_items_per_row_value"),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(
+                            width = dimensionResource(R.dimen.style_settings_stepper_value_width),
+                            height = dimensionResource(R.dimen.style_settings_stepper_visible_height),
+                        )
+                        .clip(
+                            RoundedCornerShape(
+                                dimensionResource(R.dimen.style_settings_stepper_radius),
+                            ),
+                        )
+                        .background(colorResource(R.color.style_settings_control_surface)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = value.toString(),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+            HomeStepperControl(
+                text = stringResource(R.string.home_increment_symbol),
+                enabled = enabled && value < maximum,
+                testTag = "home_items_per_row_increment",
+                onClick = { onChange(value + 1) },
+            )
+        }
+    }
+
+    @Composable
+    private fun HomeStepperControl(
+        text: String,
+        enabled: Boolean,
+        testTag: String,
+        onClick: () -> Unit,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(dimensionResource(R.dimen.style_settings_stepper_target_size))
+                .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+                .alpha(if (enabled) 1f else 0.38f)
+                .testTag(testTag),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(dimensionResource(R.dimen.style_settings_stepper_visible_size))
+                    .clip(
+                        RoundedCornerShape(
+                            dimensionResource(R.dimen.style_settings_stepper_radius),
+                        ),
+                    )
+                    .background(colorResource(R.color.style_settings_control_surface)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text = text, color = MaterialTheme.colorScheme.onSurface)
+            }
+        }
+    }
+
+    @Composable
     private fun HomeFavoriteMessage(
         message: String,
         showProgress: Boolean,
@@ -4493,6 +5064,14 @@ private fun HomeFavoriteProvisionalList(
         listState: LazyListState,
         nestedScrollConnection: NestedScrollConnection?,
         editMode: Boolean,
+        selectionEnabled: Boolean,
+        selectionInteractionEnabled: Boolean,
+        selectedModuleId: String?,
+        onSelectModule: (String) -> Unit,
+        addEntriesEnabled: Boolean,
+        onAddToModule: (OrderedFavoriteModule) -> Unit,
+        onCreateVerticalModule: () -> Unit,
+        onCreateRibbon: () -> Unit,
         onLaunchFavorite: (FavoriteAvailability) -> Unit,
         onLongPressFavorite: (LaunchableEntry) -> Unit,
     ) {
@@ -4515,6 +5094,7 @@ private fun HomeFavoriteProvisionalList(
                 items = modules,
                 key = { it.id },
             ) { module ->
+                Box(modifier = Modifier.fillMaxWidth()) {
                 when (module.type) {
                     OrderedFavoriteModuleType.Vertical -> {
                         Column(
@@ -4522,23 +5102,59 @@ private fun HomeFavoriteProvisionalList(
                                 .fillMaxWidth()
                                 .editSurface(editMode),
                         ) {
-                            module.identities.forEach { identity ->
-                                val availability = availabilityByIdentity[identity]
-                                    ?: FavoriteAvailability.Unknown(null)
-                                HomeFavoriteRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    availability = availability,
-                                    onClick = { onLaunchFavorite(availability) },
-                                    onLongClick = {
-                                        availability.presentationEntry?.let(onLongPressFavorite)
-                                    },
-                                    editMode = false,
-                                    compact = false,
-                                    listSize = FavoriteListSize.Medium,
-                                    exchangeHighlight = false,
-                                    onRowBoundsInWindow = { _, _ -> },
-                                    onHandleBoundsInWindow = {},
-                                )
+                            val cells: List<LaunchableIdentity?> =
+                                module.identities.map { it } +
+                                    if (editMode) listOf(null) else emptyList()
+                            cells.chunked(module.itemsPerRow).forEach { rowItems ->
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    rowItems.forEach { identity ->
+                                        val itemModifier = Modifier.weight(1f)
+                                        if (identity == null) {
+                                            HomeModuleAddFavoriteEntry(
+                                                modifier = itemModifier,
+                                                module = module,
+                                                enabled = addEntriesEnabled,
+                                                onClick = { onAddToModule(module) },
+                                            )
+                                        } else if (
+                                            module.namePlacement == FavoriteNamePlacement.Below
+                                        ) {
+                                            val availability = availabilityByIdentity[identity]
+                                                ?: FavoriteAvailability.Unknown(null)
+                                            HomeFavoriteBelowItem(
+                                                modifier = itemModifier,
+                                                availability = availability,
+                                                listSize = module.applicationSize,
+                                                onClick = { onLaunchFavorite(availability) },
+                                                onLongClick = {
+                                                    availability.presentationEntry
+                                                        ?.let(onLongPressFavorite)
+                                                },
+                                            )
+                                        } else {
+                                            val availability = availabilityByIdentity[identity]
+                                                ?: FavoriteAvailability.Unknown(null)
+                                            HomeFavoriteRow(
+                                                modifier = itemModifier,
+                                                availability = availability,
+                                                onClick = { onLaunchFavorite(availability) },
+                                                onLongClick = {
+                                                    availability.presentationEntry
+                                                        ?.let(onLongPressFavorite)
+                                                },
+                                                editMode = false,
+                                                compact = false,
+                                                listSize = module.applicationSize,
+                                                exchangeHighlight = false,
+                                                onRowBoundsInWindow = { _, _ -> },
+                                                onHandleBoundsInWindow = {},
+                                            )
+                                        }
+                                    }
+                                    repeat(module.itemsPerRow - rowItems.size) {
+                                        Spacer(Modifier.weight(1f))
+                                    }
+                                }
                             }
                         }
                     }
@@ -4580,11 +5196,295 @@ private fun HomeFavoriteProvisionalList(
                                     onHandleBoundsInWindow = {},
                                 )
                             }
+                            if (editMode) {
+                                item(key = "add:${module.id}") {
+                                    HomeModuleAddFavoriteEntry(
+                                        modifier = Modifier.width(
+                                            dimensionResource(
+                                                R.dimen.home_favorite_bar_item_width,
+                                            ),
+                                        ),
+                                        module = module,
+                                        enabled = addEntriesEnabled,
+                                        onClick = { onAddToModule(module) },
+                                    )
+                                }
+                            }
                         }
+                    }
+                }
+                if (selectionEnabled) {
+                    HomeModuleSelectionLayer(
+                        modifier = Modifier.matchParentSize(),
+                        selected = module.id == selectedModuleId,
+                        enabled = selectionInteractionEnabled,
+                        onSelect = { onSelectModule(module.id) },
+                    )
+                }
+                }
+            }
+            if (editMode) {
+                item(key = "main-list-add-entries") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            dimensionResource(R.dimen.home_add_favorite_entry_gap),
+                        ),
+                    ) {
+                        HomeMainListAddFavoriteEntry(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(R.string.home_add_favorite_list),
+                            testTag = "home_add_favorite_list",
+                            enabled = addEntriesEnabled,
+                            onClick = onCreateVerticalModule,
+                        )
+                        HomeMainListAddFavoriteEntry(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(R.string.home_add_favorite_ribbon),
+                            testTag = "home_add_favorite_ribbon",
+                            enabled = addEntriesEnabled,
+                            onClick = onCreateRibbon,
+                        )
                     }
                 }
             }
         }
+    }
+
+    @Composable
+    private fun HomeMainListAddFavoriteEntry(
+        modifier: Modifier,
+        label: String,
+        testTag: String,
+        enabled: Boolean,
+        onClick: () -> Unit,
+    ) {
+        val shape = RoundedCornerShape(
+            dimensionResource(R.dimen.home_favorite_bar_corner_radius),
+        )
+        Row(
+            modifier = modifier
+                .heightIn(min = dimensionResource(R.dimen.home_add_favorite_entry_min_height))
+                .clip(shape)
+                .background(colorResource(R.color.home_add_favorite_surface))
+                .border(
+                    dimensionResource(R.dimen.home_favorite_bar_border_width),
+                    colorResource(R.color.home_add_favorite_border),
+                    shape,
+                )
+                .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+                .padding(horizontal = dimensionResource(R.dimen.home_favorite_bar_item_inset))
+                .testTag(testTag),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_add),
+                contentDescription = null,
+                modifier = Modifier.size(dimensionResource(R.dimen.home_add_favorite_icon_size)),
+                tint = MaterialTheme.colorScheme.onBackground.copy(
+                    alpha = if (enabled) 1f else 0.38f,
+                ),
+            )
+            Spacer(Modifier.width(dimensionResource(R.dimen.home_add_favorite_entry_gap)))
+            Text(
+                text = label,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onBackground.copy(
+                    alpha = if (enabled) 1f else 0.38f,
+                ),
+                fontWeight = FontWeight.Normal,
+                fontSize = dimensionResource(R.dimen.home_favorite_text_size).value.sp,
+                lineHeight = dimensionResource(R.dimen.home_favorite_line_height).value.sp,
+            )
+        }
+    }
+
+    @Composable
+    private fun HomeModuleAddFavoriteEntry(
+        modifier: Modifier,
+        module: OrderedFavoriteModule,
+        enabled: Boolean,
+        onClick: () -> Unit,
+    ) {
+        val shape = RoundedCornerShape(
+            dimensionResource(R.dimen.home_favorite_bar_corner_radius),
+        )
+        val iconSlotSize = dimensionResource(
+            if (module.type == OrderedFavoriteModuleType.Ribbon) {
+                R.dimen.home_favorite_icon_size
+            } else {
+                module.applicationSize.iconSizeResource()
+            },
+        )
+        val surfaceModifier = modifier
+            .then(
+                if (module.type == OrderedFavoriteModuleType.Ribbon) {
+                    Modifier.height(dimensionResource(R.dimen.home_favorite_bar_height))
+                } else if (module.namePlacement == FavoriteNamePlacement.Below) {
+                    Modifier.height(
+                        dimensionResource(module.applicationSize.belowItemHeightResource()),
+                    )
+                } else {
+                    Modifier.height(dimensionResource(module.applicationSize.rowHeightResource()))
+                },
+            )
+            .clip(shape)
+            .background(colorResource(R.color.home_add_favorite_surface))
+            .border(
+                dimensionResource(R.dimen.home_favorite_bar_border_width),
+                colorResource(R.color.home_add_favorite_border),
+                shape,
+            )
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .testTag("home_add_favorite_${module.id}")
+        if (module.type == OrderedFavoriteModuleType.Vertical &&
+            module.namePlacement == FavoriteNamePlacement.Below
+        ) {
+            Column(
+                modifier = surfaceModifier.padding(
+                    start = dimensionResource(R.dimen.home_favorite_below_horizontal_inset),
+                    top = dimensionResource(R.dimen.home_favorite_below_top_inset),
+                    end = dimensionResource(R.dimen.home_favorite_below_horizontal_inset),
+                    bottom = dimensionResource(R.dimen.home_favorite_below_bottom_inset),
+                ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                HomeAddFavoriteIconSlot(iconSlotSize, enabled)
+                Spacer(
+                    Modifier.height(
+                        dimensionResource(R.dimen.home_favorite_below_icon_label_gap),
+                    ),
+                )
+                HomeAddFavoriteLabel(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    size = module.applicationSize,
+                    enabled = enabled,
+                )
+            }
+        } else {
+            Row(
+                modifier = surfaceModifier.padding(
+                    horizontal = dimensionResource(R.dimen.home_favorite_bar_item_inset),
+                ),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HomeAddFavoriteIconSlot(iconSlotSize, enabled)
+                Spacer(
+                    Modifier.width(
+                        dimensionResource(
+                            if (module.type == OrderedFavoriteModuleType.Ribbon) {
+                                R.dimen.home_favorite_bar_icon_label_gap
+                            } else {
+                                R.dimen.home_favorite_icon_label_gap
+                            },
+                        ),
+                    ),
+                )
+                HomeAddFavoriteLabel(
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Start,
+                    size = if (module.type == OrderedFavoriteModuleType.Ribbon) {
+                        FavoriteListSize.Medium
+                    } else {
+                        module.applicationSize
+                    },
+                    enabled = enabled,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun HomeAddFavoriteIconSlot(
+        size: androidx.compose.ui.unit.Dp,
+        enabled: Boolean,
+    ) {
+        Box(modifier = Modifier.size(size), contentAlignment = Alignment.Center) {
+            Icon(
+                painter = painterResource(R.drawable.ic_add),
+                contentDescription = null,
+                modifier = Modifier.size(dimensionResource(R.dimen.home_add_favorite_icon_size)),
+                tint = MaterialTheme.colorScheme.onBackground.copy(
+                    alpha = if (enabled) 1f else 0.38f,
+                ),
+            )
+        }
+    }
+
+    @Composable
+    private fun HomeAddFavoriteLabel(
+        modifier: Modifier,
+        textAlign: TextAlign,
+        size: FavoriteListSize,
+        enabled: Boolean,
+    ) {
+        Text(
+            text = stringResource(R.string.home_add_favorite),
+            modifier = modifier,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = textAlign,
+            color = MaterialTheme.colorScheme.onBackground.copy(
+                alpha = if (enabled) 1f else 0.38f,
+            ),
+            fontWeight = FontWeight.Normal,
+            fontSize = dimensionResource(size.textSizeResource()).value.sp,
+            lineHeight = dimensionResource(size.lineHeightResource()).value.sp,
+        )
+    }
+
+    @Composable
+    private fun HomeModuleSelectionLayer(
+        modifier: Modifier,
+        selected: Boolean,
+        enabled: Boolean,
+        onSelect: () -> Unit,
+    ) {
+        val selectedShape = RoundedCornerShape(
+            dimensionResource(R.dimen.home_module_selection_radius),
+        )
+        val selectedBorder = dimensionResource(R.dimen.home_module_selection_stroke)
+        val markColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+        val markInset = dimensionResource(R.dimen.home_module_mark_inset)
+        val markArm = dimensionResource(R.dimen.home_module_mark_arm)
+        val markStroke = dimensionResource(R.dimen.home_module_mark_stroke)
+        Box(
+            modifier = modifier
+                .then(
+                    if (selected) {
+                        Modifier.border(
+                            width = selectedBorder,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            shape = selectedShape,
+                        )
+                    } else {
+                        Modifier.drawWithContent {
+                            drawContent()
+                            val inset = markInset.toPx()
+                            val arm = markArm.toPx()
+                            val stroke = markStroke.toPx()
+                            val left = inset
+                            val top = inset
+                            val right = size.width - inset
+                            val bottom = size.height - inset
+                            drawLine(markColor, Offset(left, top), Offset(left + arm, top), stroke, StrokeCap.Round)
+                            drawLine(markColor, Offset(left, top), Offset(left, top + arm), stroke, StrokeCap.Round)
+                            drawLine(markColor, Offset(right, top), Offset(right - arm, top), stroke, StrokeCap.Round)
+                            drawLine(markColor, Offset(right, top), Offset(right, top + arm), stroke, StrokeCap.Round)
+                            drawLine(markColor, Offset(left, bottom), Offset(left + arm, bottom), stroke, StrokeCap.Round)
+                            drawLine(markColor, Offset(left, bottom), Offset(left, bottom - arm), stroke, StrokeCap.Round)
+                            drawLine(markColor, Offset(right, bottom), Offset(right - arm, bottom), stroke, StrokeCap.Round)
+                            drawLine(markColor, Offset(right, bottom), Offset(right, bottom - arm), stroke, StrokeCap.Round)
+                        }
+                    },
+                )
+                .alpha(if (enabled) 1f else 0.38f)
+                .clickable(enabled = enabled, role = Role.Button, onClick = onSelect)
+                .testTag(if (selected) "home_module_selected" else "home_module_selectable"),
+        )
     }
 
     @Composable
@@ -4654,6 +5554,87 @@ private fun HomeFavoriteProvisionalList(
                     )
                 }
             }
+        }
+    }
+
+    @Composable
+    @OptIn(ExperimentalFoundationApi::class)
+    private fun HomeFavoriteBelowItem(
+        modifier: Modifier,
+        availability: FavoriteAvailability,
+        listSize: FavoriteListSize,
+        onClick: () -> Unit,
+        onLongClick: () -> Unit,
+    ) {
+        val entry = availability.presentationEntry
+        val iconSize = dimensionResource(listSize.iconSizeResource())
+        val iconPixels = with(LocalDensity.current) { iconSize.roundToPx() }
+        val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
+        val interactionSource = remember(entry?.identity) { MutableInteractionSource() }
+        val hapticFeedback = LocalHapticFeedback.current
+        val displayText = when (availability) {
+            is FavoriteAvailability.Available -> availability.entry.label
+            is FavoriteAvailability.Disabled -> entry?.let {
+                stringResource(R.string.favorite_disabled_format, it.label)
+            } ?: stringResource(R.string.favorite_application_disabled)
+            is FavoriteAvailability.TemporarilyUnavailable,
+            is FavoriteAvailability.Unknown,
+                -> entry?.let {
+                stringResource(R.string.favorite_unavailable_format, it.label)
+            } ?: stringResource(R.string.favorite_application_unavailable)
+            FavoriteAvailability.ConfirmedRemoved ->
+                stringResource(R.string.favorite_application_unavailable)
+        }
+        Column(
+            modifier = modifier
+                .height(dimensionResource(listSize.belowItemHeightResource()))
+                .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = ripple(color = colorResource(R.color.home_favorite_ripple)),
+                    role = Role.Button,
+                    onClick = onClick,
+                    onLongClick = {
+                        if (entry != null) {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onLongClick()
+                        }
+                    },
+                )
+                .padding(
+                    start = dimensionResource(R.dimen.home_favorite_below_horizontal_inset),
+                    top = dimensionResource(R.dimen.home_favorite_below_top_inset),
+                    end = dimensionResource(R.dimen.home_favorite_below_horizontal_inset),
+                    bottom = dimensionResource(R.dimen.home_favorite_below_bottom_inset),
+                )
+                .alpha(if (availability is FavoriteAvailability.Available) 1f else disabledAlpha)
+                .testTag("home_favorite_below_item"),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (entry == null) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_inventory_error),
+                    contentDescription = null,
+                    modifier = Modifier.size(iconSize),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            } else {
+                val bitmap = entry.iconBitmap?.asImageBitmap()
+                    ?: remember(entry.icon, iconPixels) {
+                        entry.icon.toBitmap(iconPixels, iconPixels).asImageBitmap()
+                    }
+                Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(iconSize))
+            }
+            Spacer(Modifier.height(dimensionResource(R.dimen.home_favorite_below_icon_label_gap)))
+            Text(
+                text = displayText,
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                fontSize = dimensionResource(listSize.textSizeResource()).value.sp,
+                lineHeight = dimensionResource(listSize.lineHeightResource()).value.sp,
+            )
         }
     }
 
@@ -4904,6 +5885,30 @@ private fun HomeFavoriteProvisionalList(
         }
     }
 
+    private fun List<OrderedFavoriteModule>.withPresentationFrom(
+        aggregate: FavoriteAggregate,
+    ): List<OrderedFavoriteModule> {
+        val verticalById = aggregate.verticalLists.associateBy(FavoriteContainer::id)
+        return map { module ->
+            val container = verticalById[module.id]
+            if (module.type != OrderedFavoriteModuleType.Vertical || container == null) {
+                module
+            } else if (
+                module.applicationSize == container.listSize &&
+                module.namePlacement == container.namePlacement &&
+                module.itemsPerRow == container.itemsPerRow
+            ) {
+                module
+            } else {
+                module.copy(
+                    applicationSize = container.listSize,
+                    namePlacement = container.namePlacement,
+                    itemsPerRow = container.itemsPerRow,
+                )
+            }
+        }
+    }
+
     @Composable
     private fun Modifier.editSurface(enabled: Boolean): Modifier = if (!enabled) this else {
         background(
@@ -4925,6 +5930,12 @@ private fun HomeFavoriteProvisionalList(
         FavoriteListSize.Large -> R.dimen.home_favorite_large_row_min_height
         FavoriteListSize.Medium -> R.dimen.home_favorite_row_min_height
         FavoriteListSize.Small -> R.dimen.home_companion_favorite_row_min_height
+    }
+
+    private fun FavoriteListSize.belowItemHeightResource(): Int = when (this) {
+        FavoriteListSize.Large -> R.dimen.home_favorite_large_below_height
+        FavoriteListSize.Medium -> R.dimen.home_favorite_medium_below_height
+        FavoriteListSize.Small -> R.dimen.home_favorite_small_below_height
     }
 
     private fun FavoriteListSize.textSizeResource(): Int = when (this) {

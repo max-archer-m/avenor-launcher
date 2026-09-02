@@ -26,6 +26,9 @@ internal data class OrderedFavoriteModule(
     val id: String,
     val type: OrderedFavoriteModuleType,
     val identities: List<LaunchableIdentity>,
+    val applicationSize: FavoriteListSize = FavoriteListSize.Medium,
+    val namePlacement: FavoriteNamePlacement = FavoriteNamePlacement.Right,
+    val itemsPerRow: Int = 1,
 ) {
     init {
         require(id.isNotBlank())
@@ -198,7 +201,10 @@ internal class OrderedFavoriteModuleStore private constructor(
     private fun readDocument(): OrderedFavoriteAggregate =
         DataInputStream(BufferedInputStream(atomicFile.openRead())).use { input ->
             require(input.readInt() == MAGIC) { "Unrecognized ordered favorites document" }
-            require(input.readInt() == SCHEMA_VERSION) { "Unsupported ordered favorites schema" }
+            val schemaVersion = input.readInt()
+            require(schemaVersion in MIN_READABLE_SCHEMA_VERSION..SCHEMA_VERSION) {
+                "Unsupported ordered favorites schema"
+            }
             val moduleCount = input.readInt()
             require(moduleCount >= 0) { "Invalid ordered favorite module count" }
             val modules = buildList {
@@ -206,12 +212,32 @@ internal class OrderedFavoriteModuleStore private constructor(
                     val id = input.readUTF()
                     val type = OrderedFavoriteModuleType.values().getOrNull(input.readInt())
                         ?: throw IllegalArgumentException("Invalid ordered favorite module type")
+                    val applicationSize = if (schemaVersion >= STYLE_SCHEMA_VERSION) {
+                        FavoriteListSize.values().getOrNull(input.readInt())
+                            ?: throw IllegalArgumentException("Invalid application size")
+                    } else {
+                        FavoriteListSize.Medium
+                    }
+                    val namePlacement = if (schemaVersion >= STYLE_SCHEMA_VERSION) {
+                        FavoriteNamePlacement.values().getOrNull(input.readInt())
+                            ?: throw IllegalArgumentException("Invalid name placement")
+                    } else {
+                        FavoriteNamePlacement.Right
+                    }
+                    val itemsPerRow = if (schemaVersion >= STYLE_SCHEMA_VERSION) {
+                        input.readInt()
+                    } else {
+                        1
+                    }
                     val identityCount = input.readInt()
                     require(identityCount > 0) { "Empty ordered favorite module" }
                     add(
                         OrderedFavoriteModule(
                             id = id,
                             type = type,
+                            applicationSize = applicationSize,
+                            namePlacement = namePlacement,
+                            itemsPerRow = itemsPerRow,
                             identities = buildList {
                                 repeat(identityCount) {
                                     val serial = input.readLong()
@@ -245,6 +271,9 @@ internal class OrderedFavoriteModuleStore private constructor(
             aggregate.modules.forEach { module ->
                 data.writeUTF(module.id)
                 data.writeInt(module.type.ordinal)
+                data.writeInt(module.applicationSize.ordinal)
+                data.writeInt(module.namePlacement.ordinal)
+                data.writeInt(module.itemsPerRow)
                 data.writeInt(module.identities.size)
                 module.identities.forEach { identity ->
                     data.writeLong(identity.profileSerialNumber)
@@ -264,7 +293,9 @@ internal class OrderedFavoriteModuleStore private constructor(
         const val FILE_NAME = "ordered_favorite_modules.bin"
         const val LEGACY_FILE_NAME = "favorites.bin"
         const val MAGIC = 0x41464D31
-        const val SCHEMA_VERSION = 1
+        const val MIN_READABLE_SCHEMA_VERSION = 1
+        const val STYLE_SCHEMA_VERSION = 2
+        const val SCHEMA_VERSION = STYLE_SCHEMA_VERSION
         const val LEGACY_MAGIC = 0x4156454E
         const val LEGACY_SCHEMA_VERSION = 1
         const val LEGACY_COMPOSITION_SCHEMA_VERSION = 2
@@ -413,6 +444,9 @@ private fun OrderedFavoriteAggregate.toLegacyAggregate(): FavoriteAggregate {
                 id = module.id,
                 type = FavoriteContainerType.VerticalList,
                 identities = module.identities,
+                listSize = module.applicationSize,
+                namePlacement = module.namePlacement,
+                itemsPerRow = module.itemsPerRow,
             )
         }
     val bars = modules.filter { it.type == OrderedFavoriteModuleType.Ribbon }
@@ -435,11 +469,23 @@ private fun OrderedFavoriteAggregate.replaceWithLegacyAggregate(
         containersById[module.id]
             ?.takeIf { it.identities.isNotEmpty() }
             ?.let { container ->
-            OrderedFavoriteModule(
-                id = container.id,
-                type = container.type.toOrderedFavoriteModuleType(),
-                identities = container.identities,
-            )
+            val type = container.type.toOrderedFavoriteModuleType()
+            if (module.type == type &&
+                module.identities == container.identities &&
+                module.applicationSize == container.listSize &&
+                module.namePlacement == container.namePlacement &&
+                module.itemsPerRow == container.itemsPerRow
+            ) {
+                module
+            } else {
+                module.copy(
+                    type = type,
+                    identities = container.identities,
+                    applicationSize = container.listSize,
+                    namePlacement = container.namePlacement,
+                    itemsPerRow = container.itemsPerRow,
+                )
+            }
         }
     }
     val existingIds = updatedModules.map(OrderedFavoriteModule::id).toSet()
@@ -452,6 +498,9 @@ private fun OrderedFavoriteAggregate.replaceWithLegacyAggregate(
                 id = container.id,
                 type = container.type.toOrderedFavoriteModuleType(),
                 identities = container.identities,
+                applicationSize = container.listSize,
+                namePlacement = container.namePlacement,
+                itemsPerRow = container.itemsPerRow,
             )
         }
         .toList()
@@ -470,8 +519,21 @@ internal fun isValidOrderedFavoriteAggregate(
     val modules = aggregate.modules
     if (modules.map(OrderedFavoriteModule::id).distinct().size != modules.size) return false
     val identities = modules.flatMap(OrderedFavoriteModule::identities)
-    return identities.distinct().size == identities.size &&
-        modules.all { it.id.isNotBlank() && it.identities.isNotEmpty() }
+    return identities.distinct().size == identities.size && modules.all { module ->
+        module.id.isNotBlank() &&
+            module.identities.isNotEmpty() &&
+            when (module.type) {
+                OrderedFavoriteModuleType.Vertical ->
+                    module.itemsPerRow in when (module.namePlacement) {
+                        FavoriteNamePlacement.Right -> 1..2
+                        FavoriteNamePlacement.Below -> 1..4
+                    }
+                OrderedFavoriteModuleType.Ribbon ->
+                    module.applicationSize == FavoriteListSize.Medium &&
+                        module.namePlacement == FavoriteNamePlacement.Right &&
+                        module.itemsPerRow == 1
+            }
+    }
 }
 
 private fun legacyAdoptionLists(

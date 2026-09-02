@@ -1,6 +1,7 @@
 <resources>
     <color name="avenor_transparent">#00000000</color>
     <color name="avenor_foreground">#FFFFFFFF</color>
+    <color name="avenor_secondary_foreground">#FFCAC4D0</color>
     <color name="avenor_sheet_surface">#FF202124</color>
     <color name="avenor_sheet_scrim">#99000000</color>
     <color name="avenor_error">#FFFF5252</color>
@@ -14,4 +15,7 @@
     <color name="drawer_selection_indicator_content">#FF000000</color>
     <color name="home_favorite_exchange_border">#CCFFFFFF</color>
     <color name="home_favorite_insertion_line">#FFFFFFFF</color>
+    <color name="home_add_favorite_surface">#0FFFFFFF</color>
+    <color name="home_add_favorite_border">#1FFFFFFF</color>
+    <color name="style_settings_control_surface">#1FFFFFFF</color>
 </resources>

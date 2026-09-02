@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Process
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
@@ -120,7 +121,7 @@ class HomeScreenTest {
     }
 
     @Test
-    fun emptyOrderedEditModeOffersOnlyTheVerticalModuleEntry() {
+    fun emptyOrderedEditModeOffersBothMainListModuleEntries() {
         composeRule.setContent {
             AvenorTheme {
                 HomeScreen(
@@ -129,13 +130,145 @@ class HomeScreenTest {
                         orderedModules = emptyList(),
                     ),
                     editMode = true,
+                    stylePanelExpanded = true,
                 )
             }
         }
 
-        composeRule.onNodeWithTag("favorite_provisional_add_0").assertIsDisplayed()
-        composeRule.onAllNodesWithTag("ordered_module_provisional_ribbon_add")
-            .assertCountEquals(0)
+        composeRule.onNodeWithTag("home_add_favorite_list").assertIsDisplayed()
+        composeRule.onNodeWithTag("home_add_favorite_ribbon").assertIsDisplayed()
+        composeRule.onNodeWithText("Select a favorite list to edit its style").assertIsDisplayed()
+        composeRule.onAllNodesWithTag("favorite_provisional_add_0").assertCountEquals(0)
+    }
+
+    @Test
+    fun expandedPanelSelectsACompleteOrderedModuleAndShowsItsStyleControls() {
+        val identity = LaunchableIdentity(
+            profileSerialNumber = 42,
+            componentName = ComponentName("com.example.selected", "MainActivity"),
+        )
+        val module = OrderedFavoriteModule(
+            id = "vertical-list-1",
+            type = OrderedFavoriteModuleType.Vertical,
+            identities = listOf(identity),
+        )
+        val selectedModule = mutableStateOf<String?>(null)
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        aggregate = FavoriteAggregate(
+                            verticalLists = listOf(
+                                FavoriteContainer(
+                                    id = module.id,
+                                    type = FavoriteContainerType.VerticalList,
+                                    identities = module.identities,
+                                ),
+                            ),
+                        ),
+                        orderedModules = listOf(module),
+                    ),
+                    editMode = true,
+                    stylePanelExpanded = true,
+                    selectedModuleId = selectedModule.value,
+                    onSelectModule = { selectedModule.value = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home_module_selectable").performClick()
+        composeRule.onNodeWithTag("home_module_selected").assertIsDisplayed()
+        composeRule.onNodeWithText("Application size").assertIsDisplayed()
+        composeRule.onAllNodesWithText("Vertical module").assertCountEquals(0)
+    }
+
+    @Test
+    fun verticalModuleStyleChangePreviewsAndPersistsThroughOneAggregateSave() {
+        val identity = LaunchableIdentity(
+            profileSerialNumber = 42,
+            componentName = ComponentName("com.example.style", "MainActivity"),
+        )
+        val module = OrderedFavoriteModule(
+            id = "vertical-list-1",
+            type = OrderedFavoriteModuleType.Vertical,
+            identities = listOf(identity),
+        )
+        var persisted = FavoriteAggregate(
+            verticalLists = listOf(
+                FavoriteContainer(
+                    id = module.id,
+                    type = FavoriteContainerType.VerticalList,
+                    identities = module.identities,
+                ),
+            ),
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        aggregate = persisted,
+                        orderedModules = listOf(module),
+                    ),
+                    editMode = true,
+                    stylePanelExpanded = true,
+                    selectedModuleId = module.id,
+                    onCommitFavoriteComposition = { transform ->
+                        transform(persisted).also { persisted = it }
+                    },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Below").performClick()
+        composeRule.onNodeWithTag("home_favorite_below_item").assertIsDisplayed()
+        composeRule.onNodeWithTag("home_add_favorite_list")
+            .performScrollTo()
+            .assertIsEnabled()
+        composeRule.runOnIdle {
+            assertEquals(
+                FavoriteNamePlacement.Below,
+                persisted.verticalLists.single().namePlacement,
+            )
+        }
+    }
+
+    @Test
+    fun selectedOrderedModuleCanOpenItsExistingAddDestination() {
+        val identity = LaunchableIdentity(
+            profileSerialNumber = 42,
+            componentName = ComponentName("com.example.add", "MainActivity"),
+        )
+        val module = OrderedFavoriteModule(
+            id = "vertical-list-1",
+            type = OrderedFavoriteModuleType.Vertical,
+            identities = listOf(identity),
+        )
+        var openedModuleId: String? = null
+        composeRule.setContent {
+            AvenorTheme {
+                HomeScreen(
+                    favoriteState = FavoriteReadState.Readable(
+                        aggregate = FavoriteAggregate(
+                            verticalLists = listOf(
+                                FavoriteContainer(
+                                    id = module.id,
+                                    type = FavoriteContainerType.VerticalList,
+                                    identities = module.identities,
+                                ),
+                            ),
+                        ),
+                        orderedModules = listOf(module),
+                    ),
+                    editMode = true,
+                    stylePanelExpanded = false,
+                    selectedModuleId = module.id,
+                    onAddFavoritesToList = { openedModuleId = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home_add_favorite_${module.id}").performClick()
+        composeRule.runOnIdle { assertEquals(module.id, openedModuleId) }
     }
 
     @Test
