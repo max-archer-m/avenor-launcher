@@ -346,28 +346,33 @@ internal class OrderedFavoriteStoreAdapter private constructor(
         }
 
     override suspend fun remove(identity: LaunchableIdentity): Boolean =
-        mutationMutex.withLock {
-            update { aggregate ->
-                OrderedFavoriteAggregate(
-                    aggregate.modules.mapNotNull { module ->
-                        module.copy(identities = module.identities - identity)
-                            .takeIf { it.identities.isNotEmpty() }
-                    },
-                )
-            } != null
-        }
+        removeAll(identities = setOf(element = identity))
 
     override suspend fun removeAll(identities: Set<LaunchableIdentity>): Boolean =
-        mutationMutex.withLock {
-            update { aggregate ->
-                OrderedFavoriteAggregate(
-                    aggregate.modules.mapNotNull { module ->
-                        module.copy(identities = module.identities.filterNot(identities::contains))
-                            .takeIf { it.identities.isNotEmpty() }
+        mutationMutex.withLock(
+            action = {
+                update(
+                    transform = { aggregate ->
+                        OrderedFavoriteAggregate(
+                            modules = aggregate.modules.mapNotNull(
+                                transform = { module ->
+                                    val retained = module.identities.filterNot(
+                                        predicate = { candidate -> candidate in identities },
+                                    )
+                                    // Empty modules are removed before copy invokes the non-empty
+                                    // constructor invariant. Publish the complete result atomically.
+                                    when {
+                                        retained.isEmpty() -> null
+                                        retained == module.identities -> module
+                                        else -> module.copy(identities = retained)
+                                    }
+                                },
+                            ),
+                        )
                     },
-                )
-            } != null
-        }
+                ) != null
+            },
+        )
 
     override suspend fun replaceOrder(identities: List<LaunchableIdentity>): Boolean =
         updateAggregate { aggregate ->
@@ -426,6 +431,12 @@ internal class OrderedFavoriteStoreAdapter private constructor(
                 if (succeeded) publish()
             }
         }
+
+    override suspend fun updateOrderedAggregate(
+        transform: (OrderedFavoriteAggregate) -> OrderedFavoriteAggregate,
+    ): OrderedFavoriteAggregate? = mutationMutex.withLock(
+        action = { update(transform = transform) },
+    )
 
     private suspend fun update(
         transform: (OrderedFavoriteAggregate) -> OrderedFavoriteAggregate,

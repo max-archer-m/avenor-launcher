@@ -81,7 +81,9 @@ import com.avenor.launcher.FavoriteContainer
 import com.avenor.launcher.LaunchableEntry
 import com.avenor.launcher.LaunchableIdentity
 import com.avenor.launcher.FavoriteListSize
+import com.avenor.launcher.FavoriteNamePlacement
 import com.avenor.launcher.HomeFavoriteRow
+import com.avenor.launcher.HomeApplicationMovement
 import com.avenor.launcher.HomeModuleAddFavoriteEntry
 import com.avenor.launcher.OrderedFavoriteModule
 import com.avenor.launcher.R
@@ -162,6 +164,10 @@ internal fun HomeOrderedFavoriteRibbon(
     onAddToModule: () -> Unit,
     onLaunchFavorite: (FavoriteAvailability) -> Unit,
     onLongPressFavorite: (LaunchableEntry) -> Unit,
+    applicationEditing: Boolean = false,
+    applicationMutationEnabled: Boolean = true,
+    onRemoveFavorite: (LaunchableIdentity) -> Unit = {},
+    applicationMovement: HomeApplicationMovement? = null,
 ) {
     LazyRow(
         modifier = Modifier
@@ -169,6 +175,7 @@ internal fun HomeOrderedFavoriteRibbon(
             .height(height = dimensionResource(id = R.dimen.home_favorite_bar_height))
             .homeEditSurface(enabled = editMode),
         state = listState,
+        userScrollEnabled = applicationMovement?.activeIdentity == null,
         horizontalArrangement = Arrangement.spacedBy(
             space = dimensionResource(id = R.dimen.home_favorite_bar_item_spacing),
         ),
@@ -179,23 +186,35 @@ internal fun HomeOrderedFavoriteRibbon(
                 itemContent = { _, identity ->
                     val availability = availabilityByIdentity[identity]
                         ?: FavoriteAvailability.Unknown(presentationEntry = null)
-                    HomeFavoriteRow(
+                    HomeFavoriteItemFrame(
+                        identity = identity,
+                        movement = applicationMovement,
+                        ribbon = true,
                         modifier = Modifier.width(
                             width = dimensionResource(id = R.dimen.home_favorite_bar_item_width),
                         ),
-                        availability = availability,
-                        onClick = { onLaunchFavorite(availability) },
-                        onLongClick = {
-                            availability.presentationEntry?.let(
-                                block = onLongPressFavorite,
+                        showRemove = applicationEditing,
+                        removeEnabled = applicationMutationEnabled,
+                        namePlacement = FavoriteNamePlacement.Right,
+                        iconSize = dimensionResource(id = R.dimen.home_favorite_icon_size),
+                        onRemove = { onRemoveFavorite(identity) },
+                        content = {
+                            HomeFavoriteRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                availability = availability,
+                                onClick = { onLaunchFavorite(availability) },
+                                onLongClick = {
+                                    availability.presentationEntry?.let(block = onLongPressFavorite)
+                                },
+                                editMode = false,
+                                interactionEnabled = !editMode,
+                                compact = true,
+                                listSize = FavoriteListSize.Medium,
+                                exchangeHighlight = false,
+                                onRowBoundsInWindow = { _, _ -> },
+                                onHandleBoundsInWindow = {},
                             )
                         },
-                        editMode = false,
-                        compact = true,
-                        listSize = FavoriteListSize.Medium,
-                        exchangeHighlight = false,
-                        onRowBoundsInWindow = { _, _ -> },
-                        onHandleBoundsInWindow = {},
                     )
                 },
             )
@@ -203,8 +222,20 @@ internal fun HomeOrderedFavoriteRibbon(
                 item(
                     key = "add:${module.id}",
                     content = {
+                        DisposableEffect(
+                            key1 = applicationMovement,
+                            key2 = module.id,
+                            effect = { onDispose { applicationMovement?.updateAdd(id = module.id, bounds = null) } },
+                        )
                         HomeModuleAddFavoriteEntry(
-                            modifier = Modifier.width(
+                            modifier = Modifier.onGloballyPositioned(
+                                onGloballyPositioned = { coordinates ->
+                                    applicationMovement?.updateAdd(
+                                        id = module.id,
+                                        bounds = Rect(offset = coordinates.positionInWindow(), size = coordinates.size.toSize()),
+                                    )
+                                },
+                            ).width(
                                 width = dimensionResource(
                                     id = R.dimen.home_favorite_bar_item_width,
                                 ),

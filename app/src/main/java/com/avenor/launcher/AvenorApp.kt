@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +38,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -183,6 +187,11 @@ internal fun AvenorApp(
     var settleJob by remember { mutableStateOf<Job?>(null) }
     val effectiveFavoriteStore = favoriteStore ?: remember { InMemoryFavoriteStore() }
     val favoriteState by effectiveFavoriteStore.state.collectAsState()
+    val favoriteEditor = remember(
+        key1 = effectiveFavoriteStore,
+        calculation = { HomeFavoriteEditor(store = effectiveFavoriteStore) },
+    )
+    val removalSnackbarHostState = remember(calculation = { SnackbarHostState() })
     val inventoryCoordinator = remember(inventoryLoader) {
         LaunchableInventoryCoordinator(inventoryLoader)
     }
@@ -214,6 +223,75 @@ internal fun AvenorApp(
     val addToFavoriteBarLabel = stringResource(R.string.drawer_selection_add_to_favorite_bar)
     val createFavoriteBarLabel = stringResource(
         R.string.drawer_selection_create_favorite_bar,
+    )
+    val removedMessage = stringResource(id = R.string.favorite_removed)
+    val undoLabel = stringResource(id = R.string.undo)
+
+    fun refreshEditMembership() {
+        if (homeEditMode) {
+            editMembership = (effectiveFavoriteStore.state.value as? FavoriteReadState.Readable)
+                ?.identities?.toSet().orEmpty()
+        }
+    }
+
+    fun removeHomeFavorite(identity: LaunchableIdentity, offerUndo: Boolean = true) {
+        if (favoriteEditor.isSaving) return
+        scope.launch(
+            block = {
+                val saved = favoriteEditor.remove(identity = identity)
+                if (saved && !offerUndo) favoriteEditor.invalidateUndo()
+                refreshEditMembership()
+                if (!saved) {
+                    Toast.makeText(androidContext, R.string.favorite_remove_failed, Toast.LENGTH_SHORT).show()
+                }
+            },
+        )
+    }
+
+    LaunchedEffect(
+        key1 = favoriteEditor.undoRemoval,
+        block = {
+            val snapshot = favoriteEditor.undoRemoval ?: return@LaunchedEffect
+            val result = removalSnackbarHostState.showSnackbar(
+                message = removedMessage,
+                actionLabel = undoLabel,
+                duration = SnackbarDuration.Long,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                // The save belongs to the App scope, not this Snackbar's cancellable effect.
+                scope.launch(
+                    block = {
+                        val restored = favoriteEditor.undo(
+                            snapshot = snapshot,
+                            revalidate = {
+                                val inventory = (inventoryCoordinator.state.value
+                                    as? LaunchableInventoryState.Content)?.snapshot
+                                if (inventory == null) {
+                                    false
+                                } else {
+                                    val resolved = inventoryCoordinator.resolveFavorites(
+                                        identities = listOf(element = snapshot.identity),
+                                        snapshot = inventory,
+                                    )
+                                    favoriteEditor.reconcileAvailability(availability = resolved)
+                                    resolved[snapshot.identity] != FavoriteAvailability.ConfirmedRemoved
+                                }
+                            },
+                        )
+                        refreshEditMembership()
+                        if (!restored) {
+                            Toast.makeText(
+                                androidContext,
+                                R.string.favorite_undo_unavailable,
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+                    },
+                )
+            } else {
+                favoriteEditor.dismissUndo(snapshot = snapshot)
+            }
+        },
     )
 
     LaunchedEffect(effectiveFavoriteStore) {
@@ -251,6 +329,7 @@ internal fun AvenorApp(
 
     LaunchedEffect(homeEditMode) {
         if (!homeEditMode) {
+            favoriteEditor.invalidateUndo()
             homeStylePanelExpanded = false
             selectedHomeModuleId = null
         }
@@ -296,15 +375,17 @@ internal fun AvenorApp(
         inventoryState,
         effectiveFavoriteStore,
         inventoryCoordinator,
+        favoriteEditor.undoRemoval?.identity,
     ) {
         val identities = favoriteMembership ?: return@LaunchedEffect
         val completeInventory = inventoryState as? LaunchableInventoryState.Content
             ?: return@LaunchedEffect
         val resolved = inventoryCoordinator.resolveFavorites(
-            identities = identities.toList(),
+            identities = (identities + listOfNotNull(element = favoriteEditor.undoRemoval?.identity)).toList(),
             snapshot = completeInventory.snapshot,
         )
         favoriteAvailability = resolved
+        favoriteEditor.reconcileAvailability(availability = resolved)
         val confirmedRemovedIdentities = resolved
             .filterValues { it == FavoriteAvailability.ConfirmedRemoved }
             .keys
@@ -384,6 +465,7 @@ internal fun AvenorApp(
     }
 
     fun returnToHome() {
+        favoriteEditor.invalidateUndo()
         settleJob?.cancel()
         settledSurface = AvenorSurface.Home
         drawerActivated = false
@@ -413,9 +495,11 @@ internal fun AvenorApp(
     }
 
     fun openFavoriteSelection(containerId: String) {
+        if (favoriteEditor.isSaving) return
         val readable = favoriteState as? FavoriteReadState.Readable ?: return
         val index = readable.aggregate.verticalLists.indexOfFirst { it.id == containerId }
         if (index < 0) return
+        favoriteEditor.invalidateUndo()
         favoriteAddTarget = FavoriteAddTarget(
             containerId = containerId,
             containerType = FavoriteContainerType.VerticalList,
@@ -429,8 +513,10 @@ internal fun AvenorApp(
     }
 
     fun openProvisionalFavoriteSelection() {
+        if (favoriteEditor.isSaving) return
         val state = favoriteState
         if (state !is FavoriteReadState.Readable) return
+        favoriteEditor.invalidateUndo()
         favoriteAddTarget = FavoriteAddTarget(
             containerId = null,
             containerType = FavoriteContainerType.VerticalList,
@@ -444,8 +530,10 @@ internal fun AvenorApp(
     }
 
     fun openFavoriteBarSelection(containerId: String) {
+        if (favoriteEditor.isSaving) return
         val readable = favoriteState as? FavoriteReadState.Readable ?: return
         if (readable.aggregate.favoriteBars.none { it.id == containerId }) return
+        favoriteEditor.invalidateUndo()
         favoriteAddTarget = FavoriteAddTarget(
             containerId = containerId,
             containerType = FavoriteContainerType.FavoriteBar,
@@ -459,7 +547,9 @@ internal fun AvenorApp(
     }
 
     fun openProvisionalFavoriteBarSelection() {
+        if (favoriteEditor.isSaving) return
         if (favoriteState !is FavoriteReadState.Readable) return
+        favoriteEditor.invalidateUndo()
         favoriteAddTarget = FavoriteAddTarget(
             containerId = null,
             containerType = FavoriteContainerType.FavoriteBar,
@@ -490,7 +580,7 @@ internal fun AvenorApp(
             var updatedAggregate: FavoriteAggregate? = null
             var targetInvalid = false
             val savedAggregate = inventorySnapshot?.let {
-                effectiveFavoriteStore.updateAggregate { aggregate ->
+                favoriteEditor.updateComposition(transform = { aggregate ->
                     val targetContainers = when (target.containerType) {
                         FavoriteContainerType.VerticalList -> aggregate.verticalLists
                         FavoriteContainerType.FavoriteBar -> aggregate.favoriteBars
@@ -500,7 +590,7 @@ internal fun AvenorApp(
                     }
                     if (target.containerId != null && container == null) {
                         targetInvalid = true
-                        return@updateAggregate aggregate
+                        return@updateComposition aggregate
                     }
                     val appendable = selected.filter { identity ->
                         (identity in currentInventoryIdentities ||
@@ -509,7 +599,7 @@ internal fun AvenorApp(
                     }
                     if (appendable.isEmpty()) {
                         updatedAggregate = aggregate
-                        return@updateAggregate aggregate
+                        return@updateComposition aggregate
                     }
                     val updatedContainer = container?.copy(
                         identities = container.identities + appendable,
@@ -560,7 +650,7 @@ internal fun AvenorApp(
                     }
                     updatedAggregate = updated
                     updated
-                }
+                })
             }
             if (targetInvalid) {
                 favoriteSelectionSaving = false
@@ -605,12 +695,16 @@ internal fun AvenorApp(
         onDispose { cacheInvalidationObservation?.stop() }
     }
 
-    DisposableEffect(lifecycleOwner, inventoryCoordinator) {
+    DisposableEffect(key1 = lifecycleOwner, key2 = inventoryCoordinator, key3 = favoriteEditor) {
         var hasResumed = false
         var wasPaused = false
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_PAUSE -> wasPaused = true
+                Lifecycle.Event.ON_PAUSE -> {
+                    wasPaused = true
+                    favoriteEditor.invalidateUndo()
+                    homeEditMode = false
+                }
                 Lifecycle.Event.ON_RESUME -> {
                     if (hasResumed && wasPaused && externalLaunchPendingReturn) {
                         returnToHome()
@@ -630,6 +724,25 @@ internal fun AvenorApp(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
+
+    val windowInfo = LocalWindowInfo.current
+    LaunchedEffect(
+        key1 = windowInfo.isWindowFocused,
+        block = {
+            // An Avenor action sheet is part of the journey; system-owned overlays are not.
+            if (!windowInfo.isWindowFocused && selectedEntry == null) {
+                favoriteEditor.invalidateUndo()
+                homeEditMode = false
+            }
+        },
+    )
+
+    LaunchedEffect(
+        key1 = settledSurface,
+        block = {
+            if (settledSurface != AvenorSurface.Home) favoriteEditor.invalidateUndo()
+        },
+    )
 
     BackHandler(enabled = favoriteAddTarget != null && !favoriteSelectionSaving) {
         closeFavoriteSelection()
@@ -878,6 +991,18 @@ internal fun AvenorApp(
                 editMode = homeEditMode,
                 stylePanelExpanded = homeStylePanelExpanded,
                 selectedModuleId = selectedHomeModuleId,
+                applicationEditingSaving = favoriteEditor.isSaving,
+                onRemoveApplication = { identity -> removeHomeFavorite(identity = identity) },
+                onCommitApplicationOrder = { change ->
+                    scope.launch(
+                        block = {
+                            if (!favoriteEditor.reorderApplication(change = change)) {
+                                Toast.makeText(androidContext, R.string.unable_to_move_favorite, Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                    )
+                },
+                removalSnackbarHostState = removalSnackbarHostState,
                 onRetryFavorites = { scope.launch { effectiveFavoriteStore.load() } },
                 onRequestEditMode = {
                     editMembership = (favoriteState as? FavoriteReadState.Readable)
@@ -903,7 +1028,7 @@ internal fun AvenorApp(
                 favoriteRevealIdentity = favoriteRevealRequest?.identity,
                 onFavoriteRevealComplete = { favoriteRevealRequest = null },
                 onCommitFavoriteComposition = { transform ->
-                    val aggregate = effectiveFavoriteStore.updateAggregate(transform)
+                    val aggregate = favoriteEditor.updateComposition(transform = transform)
                     if (aggregate == null) {
                         null
                     } else {
@@ -913,7 +1038,7 @@ internal fun AvenorApp(
                         aggregate
                     }
                 },
-                onCommitModuleOrder = effectiveFavoriteStore::replaceModuleOrder,
+                onCommitModuleOrder = favoriteEditor::reorderModules,
                 onLaunchFavorite = { availability ->
                     when {
                         availability !is FavoriteAvailability.Available -> {
@@ -998,12 +1123,23 @@ internal fun AvenorApp(
                     selectedEntryFromHome = false
                 },
                 onAddFavorite = {
-                    scope.launch { effectiveFavoriteStore.add(entry.identity) }
+                    scope.launch(
+                        block = {
+                            if (effectiveFavoriteStore.add(identity = entry.identity)) {
+                                favoriteEditor.invalidateUndo()
+                            }
+                        },
+                    )
                     selectedEntry = null
                 },
                 onRemoveFavorite = {
-                    scope.launch { effectiveFavoriteStore.remove(entry.identity) }
+                    if ((favoriteState as? FavoriteReadState.Readable)?.orderedModules != null) {
+                        removeHomeFavorite(identity = entry.identity, offerUndo = selectedEntryFromHome)
+                    } else {
+                        scope.launch { effectiveFavoriteStore.remove(entry.identity) }
+                    }
                     selectedEntry = null
+                    selectedEntryFromHome = false
                 },
                 onEditFavorites = {
                     editMembership = (favoriteState as? FavoriteReadState.Readable)
@@ -1017,6 +1153,7 @@ internal fun AvenorApp(
                     selectedEntryFromHome = false
                 },
                 canEditFavorites = selectedEntryFromHome,
+                favoriteMutationEnabled = !favoriteEditor.isSaving,
                 informationLauncher = informationLauncher,
                 shortcuts = applicationShortcuts.takeIf {
                     shortcutOwner == entry.identity

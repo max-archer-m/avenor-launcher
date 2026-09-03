@@ -25,6 +25,8 @@
     <string name="remove">移除</string>
     <string name="remove_favorite_item">移除收藏</string>
     <string name="favorite_removed">已从收藏中移除</string>
+    <string name="favorite_remove_failed">无法移除收藏</string>
+    <string name="unable_to_move_favorite">无法移动收藏</string>
     <string name="favorite_list_removed">收藏列表已移除</string>
     <string name="remove_favorite_bar">移除收藏栏</string>
     <string name="remove_favorite_bar_title">移除收藏栏？</string>

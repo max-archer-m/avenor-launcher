@@ -83,6 +83,7 @@ internal fun ApplicationActionSheet(
     onRemoveFavorite: () -> Unit,
     onEditFavorites: () -> Unit = {},
     canEditFavorites: Boolean = false,
+    favoriteMutationEnabled: Boolean = true,
     informationLauncher: ApplicationInformationLauncher,
     shortcuts: List<ApplicationShortcut> = emptyList(),
     onShortcut: (ApplicationShortcut) -> Unit = {},
@@ -193,7 +194,7 @@ internal fun ApplicationActionSheet(
                         ) {
                             FavoriteActionSlot(
                                 label = stringResource(R.string.add_favorite),
-                                enabled = true,
+                                enabled = favoriteMutationEnabled,
                                 disabledAlpha = disabledAlpha,
                                 onClick = onAddFavorite,
                             )
@@ -201,7 +202,7 @@ internal fun ApplicationActionSheet(
                             FavoriteActionSlot(
                                 label = stringResource(R.string.remove_favorite),
                                 icon = R.drawable.ic_cancel_favorite,
-                                enabled = true,
+                                enabled = favoriteMutationEnabled,
                                 disabledAlpha = disabledAlpha,
                                 onClick = onRemoveFavorite,
                             )

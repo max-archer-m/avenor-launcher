@@ -26,6 +26,8 @@
     <string name="remove">Remove</string>
     <string name="remove_favorite_item">Remove favorite</string>
     <string name="favorite_removed">Removed from favorites</string>
+    <string name="favorite_remove_failed">Unable to remove favorite</string>
+    <string name="unable_to_move_favorite">Unable to move favorite</string>
     <string name="favorite_list_removed">Favorite list removed</string>
     <string name="remove_favorite_bar">Remove favorite bar</string>
     <string name="remove_favorite_bar_title">Remove favorite bar?</string>

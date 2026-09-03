@@ -1,5 +1,7 @@
 package com.avenor.launcher
 
+import androidx.activity.compose.BackHandler
+
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -51,6 +53,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.TextButton
@@ -130,6 +133,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 import com.avenor.launcher.ui.home.components.HomeBasicInformation
+import com.avenor.launcher.ui.home.components.HomeApplicationMovementOverlay
+import com.avenor.launcher.ui.home.components.HomeApplicationAutoScroll
+import androidx.compose.runtime.SideEffect
+import com.avenor.launcher.ui.home.components.detectHomeApplicationMovement
 import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonRailDivider
 import com.avenor.launcher.ui.home.components.HomeFavoriteAddControl
 import com.avenor.launcher.ui.home.components.HomeFavoriteRibbon
@@ -153,6 +160,10 @@ internal fun HomeScreen(
     editMode: Boolean = false,
     stylePanelExpanded: Boolean = false,
     selectedModuleId: String? = null,
+    applicationEditingSaving: Boolean = false,
+    onRemoveApplication: (LaunchableIdentity) -> Unit = {},
+    onCommitApplicationOrder: (ApplicationOrderChange) -> Unit = {},
+    removalSnackbarHostState: SnackbarHostState? = null,
     onRetryFavorites: () -> Unit = {},
     onRequestEditMode: () -> Unit = {},
     onStylePanelExpandedChange: (Boolean) -> Unit = {},
@@ -174,6 +185,18 @@ internal fun HomeScreen(
     accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
 ) {
     val context = LocalContext.current
+    val orderedApplicationMovement = remember(calculation = { HomeApplicationMovement() })
+    val applicationMovementActive = orderedApplicationMovement.activeIdentity != null
+    BackHandler(enabled = editMode && applicationMovementActive, onBack = { orderedApplicationMovement.cancel() })
+    LaunchedEffect(editMode, stylePanelExpanded, favoriteState, favoriteAvailability) {
+        val session = orderedApplicationMovement.session ?: return@LaunchedEffect
+        val module = (favoriteState as? FavoriteReadState.Readable)?.orderedModules
+            ?.firstOrNull(predicate = { it.id == session.module.id })
+        val availability = favoriteAvailability[session.identity]
+        if (!editMode || stylePanelExpanded || module != session.module ||
+            (availability !is FavoriteAvailability.Available && availability !is FavoriteAvailability.Disabled)
+        ) orderedApplicationMovement.cancel()
+    }
     var dragSession by remember { mutableStateOf<FavoriteDragSession?>(null) }
     var favoriteBarDragSession by remember {
         mutableStateOf<FavoriteBarDragSession?>(null)
@@ -312,7 +335,7 @@ internal fun HomeScreen(
     val moduleBoundsInWindow = remember { mutableStateMapOf<String, Rect>() }
     var moduleListBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
     val currentFavoriteState by rememberUpdatedState(favoriteState)
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = removalSnackbarHostState ?: remember { SnackbarHostState() }
     val editScope = rememberCoroutineScope()
     var dragRootOriginInWindow by remember { mutableStateOf(Offset.Zero) }
     var primaryListBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
@@ -354,6 +377,7 @@ internal fun HomeScreen(
         favoriteBarContainerDragSession = null
         listDragSession = null
         moduleDragSession = null
+        orderedApplicationMovement.cancel()
     }
     val advanceDrag: (Offset) -> Unit = { amount ->
         applicationDragTargetSession = applicationDragTargetSession?.advanced(
@@ -406,7 +430,7 @@ internal fun HomeScreen(
         modules: List<OrderedFavoriteModule>,
         touchInWindow: Offset,
     ): Boolean {
-        if (modules.size < 2 || editMutationJob?.isActive == true) return false
+        if (modules.size < 2 || editMutationJob?.isActive == true || applicationEditingSaving) return false
         val sourceIndex = modules.indexOfFirst { it.id == module.id }
         val sourceBounds = moduleBoundsInWindow[module.id] ?: return false
         if (sourceIndex < 0) return false
@@ -645,7 +669,7 @@ internal fun HomeScreen(
         moduleId: String,
         transform: (FavoriteContainer) -> FavoriteContainer,
     ) {
-        if (editMutationJob?.isActive == true) return
+        if (editMutationJob?.isActive == true || applicationEditingSaving) return
         commitEditAggregate(
             transform = { aggregate ->
                 aggregate.updateVerticalList(moduleId, transform)
@@ -1267,13 +1291,18 @@ internal fun HomeScreen(
                             nestedScrollConnection = null,
                             editMode = true,
                             selectionEnabled = stylePanelExpanded,
-                            selectionInteractionEnabled = editMutationJob?.isActive != true &&
+                            selectionInteractionEnabled = !applicationEditingSaving &&
+                                editMutationJob?.isActive != true &&
                                 moduleDragSession == null,
-                            selectionVisualEnabled = editMutationJob?.isActive != true,
+                            selectionVisualEnabled = !applicationEditingSaving && editMutationJob?.isActive != true,
                             selectedModuleId = selectedModuleId,
                             onSelectModule = onSelectModule,
-                            addEntriesEnabled = editMutationJob?.isActive != true &&
-                                moduleDragSession == null,
+                            addEntriesEnabled = !applicationEditingSaving &&
+                                editMutationJob?.isActive != true &&
+                                moduleDragSession == null && !applicationMovementActive,
+                            onRemoveFavorite = onRemoveApplication,
+                            applicationMovement = orderedApplicationMovement,
+                            onCommitApplicationOrder = onCommitApplicationOrder,
                             onAddToModule = { module ->
                                 when (module.type) {
                                     OrderedFavoriteModuleType.Vertical ->
@@ -1945,7 +1974,8 @@ internal fun HomeScreen(
                 val selectedModule = displayedModules.firstOrNull {
                     it.id == selectedModuleId
                 }
-                val styleSaving = editMutationJob?.isActive == true || moduleDragSession != null
+                val styleSaving = applicationEditingSaving || editMutationJob?.isActive == true ||
+                    moduleDragSession != null
                 if (stylePanelExpanded) {
                     HomeModuleStylePanel(
                         selectedModule = selectedModule,
@@ -1987,7 +2017,7 @@ internal fun HomeScreen(
                     hasFavorites = orderedModules.isNotEmpty(),
                     expanded = stylePanelExpanded,
                     onToggleExpanded = {
-                        onStylePanelExpandedChange(!stylePanelExpanded)
+                        if (!applicationMovementActive) onStylePanelExpandedChange(!stylePanelExpanded)
                     },
                 )
             }
@@ -1995,6 +2025,25 @@ internal fun HomeScreen(
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter),
+            snackbar = { data ->
+                Snackbar(
+                    action = {
+                        data.visuals.actionLabel?.let(
+                            block = { label ->
+                                TextButton(
+                                    enabled = !applicationEditingSaving && editMutationJob?.isActive != true &&
+                                        !applicationMovementActive,
+                                    onClick = { data.performAction() },
+                                    content = {
+                                        Text(text = label, color = MaterialTheme.colorScheme.inversePrimary)
+                                    },
+                                )
+                            },
+                        )
+                    },
+                    content = { Text(text = data.visuals.message) },
+                )
+            },
         )
         listDragSession?.let { session ->
             HomeFavoriteListDragPreview(
@@ -2028,6 +2077,7 @@ internal fun HomeScreen(
                 rootOriginInWindow = dragRootOriginInWindow,
             )
         }
+        HomeApplicationMovementOverlay(movement = orderedApplicationMovement, rootOrigin = dragRootOriginInWindow)
         moduleDragSession?.let { session ->
             HomeModuleDragPreview(
                 session = session,
@@ -3416,6 +3466,9 @@ private fun HomeFavoriteProvisionalList(
         onLaunchFavorite: (FavoriteAvailability) -> Unit,
         onLongPressFavorite: (LaunchableEntry) -> Unit,
         modifier: Modifier = Modifier,
+        onRemoveFavorite: (LaunchableIdentity) -> Unit = {},
+        applicationMovement: HomeApplicationMovement? = null,
+        onCommitApplicationOrder: (ApplicationOrderChange) -> Unit = {},
         showModuleAddEntries: Boolean = editMode,
         showMainAddEntries: Boolean = editMode,
         moduleEdgeScrollDirection: Int = 0,
@@ -3429,11 +3482,20 @@ private fun HomeFavoriteProvisionalList(
         onModuleDragCancel: () -> Unit = {},
     ) {
         val ribbonListStates = remember {
-            mutableMapOf<String, LazyListState>()
+            mutableStateMapOf<String, LazyListState>()
+        }
+        if (applicationMovement != null) {
+            SideEffect(effect = { applicationMovement.updateModules(current = modules) })
+            HomeApplicationAutoScroll(
+                movement = applicationMovement, mainListState = listState, ribbonStates = ribbonListStates,
+            )
         }
         val localModuleBounds = remember { mutableMapOf<String, Rect>() }
         var listOriginInWindow by remember { mutableStateOf(Offset.Zero) }
         val currentModules by rememberUpdatedState(modules)
+        val currentAvailability by rememberUpdatedState(newValue = availabilityByIdentity)
+        val currentApplicationMovementEnabled by rememberUpdatedState(newValue = addEntriesEnabled)
+        val currentOnCommitApplicationOrder by rememberUpdatedState(newValue = onCommitApplicationOrder)
         val currentOnModuleDragStart by rememberUpdatedState(onModuleDragStart)
         val currentOnModuleDrag by rememberUpdatedState(onModuleDrag)
         val currentOnModuleDragEnd by rememberUpdatedState(onModuleDragEnd)
@@ -3444,7 +3506,9 @@ private fun HomeFavoriteProvisionalList(
             R.dimen.home_favorite_insertion_line_thickness,
         )
         val edgeFeedbackBand = dimensionResource(R.dimen.home_favorite_edge_scroll_band)
-        val edgeFeedbackColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f)
+        val edgeFeedbackColor = MaterialTheme.colorScheme.onBackground.copy(
+            alpha = integerResource(id = R.integer.home_favorite_edge_feedback_alpha_percent) / 100f,
+        )
         LazyColumn(
             modifier = modifier
                 .fillMaxWidth()
@@ -3455,6 +3519,7 @@ private fun HomeFavoriteProvisionalList(
                     val origin = coordinates.positionInWindow()
                     listOriginInWindow = origin
                     onModuleListBoundsInWindow(Rect(origin, coordinates.size.toSize()))
+                    applicationMovement?.updateViewport(bounds = Rect(offset = origin, size = coordinates.size.toSize()))
                 }
                 .then(
                     // Keep the pointer-input node stable for the complete expanded-panel
@@ -3479,6 +3544,27 @@ private fun HomeFavoriteProvisionalList(
                                 onDrag = { currentOnModuleDrag(it) },
                                 onDragEnd = { currentOnModuleDragEnd() },
                                 onDragCancel = { currentOnModuleDragCancel() },
+                            )
+                        }
+                    } else if (editMode && applicationMovement != null) {
+                        Modifier.pointerInput(key1 = applicationMovement) {
+                            detectHomeApplicationMovement(
+                                movement = applicationMovement,
+                                onStart = { identity, pointer ->
+                                    val module = currentModules.firstOrNull(predicate = { identity in it.identities })
+                                    val availability = currentAvailability[identity]
+                                    currentApplicationMovementEnabled && module != null && availability != null &&
+                                        applicationMovement.start(
+                                            identity = identity,
+                                            module = module,
+                                            availability = availability,
+                                            pointer = pointer,
+                                        )
+                                },
+                                onRecognized = {
+                                    moduleHapticFeedback.performHapticFeedback(hapticFeedbackType = HapticFeedbackType.LongPress)
+                                },
+                                onCommit = { change -> currentOnCommitApplicationOrder(change) },
                             )
                         }
                     } else {
@@ -3519,6 +3605,7 @@ private fun HomeFavoriteProvisionalList(
                 }
                 .testTag("home_ordered_favorite_modules"),
             state = listState,
+            userScrollEnabled = applicationMovement?.activeIdentity == null,
             verticalArrangement = Arrangement.spacedBy(
                 dimensionResource(R.dimen.home_module_spacing),
             ),
@@ -3531,6 +3618,7 @@ private fun HomeFavoriteProvisionalList(
                     onDispose {
                         localModuleBounds.remove(module.id)
                         onModuleDisposed(module.id)
+                        applicationMovement?.updateModule(id = module.id, bounds = null)
                     }
                 }
                 val showsTopInsertion = moduleInsertionIndex == index
@@ -3544,6 +3632,7 @@ private fun HomeFavoriteProvisionalList(
                             val bounds = Rect(origin, coordinates.size.toSize())
                             localModuleBounds[module.id] = bounds
                             onModuleBoundsInWindow(module.id, bounds)
+                            applicationMovement?.updateModule(id = module.id, bounds = bounds)
                         }
                         .drawWithContent {
                             drawContent()
@@ -3581,6 +3670,10 @@ private fun HomeFavoriteProvisionalList(
                     onAddToModule = { onAddToModule(module) },
                     onLaunchFavorite = onLaunchFavorite,
                     onLongPressFavorite = onLongPressFavorite,
+                    applicationEditing = editMode && !selectionEnabled,
+                    applicationMutationEnabled = addEntriesEnabled,
+                    onRemoveFavorite = onRemoveFavorite,
+                    applicationMovement = applicationMovement,
                 )
                 if (selectionEnabled) {
                     HomeModuleSelectionLayer(
@@ -3595,6 +3688,16 @@ private fun HomeFavoriteProvisionalList(
             }
             if (showMainAddEntries) {
                 item(key = "main-list-add-entries") {
+                    DisposableEffect(
+                        key1 = applicationMovement,
+                        effect = {
+                            onDispose {
+                                OrderedFavoriteModuleType.entries.forEach(
+                                    action = { type -> applicationMovement?.updateCreationTarget(type = type, bounds = null) },
+                                )
+                            }
+                        },
+                    )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(
@@ -3602,17 +3705,33 @@ private fun HomeFavoriteProvisionalList(
                         ),
                     ) {
                         HomeMainListAddFavoriteEntry(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(weight = 1f).onGloballyPositioned(
+                                onGloballyPositioned = { coordinates ->
+                                    applicationMovement?.updateCreationTarget(
+                                        type = OrderedFavoriteModuleType.Vertical,
+                                        bounds = Rect(offset = coordinates.positionInWindow(), size = coordinates.size.toSize()),
+                                    )
+                                },
+                            ),
                             label = stringResource(R.string.home_add_favorite_list),
                             testTag = "home_add_favorite_list",
                             enabled = addEntriesEnabled,
+                            contentEnabled = addEntriesEnabled || applicationMovement?.activeIdentity != null,
                             onClick = onCreateVerticalModule,
                         )
                         HomeMainListAddFavoriteEntry(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(weight = 1f).onGloballyPositioned(
+                                onGloballyPositioned = { coordinates ->
+                                    applicationMovement?.updateCreationTarget(
+                                        type = OrderedFavoriteModuleType.Ribbon,
+                                        bounds = Rect(offset = coordinates.positionInWindow(), size = coordinates.size.toSize()),
+                                    )
+                                },
+                            ),
                             label = stringResource(R.string.home_add_favorite_ribbon),
                             testTag = "home_add_favorite_ribbon",
                             enabled = addEntriesEnabled,
+                            contentEnabled = addEntriesEnabled || applicationMovement?.activeIdentity != null,
                             onClick = onCreateRibbon,
                         )
                     }
@@ -3671,7 +3790,9 @@ private fun HomeFavoriteProvisionalList(
         testTag: String,
         enabled: Boolean,
         onClick: () -> Unit,
+        contentEnabled: Boolean = enabled,
     ) {
+        val contentAlpha = if (contentEnabled) 1f else integerResource(id = R.integer.disabled_content_alpha_percent) / 100f
         val shape = RoundedCornerShape(
             dimensionResource(R.dimen.home_favorite_bar_corner_radius),
         )
@@ -3696,7 +3817,7 @@ private fun HomeFavoriteProvisionalList(
                 contentDescription = null,
                 modifier = Modifier.size(dimensionResource(R.dimen.home_add_favorite_icon_size)),
                 tint = MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = if (enabled) 1f else 0.38f,
+                    alpha = contentAlpha,
                 ),
             )
             Spacer(Modifier.width(dimensionResource(R.dimen.home_add_favorite_entry_gap)))
@@ -3705,7 +3826,7 @@ private fun HomeFavoriteProvisionalList(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = if (enabled) 1f else 0.38f,
+                    alpha = contentAlpha,
                 ),
                 fontWeight = FontWeight.Normal,
                 fontSize = dimensionResource(R.dimen.home_favorite_text_size).value.sp,
@@ -4037,6 +4158,7 @@ private fun HomeFavoriteProvisionalList(
         listSize: FavoriteListSize,
         onClick: () -> Unit,
         onLongClick: () -> Unit,
+        interactionEnabled: Boolean = true,
     ) {
         val entry = availability.presentationEntry
         val iconSize = dimensionResource(listSize.iconSizeResource())
@@ -4060,7 +4182,7 @@ private fun HomeFavoriteProvisionalList(
         Column(
             modifier = modifier
                 .height(dimensionResource(listSize.belowItemHeightResource()))
-                .combinedClickable(
+                .then(other = if (interactionEnabled) Modifier.combinedClickable(
                     interactionSource = interactionSource,
                     indication = ripple(color = colorResource(R.color.home_favorite_ripple)),
                     role = Role.Button,
@@ -4071,7 +4193,7 @@ private fun HomeFavoriteProvisionalList(
                             onLongClick()
                         }
                     },
-                )
+                ) else Modifier)
                 .padding(
                     start = dimensionResource(R.dimen.home_favorite_below_horizontal_inset),
                     top = dimensionResource(R.dimen.home_favorite_below_top_inset),
@@ -4124,6 +4246,7 @@ private fun HomeFavoriteProvisionalList(
         exchangeHighlight: Boolean,
         onRowBoundsInWindow: (Offset, IntSize) -> Unit,
         onHandleBoundsInWindow: (Rect) -> Unit,
+        interactionEnabled: Boolean = true,
     ) {
         val entry = availability.presentationEntry
         val iconSize = dimensionResource(
@@ -4203,7 +4326,7 @@ private fun HomeFavoriteProvisionalList(
                         )
                     },
                 )
-                .combinedClickable(
+                .then(other = if (interactionEnabled) Modifier.combinedClickable(
                     enabled = !editMode,
                     interactionSource = interactionSource,
                     indication = if (editMode) {
@@ -4221,7 +4344,7 @@ private fun HomeFavoriteProvisionalList(
                             onLongClick()
                         }
                     },
-                )
+                ) else Modifier)
                 .alpha(if (availability is FavoriteAvailability.Available) 1f else disabledAlpha)
                 .testTag("home_favorite_row"),
         ) {
