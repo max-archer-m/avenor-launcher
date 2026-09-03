@@ -1,18 +1,13 @@
 package com.avenor.launcher
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
+import com.avenor.launcher.ui.home.components.HomeOrderedFavoriteRibbon
 import com.avenor.launcher.ui.home.components.homeEditSurface
 
 @Composable
@@ -87,53 +82,17 @@ internal fun HomeOrderedModuleContent(
         }
 
         OrderedFavoriteModuleType.Ribbon -> {
-            val state = requireNotNull(ribbonListState)
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(dimensionResource(R.dimen.home_favorite_bar_height))
-                    .homeEditSurface(enabled = editMode),
-                state = state,
-                horizontalArrangement = Arrangement.spacedBy(
-                    dimensionResource(R.dimen.home_favorite_bar_item_spacing),
-                ),
-            ) {
-                items(
-                    items = module.identities,
-                    key = { it.stableKey() },
-                ) { identity ->
-                    val availability = availabilityByIdentity[identity]
-                        ?: FavoriteAvailability.Unknown(null)
-                    HomeFavoriteRow(
-                        modifier = Modifier.width(
-                            dimensionResource(R.dimen.home_favorite_bar_item_width),
-                        ),
-                        availability = availability,
-                        onClick = { onLaunchFavorite(availability) },
-                        onLongClick = {
-                            availability.presentationEntry?.let(onLongPressFavorite)
-                        },
-                        editMode = false,
-                        compact = true,
-                        listSize = FavoriteListSize.Medium,
-                        exchangeHighlight = false,
-                        onRowBoundsInWindow = { _, _ -> },
-                        onHandleBoundsInWindow = {},
-                    )
-                }
-                if (showAddEntry) {
-                    item(key = "add:${module.id}") {
-                        HomeModuleAddFavoriteEntry(
-                            modifier = Modifier.width(
-                                dimensionResource(R.dimen.home_favorite_bar_item_width),
-                            ),
-                            module = module,
-                            enabled = addEntryEnabled,
-                            onClick = onAddToModule,
-                        )
-                    }
-                }
-            }
+            HomeOrderedFavoriteRibbon(
+                module = module,
+                availabilityByIdentity = availabilityByIdentity,
+                listState = requireNotNull(value = ribbonListState),
+                editMode = editMode,
+                showAddEntry = showAddEntry,
+                addEntryEnabled = addEntryEnabled,
+                onAddToModule = onAddToModule,
+                onLaunchFavorite = onLaunchFavorite,
+                onLongPressFavorite = onLongPressFavorite,
+            )
         }
     }
 }
