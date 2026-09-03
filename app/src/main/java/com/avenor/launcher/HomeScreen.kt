@@ -1,5 +1,11 @@
 package com.avenor.launcher
 
+import com.avenor.launcher.ui.home.components.HomeFavoriteEnterBatch
+import com.avenor.launcher.ui.home.components.HomeFavoriteEnterKey
+import com.avenor.launcher.ui.home.components.HomeFavoriteExitOverlay
+import com.avenor.launcher.ui.home.components.homeFavoriteEnter
+import com.avenor.launcher.ui.home.components.rememberHomeFavoriteEnterBatch
+
 import androidx.activity.compose.BackHandler
 
 import android.annotation.SuppressLint
@@ -133,6 +139,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 import com.avenor.launcher.ui.home.components.HomeBasicInformation
+import com.avenor.launcher.ui.home.components.HomeMainListAddFavoriteEntry
 import com.avenor.launcher.ui.home.components.HomeApplicationMovementOverlay
 import com.avenor.launcher.ui.home.components.HomeApplicationAutoScroll
 import androidx.compose.runtime.SideEffect
@@ -162,7 +169,7 @@ internal fun HomeScreen(
     selectedModuleId: String? = null,
     applicationEditingSaving: Boolean = false,
     onRemoveApplication: (LaunchableIdentity) -> Unit = {},
-    onCommitApplicationOrder: (ApplicationOrderChange) -> Unit = {},
+    onCommitApplicationOrder: (change: ApplicationOrderChange, onComplete: () -> Unit) -> Unit = { _, complete -> complete() },
     removalSnackbarHostState: SnackbarHostState? = null,
     onRetryFavorites: () -> Unit = {},
     onRequestEditMode: () -> Unit = {},
@@ -186,15 +193,19 @@ internal fun HomeScreen(
 ) {
     val context = LocalContext.current
     val orderedApplicationMovement = remember(calculation = { HomeApplicationMovement() })
+    val favoriteEnterBatch = rememberHomeFavoriteEnterBatch(
+        modules = (favoriteState as? FavoriteReadState.Readable)?.orderedModules,
+    )
     val applicationMovementActive = orderedApplicationMovement.activeIdentity != null
-    BackHandler(enabled = editMode && applicationMovementActive, onBack = { orderedApplicationMovement.cancel() })
+    BackHandler(enabled = editMode && orderedApplicationMovement.isDragging, onBack = { orderedApplicationMovement.cancel() })
     LaunchedEffect(editMode, stylePanelExpanded, favoriteState, favoriteAvailability) {
         val session = orderedApplicationMovement.session ?: return@LaunchedEffect
         val module = (favoriteState as? FavoriteReadState.Readable)?.orderedModules
             ?.firstOrNull(predicate = { it.id == session.module.id })
         val availability = favoriteAvailability[session.identity]
-        if (!editMode || stylePanelExpanded || module != session.module ||
-            (availability !is FavoriteAvailability.Available && availability !is FavoriteAvailability.Disabled)
+        val invalidSource = orderedApplicationMovement.isDragging &&
+            (module != session.module || (availability !is FavoriteAvailability.Available && availability !is FavoriteAvailability.Disabled))
+        if (!editMode || stylePanelExpanded || invalidSource || availability == FavoriteAvailability.ConfirmedRemoved
         ) orderedApplicationMovement.cancel()
     }
     var dragSession by remember { mutableStateOf<FavoriteDragSession?>(null) }
@@ -1186,7 +1197,12 @@ internal fun HomeScreen(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .onGloballyPositioned(onGloballyPositioned = { coordinates ->
+                        favoriteEnterBatch.exitTransitions?.viewport = Rect(
+                            offset = coordinates.positionInWindow(), size = coordinates.size.toSize(),
+                        )
+                    }),
             ) {
                 when (favoriteState) {
                 FavoriteReadState.Loading -> HomeFavoriteMessage(
@@ -1245,6 +1261,7 @@ internal fun HomeScreen(
                         )
                     } else if (!editMode) {
                         HomeOrderedModuleComposition(
+                            enterBatch = favoriteEnterBatch,
                             modules = orderedModules
                                 ?: (
                                     favoriteState.aggregate.verticalLists.map { container ->
@@ -1285,6 +1302,7 @@ internal fun HomeScreen(
                             ?: editTransaction.pendingModuleOrder
                             ?: styledModules
                         HomeOrderedModuleComposition(
+                            enterBatch = favoriteEnterBatch,
                             modules = displayedModules,
                             availabilityByIdentity = favoriteAvailability,
                             listState = favoriteListState,
@@ -1302,7 +1320,9 @@ internal fun HomeScreen(
                                 moduleDragSession == null && !applicationMovementActive,
                             onRemoveFavorite = onRemoveApplication,
                             applicationMovement = orderedApplicationMovement,
-                            onCommitApplicationOrder = onCommitApplicationOrder,
+                            onCommitApplicationOrder = { change ->
+                                onCommitApplicationOrder(change) { orderedApplicationMovement.complete(change = change) }
+                            },
                             onAddToModule = { module ->
                                 when (module.type) {
                                     OrderedFavoriteModuleType.Vertical ->
@@ -2022,6 +2042,7 @@ internal fun HomeScreen(
                 )
             }
         }
+        HomeFavoriteExitOverlay(owner = favoriteEnterBatch.exitTransitions, rootOrigin = dragRootOriginInWindow)
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter),
@@ -3480,7 +3501,9 @@ private fun HomeFavoriteProvisionalList(
         onModuleDrag: (Offset) -> Unit = {},
         onModuleDragEnd: () -> Unit = {},
         onModuleDragCancel: () -> Unit = {},
+        enterBatch: HomeFavoriteEnterBatch? = null,
     ) {
+        val animationDuration = integerResource(id = R.integer.short_property_animation_duration_ms)
         val ribbonListStates = remember {
             mutableStateMapOf<String, LazyListState>()
         }
@@ -3519,6 +3542,7 @@ private fun HomeFavoriteProvisionalList(
                     val origin = coordinates.positionInWindow()
                     listOriginInWindow = origin
                     onModuleListBoundsInWindow(Rect(origin, coordinates.size.toSize()))
+                    enterBatch?.updateViewport(bounds = Rect(offset = origin, size = coordinates.size.toSize()))
                     applicationMovement?.updateViewport(bounds = Rect(offset = origin, size = coordinates.size.toSize()))
                 }
                 .then(
@@ -3605,7 +3629,7 @@ private fun HomeFavoriteProvisionalList(
                 }
                 .testTag("home_ordered_favorite_modules"),
             state = listState,
-            userScrollEnabled = applicationMovement?.activeIdentity == null,
+            userScrollEnabled = applicationMovement?.isDragging != true,
             verticalArrangement = Arrangement.spacedBy(
                 dimensionResource(R.dimen.home_module_spacing),
             ),
@@ -3626,6 +3650,12 @@ private fun HomeFavoriteProvisionalList(
                     moduleInsertionIndex == modules.size
                 Box(
                     modifier = Modifier
+                        .animateItem(
+                            fadeInSpec = null,
+                            fadeOutSpec = null,
+                            placementSpec = tween(durationMillis = animationDuration),
+                        )
+                        .homeFavoriteEnter(batch = enterBatch, key = HomeFavoriteEnterKey(moduleId = module.id))
                         .fillMaxWidth()
                         .onGloballyPositioned { coordinates ->
                             val origin = coordinates.positionInWindow()
@@ -3661,6 +3691,7 @@ private fun HomeFavoriteProvisionalList(
                     null
                 }
                 HomeOrderedModuleContent(
+                    enterBatch = enterBatch,
                     module = module,
                     availabilityByIdentity = availabilityByIdentity,
                     ribbonListState = ribbonListState,
@@ -3699,7 +3730,11 @@ private fun HomeFavoriteProvisionalList(
                         },
                     )
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            fadeOutSpec = null,
+                            placementSpec = tween(durationMillis = animationDuration),
+                        ).fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(
                             dimensionResource(R.dimen.home_add_favorite_entry_gap),
                         ),
@@ -3780,193 +3815,6 @@ private fun HomeFavoriteProvisionalList(
                 .shadow(shadowElevation, shape, clip = false)
                 .clearAndSetSemantics { }
                 .testTag("home_module_drag_preview"),
-        )
-    }
-
-    @Composable
-    private fun HomeMainListAddFavoriteEntry(
-        modifier: Modifier,
-        label: String,
-        testTag: String,
-        enabled: Boolean,
-        onClick: () -> Unit,
-        contentEnabled: Boolean = enabled,
-    ) {
-        val contentAlpha = if (contentEnabled) 1f else integerResource(id = R.integer.disabled_content_alpha_percent) / 100f
-        val shape = RoundedCornerShape(
-            dimensionResource(R.dimen.home_favorite_bar_corner_radius),
-        )
-        Row(
-            modifier = modifier
-                .heightIn(min = dimensionResource(R.dimen.home_add_favorite_entry_min_height))
-                .clip(shape)
-                .background(colorResource(R.color.home_add_favorite_surface))
-                .border(
-                    dimensionResource(R.dimen.home_favorite_bar_border_width),
-                    colorResource(R.color.home_add_favorite_border),
-                    shape,
-                )
-                .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-                .padding(horizontal = dimensionResource(R.dimen.home_favorite_bar_item_inset))
-                .testTag(testTag),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_add),
-                contentDescription = null,
-                modifier = Modifier.size(dimensionResource(R.dimen.home_add_favorite_icon_size)),
-                tint = MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = contentAlpha,
-                ),
-            )
-            Spacer(Modifier.width(dimensionResource(R.dimen.home_add_favorite_entry_gap)))
-            Text(
-                text = label,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = contentAlpha,
-                ),
-                fontWeight = FontWeight.Normal,
-                fontSize = dimensionResource(R.dimen.home_favorite_text_size).value.sp,
-                lineHeight = dimensionResource(R.dimen.home_favorite_line_height).value.sp,
-            )
-        }
-    }
-
-    @Composable
-    internal fun HomeModuleAddFavoriteEntry(
-        modifier: Modifier,
-        module: OrderedFavoriteModule,
-        enabled: Boolean,
-        onClick: () -> Unit,
-    ) {
-        val shape = RoundedCornerShape(
-            dimensionResource(R.dimen.home_favorite_bar_corner_radius),
-        )
-        val iconSlotSize = dimensionResource(
-            if (module.type == OrderedFavoriteModuleType.Ribbon) {
-                R.dimen.home_favorite_icon_size
-            } else {
-                module.applicationSize.iconSizeResource()
-            },
-        )
-        val surfaceModifier = modifier
-            .then(
-                if (module.type == OrderedFavoriteModuleType.Ribbon) {
-                    Modifier.height(dimensionResource(R.dimen.home_favorite_bar_height))
-                } else if (module.namePlacement == FavoriteNamePlacement.Below) {
-                    Modifier.height(
-                        dimensionResource(module.applicationSize.belowItemHeightResource()),
-                    )
-                } else {
-                    Modifier.height(dimensionResource(module.applicationSize.rowHeightResource()))
-                },
-            )
-            .clip(shape)
-            .background(colorResource(R.color.home_add_favorite_surface))
-            .border(
-                dimensionResource(R.dimen.home_favorite_bar_border_width),
-                colorResource(R.color.home_add_favorite_border),
-                shape,
-            )
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .testTag("home_add_favorite_${module.id}")
-        if (module.type == OrderedFavoriteModuleType.Vertical &&
-            module.namePlacement == FavoriteNamePlacement.Below
-        ) {
-            Column(
-                modifier = surfaceModifier.padding(
-                    start = dimensionResource(R.dimen.home_favorite_below_horizontal_inset),
-                    top = dimensionResource(R.dimen.home_favorite_below_top_inset),
-                    end = dimensionResource(R.dimen.home_favorite_below_horizontal_inset),
-                    bottom = dimensionResource(R.dimen.home_favorite_below_bottom_inset),
-                ),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                HomeAddFavoriteIconSlot(iconSlotSize, enabled)
-                Spacer(
-                    Modifier.height(
-                        dimensionResource(R.dimen.home_favorite_below_icon_label_gap),
-                    ),
-                )
-                HomeAddFavoriteLabel(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    size = module.applicationSize,
-                    enabled = enabled,
-                )
-            }
-        } else {
-            Row(
-                modifier = surfaceModifier.padding(
-                    horizontal = dimensionResource(R.dimen.home_favorite_bar_item_inset),
-                ),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                HomeAddFavoriteIconSlot(iconSlotSize, enabled)
-                Spacer(
-                    Modifier.width(
-                        dimensionResource(
-                            if (module.type == OrderedFavoriteModuleType.Ribbon) {
-                                R.dimen.home_favorite_bar_icon_label_gap
-                            } else {
-                                R.dimen.home_favorite_icon_label_gap
-                            },
-                        ),
-                    ),
-                )
-                HomeAddFavoriteLabel(
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Start,
-                    size = if (module.type == OrderedFavoriteModuleType.Ribbon) {
-                        FavoriteListSize.Medium
-                    } else {
-                        module.applicationSize
-                    },
-                    enabled = enabled,
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun HomeAddFavoriteIconSlot(
-        size: androidx.compose.ui.unit.Dp,
-        enabled: Boolean,
-    ) {
-        Box(modifier = Modifier.size(size), contentAlignment = Alignment.Center) {
-            Icon(
-                painter = painterResource(R.drawable.ic_add),
-                contentDescription = null,
-                modifier = Modifier.size(dimensionResource(R.dimen.home_add_favorite_icon_size)),
-                tint = MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = if (enabled) 1f else 0.38f,
-                ),
-            )
-        }
-    }
-
-    @Composable
-    private fun HomeAddFavoriteLabel(
-        modifier: Modifier,
-        textAlign: TextAlign,
-        size: FavoriteListSize,
-        enabled: Boolean,
-    ) {
-        Text(
-            text = stringResource(R.string.home_add_favorite),
-            modifier = modifier,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = textAlign,
-            color = MaterialTheme.colorScheme.onBackground.copy(
-                alpha = if (enabled) 1f else 0.38f,
-            ),
-            fontWeight = FontWeight.Normal,
-            fontSize = dimensionResource(size.textSizeResource()).value.sp,
-            lineHeight = dimensionResource(size.lineHeightResource()).value.sp,
         )
     }
 
@@ -4506,33 +4354,3 @@ private fun HomeFavoriteProvisionalList(
 
     internal fun LaunchableIdentity.stableKey(): String =
         "$profileSerialNumber:${componentName.flattenToString()}"
-
-    internal fun FavoriteListSize.iconSizeResource(): Int = when (this) {
-        FavoriteListSize.Large -> R.dimen.home_favorite_large_icon_size
-        FavoriteListSize.Medium -> R.dimen.home_favorite_icon_size
-        FavoriteListSize.Small -> R.dimen.home_companion_favorite_icon_size
-    }
-
-    private fun FavoriteListSize.rowHeightResource(): Int = when (this) {
-        FavoriteListSize.Large -> R.dimen.home_favorite_large_row_min_height
-        FavoriteListSize.Medium -> R.dimen.home_favorite_row_min_height
-        FavoriteListSize.Small -> R.dimen.home_companion_favorite_row_min_height
-    }
-
-    private fun FavoriteListSize.belowItemHeightResource(): Int = when (this) {
-        FavoriteListSize.Large -> R.dimen.home_favorite_large_below_height
-        FavoriteListSize.Medium -> R.dimen.home_favorite_medium_below_height
-        FavoriteListSize.Small -> R.dimen.home_favorite_small_below_height
-    }
-
-    private fun FavoriteListSize.textSizeResource(): Int = when (this) {
-        FavoriteListSize.Large -> R.dimen.home_favorite_large_text_size
-        FavoriteListSize.Medium -> R.dimen.home_favorite_text_size
-        FavoriteListSize.Small -> R.dimen.home_companion_favorite_text_size
-    }
-
-    private fun FavoriteListSize.lineHeightResource(): Int = when (this) {
-        FavoriteListSize.Large -> R.dimen.home_favorite_large_line_height
-        FavoriteListSize.Medium -> R.dimen.home_favorite_line_height
-        FavoriteListSize.Small -> R.dimen.home_companion_favorite_line_height
-    }

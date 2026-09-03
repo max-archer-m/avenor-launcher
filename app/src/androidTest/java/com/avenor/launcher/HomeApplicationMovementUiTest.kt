@@ -50,12 +50,35 @@ class HomeApplicationMovementUiTest {
     @Test
     fun belowNameApplicationCanDropOntoCreateRibbon() = verifyMovement(below = true, creationType = OrderedFavoriteModuleType.Ribbon)
 
+    @Test
+    fun cancellingVerticalLiftRestoresTheSourceAndItsClosedGap() = verifyMovement(cancelMovement = true)
+
+    @Test
+    fun cancellingWrappedRowLiftRestoresTheSourceAndItsClosedGap() = verifyMovement(below = true, cancelMovement = true)
+
+    @Test
+    fun cancellingRibbonLiftRestoresTheSourceAndItsClosedGap() = verifyMovement(ribbon = true, cancelMovement = true)
+
+    @Test
+    fun returningToTheOriginalReducedBoundaryDoesNotCommit() = verifyMovement(unchangedRelease = true)
+
+    @Test
+    fun singleVerticalSourceRetainsOnlyAnInvalidAddEntryUntilRestoration() = verifyMovement(singleSource = true)
+
+    @Test
+    fun singleRibbonSourceRetainsOnlyAnInvalidAddEntryUntilRestoration() = verifyMovement(singleSource = true, ribbon = true)
+
+    @Test
+    fun singleRibbonSourceCanStillCreateANewModule() = verifyMovement(singleSource = true, ribbon = true, creationType = OrderedFavoriteModuleType.Ribbon)
+
     private fun verifyMovement(
         below: Boolean = false,
         ribbon: Boolean = false,
         destinationRibbon: Boolean? = null,
         creationType: OrderedFavoriteModuleType? = null,
         singleSource: Boolean = false,
+        cancelMovement: Boolean = false,
+        unchangedRelease: Boolean = false,
     ) {
         val count = if (singleSource) 1 else if (destinationRibbon != null) 4 else if (ribbon) 2 else 3
         val entries = (1..count).map(
@@ -114,16 +137,18 @@ class HomeApplicationMovementUiTest {
                         editMode = true,
                         onRemoveApplication = { removals += 1 },
                         onLaunchFavorite = { launches += 1 },
-                        onCommitApplicationOrder = { change = it },
+                        onCommitApplicationOrder = { requested, complete ->
+                            change = requested
+                            complete()
+                        },
                     )
                 })
             },
         )
         val root = composeRule.onNodeWithTag(testTag = "home_ordered_favorite_modules")
         val origin = root.fetchSemanticsNode().boundsInRoot.topLeft
-        val cells = composeRule.onAllNodesWithTag(testTag = if (below) "home_favorite_below_item" else "home_favorite_row")
-        val source = cells[0].fetchSemanticsNode().boundsInRoot
-        val last = cells[entries.lastIndex].fetchSemanticsNode().boundsInRoot
+        val sourceNode = composeRule.onNodeWithTag(testTag = "home_favorite_item:${entries.first().identity.stableKey()}")
+        val source = sourceNode.fetchSemanticsNode().boundsInRoot
         composeRule.onAllNodesWithTag(testTag = "remove_favorite_item")[0].performClick()
         composeRule.runOnIdle(action = { assertEquals(1, removals) })
         composeRule.onNodeWithTag(testTag = "home_application_movement_preview").assertDoesNotExist()
@@ -131,18 +156,38 @@ class HomeApplicationMovementUiTest {
         root.performTouchInput(block = { down(position = source.center - origin) })
         composeRule.mainClock.advanceTimeBy(milliseconds = timeout + 50)
         composeRule.onNodeWithTag(testTag = "home_application_movement_preview").assertIsDisplayed()
-        composeRule.onNodeWithTag(testTag = "home_application_placeholder").assertIsDisplayed()
+        composeRule.onNodeWithTag(testTag = "home_application_placeholder").assertDoesNotExist()
+        sourceNode.assertDoesNotExist()
+        // The real source slot is absent, not an invisible measured item. Remaining entries reflow.
+        val firstRemaining = composeRule.onNodeWithTag(
+            testTag = if (singleSource) "home_add_favorite_${module.id}" else "home_favorite_item:${entries[1].identity.stableKey()}",
+        ).fetchSemanticsNode().boundsInRoot
+        assertEquals(source.left, firstRemaining.left, 0.5f)
+        assertEquals(source.top, firstRemaining.top, 0.5f)
+        val invalidSourceDrop = singleSource && creationType == null
         val destination = if (creationType != null) {
             composeRule.onNodeWithTag(
                 testTag = if (creationType == OrderedFavoriteModuleType.Vertical) "home_add_favorite_list" else "home_add_favorite_ribbon",
             ).fetchSemanticsNode().boundsInRoot.center
-        } else if (below || (destinationRibbon ?: ribbon)) {
-            Offset(x = last.right - 1f, y = last.center.y)
+        } else if (invalidSourceDrop) {
+            firstRemaining.center
+        } else if (unchangedRelease) {
+            Offset(x = firstRemaining.center.x, y = firstRemaining.top + 1f)
         } else {
-            Offset(x = last.center.x, y = last.bottom - 1f)
+            // Read the destination after reflow, not the pre-lift source layout.
+            val last = composeRule.onNodeWithTag(testTag = "home_favorite_item:${entries.last().identity.stableKey()}")
+                .fetchSemanticsNode().boundsInRoot
+            if (below || (destinationRibbon ?: ribbon)) {
+                Offset(x = last.right - 1f, y = last.center.y)
+            } else {
+                Offset(x = last.center.x, y = last.bottom - 1f)
+            }
         }
         root.performTouchInput(block = { moveTo(position = destination - origin) })
-        if (creationType == null) {
+        if (invalidSourceDrop) {
+            composeRule.onNodeWithTag(testTag = "home_application_insertion_line").assertDoesNotExist()
+            composeRule.onNodeWithTag(testTag = "home_module_creation_drop_outline").assertDoesNotExist()
+        } else if (creationType == null) {
             composeRule.onNodeWithTag(testTag = "home_application_insertion_line").assertIsDisplayed()
             composeRule.onNodeWithTag(testTag = "home_module_creation_drop_outline").assertDoesNotExist()
         } else {
@@ -150,18 +195,26 @@ class HomeApplicationMovementUiTest {
             composeRule.onNodeWithTag(testTag = "home_module_creation_drop_outline").assertIsDisplayed()
         }
         composeRule.runOnIdle(action = { assertNull(change) })
-        root.performTouchInput(block = { up() })
+        root.performTouchInput(block = { if (cancelMovement) cancel() else up() })
         composeRule.runOnIdle(action = {
-            assertNotNull(change)
-            val expected = if (creationType != null) emptyList() else if (target == null) module.identities.drop(n = 1) else target.identities
-            assertEquals(expected + module.identities.first(), change?.reorderedIdentities())
-            assertEquals(target?.id ?: module.id, change?.destinationModuleId)
-            assertEquals(creationType, change?.newModuleType)
+            if (cancelMovement || unchangedRelease || invalidSourceDrop) {
+                assertNull(change)
+            } else {
+                assertNotNull(change)
+                val expected = if (creationType != null) emptyList() else if (target == null) module.identities.drop(n = 1) else target.identities
+                assertEquals(expected + module.identities.first(), change?.reorderedIdentities())
+                assertEquals(target?.id ?: module.id, change?.destinationModuleId)
+                assertEquals(creationType, change?.newModuleType)
+            }
             assertEquals(0, launches)
             assertEquals(1, removals)
         })
         composeRule.onNodeWithTag(testTag = "home_application_movement_preview").assertDoesNotExist()
         composeRule.onNodeWithTag(testTag = "home_application_placeholder").assertDoesNotExist()
         composeRule.onNodeWithTag(testTag = "home_module_creation_drop_outline").assertDoesNotExist()
+        if (cancelMovement || unchangedRelease || invalidSourceDrop) {
+            sourceNode.assertIsDisplayed()
+            assertEquals(source, sourceNode.fetchSemanticsNode().boundsInRoot)
+        }
     }
 }

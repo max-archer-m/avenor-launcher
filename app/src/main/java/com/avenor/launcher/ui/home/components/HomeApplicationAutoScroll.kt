@@ -5,10 +5,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
@@ -32,12 +34,16 @@ internal fun HomeApplicationAutoScroll(
     val delayMillis = integerResource(id = R.integer.home_favorite_edge_scroll_start_delay_ms)
     val speedPx = integerResource(id = R.integer.home_favorite_edge_scroll_dp_per_second) * density.density
     var stalledRequest by remember(calculation = { mutableStateOf<HomeApplicationScrollRequest?>(value = null) })
+    val currentPointer = remember(key1 = movement, calculation = {
+        derivedStateOf(policy = structuralEqualityPolicy(), calculation = { movement.session?.pointer })
+    })
 
     fun currentRequest(): HomeApplicationScrollRequest? {
+        if (!movement.isDragging) return null
         // Module/viewport bounds are plain geometry, not a state read in every application row.
         @Suppress("UNUSED_VARIABLE")
         val geometryRevision = movement.geometryRevision
-        val pointer = movement.session?.pointer ?: return null
+        val pointer = currentPointer.value ?: return null
         val ribbon = movement.visibleRibbonAt(pointer = pointer)
         val ribbonState = ribbon?.let(block = { ribbonStates[it.first] })
         return resolveHomeApplicationEdgeScroll(
@@ -63,7 +69,7 @@ internal fun HomeApplicationAutoScroll(
             val owner = request?.owner ?: return@LaunchedEffect
             delay(duration = delayMillis.milliseconds)
             var previousFrame = withFrameNanos(onFrame = { it })
-            while (movement.activeIdentity != null) {
+            while (movement.isDragging) {
                 val frame = withFrameNanos(onFrame = { it })
                 val current = currentRequest() ?: break
                 if (current.owner != owner) break

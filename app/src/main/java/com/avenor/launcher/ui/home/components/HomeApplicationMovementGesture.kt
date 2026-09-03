@@ -27,6 +27,7 @@ internal suspend fun PointerInputScope.detectHomeApplicationMovement(
                 ?: return@awaitEachGesture
             val recognized = awaitApplicationLongPress(down = down) ?: return@awaitEachGesture
             if (!onStart(identity, movement.viewport.topLeft + recognized.position)) return@awaitEachGesture
+            var handedOff = false
             try {
                 recognized.consume()
                 onRecognized()
@@ -37,12 +38,15 @@ internal suspend fun PointerInputScope.detectHomeApplicationMovement(
                     event.changes.forEach(action = { it.consume() })
                     movement.move(pointer = movement.viewport.topLeft + owner.position)
                     if (owner.changedToUpIgnoreConsumed()) {
-                        movement.finish()?.let(block = onCommit)
+                        movement.finish()?.let(block = { change ->
+                            onCommit(change)
+                            handedOff = true
+                        })
                         break
                     }
                 }
             } finally {
-                movement.cancel()
+                if (!handedOff) movement.cancel()
             }
         },
     )

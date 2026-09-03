@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -993,11 +995,21 @@ internal fun AvenorApp(
                 selectedModuleId = selectedHomeModuleId,
                 applicationEditingSaving = favoriteEditor.isSaving,
                 onRemoveApplication = { identity -> removeHomeFavorite(identity = identity) },
-                onCommitApplicationOrder = { change ->
+                onCommitApplicationOrder = { change, complete ->
                     scope.launch(
                         block = {
-                            if (!favoriteEditor.reorderApplication(change = change)) {
-                                Toast.makeText(androidContext, R.string.unable_to_move_favorite, Toast.LENGTH_SHORT).show()
+                            try {
+                                if (!favoriteEditor.reorderApplication(change = change)) {
+                                    Toast.makeText(androidContext, R.string.unable_to_move_favorite, Toast.LENGTH_SHORT).show()
+                                }
+                                // The Flow collector may lag behind the completed write. Hand off only
+                                // after Home's input has the current reliable state, never an old source.
+                                // This waits for state delivery, not for a frame or an animation.
+                                snapshotFlow(block = { favoriteState }).first(
+                                    predicate = { presented -> presented == effectiveFavoriteStore.state.value },
+                                )
+                            } finally {
+                                complete()
                             }
                         },
                     )

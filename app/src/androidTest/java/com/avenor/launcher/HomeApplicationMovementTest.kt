@@ -72,15 +72,15 @@ class HomeApplicationMovementTest {
     }
 
     @Test
-    fun insertionShiftsInterveningIdentitiesAndBothSourceBoundariesAreNoChange() {
+    fun insertionUsesTheReducedOrderAndOnlyTheOriginalOrderIsNoChange() {
         val change = ApplicationOrderChange(
-            moduleId = "module", identity = identities[1], originalOrder = identities, boundary = 4,
+            moduleId = "module", identity = identities[1], originalOrder = identities, boundary = 3,
         )
         assertEquals(listOf(identities[0], identities[2], identities[3], identities[1]), change.reorderedIdentities())
         assertEquals(identities, change.copy(boundary = 1).reorderedIdentities())
-        assertEquals(identities, change.copy(boundary = 2).reorderedIdentities())
+        assertEquals(listOf(identities[0], identities[2], identities[1], identities[3]), change.copy(boundary = 2).reorderedIdentities())
         assertEquals(listOf(identities[1], identities[0], identities[2], identities[3]), change.copy(boundary = 0).reorderedIdentities())
-        assertNull(change.copy(boundary = 5).reorderedIdentities())
+        assertNull(change.copy(boundary = 4).reorderedIdentities())
     }
 
     @Test
@@ -103,7 +103,10 @@ class HomeApplicationMovementTest {
         assertFalse(movement.start(identity = identities[1], module = module, availability = FavoriteAvailability.Disabled(presentationEntry = null), pointer = Offset(x = 130f, y = 20f)))
         val change = movement.finish()
         assertNotNull(change)
-        assertEquals(4, change?.boundary)
+        assertEquals(3, change?.boundary)
+        assertFalse(movement.isDragging)
+        assertNotNull(movement.session)
+        movement.complete(change = checkNotNull(value = change))
         assertNull(movement.session)
         movement.cancel()
         assertNull(movement.finish())

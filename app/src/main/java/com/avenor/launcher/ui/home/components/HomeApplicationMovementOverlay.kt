@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -37,11 +41,11 @@ internal fun HomeApplicationMovementOverlay(
     movement: HomeApplicationMovement,
     rootOrigin: Offset,
 ) {
-    val session = movement.session ?: return
+    val source = movement.previewSource ?: return
     val density = LocalDensity.current
-    val width = with(receiver = density, block = { session.sourceBounds.width.toDp() })
-    val height = with(receiver = density, block = { session.sourceBounds.height.toDp() })
-    val ribbon = session.module.type == OrderedFavoriteModuleType.Ribbon
+    val width = with(receiver = density, block = { source.sourceBounds.width.toDp() })
+    val height = with(receiver = density, block = { source.sourceBounds.height.toDp() })
+    val ribbon = source.module.type == OrderedFavoriteModuleType.Ribbon
     val shape = if (ribbon) {
         RoundedCornerShape(size = dimensionResource(id = R.dimen.home_favorite_bar_corner_radius))
     } else {
@@ -50,80 +54,97 @@ internal fun HomeApplicationMovementOverlay(
     val lineColor = MaterialTheme.colorScheme.onBackground
     val lineWidth = dimensionResource(id = R.dimen.home_favorite_insertion_line_thickness)
     val edgeColor = lineColor.copy(alpha = integerResource(id = R.integer.home_favorite_edge_feedback_alpha_percent) / 100f)
-    movement.edgeFeedback?.let(
-        block = { edge ->
-            Canvas(
-                modifier = Modifier.fillMaxSize().testTag(tag = "home_application_edge_feedback"),
-                onDraw = {
-                    val bounds = edge.bounds.translate(offset = -rootOrigin)
-                    val startSide = edge.owner.direction < 0
-                    val colors = if (startSide) listOf(edgeColor, edgeColor.copy(alpha = 0f)) else listOf(edgeColor.copy(alpha = 0f), edgeColor)
-                    if (edge.horizontal) {
-                        val left = if (startSide) bounds.left else bounds.right - edge.band
-                        drawRect(
-                            brush = Brush.horizontalGradient(colors = colors, startX = left, endX = left + edge.band),
-                            topLeft = Offset(x = left, y = bounds.top),
-                            size = Size(width = edge.band, height = bounds.height),
-                        )
-                    } else {
-                        val top = if (startSide) bounds.top else bounds.bottom - edge.band
-                        drawRect(
-                            brush = Brush.verticalGradient(colors = colors, startY = top, endY = top + edge.band),
-                            topLeft = Offset(x = bounds.left, y = top),
-                            size = Size(width = bounds.width, height = edge.band),
-                        )
-                    }
-                },
-            )
-        },
-    )
-    session.creation?.let(
-        block = { (_, targetBounds) ->
-            val outlineWidth = dimensionResource(id = R.dimen.home_module_selection_stroke)
-            val outlineRadius = dimensionResource(id = R.dimen.home_module_selection_radius)
-            Canvas(
-                modifier = Modifier.fillMaxSize().testTag(tag = "home_module_creation_drop_outline"),
-                onDraw = {
-                    val bounds = targetBounds.translate(offset = -rootOrigin)
-                    val viewport = movement.viewport.translate(offset = -rootOrigin)
-                    val stroke = outlineWidth.toPx()
-                    val radius = (outlineRadius.toPx() - stroke / 2f).coerceAtLeast(minimumValue = 0f)
-                    clipRect(
-                        left = viewport.left, top = viewport.top, right = viewport.right, bottom = viewport.bottom,
-                        block = {
-                            drawRoundRect(
-                                color = lineColor,
-                                topLeft = bounds.topLeft + Offset(x = stroke / 2f, y = stroke / 2f),
-                                size = Size(width = bounds.width - stroke, height = bounds.height - stroke),
-                                cornerRadius = CornerRadius(x = radius, y = radius),
-                                style = Stroke(width = stroke),
-                            )
-                        },
+    // Membership changes need composition (including test/semantics tags); moving geometry only
+    // needs placement or drawing. Never subscribe the preview's icon/text to every pointer tick.
+    val showEdge by remember(key1 = movement, calculation = {
+        derivedStateOf(policy = structuralEqualityPolicy(), calculation = { movement.edgeFeedback != null })
+    })
+    val showCreation by remember(key1 = movement, calculation = {
+        derivedStateOf(policy = structuralEqualityPolicy(), calculation = { movement.session?.creation != null })
+    })
+    val showInsertion by remember(key1 = movement, calculation = {
+        derivedStateOf(policy = structuralEqualityPolicy(), calculation = { movement.session?.insertion != null })
+    })
+    val previewOrigin = remember(key1 = movement, calculation = {
+        derivedStateOf(policy = structuralEqualityPolicy(), calculation = { movement.session?.previewOrigin })
+    })
+    if (showEdge) {
+        Canvas(
+            modifier = Modifier.fillMaxSize().testTag(tag = "home_application_edge_feedback"),
+            onDraw = {
+                val edge = movement.edgeFeedback ?: return@Canvas
+                val bounds = edge.bounds.translate(offset = -rootOrigin)
+                val startSide = edge.owner.direction < 0
+                val colors = if (startSide) listOf(edgeColor, edgeColor.copy(alpha = 0f)) else listOf(edgeColor.copy(alpha = 0f), edgeColor)
+                if (edge.horizontal) {
+                    val left = if (startSide) bounds.left else bounds.right - edge.band
+                    drawRect(
+                        brush = Brush.horizontalGradient(colors = colors, startX = left, endX = left + edge.band),
+                        topLeft = Offset(x = left, y = bounds.top),
+                        size = Size(width = edge.band, height = bounds.height),
                     )
-                },
-            )
-        },
-    )
-    session.insertion?.let(
-        block = { insertion ->
-            Canvas(
-                modifier = Modifier.fillMaxSize().testTag(tag = "home_application_insertion_line"),
-                onDraw = {
-                    drawLine(
-                        color = lineColor,
-                        start = insertion.lineStart - rootOrigin,
-                        end = insertion.lineEnd - rootOrigin,
-                        strokeWidth = lineWidth.toPx(),
+                } else {
+                    val top = if (startSide) bounds.top else bounds.bottom - edge.band
+                    drawRect(
+                        brush = Brush.verticalGradient(colors = colors, startY = top, endY = top + edge.band),
+                        topLeft = Offset(x = bounds.left, y = top),
+                        size = Size(width = bounds.width, height = edge.band),
                     )
-                },
-            )
-        },
-    )
+                }
+            },
+        )
+    }
+    if (showCreation) {
+        val outlineWidth = dimensionResource(id = R.dimen.home_module_selection_stroke)
+        val outlineRadius = dimensionResource(id = R.dimen.home_module_selection_radius)
+        Canvas(
+            modifier = Modifier.fillMaxSize().testTag(tag = "home_module_creation_drop_outline"),
+            onDraw = {
+                val targetBounds = movement.session?.creation?.second ?: return@Canvas
+                val bounds = targetBounds.translate(offset = -rootOrigin)
+                val viewport = movement.viewport.translate(offset = -rootOrigin)
+                val stroke = outlineWidth.toPx()
+                val radius = (outlineRadius.toPx() - stroke / 2f).coerceAtLeast(minimumValue = 0f)
+                clipRect(
+                    left = viewport.left, top = viewport.top, right = viewport.right, bottom = viewport.bottom,
+                    block = {
+                        drawRoundRect(
+                            color = lineColor,
+                            topLeft = bounds.topLeft + Offset(x = stroke / 2f, y = stroke / 2f),
+                            size = Size(width = bounds.width - stroke, height = bounds.height - stroke),
+                            cornerRadius = CornerRadius(x = radius, y = radius),
+                            style = Stroke(width = stroke),
+                        )
+                    },
+                )
+            },
+        )
+    }
+    if (showInsertion) {
+        Canvas(
+            modifier = Modifier.fillMaxSize().testTag(tag = "home_application_insertion_line"),
+            onDraw = {
+                val insertion = movement.session?.insertion ?: return@Canvas
+                val clip = insertion.clipBounds.translate(offset = -rootOrigin)
+                clipRect(
+                    left = clip.left, top = clip.top, right = clip.right, bottom = clip.bottom,
+                    block = {
+                        drawLine(
+                            color = lineColor,
+                            start = insertion.lineStart - rootOrigin,
+                            end = insertion.lineEnd - rootOrigin,
+                            strokeWidth = lineWidth.toPx(),
+                        )
+                    },
+                )
+            },
+        )
+    }
     Box(
         modifier = Modifier
             .offset(
                 offset = {
-                    val origin = session.previewOrigin - rootOrigin
+                    val origin = (previewOrigin.value ?: source.previewOrigin) - rootOrigin
                     IntOffset(x = origin.x.roundToInt(), y = origin.y.roundToInt())
                 },
             )
@@ -136,11 +157,11 @@ internal fun HomeApplicationMovementOverlay(
             .clearAndSetSemantics(properties = {})
             .testTag(tag = "home_application_movement_preview"),
         content = {
-            if (!ribbon && session.module.namePlacement == FavoriteNamePlacement.Below) {
+            if (!ribbon && source.module.namePlacement == FavoriteNamePlacement.Below) {
                 HomeFavoriteBelowItem(
                     modifier = Modifier.fillMaxWidth(),
-                    availability = session.availability,
-                    listSize = session.module.applicationSize,
+                    availability = source.availability,
+                    listSize = source.module.applicationSize,
                     onClick = {},
                     onLongClick = {},
                     interactionEnabled = false,
@@ -148,8 +169,8 @@ internal fun HomeApplicationMovementOverlay(
             } else {
                 HomeFavoriteRow(
                     modifier = Modifier.fillMaxWidth(),
-                    availability = session.availability,
-                    listSize = session.module.applicationSize,
+                    availability = source.availability,
+                    listSize = source.module.applicationSize,
                     onClick = {},
                     onLongClick = {},
                     editMode = false,

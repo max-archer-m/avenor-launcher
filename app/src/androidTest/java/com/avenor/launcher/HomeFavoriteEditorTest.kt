@@ -265,7 +265,7 @@ class HomeFavoriteEditorTest {
                 assertTrue(editor.reorderApplication(
                     change = ApplicationOrderChange(
                         moduleId = source.id, identity = identity(serial = 1),
-                        originalOrder = source.identities.take(n = 3), boundary = 3,
+                        originalOrder = source.identities.take(n = 3), boundary = 2,
                     ),
                 ))
                 store.load()
@@ -288,14 +288,14 @@ class HomeFavoriteEditorTest {
             assertTrue(editor.remove(identity = identity(serial = 3)))
             val snapshot = checkNotNull(value = editor.undoRemoval)
             val change = ApplicationOrderChange(
-                moduleId = source.id, identity = identity(serial = 1), originalOrder = source.identities.take(n = 2), boundary = 1,
+                moduleId = source.id, identity = identity(serial = 1), originalOrder = source.identities.take(n = 2), boundary = 0,
             )
             val writes = controlled.writeAttempts
             assertTrue(editor.reorderApplication(change = change))
             assertEquals(writes, controlled.writeAttempts)
             assertSame(snapshot, editor.undoRemoval)
             controlled.failWrites = true
-            assertFalse(editor.reorderApplication(change = change.copy(boundary = 2)))
+            assertFalse(editor.reorderApplication(change = change.copy(boundary = 1)))
             assertSame(snapshot, editor.undoRemoval)
             assertFalse(editor.isSaving)
             store.load()
@@ -317,7 +317,7 @@ class HomeFavoriteEditorTest {
                 block = {
                     editor.reorderApplication(
                         change = ApplicationOrderChange(
-                            moduleId = source.id, identity = identity(serial = 1), originalOrder = source.identities, boundary = 3,
+                            moduleId = source.id, identity = identity(serial = 1), originalOrder = source.identities, boundary = 2,
                         ),
                     )
                 },

@@ -1,5 +1,6 @@
 package com.avenor.launcher.ui.home.components
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -84,7 +85,7 @@ import com.avenor.launcher.FavoriteListSize
 import com.avenor.launcher.FavoriteNamePlacement
 import com.avenor.launcher.HomeFavoriteRow
 import com.avenor.launcher.HomeApplicationMovement
-import com.avenor.launcher.HomeModuleAddFavoriteEntry
+import com.avenor.launcher.applicationLayoutIdentities
 import com.avenor.launcher.OrderedFavoriteModule
 import com.avenor.launcher.R
 import com.avenor.launcher.applicationDragDescriptor
@@ -168,20 +169,25 @@ internal fun HomeOrderedFavoriteRibbon(
     applicationMutationEnabled: Boolean = true,
     onRemoveFavorite: (LaunchableIdentity) -> Unit = {},
     applicationMovement: HomeApplicationMovement? = null,
+    enterBatch: HomeFavoriteEnterBatch? = null,
 ) {
+    val animationDuration = integerResource(id = R.integer.short_property_animation_duration_ms)
+    val layoutIdentities = applicationLayoutIdentities(
+        module = module, movingIdentity = applicationMovement?.activeIdentity,
+    )
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(height = dimensionResource(id = R.dimen.home_favorite_bar_height))
             .homeEditSurface(enabled = editMode),
         state = listState,
-        userScrollEnabled = applicationMovement?.activeIdentity == null,
+        userScrollEnabled = applicationMovement?.isDragging != true,
         horizontalArrangement = Arrangement.spacedBy(
             space = dimensionResource(id = R.dimen.home_favorite_bar_item_spacing),
         ),
         content = {
             itemsIndexed(
-                items = module.identities,
+                items = layoutIdentities,
                 key = { _, identity -> identity.stableKey() },
                 itemContent = { _, identity ->
                     val availability = availabilityByIdentity[identity]
@@ -189,10 +195,17 @@ internal fun HomeOrderedFavoriteRibbon(
                     HomeFavoriteItemFrame(
                         identity = identity,
                         movement = applicationMovement,
-                        ribbon = true,
-                        modifier = Modifier.width(
-                            width = dimensionResource(id = R.dimen.home_favorite_bar_item_width),
-                        ),
+                        modifier = Modifier
+                            .animateItem(
+                                fadeInSpec = null,
+                                fadeOutSpec = null,
+                                placementSpec = tween(durationMillis = animationDuration),
+                            )
+                            .homeFavoriteEnter(
+                                batch = enterBatch,
+                                key = HomeFavoriteEnterKey(moduleId = module.id, identity = identity),
+                            )
+                            .width(width = dimensionResource(id = R.dimen.home_favorite_bar_item_width)),
                         showRemove = applicationEditing,
                         removeEnabled = applicationMutationEnabled,
                         namePlacement = FavoriteNamePlacement.Right,
@@ -228,7 +241,11 @@ internal fun HomeOrderedFavoriteRibbon(
                             effect = { onDispose { applicationMovement?.updateAdd(id = module.id, bounds = null) } },
                         )
                         HomeModuleAddFavoriteEntry(
-                            modifier = Modifier.onGloballyPositioned(
+                            modifier = Modifier.animateItem(
+                                fadeInSpec = null,
+                                fadeOutSpec = null,
+                                placementSpec = tween(durationMillis = animationDuration),
+                            ).onGloballyPositioned(
                                 onGloballyPositioned = { coordinates ->
                                     applicationMovement?.updateAdd(
                                         id = module.id,

@@ -65,6 +65,7 @@ class HomeApplicationCrossModuleGeometryTest {
         val result = movement.finish()
         assertEquals(target.id, result?.destinationModuleId)
         assertEquals(listOf(second, first), result?.reorderedIdentities())
+        movement.complete(change = checkNotNull(value = result))
         assertNull(movement.activeIdentity)
     }
 
@@ -135,7 +136,9 @@ class HomeApplicationCrossModuleGeometryTest {
         assertEquals(target, movement.session?.destination)
         assertNull(movement.session?.creation)
         movement.move(pointer = Offset(x = 150f, y = 170f))
-        assertEquals(OrderedFavoriteModuleType.Ribbon, movement.finish()?.newModuleType)
+        val result = movement.finish()
+        assertEquals(OrderedFavoriteModuleType.Ribbon, result?.newModuleType)
+        movement.complete(change = checkNotNull(value = result))
         assertNull(movement.session)
     }
 

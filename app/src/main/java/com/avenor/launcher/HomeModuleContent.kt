@@ -1,8 +1,5 @@
 package com.avenor.launcher
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
@@ -12,7 +9,12 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.toSize
+import com.avenor.launcher.ui.home.components.HomeFavoriteGrid
+import com.avenor.launcher.ui.home.components.HomeFavoriteEnterBatch
+import com.avenor.launcher.ui.home.components.HomeFavoriteEnterKey
+import com.avenor.launcher.ui.home.components.homeFavoriteEnter
 import com.avenor.launcher.ui.home.components.HomeFavoriteItemFrame
+import com.avenor.launcher.ui.home.components.HomeModuleAddFavoriteEntry
 import com.avenor.launcher.ui.home.components.HomeOrderedFavoriteRibbon
 import com.avenor.launcher.ui.home.components.homeEditSurface
 
@@ -31,89 +33,89 @@ internal fun HomeOrderedModuleContent(
     applicationMutationEnabled: Boolean = true,
     onRemoveFavorite: (LaunchableIdentity) -> Unit = {},
     applicationMovement: HomeApplicationMovement? = null,
+    enterBatch: HomeFavoriteEnterBatch? = null,
 ) {
     when (module.type) {
         OrderedFavoriteModuleType.Vertical -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .homeEditSurface(enabled = editMode),
-            ) {
-                val cells: List<LaunchableIdentity?> =
-                    module.identities.map { it } + if (showAddEntry) listOf(null) else emptyList()
-                cells.chunked(module.itemsPerRow).forEach { rowItems ->
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        rowItems.forEach { identity ->
-                            val itemModifier = Modifier.weight(1f)
-                            if (identity == null) {
-                                HomeModuleAddFavoriteEntry(
-                                    modifier = itemModifier.onGloballyPositioned(
-                                        onGloballyPositioned = { coordinates ->
-                                            applicationMovement?.updateAdd(
-                                                id = module.id,
-                                                bounds = Rect(offset = coordinates.positionInWindow(), size = coordinates.size.toSize()),
-                                            )
+            val layoutIdentities = applicationLayoutIdentities(
+                module = module, movingIdentity = applicationMovement?.activeIdentity,
+            )
+            val cells: List<LaunchableIdentity?> =
+                layoutIdentities + if (showAddEntry) listOf(element = null) else emptyList()
+            HomeFavoriteGrid(
+                items = cells,
+                columns = module.itemsPerRow,
+                itemKey = { identity -> identity?.stableKey() ?: "add:${module.id}" },
+                modifier = Modifier.homeEditSurface(enabled = editMode),
+                content = { identity ->
+                    if (identity == null) {
+                        HomeModuleAddFavoriteEntry(
+                            modifier = Modifier.fillMaxWidth().onGloballyPositioned(
+                                onGloballyPositioned = { coordinates ->
+                                    applicationMovement?.updateAdd(
+                                        id = module.id,
+                                        bounds = Rect(offset = coordinates.positionInWindow(), size = coordinates.size.toSize()),
+                                    )
+                                },
+                            ),
+                            module = module,
+                            enabled = addEntryEnabled,
+                            onClick = onAddToModule,
+                        )
+                    } else {
+                        val availability = availabilityByIdentity[identity]
+                            ?: FavoriteAvailability.Unknown(presentationEntry = null)
+                        HomeFavoriteItemFrame(
+                            modifier = Modifier.fillMaxWidth().homeFavoriteEnter(
+                                batch = enterBatch,
+                                key = HomeFavoriteEnterKey(moduleId = module.id, identity = identity),
+                            ),
+                            identity = identity,
+                            movement = applicationMovement,
+                            showRemove = applicationEditing,
+                            removeEnabled = applicationMutationEnabled,
+                            namePlacement = module.namePlacement,
+                            iconSize = dimensionResource(id = module.applicationSize.iconSizeResource()),
+                            onRemove = { onRemoveFavorite(identity) },
+                            content = {
+                                if (module.namePlacement == FavoriteNamePlacement.Below) {
+                                    HomeFavoriteBelowItem(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        availability = availability,
+                                        listSize = module.applicationSize,
+                                        interactionEnabled = !editMode,
+                                        onClick = { onLaunchFavorite(availability) },
+                                        onLongClick = {
+                                            availability.presentationEntry?.let(block = onLongPressFavorite)
                                         },
-                                    ),
-                                    module = module,
-                                    enabled = addEntryEnabled,
-                                    onClick = onAddToModule,
-                                )
-                            } else {
-                                val availability = availabilityByIdentity[identity]
-                                    ?: FavoriteAvailability.Unknown(presentationEntry = null)
-                                HomeFavoriteItemFrame(
-                                    modifier = itemModifier,
-                                    identity = identity,
-                                    movement = applicationMovement,
-                                    showRemove = applicationEditing,
-                                    removeEnabled = applicationMutationEnabled,
-                                    namePlacement = module.namePlacement,
-                                    iconSize = dimensionResource(id = module.applicationSize.iconSizeResource()),
-                                    onRemove = { onRemoveFavorite(identity) },
-                                    content = {
-                                        if (module.namePlacement == FavoriteNamePlacement.Below) {
-                                            HomeFavoriteBelowItem(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                availability = availability,
-                                                listSize = module.applicationSize,
-                                                interactionEnabled = !editMode,
-                                                onClick = { onLaunchFavorite(availability) },
-                                                onLongClick = {
-                                                    availability.presentationEntry?.let(block = onLongPressFavorite)
-                                                },
-                                            )
-                                        } else {
-                                            HomeFavoriteRow(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                availability = availability,
-                                                onClick = { onLaunchFavorite(availability) },
-                                                onLongClick = {
-                                                    availability.presentationEntry?.let(block = onLongPressFavorite)
-                                                },
-                                                editMode = false,
-                                                interactionEnabled = !editMode,
-                                                compact = false,
-                                                listSize = module.applicationSize,
-                                                exchangeHighlight = false,
-                                                onRowBoundsInWindow = { _, _ -> },
-                                                onHandleBoundsInWindow = {},
-                                            )
-                                        }
-                                    },
-                                )
-                            }
-                        }
-                        repeat(module.itemsPerRow - rowItems.size) {
-                            Spacer(Modifier.weight(1f))
-                        }
+                                    )
+                                } else {
+                                    HomeFavoriteRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        availability = availability,
+                                        onClick = { onLaunchFavorite(availability) },
+                                        onLongClick = {
+                                            availability.presentationEntry?.let(block = onLongPressFavorite)
+                                        },
+                                        editMode = false,
+                                        interactionEnabled = !editMode,
+                                        compact = false,
+                                        listSize = module.applicationSize,
+                                        exchangeHighlight = false,
+                                        onRowBoundsInWindow = { _, _ -> },
+                                        onHandleBoundsInWindow = {},
+                                    )
+                                }
+                            },
+                        )
                     }
-                }
-            }
+                },
+            )
         }
 
         OrderedFavoriteModuleType.Ribbon -> {
             HomeOrderedFavoriteRibbon(
+                enterBatch = enterBatch,
                 module = module,
                 availabilityByIdentity = availabilityByIdentity,
                 listState = requireNotNull(value = ribbonListState),

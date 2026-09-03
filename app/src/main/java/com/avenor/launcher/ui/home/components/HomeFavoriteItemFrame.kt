@@ -15,10 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
@@ -27,7 +24,6 @@ import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -38,6 +34,7 @@ import com.avenor.launcher.FavoriteNamePlacement
 import com.avenor.launcher.HomeApplicationMovement
 import com.avenor.launcher.LaunchableIdentity
 import com.avenor.launcher.R
+import com.avenor.launcher.stableKey
 
 /** Removal is a sibling overlay, so unavailable-content opacity never dims the control. */
 @Composable
@@ -50,19 +47,12 @@ internal fun HomeFavoriteItemFrame(
     onRemove: () -> Unit,
     identity: LaunchableIdentity,
     movement: HomeApplicationMovement? = null,
-    ribbon: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val targetSize = dimensionResource(id = R.dimen.home_favorite_bar_remove_target_size)
     val iconInset = dimensionResource(id = R.dimen.home_favorite_list_icon_start_margin)
     val topInset = dimensionResource(id = R.dimen.home_favorite_below_top_inset)
     val density = LocalDensity.current
-    val placeholder = movement?.activeIdentity == identity
-    val outlineColor = MaterialTheme.colorScheme.onBackground.copy(
-        alpha = integerResource(id = R.integer.home_favorite_bar_border_alpha_percent) / 100f,
-    )
-    val outlineWidth = dimensionResource(id = R.dimen.home_favorite_bar_border_width)
-    val radius = if (ribbon) dimensionResource(id = R.dimen.home_favorite_bar_corner_radius) else Dp(value = 0f)
     DisposableEffect(
         key1 = movement,
         key2 = identity,
@@ -88,23 +78,7 @@ internal fun HomeFavoriteItemFrame(
                     }
                 },
             )
-            .drawWithContent(
-                onDraw = {
-                    if (placeholder) {
-                        val stroke = outlineWidth.toPx()
-                        drawRoundRect(
-                            color = outlineColor,
-                            topLeft = androidx.compose.ui.geometry.Offset(x = stroke / 2, y = stroke / 2),
-                            size = androidx.compose.ui.geometry.Size(width = size.width - stroke, height = size.height - stroke),
-                            cornerRadius = CornerRadius(x = radius.toPx(), y = radius.toPx()),
-                            style = Stroke(width = stroke),
-                        )
-                    } else {
-                        drawContent()
-                    }
-                },
-            )
-            .then(other = if (placeholder) Modifier.testTag(tag = "home_application_placeholder") else Modifier),
+            .testTag(tag = "home_favorite_item:${identity.stableKey()}"),
         content = {
             content()
             if (showRemove) {

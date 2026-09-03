@@ -7,7 +7,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 
-/** Existing destinations use an order boundary; new-module destinations use type plus boundary zero. */
+/** Layout projection only: a temporarily empty source must never become a persisted empty module. */
+internal fun applicationLayoutIdentities(
+    module: OrderedFavoriteModule,
+    movingIdentity: LaunchableIdentity?,
+): List<LaunchableIdentity> = if (movingIdentity == null || movingIdentity !in module.identities) {
+    module.identities
+} else {
+    module.identities.filterNot(predicate = { it == movingIdentity })
+}
+
+/** Boundaries index the destination with the source omitted; original orders only validate the save. */
 internal data class ApplicationOrderChange(
     val moduleId: String,
     val identity: LaunchableIdentity,
@@ -25,15 +35,10 @@ internal data class ApplicationOrderChange(
             if (identity in destinationOrder || boundary !in 0..destinationOrder.size) return null
             return destinationOrder.toMutableList().apply(block = { add(index = boundary, element = identity) })
         }
-        if (boundary !in 0..originalOrder.size) return null
-        val targetIndex = boundary - if (sourceIndex < boundary) 1 else 0
-        if (targetIndex == sourceIndex) return originalOrder
-        return originalOrder.toMutableList().apply(
-            block = {
-                removeAt(index = sourceIndex)
-                add(index = targetIndex, element = identity)
-            },
-        )
+        val remaining = originalOrder.filterNot(predicate = { it == identity })
+        if (boundary !in 0..remaining.size) return null
+        if (boundary == sourceIndex) return originalOrder
+        return remaining.toMutableList().apply(block = { add(index = boundary, element = identity) })
     }
 }
 
@@ -78,150 +83,6 @@ internal fun applyApplicationOrderChange(
     )
 }
 
-internal data class ApplicationInsertion(
-    val boundary: Int,
-    val lineStart: Offset,
-    val lineEnd: Offset,
-)
-
-/** Pure geometry: real cells only, with a distinct edge for each visual before/after candidate. */
-internal fun resolveApplicationInsertion(
-    module: OrderedFavoriteModule,
-    pointer: Offset,
-    viewport: Rect,
-    moduleBounds: Rect,
-    itemBounds: Map<LaunchableIdentity, Rect>,
-    addBounds: Rect?,
-): ApplicationInsertion? {
-    val clip = viewport.intersect(other = moduleBounds)
-    if (clip.isEmpty || !clip.contains(offset = pointer) || addBounds?.contains(offset = pointer) == true) {
-        return null
-    }
-    val cells = module.identities.mapIndexedNotNull(
-        transform = { index, identity -> itemBounds[identity]?.let(block = { index to it }) },
-    )
-    if (cells.isEmpty()) return null
-    val horizontal = module.type == OrderedFavoriteModuleType.Ribbon || module.itemsPerRow > 1
-
-    fun edge(cell: Pair<Int, Rect>, after: Boolean): ApplicationInsertion? = applicationInsertionEdge(
-        cell = cell, after = after, horizontal = horizontal, clip = clip,
-    )
-
-    val hit = cells.firstOrNull(predicate = { (_, bounds) -> bounds.contains(offset = pointer) })
-    if (hit != null) {
-        return edge(
-            cell = hit,
-            after = if (horizontal) pointer.x >= hit.second.center.x else pointer.y >= hit.second.center.y,
-        )
-    }
-
-    val rows = if (module.type == OrderedFavoriteModuleType.Ribbon) {
-        listOf(element = cells)
-    } else {
-        cells.groupBy(keySelector = { it.first / module.itemsPerRow }).values.toList()
-    }
-    val sameRow = rows.firstOrNull(
-        predicate = { row -> pointer.y >= row.first().second.top && pointer.y <= row.first().second.bottom },
-    )
-    if (horizontal && sameRow != null) {
-        // Includes ribbon gaps and unused cells in a partially filled final row, never the add cell.
-        val following = sameRow.firstOrNull(predicate = { pointer.x < it.second.left })
-        val preceding = sameRow.lastOrNull(predicate = { pointer.x > it.second.right })
-        return when {
-            following == null && preceding != null -> edge(cell = preceding, after = true)
-            preceding == null && following != null -> edge(cell = following, after = false)
-            following != null && preceding != null -> {
-                if (following.second.left - pointer.x <= pointer.x - preceding.second.right) {
-                    edge(cell = following, after = false)
-                } else {
-                    edge(cell = preceding, after = true)
-                }
-            }
-            else -> null
-        }
-    }
-    val following = rows.firstOrNull(predicate = { pointer.y < it.first().second.top })?.first()
-    val preceding = rows.lastOrNull(predicate = { pointer.y > it.last().second.bottom })?.last()
-    return when {
-        following == null && preceding != null -> edge(cell = preceding, after = true)
-        preceding == null && following != null -> edge(cell = following, after = false)
-        following != null && preceding != null -> {
-            if (following.second.top - pointer.y <= pointer.y - preceding.second.bottom) {
-                edge(cell = following, after = false)
-            } else {
-                edge(cell = preceding, after = true)
-            }
-        }
-        else -> null
-    }
-}
-
-private fun applicationInsertionEdge(
-    cell: Pair<Int, Rect>,
-    after: Boolean,
-    horizontal: Boolean,
-    clip: Rect,
-): ApplicationInsertion? {
-    val (index, bounds) = cell
-    val lineStart: Offset
-    val lineEnd: Offset
-    if (horizontal) {
-        val x = if (after) bounds.right else bounds.left
-        if (x < clip.left || x > clip.right) return null
-        lineStart = Offset(x = x, y = maxOf(clip.top, bounds.top))
-        lineEnd = Offset(x = x, y = minOf(clip.bottom, bounds.bottom))
-        if (lineEnd.y <= lineStart.y) return null
-    } else {
-        val y = if (after) bounds.bottom else bounds.top
-        if (y < clip.top || y > clip.bottom) return null
-        lineStart = Offset(x = maxOf(clip.left, bounds.left), y = y)
-        lineEnd = Offset(x = minOf(clip.right, bounds.right), y = y)
-        if (lineEnd.x <= lineStart.x) return null
-    }
-    return ApplicationInsertion(
-        boundary = index + if (after) 1 else 0,
-        lineStart = lineStart,
-        lineEnd = lineEnd,
-    )
-}
-
-internal fun resolveApplicationDestination(
-    modules: List<OrderedFavoriteModule>,
-    pointer: Offset,
-    viewport: Rect,
-    moduleBounds: Map<String, Rect>,
-    itemBounds: Map<LaunchableIdentity, Rect>,
-    addBounds: Map<String, Rect>,
-): Pair<OrderedFavoriteModule, ApplicationInsertion>? {
-    if (!viewport.contains(offset = pointer)) return null
-    val hit = modules.firstOrNull(predicate = { moduleBounds[it.id]?.contains(offset = pointer) == true })
-    if (hit != null) {
-        val insertion = resolveApplicationInsertion(
-            module = hit, pointer = pointer, viewport = viewport,
-            moduleBounds = moduleBounds.getValue(key = hit.id), itemBounds = itemBounds, addBounds = addBounds[hit.id],
-        ) ?: return null
-        return hit to insertion
-    }
-    // Only a gap bounded by two modules is an insertion destination. Space before the first
-    // or after the last module, including the main add-entry row, is not an implicit boundary.
-    val preceding = modules.lastOrNull(predicate = { moduleBounds[it.id]?.bottom?.let(block = { y -> y <= pointer.y }) == true })
-        ?: return null
-    val following = modules.firstOrNull(predicate = { moduleBounds[it.id]?.top?.let(block = { y -> y > pointer.y }) == true })
-        ?: return null
-    val beforeNext = moduleBounds.getValue(key = following.id).top - pointer.y <=
-        pointer.y - moduleBounds.getValue(key = preceding.id).bottom
-    val module = if (beforeNext) following else preceding
-    val index = if (beforeNext) 0 else module.identities.lastIndex
-    val bounds = itemBounds[module.identities[index]] ?: return null
-    val clip = viewport.intersect(other = moduleBounds.getValue(key = module.id))
-    if (clip.isEmpty) return null
-    val insertion = applicationInsertionEdge(
-        cell = index to bounds, after = !beforeNext,
-        horizontal = module.type == OrderedFavoriteModuleType.Ribbon || module.itemsPerRow > 1, clip = clip,
-    ) ?: return null
-    return module to insertion
-}
-
 internal data class HomeApplicationMovementSession(
     val module: OrderedFavoriteModule,
     val identity: LaunchableIdentity,
@@ -239,11 +100,17 @@ internal data class HomeApplicationMovementSession(
 /** Transient gesture state only. All durable writes continue through the App's favorite editor. */
 @Stable
 internal class HomeApplicationMovement {
-    // Item/layout scopes observe ownership only; pointer updates invalidate just the overlay.
+    // Item/layout scopes observe ownership and phase, not pointer or candidate geometry.
     var activeIdentity by mutableStateOf<LaunchableIdentity?>(value = null)
         private set
     var session by mutableStateOf<HomeApplicationMovementSession?>(value = null)
         private set
+    // Frozen preview content is observed independently from pointer/candidate geometry.
+    var previewSource by mutableStateOf<HomeApplicationMovementSession?>(value = null)
+        private set
+    var pendingChange by mutableStateOf<ApplicationOrderChange?>(value = null)
+        private set
+    val isDragging: Boolean get() = activeIdentity != null && pendingChange == null
     var edgeFeedback by mutableStateOf<HomeApplicationScrollRequest?>(value = null)
         private set
     var viewport = Rect.Zero
@@ -258,7 +125,7 @@ internal class HomeApplicationMovement {
         private set
 
     fun updateEdgeFeedback(request: HomeApplicationScrollRequest?) {
-        edgeFeedback = request.takeIf(predicate = { activeIdentity != null })
+        edgeFeedback = request.takeIf(predicate = { isDragging })
     }
 
     fun updateModules(current: List<OrderedFavoriteModule>) {
@@ -337,7 +204,7 @@ internal class HomeApplicationMovement {
             (availability !is FavoriteAvailability.Available && availability !is FavoriteAvailability.Disabled)
         ) return false
         val bounds = itemBounds[identity] ?: return false
-        session = HomeApplicationMovementSession(
+        val source = HomeApplicationMovementSession(
             module = module,
             identity = identity,
             availability = availability,
@@ -345,17 +212,24 @@ internal class HomeApplicationMovement {
             pointerOffset = pointer - bounds.topLeft,
             pointer = pointer,
         )
+        previewSource = source
+        session = source
         activeIdentity = identity
+        // The preview owns this identity now, even before its old layout node is disposed.
+        itemBounds.remove(key = identity)
+        removeBounds.remove(key = identity)
         refreshCandidate()
         return true
     }
 
     fun move(pointer: Offset) {
+        if (!isDragging) return
         session = session?.copy(pointer = pointer)
         refreshCandidate()
     }
 
     private fun refreshCandidate() {
+        if (!isDragging) return
         val current = session ?: return
         val creation = creationBounds.entries.firstOrNull(
             predicate = { (_, bounds) -> viewport.contains(offset = current.pointer) && bounds.contains(offset = current.pointer) },
@@ -368,6 +242,7 @@ internal class HomeApplicationMovement {
             modules = modules.ifEmpty(defaultValue = { listOf(element = current.module) }),
             pointer = current.pointer, viewport = viewport, moduleBounds = moduleBounds,
             itemBounds = itemBounds, addBounds = addBounds,
+            movingIdentity = current.identity,
         )
         session = current.copy(
             insertion = resolved?.second,
@@ -378,31 +253,48 @@ internal class HomeApplicationMovement {
 
     fun cancel() {
         session = null
+        previewSource = null
         activeIdentity = null
+        pendingChange = null
         edgeFeedback = null
     }
 
+    /** Only this save may hand off its preview; a late callback cannot clear a newer gesture. */
+    fun complete(change: ApplicationOrderChange) {
+        if (pendingChange === change) cancel()
+    }
+
     fun finish(): ApplicationOrderChange? {
+        if (!isDragging) return null
         refreshCandidate()
         val current = session ?: return null
-        cancel()
-        if (current.creation != null) {
-            return ApplicationOrderChange(
+        val change = if (current.creation != null) {
+            ApplicationOrderChange(
                 moduleId = current.module.id, identity = current.identity,
                 originalOrder = current.module.identities, boundary = 0,
                 newModuleType = current.creation.first,
             )
+        } else {
+            current.insertion?.let(block = { insertion ->
+                current.destination?.let(block = { destination ->
+                    ApplicationOrderChange(
+                        moduleId = current.module.id, identity = current.identity,
+                        originalOrder = current.module.identities, boundary = insertion.boundary,
+                        destinationModuleId = destination.id, destinationOrder = destination.identities,
+                    )
+                })
+            })
         }
-        val insertion = current.insertion ?: return null
-        val destination = current.destination ?: return null
-        val change = ApplicationOrderChange(
-            moduleId = current.module.id,
-            identity = current.identity,
-            originalOrder = current.module.identities,
-            boundary = insertion.boundary,
-            destinationModuleId = destination.id,
-            destinationOrder = destination.identities,
-        )
-        return change.takeUnless(predicate = { it.destinationModuleId == it.moduleId && it.reorderedIdentities() == it.originalOrder })
+        if (change == null || change.reorderedIdentities() == null ||
+            (change.newModuleType == null && change.destinationModuleId == change.moduleId && change.reorderedIdentities() == change.originalOrder)
+        ) {
+            cancel()
+            return null
+        }
+        // Keep source omission and the preview together until the reliable state reaches the UI.
+        pendingChange = change
+        session = current.copy(insertion = null, destination = null, creation = null)
+        edgeFeedback = null
+        return change
     }
 }
