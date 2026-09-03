@@ -66,7 +66,7 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 
 ### Iteration 24
 
-[Contract](iteration-24-application-editing-and-cross-module-movement.md). No implementation or validation evidence exists. The contract is rebaselined to accepted product-contract commit `7cae837dafb188896dd24bd43aae58022c81fe11`, including the drop-to-create destination when an application is released on a main-list add-favorite entry. Status remains `Planned`; absent evidence is not a pass.
+[Contract](iteration-24-application-editing-and-cross-module-movement.md). The author-authorized 2026-09-03 amendment selects product-contract baseline `78d2aab18066c2d9b57b56581e0ab8c17402d104` for movement feedback, content transitions, and add-entry surface refinements; the contract records the previous boundary and affected acceptance requirements. This record contains no implementation or validation evidence for the amended scope. Status remains `Planned`; the scope amendment and absent evidence do not establish a pass.
 
 ### Iteration 25
 

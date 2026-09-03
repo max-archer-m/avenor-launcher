@@ -66,7 +66,7 @@
 
 ### 迭代 24
 
-[契约](iteration-24-application-editing-and-cross-module-movement.zh-CN.md)。当前没有实施或验证证据。契约已重新基线到已接受的产品契约 commit `7cae837dafb188896dd24bd43aae58022c81fe11`，纳入把应用松手在主列表新增收藏入口上的拖动创建落点。状态保持 `Planned`；缺少证据不代表通过。
+[契约](iteration-24-application-editing-and-cross-module-movement.zh-CN.md)。作者授权的 2026-09-03 修订为移动反馈、内容过渡和新增入口表面细化选择产品契约基线 `78d2aab18066c2d9b57b56581e0ab8c17402d104`；原边界与受影响的验收要求记录在契约中。本记录尚未包含修订范围的实现或验证证据。状态保持 `Planned`；范围修订和缺少证据均不代表通过。
 
 ### 迭代 25
 
