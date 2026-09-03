@@ -66,7 +66,11 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 
 ### Iteration 24
 
-[Contract](iteration-24-application-editing-and-cross-module-movement.md). Implementation began under author authorization on 2026-09-03 and retains accepted product-contract baseline `7cae837dafb188896dd24bd43aae58022c81fe11`. Status is `In Progress`.
+[Contract](iteration-24-application-editing-and-cross-module-movement.md). Implementation began under author authorization on 2026-09-03 against product-contract baseline `7cae837dafb188896dd24bd43aae58022c81fe11`. The author-authorized amendment of the same date selects baseline `78d2aab18066c2d9b57b56581e0ab8c17402d104` for movement feedback, content transitions, and add-entry surface refinements; the contract records the previous boundary and affected acceptance requirements. Status remains `In Progress`.
+
+#### Pre-amendment implementation and evidence
+
+The following records describe implementation through `b42e02b88aafa3158e4d00d60a6eb5c554126b4a` under the previous product baseline. They retain their reported evidence scope and do not establish implementation or acceptance of the amended requirements.
 
 - Automatic empty-module cleanup now omits an emptied module before constructing a non-empty module value and saves the complete result through the existing serialized atomic store. The author reports compilation and basic acceptance of this change. It adds no module-level deletion control.
 - Application removal now has the contracted separate control in collapsed-panel editing for vertical modules and ribbons. Normal Home action-sheet removal shares the transient latest-removal Undo lifecycle. Restoration preserves the original module position, type, and style without resurrecting unrelated identities removed by reliable inventory cleanup. Favorite writes are guarded against concurrent user mutations; exit, interruption, other successful mutations, and confirmed disappearance invalidate eligible Undo state. No persistence schema or migration changes are introduced. The author reports compilation and basic acceptance of these additions.
@@ -78,6 +82,10 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 - Further test sources cover all four source/destination module-type combinations, empty-source deletion, failed cross-module saves, destination inventory changes, source virtualization, inter-module gap ties, edge ownership, band capping, and proximity-independent residence keys. Agent execution remains `Not run`.
 - Drop-to-create test sources cover both source and destination types, final-application movement, default style, persisted reload, failed saves and Undo eligibility, stale source rejection, colliding IDs, hover/insertion exclusivity, and disposed targets. Agent execution remains `Not run`.
 - Technical decision assessment: drop-to-create adds a destination to the existing App-owned favorite editor and ordered-store transaction, not a second persistence owner or schema. No additional ADR is selected specifically for this route. The final iteration-wide interruption, recovery, regression, and decision review remains incomplete.
+
+#### Amended-scope follow-up
+
+The source placeholder described above remains an implementation mismatch with the amended contract and must be removed under the selected scope. Ribbon gap-centered insertion feedback, current-visible-geometry resolution, content transitions and preview handoff, and revised add-entry surfaces still require implementation alignment and applicable validation. Resolving the documentation merge does not complete those changes or extend the earlier author acceptance to them. Final interaction, recovery, regression, and iteration-wide decision review remain incomplete.
 
 ### Iteration 25
 
