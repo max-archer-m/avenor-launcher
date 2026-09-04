@@ -4,10 +4,17 @@
     <string name="calendar_unavailable">Unable to open Calendar</string>
     <string name="drawer_loading_applications">Loading applications…</string>
     <string name="drawer_unable_to_load_applications">Unable to load applications</string>
+    <string name="drawer_search_apps">Search apps</string>
+    <string name="drawer_search_mode">Search mode</string>
+    <string name="drawer_clear_search">Clear search</string>
+    <string name="drawer_search_cancel">Cancel</string>
+    <string name="drawer_no_matching_apps">No matching apps</string>
     <string name="retry">Retry</string>
     <string name="application_unable_to_open">Unable to open application</string>
     <string name="application_information">Application information</string>
     <string name="application_information_unavailable">Unable to open application information</string>
+    <string name="uninstall_application">Uninstall</string>
+    <string name="uninstall_application_unavailable">Unable to open uninstall</string>
     <string name="add_favorite">Add favorite</string>
     <string name="remove_favorite">Remove favorite</string>
     <string name="edit_favorites">Edit</string>

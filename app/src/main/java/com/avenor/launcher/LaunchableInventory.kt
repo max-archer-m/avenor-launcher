@@ -129,6 +129,7 @@ internal class LaunchableInventoryCoordinator(
     private val loadMutex = Mutex()
     private var pendingLoad = false
     private var pendingShowLoading = false
+    private var pendingPreserveContentOnFailure = true
     private val mutableState = MutableStateFlow<LaunchableInventoryState>(
         LaunchableInventoryState.Loading,
     )
@@ -137,14 +138,23 @@ internal class LaunchableInventoryCoordinator(
 
     val state: StateFlow<LaunchableInventoryState> = mutableState
 
-    suspend fun load(showLoading: Boolean) {
+    suspend fun load(
+        showLoading: Boolean,
+        preserveContentOnFailure: Boolean = false,
+    ) {
         if (!loadMutex.tryLock()) {
+            pendingPreserveContentOnFailure = if (pendingLoad) {
+                pendingPreserveContentOnFailure && preserveContentOnFailure
+            } else {
+                preserveContentOnFailure
+            }
             pendingLoad = true
             pendingShowLoading = pendingShowLoading || showLoading
             return
         }
         try {
             var shouldShowLoading = showLoading
+            var shouldPreserveContentOnFailure = preserveContentOnFailure
             do {
                 pendingLoad = false
                 if (shouldShowLoading) mutableState.value = LaunchableInventoryState.Loading
@@ -160,10 +170,17 @@ internal class LaunchableInventoryCoordinator(
                 } catch (cancellation: CancellationException) {
                     throw cancellation
                 } catch (_: Exception) {
-                    LaunchableInventoryState.Error(lastSuccessfulSnapshot)
+                    val reliableSnapshot = lastSuccessfulSnapshot
+                    if (shouldPreserveContentOnFailure && reliableSnapshot != null) {
+                        LaunchableInventoryState.Content(snapshot = reliableSnapshot)
+                    } else {
+                        LaunchableInventoryState.Error(lastKnownSnapshot = reliableSnapshot)
+                    }
                 }
                 shouldShowLoading = pendingShowLoading
                 pendingShowLoading = false
+                shouldPreserveContentOnFailure = pendingPreserveContentOnFailure
+                pendingPreserveContentOnFailure = true
             } while (pendingLoad)
         } finally {
             loadMutex.unlock()

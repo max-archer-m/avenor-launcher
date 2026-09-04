@@ -163,8 +163,7 @@
     <dimen name="drawer_application_icon_label_gap">16dp</dimen>
 
     <!-- Drawer / Application list / Alphabet section header -->
-    <dimen name="drawer_section_header_min_height">32dp</dimen>
-    <dimen name="drawer_section_header_vertical_padding">4dp</dimen>
+    <dimen name="drawer_section_header_height">40dp</dimen>
 
     <!-- Drawer / Application list / Alphabet index rail -->
     <dimen name="drawer_index_width">32dp</dimen>
@@ -179,8 +178,20 @@
     <dimen name="drawer_index_bubble_index_gap">16dp</dimen>
     <dimen name="drawer_index_bubble_settings_icon_size">32dp</dimen>
 
-    <!-- Drawer / Favorite selection mode / Top app bar and row indicator -->
+    <!-- Drawer / Ordinary mode / Top app bar and application search -->
     <dimen name="drawer_top_app_bar_height">56dp</dimen>
+    <dimen name="drawer_search_side_reservation_width">72dp</dimen>
+    <dimen name="drawer_search_side_target_height">48dp</dimen>
+    <dimen name="drawer_search_field_height">40dp</dimen>
+    <dimen name="drawer_search_field_radius">20dp</dimen>
+    <dimen name="drawer_search_border_width">1dp</dimen>
+    <dimen name="drawer_search_active_border_width">2dp</dimen>
+    <dimen name="drawer_search_field_content_inset">12dp</dimen>
+    <dimen name="drawer_search_icon_size">20dp</dimen>
+    <dimen name="drawer_search_icon_text_gap">8dp</dimen>
+    <dimen name="drawer_search_clear_target_size">48dp</dimen>
+
+    <!-- Drawer / Favorite selection mode / Top app bar and row indicator -->
     <dimen name="drawer_selection_indicator_region_width">40dp</dimen>
     <dimen name="drawer_selection_indicator_size">24dp</dimen>
     <dimen name="drawer_selection_indicator_border_width">1dp</dimen>
@@ -216,4 +227,8 @@
     <dimen name="action_sheet_shortcut_icon_size">24dp</dimen>
     <dimen name="action_sheet_shortcut_icon_label_gap">16dp</dimen>
     <dimen name="action_sheet_shortcut_row_min_height">48dp</dimen>
+
+    <!-- Shared UI / Typography / Large application name -->
+    <dimen name="shared_large_app_name_text_size">18sp</dimen>
+    <dimen name="shared_large_app_name_line_height">28sp</dimen>
 </resources>

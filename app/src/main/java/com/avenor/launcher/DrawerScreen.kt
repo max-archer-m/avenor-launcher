@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -57,10 +58,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.colorResource
@@ -68,18 +71,26 @@ import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import com.avenor.launcher.ui.drawer.components.DrawerAlphabetIndex
 import com.avenor.launcher.ui.drawer.components.DrawerIndexBubble
+import com.avenor.launcher.ui.drawer.components.DrawerNavigationTopBar
+import com.avenor.launcher.ui.drawer.components.DrawerSearchTopBar
+import java.util.Locale
 
 private enum class DrawerLoadTrigger {
     Initial,
     ManualRetry,
     LiveUpdate,
+    LaunchFailureRefresh,
 }
 
 @Composable
@@ -95,6 +106,7 @@ internal fun DrawerScreen(
     active: Boolean = true,
     onLongPress: (LaunchableEntry) -> Unit = {},
     onExternalLaunch: () -> Unit = {},
+    onNavigateBack: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     favoriteSelectionTarget: String? = null,
     favoriteSelection: List<LaunchableIdentity> = emptyList(),
@@ -114,6 +126,20 @@ internal fun DrawerScreen(
     val launchFailureMessage = stringResource(R.string.application_unable_to_open)
     val currentState by rememberUpdatedState(state)
     var previousContent by remember { mutableStateOf<LaunchableInventorySnapshot?>(null) }
+    var searchActive by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var ordinaryPosition by remember { mutableStateOf<DrawerListPosition?>(null) }
+    val searchFocusRequester = remember { FocusRequester() }
+    val searchScope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(key1 = active) {
+        if (!active) {
+            searchActive = false
+            searchQuery = ""
+            ordinaryPosition = null
+        }
+    }
 
     LaunchedEffect(inventoryLoader, loadRequest) {
         if (loadRequest == 0 &&
@@ -121,10 +147,17 @@ internal fun DrawerScreen(
         ) {
             return@LaunchedEffect
         }
-        val positionBeforeRefresh = if (loadTrigger == DrawerLoadTrigger.LiveUpdate) {
+        val positionBeforeRefresh = if (
+            loadTrigger == DrawerLoadTrigger.LiveUpdate ||
+            loadTrigger == DrawerLoadTrigger.LaunchFailureRefresh
+        ) {
             (state as? LaunchableInventoryState.Content)?.let { content ->
                 captureDrawerListPosition(
-                    sections = content.snapshot.drawerSectionsFor(locale),
+                    sections = content.snapshot.drawerSectionsForCurrentMode(
+                        locale = locale,
+                        searchActive = searchActive,
+                        searchQuery = searchQuery,
+                    ),
                     firstVisibleItemIndex = listState.firstVisibleItemIndex,
                     firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
                 )
@@ -132,13 +165,21 @@ internal fun DrawerScreen(
         } else {
             null
         }
-        inventoryCoordinator.load(showLoading = loadTrigger != DrawerLoadTrigger.LiveUpdate)
+        inventoryCoordinator.load(
+            showLoading = loadTrigger != DrawerLoadTrigger.LiveUpdate &&
+                loadTrigger != DrawerLoadTrigger.LaunchFailureRefresh,
+            preserveContentOnFailure = loadTrigger == DrawerLoadTrigger.LaunchFailureRefresh,
+        )
         val updatedState = inventoryCoordinator.state.value
 
         if (positionBeforeRefresh != null && updatedState is LaunchableInventoryState.Content) {
             val restorationTarget = resolveDrawerRestorationTarget(
                 position = positionBeforeRefresh,
-                sections = updatedState.snapshot.drawerSectionsFor(locale),
+                sections = updatedState.snapshot.drawerSectionsForCurrentMode(
+                    locale = locale,
+                    searchActive = searchActive,
+                    searchQuery = searchQuery,
+                ),
             )
             if (restorationTarget != null) {
                 withFrameNanos { }
@@ -179,13 +220,21 @@ internal fun DrawerScreen(
         previousContent = content.snapshot
         if (oldContent == null) return@LaunchedEffect
         val position = captureDrawerListPosition(
-            sections = oldContent.drawerSectionsFor(locale),
+            sections = oldContent.drawerSectionsForCurrentMode(
+                locale = locale,
+                searchActive = searchActive,
+                searchQuery = searchQuery,
+            ),
             firstVisibleItemIndex = listState.firstVisibleItemIndex,
             firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
         ) ?: return@LaunchedEffect
         val restorationTarget = resolveDrawerRestorationTarget(
             position = position,
-            sections = content.snapshot.drawerSectionsFor(locale),
+            sections = content.snapshot.drawerSectionsForCurrentMode(
+                locale = locale,
+                searchActive = searchActive,
+                searchQuery = searchQuery,
+            ),
         ) ?: return@LaunchedEffect
         withFrameNanos { }
         listState.scrollToItem(
@@ -212,12 +261,13 @@ internal fun DrawerScreen(
 
     when (val currentState = state) {
         LaunchableInventoryState.Loading -> if (favoriteSelectionTarget == null) {
-            DrawerMessage(
+            DrawerOrdinaryMessage(
                 modifier = modifier,
                 message = stringResource(R.string.drawer_loading_applications),
                 showProgress = true,
                 action = null,
                 testTag = "drawer_loading",
+                onNavigateBack = onNavigateBack,
             )
         } else {
             DrawerSelectionMessage(
@@ -234,7 +284,7 @@ internal fun DrawerScreen(
         }
 
         is LaunchableInventoryState.Error -> if (favoriteSelectionTarget == null) {
-            DrawerMessage(
+            DrawerOrdinaryMessage(
                 modifier = modifier,
                 message = stringResource(R.string.drawer_unable_to_load_applications),
                 showProgress = false,
@@ -250,6 +300,7 @@ internal fun DrawerScreen(
                     }
                 },
                 testTag = "drawer_error",
+                onNavigateBack = onNavigateBack,
             )
         } else {
             DrawerSelectionMessage(
@@ -269,20 +320,81 @@ internal fun DrawerScreen(
         }
 
         is LaunchableInventoryState.Content -> if (favoriteSelectionTarget == null) {
+            val completeSections = currentState.snapshot.drawerSectionsFor(locale)
+            val visibleSections = remember(
+                key1 = completeSections,
+                key2 = searchActive,
+                key3 = searchQuery,
+                calculation = {
+                    if (searchActive) {
+                        filterDrawerSections(sections = completeSections, query = searchQuery)
+                    } else {
+                        completeSections
+                    }
+                },
+            )
+            val exitSearch: () -> Unit = {
+                val restorationPosition = ordinaryPosition
+                searchActive = false
+                searchQuery = ""
+                ordinaryPosition = null
+                keyboardController?.hide()
+                if (restorationPosition != null) {
+                    searchScope.launch {
+                        withFrameNanos { }
+                        resolveDrawerOrdinaryRestorationTarget(
+                            position = restorationPosition,
+                            sections = completeSections,
+                        )?.let { target ->
+                            listState.scrollToItem(
+                                index = target.itemIndex,
+                                scrollOffset = target.scrollOffset,
+                            )
+                        }
+                    }
+                }
+            }
+            BackHandler(enabled = searchActive, onBack = exitSearch)
+            LaunchedEffect(key1 = searchActive, key2 = searchQuery) {
+                if (searchActive) {
+                    listState.scrollToItem(index = 0)
+                }
+            }
             DrawerApplicationList(
                 modifier = modifier,
                 listState = listState,
-                sections = currentState.snapshot.drawerSectionsFor(locale),
+                sections = visibleSections,
+                searchActive = searchActive,
+                searchQuery = searchQuery,
+                searchFocusRequester = searchFocusRequester,
                 onLaunch = { entry ->
                     if (activationGuard.tryAcquire()) {
                         if (entryLauncher.launch(entry)) {
+                            searchActive = false
+                            searchQuery = ""
+                            ordinaryPosition = null
+                            keyboardController?.hide()
                             onExternalLaunch()
                         } else {
                             Toast.makeText(context, launchFailureMessage, Toast.LENGTH_SHORT).show()
+                            loadTrigger = DrawerLoadTrigger.LaunchFailureRefresh
+                            loadRequest += 1
                         }
                     }
                 },
                 onLongPress = onLongPress,
+                onNavigateBack = onNavigateBack,
+                onEnterSearch = {
+                    ordinaryPosition = captureDrawerOrdinaryListPosition(
+                        sections = completeSections,
+                        firstVisibleItemIndex = listState.firstVisibleItemIndex,
+                        firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+                    )
+                    searchActive = true
+                },
+                onQueryChange = { query -> searchQuery = query },
+                onClearSearch = { searchQuery = "" },
+                onCancelSearch = exitSearch,
                 onOpenSettings = onOpenSettings,
             )
         } else {
@@ -302,6 +414,19 @@ internal fun DrawerScreen(
     }
 }
 
+private fun LaunchableInventorySnapshot.drawerSectionsForCurrentMode(
+    locale: Locale,
+    searchActive: Boolean,
+    searchQuery: String,
+): List<DrawerSection> {
+    val completeSections = drawerSectionsFor(locale = locale)
+    return if (searchActive) {
+        filterDrawerSections(sections = completeSections, query = searchQuery)
+    } else {
+        completeSections
+    }
+}
+
 @Composable
 private fun DrawerMessage(
     modifier: Modifier,
@@ -318,7 +443,6 @@ private fun DrawerMessage(
                 state = rememberScrollableState { 0f },
                 orientation = Orientation.Vertical,
             )
-            .windowInsetsPadding(WindowInsets.safeDrawing)
             .testTag(testTag),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -344,6 +468,33 @@ private fun DrawerMessage(
             style = MaterialTheme.typography.bodyLarge,
         )
         action?.invoke()
+    }
+}
+
+@Composable
+private fun DrawerOrdinaryMessage(
+    modifier: Modifier,
+    message: String,
+    showProgress: Boolean,
+    showErrorIcon: Boolean = false,
+    action: (@Composable () -> Unit)?,
+    testTag: String,
+    onNavigateBack: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(insets = WindowInsets.safeDrawing),
+    ) {
+        DrawerNavigationTopBar(onNavigateBack = onNavigateBack)
+        DrawerMessage(
+            modifier = modifier.weight(weight = 1f),
+            message = message,
+            showProgress = showProgress,
+            showErrorIcon = showErrorIcon,
+            action = action,
+            testTag = testTag,
+        )
     }
 }
 
@@ -655,8 +806,16 @@ private fun DrawerApplicationList(
     modifier: Modifier,
     listState: LazyListState,
     sections: List<DrawerSection>,
+    searchActive: Boolean,
+    searchQuery: String,
+    searchFocusRequester: FocusRequester,
     onLaunch: (LaunchableEntry) -> Unit,
     onLongPress: (LaunchableEntry) -> Unit,
+    onNavigateBack: () -> Unit,
+    onEnterSearch: () -> Unit,
+    onQueryChange: (String) -> Unit,
+    onClearSearch: () -> Unit,
+    onCancelSearch: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     val sectionAnchors = remember(sections) {
@@ -675,92 +834,140 @@ private fun DrawerApplicationList(
     val hapticFeedback = LocalHapticFeedback.current
     var activeIndexLabel by remember { mutableStateOf<String?>(null) }
     var indexJumpJob by remember { mutableStateOf<Job?>(null) }
-    Box(
-        modifier = Modifier.fillMaxSize(),
+    LaunchedEffect(key1 = searchActive) {
+        if (searchActive) {
+            indexJumpJob?.cancel()
+            activeIndexLabel = null
+        }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(insets = WindowInsets.safeDrawing),
     ) {
+        DrawerSearchTopBar(
+            searchActive = searchActive,
+            query = searchQuery,
+            focusRequester = searchFocusRequester,
+            onNavigateBack = onNavigateBack,
+            onEnterSearch = onEnterSearch,
+            onQueryChange = onQueryChange,
+            onClearSearch = onClearSearch,
+            onCancelSearch = onCancelSearch,
+        )
         val horizontalPadding = dimensionResource(R.dimen.drawer_horizontal_padding)
         val indexWidth = dimensionResource(R.dimen.drawer_index_width)
-        LazyColumn(
+        Box(
             modifier = modifier
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.safeDrawing)
-                .testTag("drawer_application_list"),
-            contentPadding = PaddingValues(
-                start = horizontalPadding,
-                end = horizontalPadding + indexWidth,
-            ),
-            state = listState,
+                .weight(weight = 1f)
+                .fillMaxWidth(),
         ) {
-            sections.forEach { section ->
-                item(key = "section:${section.label}") {
-                    DrawerSectionHeader(section.label)
+            if (searchActive && searchQuery.isNotBlank() && sections.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag(tag = "drawer_search_empty"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.drawer_no_matching_apps),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
                 }
-                items(
-                    items = section.entries,
-                    key = { entry ->
-                        "${entry.identity.profileSerialNumber}:" +
-                            entry.identity.componentName.flattenToString()
-                    },
-                ) { entry ->
-                    DrawerApplicationRow(
-                        entry = entry,
-                        onLaunch = onLaunch,
-                        onLongPress = onLongPress,
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag(tag = "drawer_application_list"),
+                    contentPadding = PaddingValues(
+                        start = horizontalPadding,
+                        end = horizontalPadding + indexWidth,
+                    ),
+                    state = listState,
+                ) {
+                    sections.forEach { section ->
+                        item(key = "section:${section.label}") {
+                            DrawerSectionHeader(label = section.label)
+                        }
+                        items(
+                            items = section.entries,
+                            key = { entry ->
+                                "${entry.identity.profileSerialNumber}:" +
+                                    entry.identity.componentName.flattenToString()
+                            },
+                        ) { entry ->
+                            DrawerApplicationRow(
+                                entry = entry,
+                                searchQuery = searchQuery.takeIf { searchActive },
+                                onLaunch = onLaunch,
+                                onLongPress = onLongPress,
+                            )
+                        }
+                    }
+                    if (!searchActive) {
+                        item(key = "section:settings") {
+                            DrawerSectionHeader(
+                                label = stringResource(id = R.string.settings),
+                                modifier = Modifier.testTag(tag = "drawer_settings_anchor"),
+                            )
+                        }
+                        item(key = "settings") {
+                            DrawerSettingsRow(onClick = onOpenSettings)
+                        }
+                    }
+                }
+                if (!searchActive || sections.isNotEmpty()) {
+                    DrawerAlphabetIndex(
+                        labels = sections.map(transform = DrawerSection::label),
+                        modifier = Modifier.align(alignment = Alignment.CenterEnd),
+                        onSelect = { label, immediate ->
+                            val anchor = sectionAnchors.getValue(label)
+                            hapticFeedback.performHapticFeedback(
+                                hapticFeedbackType = HapticFeedbackType.SegmentTick,
+                            )
+                            indexJumpJob?.cancel()
+                            indexJumpJob = coroutineScope.launch {
+                                if (immediate) {
+                                    listState.scrollToItem(index = anchor)
+                                } else {
+                                    listState.animateScrollToItem(index = anchor)
+                                }
+                            }
+                        },
+                        onActiveLabelChange = { label -> activeIndexLabel = label },
+                        onSelectSettings = { immediate ->
+                            if (!searchActive) {
+                                hapticFeedback.performHapticFeedback(
+                                    hapticFeedbackType = HapticFeedbackType.SegmentTick,
+                                )
+                                indexJumpJob?.cancel()
+                                indexJumpJob = coroutineScope.launch {
+                                    if (immediate) {
+                                        listState.scrollToItem(index = settingsAnchor)
+                                    } else {
+                                        listState.animateScrollToItem(index = settingsAnchor)
+                                    }
+                                }
+                            }
+                        },
+                        includeSettings = !searchActive,
                     )
                 }
             }
-            item(key = "section:settings") {
-                DrawerSectionHeader(
-                    label = stringResource(R.string.settings),
-                    modifier = Modifier.testTag("drawer_settings_anchor"),
+
+            activeIndexLabel?.let { label ->
+                DrawerIndexBubble(
+                    label = label,
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterEnd)
+                        .padding(
+                            end = indexWidth + dimensionResource(
+                                id = R.dimen.drawer_index_bubble_index_gap,
+                            ),
+                        ),
                 )
             }
-            item(key = "settings") {
-                DrawerSettingsRow(onClick = onOpenSettings)
-            }
-        }
-
-        DrawerAlphabetIndex(
-            labels = sections.map(DrawerSection::label),
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .windowInsetsPadding(WindowInsets.safeDrawing),
-            onSelect = { label, immediate ->
-                val anchor = sectionAnchors.getValue(label)
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                indexJumpJob?.cancel()
-                indexJumpJob = coroutineScope.launch {
-                    if (immediate) {
-                        listState.scrollToItem(anchor)
-                    } else {
-                        listState.animateScrollToItem(anchor)
-                    }
-                }
-            },
-            onActiveLabelChange = { label -> activeIndexLabel = label },
-            onSelectSettings = { immediate ->
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                indexJumpJob?.cancel()
-                indexJumpJob = coroutineScope.launch {
-                    if (immediate) {
-                        listState.scrollToItem(settingsAnchor)
-                    } else {
-                        listState.animateScrollToItem(settingsAnchor)
-                    }
-                }
-            },
-        )
-
-        activeIndexLabel?.let { label ->
-            DrawerIndexBubble(
-                label = label,
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(
-                        end = indexWidth +
-                            dimensionResource(R.dimen.drawer_index_bubble_index_gap),
-                    ),
-            )
         }
     }
 }
@@ -770,16 +977,27 @@ private fun DrawerSectionHeader(
     label: String,
     modifier: Modifier = Modifier,
 ) {
-    Text(
-        text = label,
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = dimensionResource(R.dimen.drawer_section_header_min_height))
-            .padding(vertical = dimensionResource(R.dimen.drawer_section_header_vertical_padding))
-            .testTag("drawer_section_$label"),
-        color = MaterialTheme.colorScheme.onBackground,
-        style = MaterialTheme.typography.labelLarge,
-    )
+            .height(height = dimensionResource(id = R.dimen.drawer_section_header_height))
+            .testTag(tag = "drawer_section_$label"),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontSize = dimensionResource(
+                    id = R.dimen.shared_large_app_name_text_size,
+                ).value.sp,
+                lineHeight = dimensionResource(
+                    id = R.dimen.shared_large_app_name_line_height,
+                ).value.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+        )
+    }
 }
 
 @Composable
@@ -813,6 +1031,7 @@ private fun DrawerSettingsRow(onClick: () -> Unit) {
 @Composable
 private fun DrawerApplicationRow(
     entry: LaunchableEntry,
+    searchQuery: String?,
     onLaunch: (LaunchableEntry) -> Unit,
     onLongPress: (LaunchableEntry) -> Unit,
 ) {
@@ -837,15 +1056,45 @@ private fun DrawerApplicationRow(
     ) {
         DrawerApplicationIcon(entry.iconBitmap, entry.icon, iconSize, iconSizePixels)
         Spacer(Modifier.width(dimensionResource(R.dimen.drawer_application_icon_label_gap)))
-        Text(
-            text = entry.label,
+        DrawerApplicationName(
+            label = entry.label,
+            searchQuery = searchQuery,
             modifier = Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodyLarge,
         )
     }
+}
+
+@Composable
+private fun DrawerApplicationName(
+    label: String,
+    searchQuery: String?,
+    modifier: Modifier = Modifier,
+) {
+    val matchRanges = remember(key1 = label, key2 = searchQuery) {
+        searchQuery?.let { query ->
+            drawerSearchMatchRanges(label = label, query = query)
+        }.orEmpty()
+    }
+    val emphasizedLabel = remember(key1 = label, key2 = matchRanges) {
+        buildAnnotatedString {
+            append(text = label)
+            matchRanges.forEach { range ->
+                addStyle(
+                    style = SpanStyle(fontWeight = FontWeight.Medium),
+                    start = range.first,
+                    end = range.last + 1,
+                )
+            }
+        }
+    }
+    Text(
+        text = emphasizedLabel,
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.onBackground,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.bodyLarge,
+    )
 }
 
 @Composable

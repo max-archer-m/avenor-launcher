@@ -1,6 +1,8 @@
 package com.avenor.launcher
 
 import android.content.ComponentName
+import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -759,6 +761,7 @@ class HomeScreenTest {
             AvenorTheme {
                 ApplicationActionSheet(
                     entry = entry,
+                    source = ApplicationActionSheetSource.Home,
                     favoriteState = FavoriteReadState.Readable(emptyList()),
                     onDismiss = {},
                     onAddFavorite = { addRequested = true },
@@ -789,6 +792,7 @@ class HomeScreenTest {
             AvenorTheme {
                 ApplicationActionSheet(
                     entry = entry,
+                    source = ApplicationActionSheetSource.Home,
                     favoriteState = FavoriteReadState.Readable(listOf(entry.identity)),
                     onDismiss = {},
                     onAddFavorite = {},
@@ -819,6 +823,7 @@ class HomeScreenTest {
             AvenorTheme {
                 ApplicationActionSheet(
                     entry = entry,
+                    source = ApplicationActionSheetSource.Home,
                     favoriteState = FavoriteReadState.ReadFailure,
                     onDismiss = {},
                     onAddFavorite = {},
@@ -845,11 +850,13 @@ class HomeScreenTest {
             profileBadge = ColorDrawable(Color.WHITE),
         )
         var openedEntry: LaunchableEntry? = null
+        var informationOpened = false
         var dismissed = false
         composeRule.setContent {
             AvenorTheme {
                 ApplicationActionSheet(
                     entry = entry,
+                    source = ApplicationActionSheetSource.Home,
                     favoriteState = FavoriteReadState.Readable(emptyList()),
                     onDismiss = { dismissed = true },
                     onAddFavorite = {},
@@ -858,6 +865,7 @@ class HomeScreenTest {
                         openedEntry = it
                         true
                     },
+                    onInformationOpened = { informationOpened = true },
                 )
             }
         }
@@ -867,6 +875,177 @@ class HomeScreenTest {
 
         composeRule.runOnIdle {
             assertEquals(entry, openedEntry)
+            assertEquals(true, informationOpened)
+            assertEquals(true, dismissed)
+        }
+    }
+
+    @Test
+    fun failedInformationLaunchDismissesWithoutSchedulingReturnRefresh() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.missing.details", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Missing application details",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        var informationOpened = false
+        var dismissed = false
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    source = ApplicationActionSheetSource.Drawer,
+                    favoriteState = FavoriteReadState.Readable(emptyList()),
+                    onDismiss = { dismissed = true },
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    informationLauncher = ApplicationInformationLauncher { false },
+                    onInformationOpened = { informationOpened = true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(testTag = "application_information_action").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(false, informationOpened)
+            assertEquals(true, dismissed)
+        }
+    }
+
+    @Test
+    fun uninstallAvailabilityExcludesSystemProfilesAndMissingHandlers() {
+        assertEquals(
+            true,
+            isOrdinaryUninstallAvailable(
+                isCurrentUser = true,
+                applicationFlags = 0,
+                hasSystemHandler = true,
+            ),
+        )
+        assertEquals(
+            false,
+            isOrdinaryUninstallAvailable(
+                isCurrentUser = true,
+                applicationFlags = ApplicationInfo.FLAG_SYSTEM,
+                hasSystemHandler = true,
+            ),
+        )
+        assertEquals(
+            false,
+            isOrdinaryUninstallAvailable(
+                isCurrentUser = true,
+                applicationFlags = ApplicationInfo.FLAG_UPDATED_SYSTEM_APP,
+                hasSystemHandler = true,
+            ),
+        )
+        assertEquals(
+            false,
+            isOrdinaryUninstallAvailable(
+                isCurrentUser = false,
+                applicationFlags = 0,
+                hasSystemHandler = true,
+            ),
+        )
+        assertEquals(
+            false,
+            isOrdinaryUninstallAvailable(
+                isCurrentUser = true,
+                applicationFlags = 0,
+                hasSystemHandler = false,
+            ),
+        )
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun uninstallIntentTargetsTheSystemPackageUninstaller() {
+        val intent = createApplicationUninstallIntent(packageName = "com.example.uninstall")
+
+        assertEquals(Intent.ACTION_UNINSTALL_PACKAGE, intent.action)
+        assertEquals("package:com.example.uninstall", intent.data.toString())
+    }
+
+    @Test
+    fun homeUninstallActionDismissesAndSchedulesReturnRefresh() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.uninstall", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Uninstall application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        var uninstallRequested = false
+        var uninstallOpened = false
+        var dismissed = false
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    source = ApplicationActionSheetSource.Home,
+                    favoriteState = FavoriteReadState.Readable(listOf(entry.identity)),
+                    onDismiss = { dismissed = true },
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    informationLauncher = ApplicationInformationLauncher { true },
+                    uninstallAvailable = true,
+                    onUninstall = {
+                        uninstallRequested = true
+                        true
+                    },
+                    onUninstallOpened = { uninstallOpened = true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(testTag = "uninstall_application_action").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(true, uninstallRequested)
+            assertEquals(true, uninstallOpened)
+            assertEquals(true, dismissed)
+        }
+    }
+
+    @Test
+    fun failedUninstallLaunchDismissesWithoutSchedulingReturnRefresh() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.failed.uninstall", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Failed uninstall",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        var uninstallOpened = false
+        var dismissed = false
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    source = ApplicationActionSheetSource.Home,
+                    favoriteState = FavoriteReadState.Readable(listOf(entry.identity)),
+                    onDismiss = { dismissed = true },
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    informationLauncher = ApplicationInformationLauncher { true },
+                    uninstallAvailable = true,
+                    onUninstall = { false },
+                    onUninstallOpened = { uninstallOpened = true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(testTag = "uninstall_application_action").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(false, uninstallOpened)
             assertEquals(true, dismissed)
         }
     }
@@ -1341,6 +1520,7 @@ class HomeScreenTest {
             AvenorTheme {
                 ApplicationActionSheet(
                     entry = entry,
+                    source = ApplicationActionSheetSource.Home,
                     favoriteState = FavoriteReadState.Readable(listOf(entry.identity, second)),
                     onDismiss = {},
                     onAddFavorite = {},
@@ -1371,6 +1551,7 @@ class HomeScreenTest {
             AvenorTheme {
                 ApplicationActionSheet(
                     entry = entry,
+                    source = ApplicationActionSheetSource.Home,
                     favoriteState = FavoriteReadState.Readable(listOf(entry.identity)),
                     onDismiss = {},
                     onAddFavorite = {},
@@ -1504,6 +1685,7 @@ class HomeScreenTest {
             AvenorTheme {
                 ApplicationActionSheet(
                     entry = entry,
+                    source = ApplicationActionSheetSource.Home,
                     favoriteState = FavoriteReadState.Readable(emptyList()),
                     onDismiss = {},
                     onAddFavorite = {},
@@ -1516,8 +1698,87 @@ class HomeScreenTest {
         }
 
         composeRule.onNodeWithTag("application_shortcut_region").assertIsDisplayed()
+        composeRule.onNodeWithTag("application_shortcut_trailing_divider").assertIsDisplayed()
         composeRule.onNodeWithText("Exact shortcut").performClick()
         composeRule.runOnIdle { assertEquals(shortcut, invoked) }
+    }
+
+    @Test
+    fun drawerActionSheetOmitsHomeActionsAndTerminalShortcutDivider() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.drawer", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Drawer application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val shortcut = ApplicationShortcut(
+            packageName = "com.example.drawer",
+            shortcutId = "drawer-shortcut",
+            label = "Drawer shortcut",
+            icon = null,
+            user = entry.user,
+            rank = 0,
+        )
+        composeRule.setContent {
+            AvenorTheme {
+                ApplicationActionSheet(
+                    entry = entry,
+                    source = ApplicationActionSheetSource.Drawer,
+                    favoriteState = FavoriteReadState.Readable(listOf(entry.identity)),
+                    onDismiss = {},
+                    onAddFavorite = {},
+                    onRemoveFavorite = {},
+                    onEditFavorites = {},
+                    canEditFavorites = true,
+                    informationLauncher = ApplicationInformationLauncher { true },
+                    uninstallAvailable = true,
+                    shortcuts = listOf(shortcut),
+                )
+            }
+        }
+
+        composeRule.onNodeWithText(text = "Drawer shortcut").assertIsDisplayed()
+        composeRule.onAllNodesWithTag(testTag = "favorite_action").assertCountEquals(expectedSize = 0)
+        composeRule.onAllNodesWithTag(testTag = "edit_favorites_action")
+            .assertCountEquals(expectedSize = 0)
+        composeRule.onAllNodesWithTag(testTag = "uninstall_application_action")
+            .assertCountEquals(expectedSize = 0)
+        composeRule.onAllNodesWithTag(testTag = "application_shortcut_trailing_divider")
+            .assertCountEquals(expectedSize = 0)
+    }
+
+    @Test
+    fun drawerActionSheetRemainsAvailableWhenFavoriteStorageFails() {
+        val entry = LaunchableEntry(
+            identity = LaunchableIdentity(
+                profileSerialNumber = 0,
+                componentName = ComponentName("com.example.drawer.failure", "MainActivity"),
+            ),
+            user = Process.myUserHandle(),
+            label = "Drawer independent application",
+            icon = ColorDrawable(Color.TRANSPARENT),
+        )
+        val favoriteStore = TestFavoriteStore(initial = emptyList())
+        composeRule.setContent {
+            AvenorTheme {
+                AvenorApp(
+                    inventoryLoader = LaunchableInventoryLoader { completeSnapshot(entry) },
+                    favoriteStore = favoriteStore,
+                )
+            }
+        }
+        composeRule.onNodeWithTag(testTag = "home_surface").performTouchInput { swipeUp() }
+        composeRule.onNodeWithText(text = "Drawer independent application")
+            .performTouchInput { longClick() }
+        composeRule.onNodeWithTag(testTag = "application_action_sheet").assertIsDisplayed()
+
+        composeRule.runOnIdle { favoriteStore.failRead() }
+
+        composeRule.onNodeWithTag(testTag = "application_action_sheet").assertIsDisplayed()
+        composeRule.onNodeWithTag(testTag = "application_information_action").assertIsDisplayed()
     }
 
     @Test
@@ -1532,6 +1793,7 @@ class HomeScreenTest {
             AvenorTheme {
                 ApplicationActionSheet(
                     entry = entry,
+                    source = ApplicationActionSheetSource.Home,
                     favoriteState = FavoriteReadState.Readable(emptyList()),
                     onDismiss = {},
                     onAddFavorite = {},
@@ -1569,6 +1831,7 @@ class HomeScreenTest {
             AvenorTheme {
                 ApplicationActionSheet(
                     entry = entry,
+                    source = ApplicationActionSheetSource.Home,
                     favoriteState = FavoriteReadState.Readable(emptyList()),
                     onDismiss = {},
                     onAddFavorite = {},
@@ -1876,6 +2139,10 @@ private class TestFavoriteStore(initial: List<LaunchableIdentity>) : FavoriteSto
 
     fun readableIdentities(): List<LaunchableIdentity> =
         (state.value as FavoriteReadState.Readable).identities
+
+    fun failRead() {
+        mutableState.value = FavoriteReadState.ReadFailure
+    }
 }
 
 private class TestAccessibilityLockController(

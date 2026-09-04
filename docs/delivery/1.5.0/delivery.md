@@ -46,7 +46,7 @@ Primary risks are locale-dependent search behavior, stale result identity, Back/
 
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
-| [Iteration 26: Drawer Search and Ordinary Navigation](iteration-26-drawer-search-and-ordinary-navigation.md) | `Planned` | 2026-09-01 | Local application-name search and the revised ordinary Drawer navigation form one independently observable discovery increment. |
+| [Iteration 26: Drawer Search and Ordinary Navigation](iteration-26-drawer-search-and-ordinary-navigation.md) | `Completed` | 2026-09-04 | The author reported basic acceptance of the complete implemented scope after incremental device validation and final gap review. |
 | [Iteration 27: Drawer Display Settings](iteration-27-drawer-display-settings.md) | `Planned` | 2026-09-01 | Durable layout, anchor, and background controls depend on the revised ordinary Drawer surface. |
 | [Iteration 28: Upgrade, Regression, and Version Closure](iteration-28-upgrade-regression-and-version-closure.md) | `Planned` | 2026-09-01 | Version completion requires integrated Drawer, upgrade, compatibility, artifact, and author-acceptance evidence after the selected Drawer loop is complete. |
 
@@ -54,7 +54,13 @@ Primary risks are locale-dependent search behavior, stale result identity, Back/
 
 ### Iteration 26
 
-[Contract](iteration-26-drawer-search-and-ordinary-navigation.md). No implementation or validation evidence exists. Status remains `Planned`; absent evidence is not a pass.
+[Contract](iteration-26-drawer-search-and-ordinary-navigation.md). Production implementation was authorized on 2026-09-04 from integrated mainline commit `9bdd79c69013379dc3a7f964388bd012deaf2907`, which contains the accepted product-contract baseline. Status is `Completed` after the author reported basic acceptance of the complete implemented iteration scope.
+
+The completed implementation establishes the fixed ordinary top app bar and transient search mode without exposing the Iteration 27 display-settings entry. Displayed-name filtering preserves the existing section and application order, uses the ordering-compatible Latin-to-ASCII normalization without Han-to-Latin or pinyin matching, emphasizes every non-overlapping displayed match, hides Settings during search, and supplies clear, cancel, Back, no-result, live-inventory reprojection, and ordinary-position restoration paths including entry from the Settings section. Focused test sources cover normalization, match ranges, search lifecycle, latest-inventory projection, non-blocking launch-failure refresh, and ordinary restoration. The author reported the resulting search and ordinary-navigation behavior basically accepted after the final review corrections.
+
+The author reported basic acceptance of the source-specific action-sheet split, system-application-information round trip, revised `40dp` section-anchor presentation, and Home-only uninstall journey after its platform Intent correction. Drawer omits the complete Home Launcher-action region and terminal shortcut divider; Home retains its applicable actions, while ordinary current-user non-system applications may hand uninstall to the system confirmation surface. Work-profile, cloned, system, and updated-system identities remain conservatively excluded when exact removal cannot be guaranteed. The manifest now declares the platform-required `REQUEST_DELETE_PACKAGES` capability; no runtime permission prompt or direct package deletion is introduced. Final review removed Drawer action-sheet dependence on favorite-storage readability, restored the Settings position across search, and aligned Latin normalization with ordering; the author then reported these corrections basically accepted.
+
+Agent `git diff --check` and affected manifest/resource XML parsing passed after the completed changes. Gradle and instrumentation were not run by the agent; author-reported observations are limited to the accepted scope stated above and do not imply unreported commands or broader compatibility coverage. No known included-scope crash, wrong-identity launch, destructive reconciliation, or navigation dead end remains open at completion.
 
 ### Iteration 27
 
@@ -94,4 +100,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.5.0` identif
 
 ## Completion result
 
-No completion result exists. `1.5.0` and Iterations 26–28 remain `Planned`; this document does not authorize production implementation.
+Iteration 26 is `Completed` with the implementation and author-reported basic acceptance recorded above. `1.5.0` remains incomplete and Iterations 27–28 remain `Planned`. This result does not complete the version or authorize push, tag, artifact movement, publication, or release.

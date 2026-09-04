@@ -4,10 +4,17 @@
     <string name="calendar_unavailable">无法打开日历</string>
     <string name="drawer_loading_applications">正在加载应用…</string>
     <string name="drawer_unable_to_load_applications">无法加载应用</string>
+    <string name="drawer_search_apps">搜索应用</string>
+    <string name="drawer_search_mode">搜索模式</string>
+    <string name="drawer_clear_search">清除搜索</string>
+    <string name="drawer_search_cancel">取消</string>
+    <string name="drawer_no_matching_apps">没有匹配的应用</string>
     <string name="retry">重试</string>
     <string name="application_unable_to_open">无法打开应用</string>
     <string name="application_information">应用信息</string>
     <string name="application_information_unavailable">无法打开应用信息</string>
+    <string name="uninstall_application">卸载</string>
+    <string name="uninstall_application_unavailable">无法打开卸载界面</string>
     <string name="add_favorite">添加收藏</string>
     <string name="remove_favorite">取消收藏</string>
     <string name="edit_favorites">编辑</string>

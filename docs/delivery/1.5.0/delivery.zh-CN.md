@@ -46,7 +46,7 @@
 
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
-| [迭代 26：Drawer 搜索与普通导航](iteration-26-drawer-search-and-ordinary-navigation.zh-CN.md) | `Planned` | 2026-09-01 | 本地应用名称搜索与修订后的普通 Drawer 导航构成一个可独立观察的发现增量。 |
+| [迭代 26：Drawer 搜索与普通导航](iteration-26-drawer-search-and-ordinary-navigation.zh-CN.md) | `Completed` | 2026-09-04 | 作者在增量设备验证和最终查漏后，报告完整已实施范围基本验收通过。 |
 | [迭代 27：Drawer 展示设置](iteration-27-drawer-display-settings.zh-CN.md) | `Planned` | 2026-09-01 | 持久布局、锚点和背景控制依赖修订后的普通 Drawer 表面。 |
 | [迭代 28：升级、回归与版本收尾](iteration-28-upgrade-regression-and-version-closure.zh-CN.md) | `Planned` | 2026-09-01 | 所选 Drawer 闭环完成后，版本完成需要集成的 Drawer、升级、兼容性、产物和作者验收证据。 |
 
@@ -54,7 +54,13 @@
 
 ### 迭代 26
 
-[契约](iteration-26-drawer-search-and-ordinary-navigation.zh-CN.md)。当前没有实施或验证证据。状态保持 `Planned`；缺少证据不代表通过。
+[契约](iteration-26-drawer-search-and-ordinary-navigation.zh-CN.md)。生产实现于 2026-09-04 获得授权，起点为已集成的主线 commit `9bdd79c69013379dc3a7f964388bd012deaf2907`，其中包含已接受的产品契约基线。作者报告完整已实施迭代范围基本验收通过后，状态为 `Completed`。
+
+已完成实现建立固定的普通顶部应用栏和临时搜索模式，且不暴露迭代 27 的展示设置入口。展示名称过滤保持既有分组及应用顺序，使用与排序兼容的拉丁文字转 ASCII 规范化，但不执行汉字转拉丁或拼音匹配；所有不重叠的展示命中都会强调。搜索期间隐藏 Settings，并提供清除、取消、Back、无结果、实时清单重投影，以及包括从 Settings 分组进入时在内的普通位置恢复路径。聚焦测试源码覆盖规范化、命中范围、搜索生命周期、最新清单投影、启动失败后的非阻断刷新和普通位置恢复。最终查漏修正后，作者报告相应搜索和普通导航行为基本验收通过。
+
+作者已报告基本验收通过的步骤包括：来源特定的操作面板拆分、系统应用信息往返、修订后的 `40dp` 分组锚点表现，以及修正平台 Intent 后的 Home 专属卸载旅程。Drawer 移除完整 Home Launcher 操作区及快捷方式末尾分隔线；Home 保留其适用操作，当前用户的普通非系统应用可把卸载交给系统确认界面。无法保证精确移除时，工作资料、应用分身、系统应用及更新系统应用继续保守排除。Manifest 现已声明平台要求的 `REQUEST_DELETE_PACKAGES` 能力；不会增加运行时权限弹窗，也不会由 Avenor 直接删除软件包。最终检查还移除了 Drawer 操作面板对收藏存储可读性的依赖、恢复跨搜索的 Settings 位置，并让拉丁文字规范化与排序对齐；随后作者报告这些修正基本验收通过。
+
+已完成改动后，Agent 的 `git diff --check` 和受影响 Manifest/资源 XML 解析通过。Agent 未运行 Gradle 或 instrumentation；作者报告的观察仅限上述已接受范围，不推断未报告命令或更广兼容性覆盖。完成时不存在已知纳入范围崩溃、错误身份启动、破坏性协调或导航死路。
 
 ### 迭代 27
 
@@ -94,4 +100,4 @@
 
 ## 完成结果
 
-当前没有完成结果。`1.5.0` 和迭代 26–28 保持 `Planned`；本文件不授权生产实现。
+迭代 26 已按上述实现和作者报告的基本验收结果标记为 `Completed`。`1.5.0` 仍未完成，迭代 27–28 保持 `Planned`。本结果不完成版本，也不授权推送、tag、产物移动、发布或发行。

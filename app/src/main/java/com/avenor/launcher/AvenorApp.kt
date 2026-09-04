@@ -122,6 +122,7 @@ internal fun AvenorApp(systemHomeEvents: Flow<Unit>? = null) {
     }
     val favoriteStore = remember(context) { OrderedFavoriteStoreAdapter(context) }
     val informationLauncher = remember(context) { AndroidApplicationInformationLauncher(context) }
+    val uninstallLauncher = remember(context) { AndroidApplicationUninstallLauncher(context) }
     val shortcutController = remember(context) {
         AndroidApplicationShortcutController(context)
     }
@@ -143,6 +144,7 @@ internal fun AvenorApp(systemHomeEvents: Flow<Unit>? = null) {
         entryLauncher = entryLauncher,
         favoriteStore = favoriteStore,
         informationLauncher = informationLauncher,
+        uninstallLauncher = uninstallLauncher,
         shortcutController = shortcutController,
         settingsPlatform = settingsPlatform,
         licenseText = licenseText,
@@ -157,6 +159,7 @@ internal fun AvenorApp(
     entryLauncher: LaunchableEntryLauncher = LaunchableEntryLauncher { false },
     favoriteStore: FavoriteStore? = null,
     informationLauncher: ApplicationInformationLauncher = ApplicationInformationLauncher { false },
+    uninstallLauncher: ApplicationUninstallLauncher = EmptyApplicationUninstallLauncher,
     shortcutController: ApplicationShortcutController = EmptyApplicationShortcutController,
     settingsPlatform: SettingsPlatform = EmptySettingsPlatform,
     licenseText: String = "",
@@ -212,6 +215,7 @@ internal fun AvenorApp(
     var favoriteRevealRequest by remember { mutableStateOf<FavoriteRevealRequest?>(null) }
     var settingsOpen by remember { mutableStateOf(false) }
     var externalLaunchPendingReturn by remember { mutableStateOf(false) }
+    var inventoryRefreshPendingReturn by remember { mutableStateOf(false) }
     var shortcutOwner by remember { mutableStateOf<LaunchableIdentity?>(null) }
     var applicationShortcuts by remember { mutableStateOf(emptyList<ApplicationShortcut>()) }
     var editMembership by remember { mutableStateOf<Set<LaunchableIdentity>>(emptySet()) }
@@ -316,7 +320,10 @@ internal fun AvenorApp(
     }
     LaunchedEffect(favoriteState) {
         val state = favoriteState
-        if (state !is FavoriteReadState.Readable) selectedEntry = null
+        if (state !is FavoriteReadState.Readable && selectedEntryFromHome) {
+            selectedEntry = null
+            selectedEntryFromHome = false
+        }
         if (homeEditMode) {
             val readable = state as? FavoriteReadState.Readable
             if (readable == null) {
@@ -708,12 +715,19 @@ internal fun AvenorApp(
                     homeEditMode = false
                 }
                 Lifecycle.Event.ON_RESUME -> {
-                    if (hasResumed && wasPaused && externalLaunchPendingReturn) {
-                        returnToHome()
+                    if (hasResumed && wasPaused) {
+                        val shouldRefreshInventory = externalLaunchPendingReturn ||
+                            inventoryRefreshPendingReturn
+                        if (externalLaunchPendingReturn) {
+                            returnToHome()
+                        }
                         externalLaunchPendingReturn = false
-                        scope.launch {
-                            if (inventoryCoordinator.state.value is LaunchableInventoryState.Content) {
-                                inventoryCoordinator.load(showLoading = false)
+                        inventoryRefreshPendingReturn = false
+                        if (shouldRefreshInventory) {
+                            scope.launch {
+                                if (inventoryCoordinator.state.value is LaunchableInventoryState.Content) {
+                                    inventoryCoordinator.load(showLoading = false)
+                                }
                             }
                         }
                     }
@@ -1093,6 +1107,7 @@ internal fun AvenorApp(
                     initialLoadHandledExternally = true,
                     entryLauncher = entryLauncher,
                     onExternalLaunch = { externalLaunchPendingReturn = true },
+                    onNavigateBack = { settleTo(target = AvenorSurface.Home) },
                     modifier = Modifier.nestedScroll(drawerNestedScrollConnection),
                     listState = drawerListState,
                     active = !settingsOpen &&
@@ -1129,6 +1144,11 @@ internal fun AvenorApp(
         selectedEntry?.let { entry ->
             ApplicationActionSheet(
                 entry = entry,
+                source = if (selectedEntryFromHome) {
+                    ApplicationActionSheetSource.Home
+                } else {
+                    ApplicationActionSheetSource.Drawer
+                },
                 favoriteState = favoriteState,
                 onDismiss = {
                     selectedEntry = null
@@ -1167,6 +1187,11 @@ internal fun AvenorApp(
                 canEditFavorites = selectedEntryFromHome,
                 favoriteMutationEnabled = !favoriteEditor.isSaving,
                 informationLauncher = informationLauncher,
+                onInformationOpened = { inventoryRefreshPendingReturn = true },
+                uninstallAvailable = selectedEntryFromHome &&
+                    uninstallLauncher.isAvailable(entry = entry),
+                onUninstall = { uninstallLauncher.open(entry = entry) },
+                onUninstallOpened = { inventoryRefreshPendingReturn = true },
                 shortcuts = applicationShortcuts.takeIf {
                     shortcutOwner == entry.identity
                 }.orEmpty(),

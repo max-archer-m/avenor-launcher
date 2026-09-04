@@ -52,6 +52,11 @@ internal fun interface ApplicationInformationLauncher {
     fun open(entry: LaunchableEntry): Boolean
 }
 
+internal enum class ApplicationActionSheetSource {
+    Home,
+    Drawer,
+}
+
 internal class AndroidApplicationInformationLauncher(context: Context) :
     ApplicationInformationLauncher {
     private val launcherApps = checkNotNull(context.applicationContext.getSystemService<LauncherApps>())
@@ -77,6 +82,7 @@ internal class AndroidApplicationInformationLauncher(context: Context) :
 @OptIn(ExperimentalMaterial3Api::class)
 internal fun ApplicationActionSheet(
     entry: LaunchableEntry,
+    source: ApplicationActionSheetSource,
     favoriteState: FavoriteReadState,
     onDismiss: () -> Unit,
     onAddFavorite: () -> Unit,
@@ -85,16 +91,24 @@ internal fun ApplicationActionSheet(
     canEditFavorites: Boolean = false,
     favoriteMutationEnabled: Boolean = true,
     informationLauncher: ApplicationInformationLauncher,
+    onInformationOpened: () -> Unit = {},
+    uninstallAvailable: Boolean = false,
+    onUninstall: () -> Boolean = { false },
+    onUninstallOpened: () -> Unit = {},
     shortcuts: List<ApplicationShortcut> = emptyList(),
     onShortcut: (ApplicationShortcut) -> Unit = {},
 ) {
     val context = LocalContext.current
     val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val showsEdit = canEditFavorites &&
+    val showsLauncherActions = source == ApplicationActionSheetSource.Home
+    val showsEdit = showsLauncherActions && canEditFavorites &&
         favoriteState is FavoriteReadState.Readable &&
         entry.identity in favoriteState.identities &&
         favoriteState.identities.isNotEmpty()
+    val showsUninstall = showsLauncherActions && uninstallAvailable &&
+        favoriteState is FavoriteReadState.Readable &&
+        entry.identity in favoriteState.identities
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -142,6 +156,7 @@ internal fun ApplicationActionSheet(
                     IconButton(
                         onClick = {
                             val opened = informationLauncher.open(entry)
+                            if (opened) onInformationOpened()
                             onDismiss()
                             if (!opened) {
                                 Toast.makeText(
@@ -171,54 +186,89 @@ internal fun ApplicationActionSheet(
                         entry = entry,
                         shortcuts = shortcuts,
                         onShortcut = onShortcut,
+                        showTrailingDivider = showsLauncherActions,
                     )
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = dimensionResource(R.dimen.action_sheet_actions_vertical_padding)),
-                    horizontalArrangement = Arrangement.Start,
-                ) {
-                    when (favoriteState) {
-                        FavoriteReadState.Loading,
-                        FavoriteReadState.ReadFailure,
-                        -> FavoriteActionSlot(
-                            label = stringResource(R.string.favorites_unavailable),
-                            enabled = false,
-                            disabledAlpha = disabledAlpha,
-                            onClick = {},
-                        )
+                if (showsLauncherActions) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                vertical = dimensionResource(
+                                    R.dimen.action_sheet_actions_vertical_padding,
+                                ),
+                            ),
+                        horizontalArrangement = Arrangement.Start,
+                    ) {
+                        when (favoriteState) {
+                            FavoriteReadState.Loading,
+                            FavoriteReadState.ReadFailure,
+                            -> FavoriteActionSlot(
+                                label = stringResource(R.string.favorites_unavailable),
+                                enabled = false,
+                                disabledAlpha = disabledAlpha,
+                                onClick = {},
+                            )
 
-                        is FavoriteReadState.Readable -> if (
-                            entry.identity !in favoriteState.identities
-                        ) {
-                            FavoriteActionSlot(
-                                label = stringResource(R.string.add_favorite),
-                                enabled = favoriteMutationEnabled,
-                                disabledAlpha = disabledAlpha,
-                                onClick = onAddFavorite,
-                            )
-                        } else {
-                            FavoriteActionSlot(
-                                label = stringResource(R.string.remove_favorite),
-                                icon = R.drawable.ic_cancel_favorite,
-                                enabled = favoriteMutationEnabled,
-                                disabledAlpha = disabledAlpha,
-                                onClick = onRemoveFavorite,
-                            )
-                            if (showsEdit) {
+                            is FavoriteReadState.Readable -> if (
+                                entry.identity !in favoriteState.identities
+                            ) {
                                 FavoriteActionSlot(
-                                    label = stringResource(R.string.edit_favorites),
-                                    icon = R.drawable.ic_edit_favorites,
-                                    enabled = true,
+                                    label = stringResource(R.string.add_favorite),
+                                    enabled = favoriteMutationEnabled,
                                     disabledAlpha = disabledAlpha,
-                                    onClick = onEditFavorites,
-                                    testTag = "edit_favorites_action",
+                                    onClick = onAddFavorite,
                                 )
+                            } else {
+                                FavoriteActionSlot(
+                                    label = stringResource(R.string.remove_favorite),
+                                    icon = R.drawable.ic_cancel_favorite,
+                                    enabled = favoriteMutationEnabled,
+                                    disabledAlpha = disabledAlpha,
+                                    onClick = onRemoveFavorite,
+                                )
+                                if (showsEdit) {
+                                    FavoriteActionSlot(
+                                        label = stringResource(R.string.edit_favorites),
+                                        icon = R.drawable.ic_edit_favorites,
+                                        enabled = true,
+                                        disabledAlpha = disabledAlpha,
+                                        onClick = onEditFavorites,
+                                        testTag = "edit_favorites_action",
+                                    )
+                                }
+                                if (showsUninstall) {
+                                    FavoriteActionSlot(
+                                        label = stringResource(
+                                            id = R.string.uninstall_application,
+                                        ),
+                                        icon = R.drawable.ic_uninstall,
+                                        enabled = true,
+                                        disabledAlpha = disabledAlpha,
+                                        onClick = {
+                                            val opened = onUninstall()
+                                            if (opened) onUninstallOpened()
+                                            onDismiss()
+                                            if (!opened) {
+                                                Toast.makeText(
+                                                    context,
+                                                    R.string.uninstall_application_unavailable,
+                                                    Toast.LENGTH_SHORT,
+                                                ).show()
+                                            }
+                                        },
+                                        testTag = "uninstall_application_action",
+                                    )
+                                }
                             }
                         }
+                        val visibleActionCount = 1 +
+                            (if (showsEdit) 1 else 0) +
+                            (if (showsUninstall) 1 else 0)
+                        repeat(times = (5 - visibleActionCount).coerceAtLeast(minimumValue = 0)) {
+                            Spacer(modifier = Modifier.weight(weight = 1f))
+                        }
                     }
-                    repeat(if (showsEdit) 3 else 4) { Spacer(Modifier.weight(1f)) }
                 }
             }
 
@@ -278,6 +328,7 @@ private fun ApplicationShortcutRegion(
     entry: LaunchableEntry,
     shortcuts: List<ApplicationShortcut>,
     onShortcut: (ApplicationShortcut) -> Unit,
+    showTrailingDivider: Boolean,
 ) {
     val iconSize = dimensionResource(R.dimen.action_sheet_shortcut_icon_size)
     val iconPixels = with(LocalDensity.current) { iconSize.roundToPx() }
@@ -330,10 +381,14 @@ private fun ApplicationShortcutRegion(
             }
         }
     }
-    HorizontalDivider(
-        modifier = Modifier.padding(
-            horizontal = dimensionResource(R.dimen.action_sheet_divider_inset),
-        ),
-        color = MaterialTheme.colorScheme.onSurface,
-    )
+    if (showTrailingDivider) {
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(
+                    horizontal = dimensionResource(R.dimen.action_sheet_divider_inset),
+                )
+                .testTag(tag = "application_shortcut_trailing_divider"),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
 }

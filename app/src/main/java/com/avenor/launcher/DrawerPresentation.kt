@@ -20,6 +20,86 @@ internal data class DrawerRestorationTarget(
     val scrollOffset: Int,
 )
 
+internal fun filterDrawerSections(
+    sections: List<DrawerSection>,
+    query: String,
+): List<DrawerSection> {
+    if (query.isBlank()) return sections
+
+    return sections.mapNotNull { section ->
+        val matchingEntries = section.entries.filter { entry ->
+            drawerSearchMatchRanges(label = entry.label, query = query).isNotEmpty()
+        }
+        if (matchingEntries.isEmpty()) {
+            null
+        } else {
+            section.copy(entries = matchingEntries)
+        }
+    }
+}
+
+internal fun drawerSearchMatchRanges(label: String, query: String): List<IntRange> {
+    val normalizedQuery = normalizeDrawerSearchText(text = query.trim()).text
+    if (normalizedQuery.isEmpty()) return emptyList()
+
+    val normalizedLabel = normalizeDrawerSearchText(text = label)
+    val ranges = mutableListOf<IntRange>()
+    var searchStart = 0
+    while (searchStart <= normalizedLabel.text.length - normalizedQuery.length) {
+        val matchStart = normalizedLabel.text.indexOf(
+            string = normalizedQuery,
+            startIndex = searchStart,
+        )
+        if (matchStart < 0) break
+        val matchEnd = matchStart + normalizedQuery.length - 1
+        ranges += normalizedLabel.originalStarts[matchStart] until
+            normalizedLabel.originalEnds[matchEnd]
+        searchStart = matchStart + normalizedQuery.length
+    }
+    return ranges
+}
+
+private data class NormalizedDrawerSearchText(
+    val text: String,
+    val originalStarts: List<Int>,
+    val originalEnds: List<Int>,
+)
+
+private fun normalizeDrawerSearchText(text: String): NormalizedDrawerSearchText {
+    val normalized = StringBuilder()
+    val starts = mutableListOf<Int>()
+    val ends = mutableListOf<Int>()
+    var originalIndex = 0
+    while (originalIndex < text.length) {
+        val codePoint = text.codePointAt(originalIndex)
+        val originalLength = Character.charCount(codePoint)
+        val folded = drawerSearchLatinNormalizer.get().transliterate(
+            String(Character.toChars(codePoint)),
+        )
+        folded.forEach { character ->
+            val type = Character.getType(character)
+            if (type != Character.NON_SPACING_MARK.toInt() &&
+                type != Character.COMBINING_SPACING_MARK.toInt() &&
+                type != Character.ENCLOSING_MARK.toInt()
+            ) {
+                normalized.append(character)
+                starts += originalIndex
+                ends += originalIndex + originalLength
+            }
+        }
+        originalIndex += originalLength
+    }
+    return NormalizedDrawerSearchText(
+        text = normalized.toString(),
+        originalStarts = starts,
+        originalEnds = ends,
+    )
+}
+
+private val drawerSearchLatinNormalizer = ThreadLocal.withInitial {
+    Transliterator.getInstance("Latin-ASCII; Lower")
+}
+
 internal class LaunchableLabelNormalizer {
     private val transliterator = Transliterator.getInstance("Han-Latin; Latin-ASCII; Lower")
 
@@ -129,6 +209,33 @@ internal fun captureDrawerListPosition(
     return null
 }
 
+internal fun captureDrawerOrdinaryListPosition(
+    sections: List<DrawerSection>,
+    firstVisibleItemIndex: Int,
+    firstVisibleItemScrollOffset: Int,
+): DrawerListPosition? {
+    val applicationPosition = captureDrawerListPosition(
+        sections = sections,
+        firstVisibleItemIndex = firstVisibleItemIndex,
+        firstVisibleItemScrollOffset = firstVisibleItemScrollOffset,
+    )
+    if (applicationPosition != null) return applicationPosition
+
+    val settingsHeaderIndex = sections.sumOf(selector = { section ->
+        1 + section.entries.size
+    })
+    val settingsRelativeIndex = firstVisibleItemIndex - settingsHeaderIndex
+    return if (settingsRelativeIndex in 0..1) {
+        DrawerListPosition(
+            sectionLabel = SETTINGS_SECTION_POSITION_LABEL,
+            relativeItemIndex = settingsRelativeIndex,
+            scrollOffset = firstVisibleItemScrollOffset,
+        )
+    } else {
+        null
+    }
+}
+
 internal fun resolveDrawerRestorationTarget(
     position: DrawerListPosition,
     sections: List<DrawerSection>,
@@ -169,8 +276,29 @@ internal fun resolveDrawerRestorationTarget(
     }
 }
 
+internal fun resolveDrawerOrdinaryRestorationTarget(
+    position: DrawerListPosition,
+    sections: List<DrawerSection>,
+): DrawerRestorationTarget? {
+    if (position.sectionLabel != SETTINGS_SECTION_POSITION_LABEL) {
+        return resolveDrawerRestorationTarget(position = position, sections = sections)
+    }
+    val settingsHeaderIndex = sections.sumOf(selector = { section ->
+        1 + section.entries.size
+    })
+    return DrawerRestorationTarget(
+        itemIndex = settingsHeaderIndex + position.relativeItemIndex.coerceIn(
+            minimumValue = 0,
+            maximumValue = 1,
+        ),
+        scrollOffset = position.scrollOffset,
+    )
+}
+
 private fun drawerSectionRank(label: String): Int =
     if (label == "#") 0 else (label.firstOrNull()?.code ?: Int.MAX_VALUE)
+
+private const val SETTINGS_SECTION_POSITION_LABEL = "\u0000settings"
 
 internal class LaunchableEntryComparator(
     locale: Locale,
