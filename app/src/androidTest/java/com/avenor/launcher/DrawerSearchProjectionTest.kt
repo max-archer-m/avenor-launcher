@@ -90,6 +90,60 @@ class DrawerSearchProjectionTest {
     }
 
     @Test
+    fun geometryChangePreservesTheFormerTopApplicationAndOffset() {
+        val sections = listOf(
+            DrawerSection(
+                label = "A",
+                entries = (1..6).map { index ->
+                    entry(packageSuffix = "application$index", label = "Application $index")
+                },
+            ),
+        )
+        val position = captureDrawerListPosition(
+            sections = sections,
+            firstVisibleItemIndex = 4,
+            firstVisibleItemScrollOffset = 9,
+            itemsPerRow = 1,
+        )
+
+        assertEquals(
+            DrawerRestorationTarget(itemIndex = 2, scrollOffset = 9),
+            resolveDrawerRestorationTarget(
+                position = checkNotNull(value = position),
+                sections = sections,
+                itemsPerRow = 3,
+            ),
+        )
+    }
+
+    @Test
+    fun multiColumnProjectionKeepsSettingsAfterApplicationRows() {
+        val sections = listOf(
+            DrawerSection(
+                label = "A",
+                entries = (1..5).map { index ->
+                    entry(packageSuffix = "application$index", label = "Application $index")
+                },
+            ),
+        )
+        val position = captureDrawerOrdinaryListPosition(
+            sections = sections,
+            firstVisibleItemIndex = 5,
+            firstVisibleItemScrollOffset = 6,
+            itemsPerRow = 2,
+        )
+
+        assertEquals(
+            DrawerRestorationTarget(itemIndex = 5, scrollOffset = 6),
+            resolveDrawerOrdinaryRestorationTarget(
+                position = checkNotNull(value = position),
+                sections = sections,
+                itemsPerRow = 2,
+            ),
+        )
+    }
+
+    @Test
     fun inventoryChangeReappliesActiveQueryToLatestReliableInventory() {
         var entries = listOf(entry(packageSuffix = "before", label = "Before update"))
         var inventoryChanged: (LaunchableInventoryChange) -> Unit = {}

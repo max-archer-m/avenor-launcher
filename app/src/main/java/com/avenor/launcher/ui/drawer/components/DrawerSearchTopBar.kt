@@ -83,6 +83,7 @@ internal fun DrawerSearchTopBar(
     onQueryChange: (String) -> Unit,
     onClearSearch: () -> Unit,
     onCancelSearch: () -> Unit,
+    onOpenDisplaySettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -288,6 +289,19 @@ internal fun DrawerSearchTopBar(
                         text = stringResource(id = R.string.drawer_search_cancel),
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            } else {
+                IconButton(
+                    onClick = onOpenDisplaySettings,
+                    modifier = Modifier.testTag(tag = "drawer_display_settings_entry"),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_more_horiz),
+                        contentDescription = stringResource(
+                            id = R.string.drawer_display_settings,
+                        ),
+                        tint = MaterialTheme.colorScheme.onBackground,
                     )
                 }
             }

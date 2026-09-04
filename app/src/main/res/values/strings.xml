@@ -9,6 +9,12 @@
     <string name="drawer_clear_search">Clear search</string>
     <string name="drawer_search_cancel">Cancel</string>
     <string name="drawer_no_matching_apps">No matching apps</string>
+    <string name="drawer_display_settings">Display settings</string>
+    <string name="drawer_application_size">Application size</string>
+    <string name="drawer_application_arrangement">Application arrangement</string>
+    <string name="drawer_name_right">Right</string>
+    <string name="drawer_name_below">Below</string>
+    <string name="drawer_unable_to_save_display_settings">Unable to save display settings</string>
     <string name="retry">Retry</string>
     <string name="application_unable_to_open">Unable to open application</string>
     <string name="application_information">Application information</string>

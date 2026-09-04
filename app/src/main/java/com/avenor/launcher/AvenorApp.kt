@@ -121,6 +121,9 @@ internal fun AvenorApp(systemHomeEvents: Flow<Unit>? = null) {
         AndroidLaunchableEntryLauncher(context)
     }
     val favoriteStore = remember(context) { OrderedFavoriteStoreAdapter(context) }
+    val drawerDisplaySettingsStore = remember(context) {
+        DrawerDisplaySettingsStore(context = context)
+    }
     val informationLauncher = remember(context) { AndroidApplicationInformationLauncher(context) }
     val uninstallLauncher = remember(context) { AndroidApplicationUninstallLauncher(context) }
     val shortcutController = remember(context) {
@@ -143,6 +146,7 @@ internal fun AvenorApp(systemHomeEvents: Flow<Unit>? = null) {
         inventoryLoader = inventoryLoader,
         entryLauncher = entryLauncher,
         favoriteStore = favoriteStore,
+        drawerDisplaySettingsStore = drawerDisplaySettingsStore,
         informationLauncher = informationLauncher,
         uninstallLauncher = uninstallLauncher,
         shortcutController = shortcutController,
@@ -158,6 +162,7 @@ internal fun AvenorApp(
     inventoryLoader: LaunchableInventoryLoader,
     entryLauncher: LaunchableEntryLauncher = LaunchableEntryLauncher { false },
     favoriteStore: FavoriteStore? = null,
+    drawerDisplaySettingsStore: DrawerDisplaySettingsStore? = null,
     informationLauncher: ApplicationInformationLauncher = ApplicationInformationLauncher { false },
     uninstallLauncher: ApplicationUninstallLauncher = EmptyApplicationUninstallLauncher,
     shortcutController: ApplicationShortcutController = EmptyApplicationShortcutController,
@@ -192,6 +197,12 @@ internal fun AvenorApp(
     var settleJob by remember { mutableStateOf<Job?>(null) }
     val effectiveFavoriteStore = favoriteStore ?: remember { InMemoryFavoriteStore() }
     val favoriteState by effectiveFavoriteStore.state.collectAsState()
+    val effectiveDrawerDisplaySettingsStore = drawerDisplaySettingsStore ?: remember(
+        androidContext,
+    ) {
+        DrawerDisplaySettingsStore(context = androidContext)
+    }
+    val drawerDisplaySettingsState by effectiveDrawerDisplaySettingsStore.state.collectAsState()
     val favoriteEditor = remember(
         key1 = effectiveFavoriteStore,
         calculation = { HomeFavoriteEditor(store = effectiveFavoriteStore) },
@@ -208,6 +219,10 @@ internal fun AvenorApp(
     var selectedEntryFromHome by remember { mutableStateOf(false) }
     var homeEditMode by remember { mutableStateOf(false) }
     var homeStylePanelExpanded by remember { mutableStateOf(false) }
+    var drawerDisplaySettingsCandidate by remember {
+        mutableStateOf<DrawerDisplaySettings?>(null)
+    }
+    var drawerDisplaySettingsSaving by remember { mutableStateOf(false) }
     var selectedHomeModuleId by remember { mutableStateOf<String?>(null) }
     var favoriteAddTarget by remember { mutableStateOf<FavoriteAddTarget?>(null) }
     var favoriteSelection by remember { mutableStateOf<List<LaunchableIdentity>>(emptyList()) }
@@ -232,6 +247,29 @@ internal fun AvenorApp(
     )
     val removedMessage = stringResource(id = R.string.favorite_removed)
     val undoLabel = stringResource(id = R.string.undo)
+    val durableDrawerDisplaySettings =
+        (drawerDisplaySettingsState as? DrawerDisplaySettingsReadState.Readable)?.settings
+    val presentedDrawerDisplaySettings = drawerDisplaySettingsCandidate
+        ?: durableDrawerDisplaySettings
+        ?: DrawerDisplaySettings()
+    val drawerDisplaySettingsReady =
+        drawerDisplaySettingsState !is DrawerDisplaySettingsReadState.Loading
+    val drawerDisplaySettingsMutationEnabled =
+        drawerDisplaySettingsState is DrawerDisplaySettingsReadState.Readable &&
+            !drawerDisplaySettingsSaving
+
+    LaunchedEffect(
+        key1 = drawerDisplaySettingsState,
+        key2 = drawerDisplaySettingsCandidate,
+        key3 = drawerDisplaySettingsSaving,
+    ) {
+        if (!drawerDisplaySettingsSaving &&
+            drawerDisplaySettingsCandidate != null &&
+            durableDrawerDisplaySettings == drawerDisplaySettingsCandidate
+        ) {
+            drawerDisplaySettingsCandidate = null
+        }
+    }
 
     fun refreshEditMembership() {
         if (homeEditMode) {
@@ -302,6 +340,10 @@ internal fun AvenorApp(
 
     LaunchedEffect(effectiveFavoriteStore) {
         effectiveFavoriteStore.load()
+    }
+
+    LaunchedEffect(key1 = effectiveDrawerDisplaySettingsStore) {
+        effectiveDrawerDisplaySettingsStore.load()
     }
 
     LaunchedEffect(inventoryCoordinator) {
@@ -1112,6 +1154,35 @@ internal fun AvenorApp(
                     listState = drawerListState,
                     active = !settingsOpen &&
                         (settledSurface == AvenorSurface.Drawer || progress > 0f),
+                    displaySettings = presentedDrawerDisplaySettings,
+                    displaySettingsReady = drawerDisplaySettingsReady,
+                    displaySettingsMutationEnabled = drawerDisplaySettingsMutationEnabled,
+                    onChangeDisplaySettings = { candidateSettings ->
+                        val currentSettingsState =
+                            effectiveDrawerDisplaySettingsStore.state.value
+                        if (!drawerDisplaySettingsSaving &&
+                            currentSettingsState is DrawerDisplaySettingsReadState.Readable
+                        ) {
+                            drawerDisplaySettingsCandidate = candidateSettings
+                            drawerDisplaySettingsSaving = true
+                            scope.launch(
+                                block = {
+                                    val saved = effectiveDrawerDisplaySettingsStore.replace(
+                                        settings = candidateSettings,
+                                    )
+                                    if (!saved) {
+                                        drawerDisplaySettingsCandidate = null
+                                        Toast.makeText(
+                                            androidContext,
+                                            R.string.drawer_unable_to_save_display_settings,
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+                                    }
+                                    drawerDisplaySettingsSaving = false
+                                },
+                            )
+                        }
+                    },
                     favoriteSelectionTarget = favoriteAddTarget?.label,
                     favoriteSelection = favoriteSelection,
                     favoriteMembership = favoriteMembership.orEmpty(),

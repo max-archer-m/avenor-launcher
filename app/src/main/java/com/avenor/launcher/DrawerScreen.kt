@@ -104,6 +104,10 @@ internal fun DrawerScreen(
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     active: Boolean = true,
+    displaySettings: DrawerDisplaySettings = DrawerDisplaySettings(),
+    displaySettingsReady: Boolean = true,
+    displaySettingsMutationEnabled: Boolean = true,
+    onChangeDisplaySettings: (DrawerDisplaySettings) -> Unit = {},
     onLongPress: (LaunchableEntry) -> Unit = {},
     onExternalLaunch: () -> Unit = {},
     onNavigateBack: () -> Unit = {},
@@ -129,6 +133,8 @@ internal fun DrawerScreen(
     var searchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var ordinaryPosition by remember { mutableStateOf<DrawerListPosition?>(null) }
+    var displaySettingsPosition by remember { mutableStateOf<DrawerListPosition?>(null) }
+    var displaySettingsPanelVisible by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
     val searchScope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -138,6 +144,20 @@ internal fun DrawerScreen(
             searchActive = false
             searchQuery = ""
             ordinaryPosition = null
+            displaySettingsPosition = null
+            displaySettingsPanelVisible = false
+        }
+    }
+
+    LaunchedEffect(key1 = favoriteSelectionTarget) {
+        if (favoriteSelectionTarget != null) {
+            displaySettingsPanelVisible = false
+        }
+    }
+
+    LaunchedEffect(key1 = state is LaunchableInventoryState.Content) {
+        if (state !is LaunchableInventoryState.Content) {
+            displaySettingsPanelVisible = false
         }
     }
 
@@ -160,6 +180,7 @@ internal fun DrawerScreen(
                     ),
                     firstVisibleItemIndex = listState.firstVisibleItemIndex,
                     firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+                    itemsPerRow = displaySettings.itemsPerRow,
                 )
             }
         } else {
@@ -180,6 +201,7 @@ internal fun DrawerScreen(
                     searchActive = searchActive,
                     searchQuery = searchQuery,
                 ),
+                itemsPerRow = displaySettings.itemsPerRow,
             )
             if (restorationTarget != null) {
                 withFrameNanos { }
@@ -227,6 +249,7 @@ internal fun DrawerScreen(
             ),
             firstVisibleItemIndex = listState.firstVisibleItemIndex,
             firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+            itemsPerRow = displaySettings.itemsPerRow,
         ) ?: return@LaunchedEffect
         val restorationTarget = resolveDrawerRestorationTarget(
             position = position,
@@ -235,6 +258,7 @@ internal fun DrawerScreen(
                 searchActive = searchActive,
                 searchQuery = searchQuery,
             ),
+            itemsPerRow = displaySettings.itemsPerRow,
         ) ?: return@LaunchedEffect
         withFrameNanos { }
         listState.scrollToItem(
@@ -257,6 +281,32 @@ internal fun DrawerScreen(
         onDispose {
             observation?.stop()
         }
+    }
+
+    if (!displaySettingsReady) {
+        if (favoriteSelectionTarget == null) {
+            DrawerOrdinaryMessage(
+                modifier = modifier,
+                message = stringResource(R.string.drawer_loading_applications),
+                showProgress = true,
+                action = null,
+                testTag = "drawer_loading",
+                onNavigateBack = onNavigateBack,
+            )
+        } else {
+            DrawerSelectionMessage(
+                modifier = modifier,
+                target = favoriteSelectionTarget,
+                message = stringResource(R.string.drawer_loading_applications),
+                showProgress = true,
+                retry = null,
+                selection = favoriteSelection,
+                saving = favoriteSelectionSaving,
+                onCancel = onCancelFavoriteSelection,
+                onConfirm = onConfirmFavoriteSelection,
+            )
+        }
+        return
     }
 
     when (val currentState = state) {
@@ -345,6 +395,7 @@ internal fun DrawerScreen(
                         resolveDrawerOrdinaryRestorationTarget(
                             position = restorationPosition,
                             sections = completeSections,
+                            itemsPerRow = displaySettings.itemsPerRow,
                         )?.let { target ->
                             listState.scrollToItem(
                                 index = target.itemIndex,
@@ -360,48 +411,96 @@ internal fun DrawerScreen(
                     listState.scrollToItem(index = 0)
                 }
             }
-            DrawerApplicationList(
-                modifier = modifier,
-                listState = listState,
-                sections = visibleSections,
-                searchActive = searchActive,
-                searchQuery = searchQuery,
-                searchFocusRequester = searchFocusRequester,
-                onLaunch = { entry ->
-                    if (activationGuard.tryAcquire()) {
-                        if (entryLauncher.launch(entry)) {
-                            searchActive = false
-                            searchQuery = ""
-                            ordinaryPosition = null
-                            keyboardController?.hide()
-                            onExternalLaunch()
-                        } else {
-                            Toast.makeText(context, launchFailureMessage, Toast.LENGTH_SHORT).show()
-                            loadTrigger = DrawerLoadTrigger.LaunchFailureRefresh
-                            loadRequest += 1
-                        }
-                    }
-                },
-                onLongPress = onLongPress,
-                onNavigateBack = onNavigateBack,
-                onEnterSearch = {
-                    ordinaryPosition = captureDrawerOrdinaryListPosition(
-                        sections = completeSections,
-                        firstVisibleItemIndex = listState.firstVisibleItemIndex,
-                        firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+            LaunchedEffect(
+                key1 = displaySettings,
+                key2 = displaySettingsMutationEnabled,
+                key3 = completeSections,
+            ) {
+                val position = displaySettingsPosition ?: return@LaunchedEffect
+                withFrameNanos { }
+                resolveDrawerOrdinaryRestorationTarget(
+                    position = position,
+                    sections = completeSections,
+                    itemsPerRow = displaySettings.itemsPerRow,
+                )?.let { target ->
+                    listState.scrollToItem(
+                        index = target.itemIndex,
+                        scrollOffset = target.scrollOffset,
                     )
-                    searchActive = true
-                },
-                onQueryChange = { query -> searchQuery = query },
-                onClearSearch = { searchQuery = "" },
-                onCancelSearch = exitSearch,
-                onOpenSettings = onOpenSettings,
-            )
+                }
+                if (displaySettingsMutationEnabled) {
+                    displaySettingsPosition = null
+                }
+            }
+            Box(modifier = Modifier.fillMaxSize()) {
+                DrawerApplicationList(
+                    modifier = modifier,
+                    listState = listState,
+                    sections = visibleSections,
+                    displaySettings = displaySettings,
+                    searchActive = searchActive,
+                    searchQuery = searchQuery,
+                    searchFocusRequester = searchFocusRequester,
+                    onLaunch = { entry ->
+                        if (activationGuard.tryAcquire()) {
+                            if (entryLauncher.launch(entry)) {
+                                searchActive = false
+                                searchQuery = ""
+                                ordinaryPosition = null
+                                keyboardController?.hide()
+                                onExternalLaunch()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    launchFailureMessage,
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                                loadTrigger = DrawerLoadTrigger.LaunchFailureRefresh
+                                loadRequest += 1
+                            }
+                        }
+                    },
+                    onLongPress = onLongPress,
+                    onNavigateBack = onNavigateBack,
+                    onEnterSearch = {
+                        ordinaryPosition = captureDrawerOrdinaryListPosition(
+                            sections = completeSections,
+                            firstVisibleItemIndex = listState.firstVisibleItemIndex,
+                            firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+                            itemsPerRow = displaySettings.itemsPerRow,
+                        )
+                        searchActive = true
+                    },
+                    onQueryChange = { query -> searchQuery = query },
+                    onClearSearch = { searchQuery = "" },
+                    onCancelSearch = exitSearch,
+                    onOpenDisplaySettings = { displaySettingsPanelVisible = true },
+                    onOpenSettings = onOpenSettings,
+                )
+                if (displaySettingsPanelVisible) {
+                    DrawerDisplaySettingsPanel(
+                        settings = displaySettings,
+                        enabled = displaySettingsMutationEnabled,
+                        onChangeSettings = { candidateSettings ->
+                            displaySettingsPosition = captureDrawerOrdinaryListPosition(
+                                sections = completeSections,
+                                firstVisibleItemIndex = listState.firstVisibleItemIndex,
+                                firstVisibleItemScrollOffset =
+                                    listState.firstVisibleItemScrollOffset,
+                                itemsPerRow = displaySettings.itemsPerRow,
+                            )
+                            onChangeDisplaySettings(candidateSettings)
+                        },
+                        onDismiss = { displaySettingsPanelVisible = false },
+                    )
+                }
+            }
         } else {
             DrawerFavoriteSelectionList(
                 modifier = modifier,
                 listState = listState,
                 sections = currentState.snapshot.drawerSectionsFor(locale),
+                displaySettings = displaySettings,
                 target = favoriteSelectionTarget,
                 selection = favoriteSelection,
                 favoriteMembership = favoriteMembership,
@@ -544,6 +643,7 @@ private fun DrawerFavoriteSelectionList(
     modifier: Modifier,
     listState: LazyListState,
     sections: List<DrawerSection>,
+    displaySettings: DrawerDisplaySettings,
     target: String,
     selection: List<LaunchableIdentity>,
     favoriteMembership: Set<LaunchableIdentity>,
@@ -552,12 +652,15 @@ private fun DrawerFavoriteSelectionList(
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    val sectionAnchors = remember(sections) {
+    val sectionAnchors = remember(sections, displaySettings.itemsPerRow) {
         buildMap {
             var itemIndex = 0
             sections.forEach { section ->
                 put(section.label, itemIndex)
-                itemIndex += 1 + section.entries.size
+                itemIndex += 1 + drawerApplicationRowCount(
+                    entryCount = section.entries.size,
+                    itemsPerRow = displaySettings.itemsPerRow,
+                )
             }
         }
     }
@@ -585,32 +688,49 @@ private fun DrawerFavoriteSelectionList(
                     .fillMaxSize()
                     .testTag("drawer_favorite_selection_list"),
                 contentPadding = PaddingValues(
-                    start = dimensionResource(R.dimen.drawer_horizontal_padding),
-                    end = dimensionResource(R.dimen.drawer_horizontal_padding) +
+                    start = dimensionResource(R.dimen.drawer_application_grid_boundary),
+                    end = dimensionResource(R.dimen.drawer_application_grid_boundary) +
                         dimensionResource(R.dimen.drawer_index_width),
                 ),
                 state = listState,
             ) {
                 sections.forEach { section ->
                     item(key = "selection_section:${section.label}") {
-                        DrawerSectionHeader(section.label)
+                        DrawerSectionHeader(
+                            label = section.label,
+                            modifier = Modifier.padding(
+                                start = dimensionResource(
+                                    id = R.dimen.drawer_application_cell_horizontal_inset,
+                                ),
+                            ),
+                        )
                     }
                     items(
-                        items = section.entries,
-                        key = { entry ->
-                            "selection:${entry.identity.profileSerialNumber}:" +
-                                entry.identity.componentName.flattenToString()
+                        items = section.entries.chunked(size = displaySettings.itemsPerRow),
+                        key = { entries ->
+                            val first = entries.first()
+                            "selection_row:${first.identity.profileSerialNumber}:" +
+                                first.identity.componentName.flattenToString()
                         },
-                    ) { entry ->
-                        val alreadyFavorite = entry.identity in favoriteMembership
-                        val order = selection.indexOf(entry.identity)
-                        DrawerFavoriteSelectionRow(
-                            entry = entry,
-                            order = order.takeIf { it >= 0 }?.plus(1),
-                            alreadyFavorite = alreadyFavorite,
-                            enabled = !saving && !alreadyFavorite,
-                            onClick = { onToggle(entry.identity) },
-                        )
+                    ) { entries ->
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            entries.forEach { entry ->
+                                val alreadyFavorite = entry.identity in favoriteMembership
+                                val order = selection.indexOf(entry.identity)
+                                DrawerFavoriteSelectionRow(
+                                    entry = entry,
+                                    displaySettings = displaySettings,
+                                    order = order.takeIf { it >= 0 }?.plus(1),
+                                    alreadyFavorite = alreadyFavorite,
+                                    enabled = !saving && !alreadyFavorite,
+                                    onClick = { onToggle(entry.identity) },
+                                    modifier = Modifier.weight(weight = 1f),
+                                )
+                            }
+                            repeat(times = displaySettings.itemsPerRow - entries.size) {
+                                Spacer(modifier = Modifier.weight(weight = 1f))
+                            }
+                        }
                     }
                 }
             }
@@ -714,17 +834,26 @@ private fun DrawerSelectionHeader(
 @Composable
 private fun DrawerFavoriteSelectionRow(
     entry: LaunchableEntry,
+    displaySettings: DrawerDisplaySettings,
     order: Int?,
     alreadyFavorite: Boolean,
     enabled: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val selected = order != null
     val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
+    val applicationSize = displaySettings.applicationSize
+    val rowHeight = dimensionResource(
+        id = if (displaySettings.namePlacement == DrawerNamePlacement.Right) {
+            applicationSize.rowHeightResource()
+        } else {
+            applicationSize.belowRowHeightResource()
+        },
+    )
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = dimensionResource(R.dimen.drawer_application_row_min_height))
+        modifier = modifier
+            .height(height = rowHeight)
             .then(
                 if (selected) {
                     Modifier.background(colorResource(R.color.drawer_selection_background))
@@ -734,13 +863,18 @@ private fun DrawerFavoriteSelectionRow(
             )
             .alpha(if (alreadyFavorite) disabledAlpha else 1f)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .testTag("drawer_favorite_selection_row"),
+            .testTag("drawer_favorite_selection_row")
+            .padding(
+                horizontal = dimensionResource(
+                    id = R.dimen.drawer_application_cell_horizontal_inset,
+                ),
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
                 .width(dimensionResource(R.dimen.drawer_selection_indicator_region_width))
-                .height(dimensionResource(R.dimen.drawer_application_row_min_height)),
+                .height(height = rowHeight),
             contentAlignment = Alignment.Center,
         ) {
             Box(
@@ -779,24 +913,12 @@ private fun DrawerFavoriteSelectionRow(
                 }
             }
         }
-        DrawerApplicationIcon(
-            preparedBitmap = entry.iconBitmap,
-            icon = entry.icon,
-            iconSize = dimensionResource(R.dimen.drawer_application_icon_size),
-            iconSizePixels = with(LocalDensity.current) {
-                dimensionResource(R.dimen.drawer_application_icon_size).roundToPx()
-            },
+        DrawerApplicationContent(
+            entry = entry,
+            displaySettings = displaySettings,
+            searchQuery = null,
+            modifier = Modifier.weight(weight = 1f),
         )
-        Spacer(Modifier.width(dimensionResource(R.dimen.drawer_application_icon_label_gap)))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = entry.label,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        }
     }
 }
 
@@ -806,6 +928,7 @@ private fun DrawerApplicationList(
     modifier: Modifier,
     listState: LazyListState,
     sections: List<DrawerSection>,
+    displaySettings: DrawerDisplaySettings,
     searchActive: Boolean,
     searchQuery: String,
     searchFocusRequester: FocusRequester,
@@ -816,19 +939,28 @@ private fun DrawerApplicationList(
     onQueryChange: (String) -> Unit,
     onClearSearch: () -> Unit,
     onCancelSearch: () -> Unit,
+    onOpenDisplaySettings: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
-    val sectionAnchors = remember(sections) {
+    val sectionAnchors = remember(sections, displaySettings.itemsPerRow) {
         buildMap {
             var itemIndex = 0
             sections.forEach { section ->
                 put(section.label, itemIndex)
-                itemIndex += 1 + section.entries.size
+                itemIndex += 1 + drawerApplicationRowCount(
+                    entryCount = section.entries.size,
+                    itemsPerRow = displaySettings.itemsPerRow,
+                )
             }
         }
     }
-    val settingsAnchor = remember(sections) {
-        sections.sumOf { section -> 1 + section.entries.size }
+    val settingsAnchor = remember(sections, displaySettings.itemsPerRow) {
+        sections.sumOf { section ->
+            1 + drawerApplicationRowCount(
+                entryCount = section.entries.size,
+                itemsPerRow = displaySettings.itemsPerRow,
+            )
+        }
     }
     val coroutineScope = rememberCoroutineScope()
     val hapticFeedback = LocalHapticFeedback.current
@@ -854,8 +986,10 @@ private fun DrawerApplicationList(
             onQueryChange = onQueryChange,
             onClearSearch = onClearSearch,
             onCancelSearch = onCancelSearch,
+            onOpenDisplaySettings = onOpenDisplaySettings,
         )
-        val horizontalPadding = dimensionResource(R.dimen.drawer_horizontal_padding)
+        val gridBoundary = dimensionResource(R.dimen.drawer_application_grid_boundary)
+        val cellInset = dimensionResource(R.dimen.drawer_application_cell_horizontal_inset)
         val indexWidth = dimensionResource(R.dimen.drawer_index_width)
         Box(
             modifier = modifier
@@ -881,39 +1015,57 @@ private fun DrawerApplicationList(
                         .fillMaxSize()
                         .testTag(tag = "drawer_application_list"),
                     contentPadding = PaddingValues(
-                        start = horizontalPadding,
-                        end = horizontalPadding + indexWidth,
+                        start = gridBoundary,
+                        end = gridBoundary + indexWidth,
                     ),
                     state = listState,
                 ) {
                     sections.forEach { section ->
                         item(key = "section:${section.label}") {
-                            DrawerSectionHeader(label = section.label)
+                            DrawerSectionHeader(
+                                label = section.label,
+                                modifier = Modifier.padding(start = cellInset),
+                            )
                         }
                         items(
-                            items = section.entries,
-                            key = { entry ->
-                                "${entry.identity.profileSerialNumber}:" +
-                                    entry.identity.componentName.flattenToString()
+                            items = section.entries.chunked(size = displaySettings.itemsPerRow),
+                            key = { entries ->
+                                val first = entries.first()
+                                "row:${first.identity.profileSerialNumber}:" +
+                                    first.identity.componentName.flattenToString()
                             },
-                        ) { entry ->
-                            DrawerApplicationRow(
-                                entry = entry,
-                                searchQuery = searchQuery.takeIf { searchActive },
-                                onLaunch = onLaunch,
-                                onLongPress = onLongPress,
-                            )
+                        ) { entries ->
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                entries.forEach { entry ->
+                                    DrawerApplicationRow(
+                                        entry = entry,
+                                        displaySettings = displaySettings,
+                                        searchQuery = searchQuery.takeIf { searchActive },
+                                        onLaunch = onLaunch,
+                                        onLongPress = onLongPress,
+                                        modifier = Modifier.weight(weight = 1f),
+                                    )
+                                }
+                                repeat(times = displaySettings.itemsPerRow - entries.size) {
+                                    Spacer(modifier = Modifier.weight(weight = 1f))
+                                }
+                            }
                         }
                     }
                     if (!searchActive) {
                         item(key = "section:settings") {
                             DrawerSectionHeader(
                                 label = stringResource(id = R.string.settings),
-                                modifier = Modifier.testTag(tag = "drawer_settings_anchor"),
+                                modifier = Modifier
+                                    .padding(start = cellInset)
+                                    .testTag(tag = "drawer_settings_anchor"),
                             )
                         }
                         item(key = "settings") {
-                            DrawerSettingsRow(onClick = onOpenSettings)
+                            DrawerSettingsRow(
+                                onClick = onOpenSettings,
+                                modifier = Modifier.padding(horizontal = cellInset),
+                            )
                         }
                     }
                 }
@@ -1001,9 +1153,12 @@ private fun DrawerSectionHeader(
 }
 
 @Composable
-private fun DrawerSettingsRow(onClick: () -> Unit) {
+private fun DrawerSettingsRow(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(min = dimensionResource(R.dimen.drawer_application_row_min_height))
             .clickable(role = Role.Button, onClick = onClick)
@@ -1016,7 +1171,7 @@ private fun DrawerSettingsRow(onClick: () -> Unit) {
             modifier = Modifier.size(dimensionResource(R.dimen.drawer_application_icon_size)),
             tint = MaterialTheme.colorScheme.onBackground,
         )
-        Spacer(Modifier.width(dimensionResource(R.dimen.drawer_application_icon_label_gap)))
+        Spacer(Modifier.width(dimensionResource(R.dimen.drawer_settings_icon_label_gap)))
         Text(
             text = stringResource(R.string.settings),
             modifier = Modifier.weight(1f),
@@ -1031,18 +1186,25 @@ private fun DrawerSettingsRow(onClick: () -> Unit) {
 @Composable
 private fun DrawerApplicationRow(
     entry: LaunchableEntry,
+    displaySettings: DrawerDisplaySettings,
     searchQuery: String?,
     onLaunch: (LaunchableEntry) -> Unit,
     onLongPress: (LaunchableEntry) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val iconSize = dimensionResource(R.dimen.drawer_application_icon_size)
-    val iconSizePixels = with(LocalDensity.current) { iconSize.roundToPx() }
+    val applicationSize = displaySettings.applicationSize
+    val rowHeight = dimensionResource(
+        id = if (displaySettings.namePlacement == DrawerNamePlacement.Right) {
+            applicationSize.rowHeightResource()
+        } else {
+            applicationSize.belowRowHeightResource()
+        },
+    )
     val hapticFeedback = LocalHapticFeedback.current
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = dimensionResource(R.dimen.drawer_application_row_min_height))
+    Box(
+        modifier = modifier
+            .height(height = rowHeight)
             .combinedClickable(
                 role = Role.Button,
                 onClick = { onLaunch(entry) },
@@ -1052,15 +1214,92 @@ private fun DrawerApplicationRow(
                 },
             )
             .testTag("drawer_application_row"),
-        verticalAlignment = Alignment.CenterVertically,
+        contentAlignment = Alignment.Center,
     ) {
-        DrawerApplicationIcon(entry.iconBitmap, entry.icon, iconSize, iconSizePixels)
-        Spacer(Modifier.width(dimensionResource(R.dimen.drawer_application_icon_label_gap)))
-        DrawerApplicationName(
-            label = entry.label,
+        DrawerApplicationContent(
+            entry = entry,
+            displaySettings = displaySettings,
             searchQuery = searchQuery,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.padding(
+                horizontal = dimensionResource(
+                    id = R.dimen.drawer_application_cell_horizontal_inset,
+                ),
+            ),
         )
+    }
+}
+
+@Composable
+private fun DrawerApplicationContent(
+    entry: LaunchableEntry,
+    displaySettings: DrawerDisplaySettings,
+    searchQuery: String?,
+    modifier: Modifier = Modifier,
+) {
+    val applicationSize = displaySettings.applicationSize
+    val iconSize = dimensionResource(id = applicationSize.iconSizeResource())
+    val iconSizePixels = with(LocalDensity.current) { iconSize.roundToPx() }
+    if (displaySettings.namePlacement == DrawerNamePlacement.Right) {
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            DrawerApplicationIcon(
+                preparedBitmap = entry.iconBitmap,
+                icon = entry.icon,
+                iconSize = iconSize,
+                iconSizePixels = iconSizePixels,
+            )
+            Spacer(
+                modifier = Modifier.width(
+                    width = dimensionResource(id = R.dimen.drawer_application_icon_label_gap),
+                ),
+            )
+            DrawerApplicationName(
+                label = entry.label,
+                searchQuery = searchQuery,
+                applicationSize = applicationSize,
+                modifier = Modifier.weight(weight = 1f),
+            )
+        }
+    } else {
+        Column(
+            modifier = modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(
+                modifier = Modifier.height(
+                    height = dimensionResource(
+                        id = R.dimen.drawer_application_below_vertical_inset,
+                    ),
+                ),
+            )
+            DrawerApplicationIcon(
+                preparedBitmap = entry.iconBitmap,
+                icon = entry.icon,
+                iconSize = iconSize,
+                iconSizePixels = iconSizePixels,
+            )
+            Spacer(
+                modifier = Modifier.height(
+                    height = dimensionResource(id = R.dimen.drawer_application_icon_label_gap),
+                ),
+            )
+            DrawerApplicationName(
+                label = entry.label,
+                searchQuery = searchQuery,
+                applicationSize = applicationSize,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+            Spacer(
+                modifier = Modifier.height(
+                    height = dimensionResource(
+                        id = R.dimen.drawer_application_below_vertical_inset,
+                    ),
+                ),
+            )
+        }
     }
 }
 
@@ -1068,7 +1307,9 @@ private fun DrawerApplicationRow(
 private fun DrawerApplicationName(
     label: String,
     searchQuery: String?,
+    applicationSize: DrawerApplicationSize,
     modifier: Modifier = Modifier,
+    textAlign: androidx.compose.ui.text.style.TextAlign? = null,
 ) {
     val matchRanges = remember(key1 = label, key2 = searchQuery) {
         searchQuery?.let { query ->
@@ -1093,7 +1334,11 @@ private fun DrawerApplicationName(
         color = MaterialTheme.colorScheme.onBackground,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        style = MaterialTheme.typography.bodyLarge,
+        textAlign = textAlign,
+        style = MaterialTheme.typography.bodyLarge.copy(
+            fontSize = dimensionResource(id = applicationSize.textSizeResource()).value.sp,
+            lineHeight = dimensionResource(id = applicationSize.lineHeightResource()).value.sp,
+        ),
     )
 }
 

@@ -155,12 +155,19 @@
 
     <!-- Drawer / Application list / Root content and loading result -->
     <dimen name="drawer_horizontal_padding">16dp</dimen>
+    <dimen name="drawer_application_grid_boundary">8dp</dimen>
+    <dimen name="drawer_application_cell_horizontal_inset">8dp</dimen>
     <dimen name="drawer_error_icon_size">48dp</dimen>
 
     <!-- Drawer / Application list / Application row -->
     <dimen name="drawer_application_row_min_height">56dp</dimen>
     <dimen name="drawer_application_icon_size">40dp</dimen>
-    <dimen name="drawer_application_icon_label_gap">16dp</dimen>
+    <dimen name="drawer_application_icon_label_gap">12dp</dimen>
+    <dimen name="drawer_application_below_large_row_height">104dp</dimen>
+    <dimen name="drawer_application_below_medium_row_height">92dp</dimen>
+    <dimen name="drawer_application_below_small_row_height">80dp</dimen>
+    <dimen name="drawer_application_below_vertical_inset">8dp</dimen>
+    <dimen name="drawer_settings_icon_label_gap">16dp</dimen>
 
     <!-- Drawer / Application list / Alphabet section header -->
     <dimen name="drawer_section_header_height">40dp</dimen>
@@ -190,6 +197,10 @@
     <dimen name="drawer_search_icon_size">20dp</dimen>
     <dimen name="drawer_search_icon_text_gap">8dp</dimen>
     <dimen name="drawer_search_clear_target_size">48dp</dimen>
+
+    <!-- Drawer / Display settings / Modal panel placement -->
+    <dimen name="drawer_display_settings_horizontal_margin">8dp</dimen>
+    <dimen name="drawer_display_settings_bottom_margin">8dp</dimen>
 
     <!-- Drawer / Favorite selection mode / Top app bar and row indicator -->
     <dimen name="drawer_selection_indicator_region_width">40dp</dimen>

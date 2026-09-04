@@ -193,14 +193,25 @@ internal fun captureDrawerListPosition(
     sections: List<DrawerSection>,
     firstVisibleItemIndex: Int,
     firstVisibleItemScrollOffset: Int,
+    itemsPerRow: Int = 1,
 ): DrawerListPosition? {
+    require(itemsPerRow > 0)
     var sectionHeaderIndex = 0
     sections.forEach { section ->
-        val nextSectionHeaderIndex = sectionHeaderIndex + 1 + section.entries.size
+        val sectionRowCount = drawerApplicationRowCount(
+            entryCount = section.entries.size,
+            itemsPerRow = itemsPerRow,
+        )
+        val nextSectionHeaderIndex = sectionHeaderIndex + 1 + sectionRowCount
         if (firstVisibleItemIndex < nextSectionHeaderIndex) {
+            val relativeRowIndex = firstVisibleItemIndex - sectionHeaderIndex
             return DrawerListPosition(
                 sectionLabel = section.label,
-                relativeItemIndex = (firstVisibleItemIndex - sectionHeaderIndex).coerceAtLeast(0),
+                relativeItemIndex = if (relativeRowIndex <= 0) {
+                    0
+                } else {
+                    1 + (relativeRowIndex - 1) * itemsPerRow
+                },
                 scrollOffset = firstVisibleItemScrollOffset,
             )
         }
@@ -213,16 +224,21 @@ internal fun captureDrawerOrdinaryListPosition(
     sections: List<DrawerSection>,
     firstVisibleItemIndex: Int,
     firstVisibleItemScrollOffset: Int,
+    itemsPerRow: Int = 1,
 ): DrawerListPosition? {
     val applicationPosition = captureDrawerListPosition(
         sections = sections,
         firstVisibleItemIndex = firstVisibleItemIndex,
         firstVisibleItemScrollOffset = firstVisibleItemScrollOffset,
+        itemsPerRow = itemsPerRow,
     )
     if (applicationPosition != null) return applicationPosition
 
     val settingsHeaderIndex = sections.sumOf(selector = { section ->
-        1 + section.entries.size
+        1 + drawerApplicationRowCount(
+            entryCount = section.entries.size,
+            itemsPerRow = itemsPerRow,
+        )
     })
     val settingsRelativeIndex = firstVisibleItemIndex - settingsHeaderIndex
     return if (settingsRelativeIndex in 0..1) {
@@ -239,22 +255,33 @@ internal fun captureDrawerOrdinaryListPosition(
 internal fun resolveDrawerRestorationTarget(
     position: DrawerListPosition,
     sections: List<DrawerSection>,
+    itemsPerRow: Int = 1,
 ): DrawerRestorationTarget? {
+    require(itemsPerRow > 0)
     var sectionHeaderIndex = 0
     sections.forEach { section ->
         if (section.label == position.sectionLabel) {
-            val restoredRelativeIndex =
-                position.relativeItemIndex.coerceAtMost(section.entries.size)
+            val restoredEntryIndex = position.relativeItemIndex.coerceAtMost(
+                maximumValue = section.entries.size,
+            )
+            val restoredRelativeRowIndex = if (restoredEntryIndex == 0) {
+                0
+            } else {
+                1 + (restoredEntryIndex - 1) / itemsPerRow
+            }
             return DrawerRestorationTarget(
-                itemIndex = sectionHeaderIndex + restoredRelativeIndex,
-                scrollOffset = if (restoredRelativeIndex == position.relativeItemIndex) {
+                itemIndex = sectionHeaderIndex + restoredRelativeRowIndex,
+                scrollOffset = if (restoredEntryIndex == position.relativeItemIndex) {
                     position.scrollOffset
                 } else {
                     0
                 },
             )
         }
-        sectionHeaderIndex += 1 + section.entries.size
+        sectionHeaderIndex += 1 + drawerApplicationRowCount(
+            entryCount = section.entries.size,
+            itemsPerRow = itemsPerRow,
+        )
     }
 
     sectionHeaderIndex = 0
@@ -265,10 +292,18 @@ internal fun resolveDrawerRestorationTarget(
                 scrollOffset = 0,
             )
         }
-        sectionHeaderIndex += 1 + section.entries.size
+        sectionHeaderIndex += 1 + drawerApplicationRowCount(
+            entryCount = section.entries.size,
+            itemsPerRow = itemsPerRow,
+        )
     }
 
-    val itemCount = sections.sumOf { section -> 1 + section.entries.size }
+    val itemCount = sections.sumOf { section ->
+        1 + drawerApplicationRowCount(
+            entryCount = section.entries.size,
+            itemsPerRow = itemsPerRow,
+        )
+    }
     return if (itemCount > 0) {
         DrawerRestorationTarget(itemIndex = itemCount - 1, scrollOffset = 0)
     } else {
@@ -279,12 +314,20 @@ internal fun resolveDrawerRestorationTarget(
 internal fun resolveDrawerOrdinaryRestorationTarget(
     position: DrawerListPosition,
     sections: List<DrawerSection>,
+    itemsPerRow: Int = 1,
 ): DrawerRestorationTarget? {
     if (position.sectionLabel != SETTINGS_SECTION_POSITION_LABEL) {
-        return resolveDrawerRestorationTarget(position = position, sections = sections)
+        return resolveDrawerRestorationTarget(
+            position = position,
+            sections = sections,
+            itemsPerRow = itemsPerRow,
+        )
     }
     val settingsHeaderIndex = sections.sumOf(selector = { section ->
-        1 + section.entries.size
+        1 + drawerApplicationRowCount(
+            entryCount = section.entries.size,
+            itemsPerRow = itemsPerRow,
+        )
     })
     return DrawerRestorationTarget(
         itemIndex = settingsHeaderIndex + position.relativeItemIndex.coerceIn(
@@ -293,6 +336,15 @@ internal fun resolveDrawerOrdinaryRestorationTarget(
         ),
         scrollOffset = position.scrollOffset,
     )
+}
+
+internal fun drawerApplicationRowCount(
+    entryCount: Int,
+    itemsPerRow: Int,
+): Int {
+    require(entryCount >= 0)
+    require(itemsPerRow > 0)
+    return (entryCount + itemsPerRow - 1) / itemsPerRow
 }
 
 private fun drawerSectionRank(label: String): Int =
