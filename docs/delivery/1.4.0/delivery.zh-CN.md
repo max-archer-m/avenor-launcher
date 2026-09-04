@@ -12,7 +12,7 @@
 
 按照[发布治理](../../release.zh-CN.md)定义，本版本为`作者日常使用基线`。
 
-已配置应用标识为 `com.avenor.launcher`，`versionName` 为 `1.4.0`，候选 `versionCode` 为 `5`。编码 `5` 在可追溯 APK 按发布治理使用它之前不记为已分配；仅修改配置不构成产物或版本完成。
+已接受的开发候选包身份为 `com.avenor.launcher` `1.4.0(5)`。`versionCode` `5` 已分配给从源码 commit `a1a838819edc7c92d176b67e3766b1f8f8af096e` 重建的 debug APK，其 SHA-256 为 `CEF2853F51294C87F8CAA7125212C731BE89087B403B6A4808FF06CDFED860B8`，debug 证书 SHA-256 为 `E6786FC1914AAD390436C4F24661D81A2781492F45741CC77F96D0AD8B8C4E77`。这标识了已接受的本地验证候选包，不建立已保留的正式发布产物或公开分发结论。
 
 ## 产品引用
 
@@ -52,7 +52,7 @@
 | [迭代 22：有序收藏模块基础](iteration-22-ordered-favorite-module-foundation.zh-CN.md) | `Completed` | 2026-09-01 | 实现、聚焦测试、静态检查、作者报告的编译结果和功能验收满足本迭代边界。 |
 | [迭代 23：模块样式与排序](iteration-23-module-style-and-ordering.zh-CN.md) | `Completed` | 2026-09-02 | 实现、聚焦持久化测试源码、静态检查和作者报告的功能验收满足本迭代边界。 |
 | [迭代 24：应用编辑与跨模块移动](iteration-24-application-editing-and-cross-module-movement.zh-CN.md) | `Completed` | 2026-09-03 | 作者已验收截至修订后的退场过渡步骤的实现，并在工程收尾检查后明确确认迭代完成。未执行的建议检查继续记录于下文。 |
-| [迭代 25：升级、回归与版本收尾](iteration-25-upgrade-regression-and-version-closure.zh-CN.md) | `In Progress` | 2026-09-04 | 基线/测试准备及候选配置已完成。主设备和已安装基线已确认；强制升级前仍需新打包的 `1.4.0(5)` APK。 |
+| [迭代 25：升级、回归与版本收尾](iteration-25-upgrade-regression-and-version-closure.zh-CN.md) | `Completed` | 2026-09-04 | 可追溯源码的 `1.4.0(5)` 开发候选包、所选 S23 Ultra 旅程、保留的限制和作者的不创建 tag 处置满足迭代边界。 |
 
 ## 迭代证据和结果
 
@@ -162,6 +162,14 @@ Agent 在已连接的 `SM-S9180` 上执行 `adb install -r -t app/build/outputs/
 
 最终接受候选包必须从已提交源码 revision 重建，并保持已记录的标识和证书连续性。全新重装后，需要重新选择 Avenor 为默认 Home 并执行最终基本全新状态旅程，才能恢复设备验收。状态保持 `In Progress`。
 
+#### 可追溯源码候选包
+
+候选准备已提交为 `a1a838819edc7c92d176b67e3766b1f8f8af096e`。作者通过 IDE 从该干净工作区重新构建 debug APK。检查 `app/build/outputs/apk/debug/app-debug.apk` 得到 `com.avenor.launcher` `1.4.0(5)`、target SDK 36、SHA-256 `CEF2853F51294C87F8CAA7125212C731BE89087B403B6A4808FF06CDFED860B8`，debug 证书 SHA-256 `E6786FC1914AAD390436C4F24661D81A2781492F45741CC77F96D0AD8B8C4E77`。`versionCode` `5` 由此分配给可追溯到源码的开发候选包，不得用于另一项可追溯 APK 身份。
+
+Agent 在主设备 `SM-S9180` 上执行 `adb install --user 0 -r -t app/build/outputs/apk/debug/app-debug.apk`，结果为 `Success`。包检查保持 `1.4.0(5)`，最后更新时间变为 `2026-09-04 10:22:40`，用户 96 保持未安装，Avenor 保持默认 Home。既有 `ordered_favorite_modules.bin` 在安装前后的 SHA-256 均为 `F3FDAD3C0DD1BFD827CF3A2C5617CE0AE501F81ABFDB01D0ABFA6E267A5EE6C3`，证明该有序模块文档的字节准确保留。最终候选包安装期间未卸载或清除数据。
+
+作者确认这一准确重建的 APK 可以正常打开 Home，且既有模块保持存在。结合已接受的全新安装旅程、已安装候选包回归、作者接受的早期旧模型采用结果，以及明确保留的可追溯性和覆盖限制，本次结果满足所选作者日常使用基线。迭代 25 由作者于 2026-09-04 决定为 `Completed`。作者明确选择本次收尾不创建 tag。版本完成仍需集成本证据并同步指定的共享历史。
+
 ## 依赖和顺序
 
 迭代 22 → 23 → 24 构成 Home 依赖链。迭代 25 依赖迭代 22–24 的已接受结果。这些依赖不把工作绑定到分支、终端、贡献者、预测日期或永久任务线。
@@ -192,4 +200,4 @@ Agent 在已连接的 `SM-S9180` 上执行 `adb install -r -t app/build/outputs/
 
 ## 完成结果
 
-当前没有版本完成结果。迭代 22-24 为 `Completed`；迭代 25 为 `In Progress`。本文件不授权推送、发布或公开分发。
+迭代 22-25 均为 `Completed`，作者已按作者日常使用基线接受可追溯源码的 `1.4.0(5)` 开发候选包。版本完成仍需集成本证据并同步指定的共享历史。作者选择不创建 tag；本结果不建立正式发布产物、发布或公开分发结论。

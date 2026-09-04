@@ -12,7 +12,7 @@
 
 `Author daily-use baseline`, as defined by [release governance](../../release.md).
 
-The configured application identity is `com.avenor.launcher` with `versionName` `1.4.0` and candidate `versionCode` `5`. Code `5` is not recorded as allocated until a traceable APK uses it under release governance; configuration alone does not establish an artifact or version completion.
+The accepted development-candidate identity is `com.avenor.launcher` `1.4.0(5)`. `versionCode` `5` is allocated to the debug APK rebuilt from source commit `a1a838819edc7c92d176b67e3766b1f8f8af096e`, with SHA-256 `CEF2853F51294C87F8CAA7125212C731BE89087B403B6A4808FF06CDFED860B8` and debug-certificate SHA-256 `E6786FC1914AAD390436C4F24661D81A2781492F45741CC77F96D0AD8B8C4E77`. This identifies the accepted local validation candidate; it does not establish a retained formal release artifact or public distribution.
 
 ## Product references
 
@@ -52,7 +52,7 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 | [Iteration 22: Ordered Favorite Module Foundation](iteration-22-ordered-favorite-module-foundation.md) | `Completed` | 2026-09-01 | The implementation, focused tests, static checks, author-reported compilation, and functional acceptance satisfy the iteration boundary. |
 | [Iteration 23: Module Style and Ordering](iteration-23-module-style-and-ordering.md) | `Completed` | 2026-09-02 | The implementation, focused persistence-test sources, static checks, and author-reported functional acceptance satisfy the iteration boundary. |
 | [Iteration 24: Application Editing and Cross-Module Movement](iteration-24-application-editing-and-cross-module-movement.md) | `Completed` | 2026-09-03 | The author accepted the implementation through the amended exit-transition slice and explicitly confirmed iteration completion after the engineering closeout review. Recommended unperformed checks remain recorded below. |
-| [Iteration 25: Upgrade, Regression, and Version Closure](iteration-25-upgrade-regression-and-version-closure.md) | `In Progress` | 2026-09-04 | Baseline/test preparation and candidate configuration are complete. The primary device and installed baseline are confirmed; a newly packaged `1.4.0(5)` APK is still required before the mandatory upgrade. |
+| [Iteration 25: Upgrade, Regression, and Version Closure](iteration-25-upgrade-regression-and-version-closure.md) | `Completed` | 2026-09-04 | The source-traceable `1.4.0(5)` development candidate, selected S23 Ultra journeys, retained limitations, and the author's no-tag disposition satisfy the iteration boundary. |
 
 ## Iteration evidence and results
 
@@ -162,6 +162,14 @@ The author separately accepted the old-model APK upgrade result, reporting that 
 
 A final accepted candidate must be rebuilt from a committed source revision and retain the recorded identifier and certificate continuity. The clean reinstall requires selection of Avenor as default Home and a final basic clean-state journey before device acceptance can be restored. Status remains `In Progress`.
 
+#### Source-traceable candidate
+
+Candidate preparation was committed as `a1a838819edc7c92d176b67e3766b1f8f8af096e`. The author rebuilt the debug APK from that clean working tree through the IDE. `app/build/outputs/apk/debug/app-debug.apk` was inspected as `com.avenor.launcher` `1.4.0(5)`, target SDK 36, SHA-256 `CEF2853F51294C87F8CAA7125212C731BE89087B403B6A4808FF06CDFED860B8`, and debug certificate SHA-256 `E6786FC1914AAD390436C4F24661D81A2781492F45741CC77F96D0AD8B8C4E77`. This allocates `versionCode` `5` to the source-traceable development candidate; it may not be reused for another traceable APK identity.
+
+Agent-executed `adb install --user 0 -r -t app/build/outputs/apk/debug/app-debug.apk` returned `Success` on the primary `SM-S9180`. Package inspection retained `1.4.0(5)`, changed last-update time to `2026-09-04 10:22:40`, kept user 96 uninstalled, and retained Avenor as the default Home. The existing `ordered_favorite_modules.bin` SHA-256 remained `F3FDAD3C0DD1BFD827CF3A2C5617CE0AE501F81ABFDB01D0ABFA6E267A5EE6C3` before and after installation, establishing exact byte preservation for that ordered-module document. No uninstall or data clear occurred during this final-candidate installation.
+
+The author confirmed that this exact rebuilt APK opens Home normally and retains the existing modules. Together with the accepted clean-install journey, installed-candidate regression, author-accepted earlier old-model adoption result, and explicitly retained traceability and coverage limitations, this satisfies the selected author daily-use boundary. Iteration 25 is `Completed` by author decision on 2026-09-04. The author explicitly selected no tag for this closure. Version completion remains pending integration of this evidence and synchronization of the designated shared history.
+
 ## Dependencies and sequence
 
 Iterations 22 → 23 → 24 form the Home dependency chain. Iteration 25 depends on accepted results from Iterations 22–24. These dependencies do not bind work to a branch, terminal, contributor, forecast date, or permanent task line.
@@ -192,4 +200,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.4.0` identif
 
 ## Completion result
 
-No version completion result exists. Iterations 22-24 are `Completed`; Iteration 25 is `In Progress`. This document does not authorize push, release, or publication.
+Iterations 22-25 are `Completed`, and the author has accepted the source-traceable `1.4.0(5)` development candidate at the author daily-use baseline. Version completion remains pending integration of this evidence and synchronization of the designated shared history. The author selected no tag; no formal release artifact, publication, or public distribution is established by this result.
