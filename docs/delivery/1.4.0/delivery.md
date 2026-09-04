@@ -200,4 +200,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.4.0` identif
 
 ## Completion result
 
-Iterations 22-25 are `Completed`, and the author has accepted the source-traceable `1.4.0(5)` development candidate at the author daily-use baseline. Version completion remains pending integration of this evidence and synchronization of the designated shared history. The author selected no tag; no formal release artifact, publication, or public distribution is established by this result.
+`1.4.0` is `Completed` at the author daily-use baseline by author decision on 2026-09-04. Iterations 22-25 are `Completed`; the author accepted the source-traceable `1.4.0(5)` development candidate and its recorded limitations. Candidate source commit `a1a838819edc7c92d176b67e3766b1f8f8af096e` and iteration evidence through `a74c6a10ab9eba5e0ec20f4346a859f9343a994d` are integrated into `main` and synchronized to `origin/main`. The author selected no tag. The accepted APK remains a local debug validation candidate; no retained formal release artifact, publication, or public distribution is established by this completion result.
