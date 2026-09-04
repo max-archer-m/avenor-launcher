@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [delivery.zh-CN.md](delivery.zh-CN.md).
 >
-> This record plans behavior selected from product-contract baseline `7cae837dafb188896dd24bd43aae58022c81fe11`. Status and evidence do not authorize implementation, a version change, commit, push, tag, artifact movement, publication, or release.
+> This record selects behavior from initial product-contract baseline `7cae837dafb188896dd24bd43aae58022c81fe11`, with the authorized Home refinements and closure alignment at `78d2aab18066c2d9b57b56581e0ab8c17402d104` recorded in Iterations 24-25. Status and evidence do not authorize implementation, a version change, commit, push, tag, artifact movement, publication, or release.
 
 ## Version intent
 
@@ -12,7 +12,7 @@
 
 `Author daily-use baseline`, as defined by [release governance](../../release.md).
 
-The planned application identity remains `com.avenor.launcher` with `versionName` `1.4.0`. `versionCode` `5` is the candidate next value and is not allocated until a traceable APK uses it under release governance.
+The configured application identity is `com.avenor.launcher` with `versionName` `1.4.0` and candidate `versionCode` `5`. Code `5` is not recorded as allocated until a traceable APK uses it under release governance; configuration alone does not establish an artifact or version completion.
 
 ## Product references
 
@@ -52,7 +52,7 @@ Primary risks are destructive reset scope, stale module or selection identity, g
 | [Iteration 22: Ordered Favorite Module Foundation](iteration-22-ordered-favorite-module-foundation.md) | `Completed` | 2026-09-01 | The implementation, focused tests, static checks, author-reported compilation, and functional acceptance satisfy the iteration boundary. |
 | [Iteration 23: Module Style and Ordering](iteration-23-module-style-and-ordering.md) | `Completed` | 2026-09-02 | The implementation, focused persistence-test sources, static checks, and author-reported functional acceptance satisfy the iteration boundary. |
 | [Iteration 24: Application Editing and Cross-Module Movement](iteration-24-application-editing-and-cross-module-movement.md) | `Completed` | 2026-09-03 | The author accepted the implementation through the amended exit-transition slice and explicitly confirmed iteration completion after the engineering closeout review. Recommended unperformed checks remain recorded below. |
-| [Iteration 25: Upgrade, Regression, and Version Closure](iteration-25-upgrade-regression-and-version-closure.md) | `Planned` | 2026-09-01 | Version completion requires integrated Home adoption, compatibility, artifact, and author-acceptance evidence after the selected Home loop is complete. |
+| [Iteration 25: Upgrade, Regression, and Version Closure](iteration-25-upgrade-regression-and-version-closure.md) | `In Progress` | 2026-09-04 | Baseline/test preparation and candidate configuration are complete. The primary device and installed baseline are confirmed; a newly packaged `1.4.0(5)` APK is still required before the mandatory upgrade. |
 
 ## Iteration evidence and results
 
@@ -111,7 +111,56 @@ Static checks passed for staged and unstaged diffs, whitespace in the new transi
 
 ### Iteration 25
 
-[Contract](iteration-25-upgrade-regression-and-version-closure.md). No implementation or validation evidence exists. Status remains `Planned`; absent evidence is not a pass.
+[Contract](iteration-25-upgrade-regression-and-version-closure.md). Preparation began under author authorization on 2026-09-03 from integrated source `d8ada79f9b8a92a826edba17a340d7e0971274fc`. The contract now selects the accepted Home refinements at `78d2aab18066c2d9b57b56581e0ab8c17402d104`, already present in that ancestry. This changes neither the protected Iterations 22-24 contracts nor the upgrade/reset acceptance intent.
+
+#### Baseline and test preparation
+
+- Existing ordered-store tests cover readable schema-3 adoption, invalid legacy and ordered data, recoverable backups, persisted module/style/order round trips, and serialized mutations. The schema-3 fixture format was compared with the accepted `1.3.0` serializer.
+- Two new `OrderedFavoriteUpgradeTest` cases specify that resetting mixed legacy list/bar favorites happens only once and that unreadable new-model data never falls back to readable legacy data or permits a write. They use isolated temporary files and do not clear application data. Their execution is `Not run`; they do not establish APK upgrade or Android settings-preservation evidence.
+- Source inspection confirms `allowBackup=false` and whole-domain exclusions for cloud backup and device transfer. Packaged backup behavior remains to be checked against the candidate; the existing `BackupConfigurationTest` provides the automated entry point.
+- Static diff, new-test whitespace, affected Markdown-link, and pinned-reference target checks passed. No production behavior, configured version identifier, signing material, installed package, or device data changed. Gradle and instrumentation were not run.
+
+#### Candidate and validation readiness
+
+| Area | Preparation and remaining evidence |
+| --- | --- |
+| Old baseline | Accepted `1.3.0(4)` source is `0bdb54a49530fa6a84e9c57a054447d3ba093525`; APK and debug-certificate digests are recorded in [1.3.0 delivery](../1.3.0/delivery.md#iteration-21). Original APK availability is unconfirmed. Any reconstruction must be identified separately and accepted as a limitation, not represented as the original APK. |
+| Candidate identity | Configuration and packaged-identity test expectations now use `1.4.0(5)` under author authorization. Repository delivery records identify `4` as the latest allocated code and contain no allocation for `5`; no candidate APK has been reported or verified for this change. Record exact source, build stage, package, version, signing certificate, and available digest when built. |
+| Signing and device | The author designated Samsung S23 Ultra as the primary physical device; its exact model identifier and Android/API version remain unreported for this iteration. Match the candidate certificate to the accepted baseline before installation. Do not assume release and debug signing are interchangeable. Reinstalling an old baseline or clearing current development data requires separate direction; do not use downgrade as the upgrade setup. |
+| Mandatory upgrade | Start from actual old-model `1.3.0` state with representative lists/bars and noted unrelated settings/system authorization. Perform an in-place candidate update, verify the one-time empty Home reset, preserve unrelated configuration, then create new modules and restart to verify they are not reset again. A current development install already using ordered modules does not substitute for this journey. |
+| Selected regression | Check module creation/addition, style/order, removal/Undo, every movement type, drop-to-create, auto-scroll, transitions and single-preview handoff, then existing Drawer, Settings, launch, double-tap-lock, Privacy, offline and profile paths. Record actual observations and included-path failures; do not add deferred Drawer features. |
+| Supplemental checks | Clean install, failed reads/writes, process recreation, multi-pointer and lifecycle interruption, disabled animations, broader OEM/profile/API coverage, and profiling remain recommended. Historical Home instrumentation failures remain unresolved until rerun or explicitly dispositioned; they are not recorded as passing. |
+| Closure | Record the exact candidate and accepted device journey, known gaps, and the author's version-completion and tag disposition. Required source/evidence synchronization and any commit, push, artifact movement, tag or publication remain separately controlled. |
+
+#### Candidate configuration
+
+The author authorized file changes and retained IDE compilation responsibility. The application configuration, `CandidateConfigurationTest`, and both development-guide counterparts now agree on `1.4.0(5)`; application ID, SDK levels, signing configuration, and reset behavior are unchanged. This change does not erase current ordered-module data: reset applies only to first adoption from readable legacy favorites, not to every version change.
+
+The author selected Samsung S23 Ultra and requested reduced emphasis on compatibility testing. Broader compatibility coverage remains recommended and unperformed, not a new gate or an implied pass. The selected in-place upgrade/reset and unrelated-configuration preservation requirement is unchanged. Static diff and affected local Markdown-link checks passed; agent Gradle, APK generation, signing, installation, and device testing were not performed. Author IDE compilation and device results remain unreported.
+
+The author subsequently reported basic acceptance of this configuration slice; the exact IDE command or task was not reported. Read-only preparation identified the connected primary device as Samsung `SM-S9180`, Android 16 / API 36. Package inspection showed that user 0 currently has `com.avenor.launcher` `1.3.0(4)` installed, with first-install time `2026-09-01 15:11:21` and last-update time `2026-09-03 11:32:44`; another reported user 96 installation is absent. This is a suitable installed-version starting identity, but its application state and pre-upgrade acceptance observations still need to be recorded before mutation.
+
+The only locally found application APK was `app/build/intermediates/apk/debug/app-debug.apk`. Static artifact inspection identified it as stale `com.avenor.launcher` `1.3.0(4)`, SHA-256 `51725D8105081E80668FC51436C4362E73DE9CC36D8247A09B285367715ADCEE`, signed by debug certificate SHA-256 `E6786FC1914AAD390436C4F24661D81A2781492F45741CC77F96D0AD8B8C4E77`. Its certificate matches the accepted `1.3.0` debug identity, but its version proves it is not the configured `1.4.0(5)` candidate. It was not installed or treated as new evidence. A fresh IDE `Build APK(s)` result, or an equivalent explicitly reported package task, is required before candidate identity and in-place installation can be checked.
+
+#### Development-candidate installation
+
+The author reported completing the IDE packaging step. The generated debug APK at `app/build/outputs/apk/debug/app-debug.apk` was inspected as `com.avenor.launcher` `1.4.0(5)`, target SDK 36, SHA-256 `20735A68144E416562F54F06C587E4A37CE6A2602DBDBCF0634CD6D3DD54A1B2`, and debug certificate SHA-256 `E6786FC1914AAD390436C4F24661D81A2781492F45741CC77F96D0AD8B8C4E77`. The certificate matches the accepted `1.3.0` debug identity. The APK represents the current uncommitted working tree based on `d8ada79f9b8a92a826edba17a340d7e0971274fc`; it is a development-validation candidate, not yet a final source-commit-traceable candidate.
+
+Agent-executed `adb install -r -t app/build/outputs/apk/debug/app-debug.apk` on the connected `SM-S9180` returned `Success`. Package inspection changed the installed identity from `1.3.0(4)` to `1.4.0(5)`, retained first-install time `2026-09-01 15:11:21`, and recorded last-update time `2026-09-04 10:02:31`. User 0 remains installed. Android still resolves the default Home activity to `com.avenor.launcher/.MainActivity`.
+
+This was not the contracted legacy-model adoption journey. After installation, application-private inspection showed an existing `ordered_favorite_modules.bin` last modified `2026-09-03 20:30`, with SHA-256 `617FE2DAA121B84580DB3A55D19A433360988EEF887B0A424E9FD7A3276B2D6B`; no legacy `favorites.bin` exists. Therefore the installed `1.3.0(4)` starting package already used the ordered-module model, and its module data remained available across the version update as expected. This evidence supports signature continuity, in-place package update, default-Home continuity, and new-model data preservation only. It neither exercises nor passes the mandatory one-time reset from an accepted old-model `1.3.0` state. No uninstall, downgrade, or data clearing occurred.
+
+The author reported basic acceptance of the requested installed-candidate journey: Home modules/style/order remained usable, application add/remove/Undo/movement was usable, Drawer/Settings/application launch operated, and restarting Avenor retained the resulting state. The exact actions, module combinations, offline/profile conditions, and interruption cases were not reported, so broader regression remains `Unknown` rather than passed.
+
+Post-acceptance read-only inspection confirmed the packaged manifest retains `allowBackup=false` and the configured data-extraction rules, Avenor remains the default Home, and the candidate process is running. Its latest exit record is the expected `PACKAGE UPDATED` stop at installation; no candidate-period crash or ANR appears in the inspected exit history. Installed permissions retain `SET_ALARM`, the application-private dynamic-receiver permission, and the author-granted Samsung application-list permission for user 0.
+
+Samsung automatically registered the updated package for Dual App user 96 during installation even though that user was not installed immediately beforehand. User 96 is now reported installed but stopped, with the Samsung application-list permission not granted. This unintended secondary installation has not been removed because removal is a separate destructive device action; it remains an open cleanup and acceptance item.
+
+The author then attempted to remove the secondary installation manually. Read-only package checks established that this removed `com.avenor.launcher` globally rather than only for user 96: the package was absent for user 0, no package path existed, and Android resolved Home to the system resolver. The author authorized recovery. Agent-executed `adb install --user 0 -t app/build/outputs/apk/debug/app-debug.apk` returned `Success` and installed `1.4.0(5)` only for user 0 at `2026-09-04 10:12:19`; user 96 is now reported not installed. This was a clean reinstall, not another in-place upgrade. The previous Avenor application-private data and default-Home selection must be treated as lost or reset by the global uninstall; no claim of their preservation continues beyond that point. The author then selected Avenor as default Home and reported that clean empty favorites, creation of one module, persistence after restarting Avenor, Drawer, Settings, and application launch all operated normally. This supplies the recommended clean-install evidence at the reported scope; it does not restore the earlier private data or broaden compatibility coverage.
+
+The author separately accepted the old-model APK upgrade result, reporting that the manual journey was performed during the initial development of this adoption behavior and is not considered an unresolved product issue. The exact APK digest, source revision, device state, time, operations, and retained output for that earlier check were not reported. This author acceptance satisfies the selected daily-use baseline's legacy-reset disposition while retaining those traceability limitations; it does not convert the new automated test sources to executed evidence or establish broader compatibility.
+
+A final accepted candidate must be rebuilt from a committed source revision and retain the recorded identifier and certificate continuity. The clean reinstall requires selection of Avenor as default Home and a final basic clean-state journey before device acceptance can be restored. Status remains `In Progress`.
 
 ## Dependencies and sequence
 
@@ -143,4 +192,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.4.0` identif
 
 ## Completion result
 
-No version completion result exists. Iterations 22-24 are `Completed`; Iteration 25 remains `Planned`. This document does not authorize push, release, or publication.
+No version completion result exists. Iterations 22-24 are `Completed`; Iteration 25 is `In Progress`. This document does not authorize push, release, or publication.

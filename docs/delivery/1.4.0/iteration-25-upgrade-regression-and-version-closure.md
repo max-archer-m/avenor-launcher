@@ -8,12 +8,22 @@ Produce truthful evidence that the selected `1.4.0` Home-module journey adopts s
 
 ## Product and version references
 
-- Product-contract baseline: `7cae837dafb188896dd24bd43aae58022c81fe11`
+- Product-contract baseline: `78d2aab18066c2d9b57b56581e0ab8c17402d104`
+- [Accepted Home behavior](https://github.com/max-archer-m/avenor-launcher/blob/78d2aab18066c2d9b57b56581e0ab8c17402d104/docs/product/surfaces/home.md)
+- [Accepted Home presentation and transitions](https://github.com/max-archer-m/avenor-launcher/blob/78d2aab18066c2d9b57b56581e0ab8c17402d104/docs/product/presentation/home.md)
+- [Iteration 24 amended scope](iteration-24-application-editing-and-cross-module-movement.md)
 - [1.4.0 delivery](delivery.md)
 - [1.3.0 completed delivery](../1.3.0/delivery.md)
 - [Validation guide](../../validation.md)
 - [Release governance](../../release.md)
 - [Product foundation](../../requirements/product-foundation.md)
+
+### Authorized amendment: 2026-09-03
+
+- Author decision and reason: The author accepted the closure-preparation proposal and authorized progressive execution after Iterations 22-24 were completed and integrated. Closure must validate the accepted Iteration 24 refinements rather than its former source-placeholder and transition rules.
+- Previous baseline: `7cae837dafb188896dd24bd43aae58022c81fe11`.
+- New baseline: `78d2aab18066c2d9b57b56581e0ab8c17402d104`; the affected Home contracts are pinned above.
+- Scope and acceptance impact: Apply the already accepted placeholder-free movement, current-gap ribbon feedback, add-entry surfaces, content transitions, and single-preview save handoff when regressing the complete Home journey. The upgrade/reset boundary, excluded Drawer features, delivery level, and mandatory-versus-recommended evidence remain unchanged. No new functionality, version allocation, signing, device-data reset, or release operation is authorized by this document.
 
 ## Observable outcome
 

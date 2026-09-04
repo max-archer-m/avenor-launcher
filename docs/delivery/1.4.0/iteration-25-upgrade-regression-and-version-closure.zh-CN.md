@@ -8,12 +8,22 @@
 
 ## 产品和版本引用
 
-- 产品契约基线：`7cae837dafb188896dd24bd43aae58022c81fe11`
+- 产品契约基线：`78d2aab18066c2d9b57b56581e0ab8c17402d104`
+- [已接受的 Home 行为](https://github.com/max-archer-m/avenor-launcher/blob/78d2aab18066c2d9b57b56581e0ab8c17402d104/docs/product/surfaces/home.md)
+- [已接受的 Home 展示与过渡](https://github.com/max-archer-m/avenor-launcher/blob/78d2aab18066c2d9b57b56581e0ab8c17402d104/docs/product/presentation/home.md)
+- [迭代 24 修订范围](iteration-24-application-editing-and-cross-module-movement.zh-CN.md)
 - [1.4.0 交付](delivery.zh-CN.md)
 - [1.3.0 已完成交付](../1.3.0/delivery.zh-CN.md)
 - [验证指南](../../validation.zh-CN.md)
 - [发布治理](../../release.zh-CN.md)
 - [产品基础](../../requirements/product-foundation.zh-CN.md)
+
+### 已授权修订：2026-09-03
+
+- 作者决定及原因：迭代 22-24 完成并集成后，作者接受收尾准备建议并授权逐步执行。收尾必须验证迭代 24 已接受的完善项，而非其旧版源占位和过渡规则。
+- 原基线：`7cae837dafb188896dd24bd43aae58022c81fe11`。
+- 新基线：`78d2aab18066c2d9b57b56581e0ab8c17402d104`；受影响的 Home 契约已固定引用于上文。
+- 范围和验收影响：完整 Home 旅程回归采用已接受的无占位移动、实时间隙织带反馈、新增入口表面、内容过渡和单拖影保存交接。升级/重置边界、排除的 Drawer 功能、交付级别以及强制与建议证据的区分不变。本文件不授权新增功能、版本分配、签名、设备数据重置或发布操作。
 
 ## 可观察结果
 
