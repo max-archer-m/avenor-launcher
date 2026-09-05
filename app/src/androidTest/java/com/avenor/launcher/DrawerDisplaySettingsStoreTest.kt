@@ -1,18 +1,93 @@
 package com.avenor.launcher
 
 import androidx.test.core.app.ApplicationProvider
+import android.util.AtomicFile
+import java.io.FileOutputStream
 import java.io.DataOutputStream
 import java.io.File
 import java.util.UUID
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class DrawerDisplaySettingsStoreTest {
+    @Test
+    fun cancellationAtCommitKeepsMemoryAndReloadedStateConsistent(): Unit = runBlocking {
+        val file = temporarySettingsFile()
+        lateinit var saving: Job
+        val atomicFile = object : AtomicFile(file) {
+            override fun finishWrite(stream: FileOutputStream?) {
+                super.finishWrite(stream)
+                saving.cancel()
+            }
+        }
+        val store = DrawerDisplaySettingsStore(atomicFile)
+        try {
+            store.load()
+            val candidate = DrawerDisplaySettings(
+                applicationSize = DrawerApplicationSize.Small,
+                namePlacement = DrawerNamePlacement.Below,
+                itemsPerRow = 4,
+                sectionAnchorPresentation = DrawerSectionAnchorPresentation.LeftSide,
+                backgroundMode = DrawerBackgroundMode.Transparent,
+            )
+            saving = launch(start = CoroutineStart.LAZY) { store.replace(candidate) }
+            saving.start()
+            saving.join()
+            assertTrue(saving.isCancelled)
+            val expected = DrawerDisplaySettingsReadState.Readable(candidate)
+            assertEquals(expected, store.state.value)
+            val reloaded = DrawerDisplaySettingsStore(file)
+            reloaded.load()
+            assertEquals(expected, reloaded.state.value)
+        } finally {
+            deleteSettingsFiles(file)
+        }
+    }
+
+    @Test
+    fun failedCompleteWriteCanBeRetriedWithoutLosingOtherGroups(): Unit = runBlocking {
+        val file = temporarySettingsFile()
+        var fail = false
+        val store = DrawerDisplaySettingsStore(object : AtomicFile(file) {
+            override fun startWrite(): FileOutputStream {
+                if (fail) throw java.io.IOException("Injected write failure")
+                return super.startWrite()
+            }
+        })
+        try {
+            store.load()
+            val original = DrawerDisplaySettings(
+                applicationSize = DrawerApplicationSize.Large,
+                namePlacement = DrawerNamePlacement.Below,
+                itemsPerRow = 3,
+                sectionAnchorPresentation = DrawerSectionAnchorPresentation.LeftSide,
+            )
+            assertTrue(store.replace(original))
+            val candidate = original.copy(backgroundMode = DrawerBackgroundMode.Transparent)
+            fail = true
+            assertFalse(store.replace(candidate))
+            assertEquals(DrawerDisplaySettingsReadState.Readable(original), store.state.value)
+            val afterFailure = DrawerDisplaySettingsStore(file)
+            afterFailure.load()
+            assertEquals(store.state.value, afterFailure.state.value)
+            fail = false
+            assertTrue(store.replace(candidate))
+            val afterRetry = DrawerDisplaySettingsStore(file)
+            afterRetry.load()
+            assertEquals(DrawerDisplaySettingsReadState.Readable(candidate), afterRetry.state.value)
+        } finally {
+            deleteSettingsFiles(file)
+        }
+    }
+
     @Test
     fun freshStoreLoadsConfirmedDefaults(): Unit = runBlocking {
         val file = temporarySettingsFile()

@@ -1,4 +1,13 @@
 <resources>
+    <string name="drawer_background">背景</string>
+    <string name="drawer_background_transparent">透明</string>
+    <string name="drawer_background_frosted_glass">磨砂玻璃</string>
+    <string name="drawer_section_anchor_presentation">分节锚点</string>
+    <string name="drawer_section_anchor_inline">行内</string>
+    <string name="drawer_section_anchor_left">左侧</string>
+    <string name="style_settings_items_per_row">每行应用数量</string>
+    <string name="style_settings_decrease_items_per_row">减少每行应用数量</string>
+    <string name="style_settings_increase_items_per_row">增加每行应用数量</string>
     <string name="app_name">Avenor Launcher</string>
     <string name="clock_unavailable">无法打开时钟</string>
     <string name="calendar_unavailable">无法打开日历</string>

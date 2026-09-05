@@ -9,7 +9,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -38,7 +39,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.integerResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -82,6 +89,8 @@ internal fun StyleApplicationSizeRow(
         Row(
             modifier = Modifier
                 .weight(weight = 1f)
+                .selectableGroup()
+                .semantics { contentDescription = title }
                 .horizontalScroll(state = rememberScrollState()),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -100,12 +109,13 @@ internal fun StyleApplicationSizeRow(
                                 id = R.dimen.style_settings_panel_row_height,
                             ),
                         )
-                        .clickable(
-                            enabled = enabled && index != selectedIndex,
+                        .selectable(
+                            selected = index == selectedIndex,
+                            enabled = enabled,
                             role = Role.RadioButton,
-                            onClick = { onSelectIndex(index) },
+                            onClick = { if (index != selectedIndex) onSelectIndex(index) },
                         )
-                        .alpha(alpha = if (enabled) 1f else 0.38f)
+                        .alpha(alpha = styleSettingsContentAlpha(enabled))
                         .padding(
                             horizontal = dimensionResource(
                                 id = R.dimen.style_settings_size_option_horizontal_padding,
@@ -123,7 +133,7 @@ internal fun StyleApplicationSizeRow(
                         onClick = null,
                         modifier = Modifier.size(
                             size = dimensionResource(id = R.dimen.style_settings_indicator_size),
-                        ),
+                        ).clearAndSetSemantics { },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = MaterialTheme.colorScheme.onSurface,
                             unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -205,6 +215,7 @@ internal fun StyleArrangementRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             StyleTwoOptionSelector(
+                title = title,
                 optionLabels = optionLabels,
                 selectedIndex = selectedIndex,
                 enabled = enabled,
@@ -231,12 +242,52 @@ internal fun StyleArrangementRow(
 }
 
 @Composable
-private fun StyleTwoOptionSelector(
+internal fun StyleSelectorRow(
+    title: String,
     optionLabels: List<String>,
     selectedIndex: Int,
     enabled: Boolean,
     onSelectIndex: (Int) -> Unit,
     testTagPrefix: String,
+    wide: Boolean = false,
+) {
+    require(optionLabels.size == 2)
+    require(selectedIndex in optionLabels.indices)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(R.dimen.style_settings_panel_row_height))
+            .padding(horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset)),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = title, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
+        Spacer(Modifier.width(dimensionResource(R.dimen.style_settings_title_control_gap)))
+        Row(
+            modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StyleTwoOptionSelector(
+                title = title,
+                optionLabels = optionLabels,
+                selectedIndex = selectedIndex,
+                enabled = enabled,
+                onSelectIndex = onSelectIndex,
+                testTagPrefix = testTagPrefix,
+                wide = wide,
+            )
+        }
+    }
+}
+
+@Composable
+private fun StyleTwoOptionSelector(
+    title: String,
+    optionLabels: List<String>,
+    selectedIndex: Int,
+    enabled: Boolean,
+    onSelectIndex: (Int) -> Unit,
+    testTagPrefix: String,
+    wide: Boolean = false,
 ) {
     val animationDuration = integerResource(
         id = R.integer.short_property_animation_duration_ms,
@@ -244,76 +295,97 @@ private fun StyleTwoOptionSelector(
     val frameShape = RoundedCornerShape(
         size = dimensionResource(id = R.dimen.style_settings_selector_frame_radius),
     )
-    Row(
+    Box(
         modifier = Modifier
             .size(
-                width = dimensionResource(id = R.dimen.style_settings_selector_width),
-                height = dimensionResource(id = R.dimen.style_settings_selector_height),
-            )
-            .clip(shape = frameShape)
-            .background(color = colorResource(id = R.color.avenor_sheet_surface))
-            .border(
-                width = dimensionResource(id = R.dimen.style_settings_selector_border_width),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                shape = frameShape,
-            )
-            .padding(
-                all = dimensionResource(id = R.dimen.style_settings_selector_inner_padding),
+                width = dimensionResource(
+                    id = if (wide) R.dimen.drawer_background_selector_width
+                    else R.dimen.style_settings_selector_width,
+                ),
+                height = dimensionResource(id = R.dimen.style_settings_stepper_target_size),
             ),
+        contentAlignment = Alignment.Center,
     ) {
-        optionLabels.forEachIndexed { index, label ->
-            val selected = index == selectedIndex
-            val backgroundColor by animateColorAsState(
-                targetValue = if (selected) {
-                    MaterialTheme.colorScheme.onSurface
-                } else {
-                    Color.Transparent
-                },
-                animationSpec = tween(durationMillis = animationDuration),
-                label = "${testTagPrefix}_background",
-            )
-            val contentColor by animateColorAsState(
-                targetValue = if (selected) {
-                    colorResource(id = R.color.avenor_sheet_surface)
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                },
-                animationSpec = tween(durationMillis = animationDuration),
-                label = "${testTagPrefix}_content",
-            )
-            Box(
-                modifier = Modifier
-                    .weight(weight = 1f)
-                    .fillMaxHeight()
-                    .clip(
-                        shape = RoundedCornerShape(
-                            size = dimensionResource(
-                                id = R.dimen.style_settings_selector_thumb_radius,
-                            ),
-                        ),
-                    )
-                    .background(color = backgroundColor)
-                    .clickable(
-                        enabled = enabled && !selected,
-                        role = Role.RadioButton,
-                        onClick = { onSelectIndex(index) },
-                    )
-                    .alpha(alpha = if (enabled) 1f else 0.38f)
-                    .testTag(tag = "${testTagPrefix}_$index"),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = label,
-                    color = contentColor,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = dimensionResource(
-                        id = R.dimen.style_settings_secondary_text_size,
-                    ).value.sp,
-                    lineHeight = dimensionResource(
-                        id = R.dimen.style_settings_secondary_line_height,
-                    ).value.sp,
-                    maxLines = 1,
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(R.dimen.style_settings_selector_height))
+                .clip(frameShape)
+                .background(colorResource(R.color.avenor_sheet_surface))
+                .border(
+                    width = dimensionResource(R.dimen.style_settings_selector_border_width),
+                    color = MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = integerResource(R.integer.style_settings_selector_border_alpha_percent) / 100f,
+                    ),
+                    shape = frameShape,
+                ),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .selectableGroup()
+                .semantics { contentDescription = title }
+                .padding(horizontal = dimensionResource(R.dimen.style_settings_selector_inner_padding)),
+        ) {
+            optionLabels.forEachIndexed { index, label ->
+                val selected = index == selectedIndex
+                val backgroundColor by animateColorAsState(
+                    targetValue = if (selected) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        Color.Transparent
+                    },
+                    animationSpec = tween(durationMillis = animationDuration),
+                    label = "${testTagPrefix}_background",
                 )
+                val contentColor by animateColorAsState(
+                    targetValue = if (selected) {
+                        colorResource(id = R.color.avenor_sheet_surface)
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    animationSpec = tween(durationMillis = animationDuration),
+                    label = "${testTagPrefix}_content",
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(weight = 1f)
+                        .height(dimensionResource(R.dimen.style_settings_stepper_target_size))
+                        .clip(
+                            shape = RoundedCornerShape(
+                                size = dimensionResource(
+                                    id = R.dimen.style_settings_selector_thumb_radius,
+                                ),
+                            ),
+                        )
+                        .selectable(
+                            selected = selected,
+                            enabled = enabled,
+                            role = Role.RadioButton,
+                            onClick = { if (!selected) onSelectIndex(index) },
+                        )
+                        .alpha(alpha = styleSettingsContentAlpha(enabled))
+                        .testTag(tag = "${testTagPrefix}_$index"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .height(dimensionResource(R.dimen.style_settings_selector_thumb_height))
+                            .clip(RoundedCornerShape(dimensionResource(R.dimen.style_settings_selector_thumb_radius)))
+                            .background(backgroundColor),
+                    )
+                    Text(
+                        text = label,
+                        color = contentColor,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = dimensionResource(
+                            id = R.dimen.style_settings_secondary_text_size,
+                        ).value.sp,
+                        lineHeight = dimensionResource(
+                            id = R.dimen.style_settings_secondary_line_height,
+                        ).value.sp,
+                        maxLines = 1,
+                    )
+                }
             }
         }
     }
@@ -330,9 +402,11 @@ private fun StyleItemsPerRowStepper(
     onChangeValue: (Int) -> Unit,
     testTagPrefix: String,
 ) {
+    val valueLabel = stringResource(R.string.style_settings_items_per_row)
     Row(verticalAlignment = Alignment.CenterVertically) {
         StyleStepperControl(
             text = decrementLabel,
+            actionLabel = stringResource(R.string.style_settings_decrease_items_per_row),
             enabled = enabled && value > minimum,
             testTag = "${testTagPrefix}_decrement",
             onClick = { onChangeValue(value - 1) },
@@ -340,6 +414,12 @@ private fun StyleItemsPerRowStepper(
         Box(
             modifier = Modifier
                 .size(size = dimensionResource(id = R.dimen.style_settings_stepper_target_size))
+                .alpha(alpha = styleSettingsContentAlpha(enabled))
+                .clearAndSetSemantics {
+                    contentDescription = valueLabel
+                    stateDescription = value.toString()
+                    if (!enabled) disabled()
+                }
                 .testTag(tag = "${testTagPrefix}_value"),
             contentAlignment = Alignment.Center,
         ) {
@@ -368,6 +448,7 @@ private fun StyleItemsPerRowStepper(
         }
         StyleStepperControl(
             text = incrementLabel,
+            actionLabel = stringResource(R.string.style_settings_increase_items_per_row),
             enabled = enabled && value < maximum,
             testTag = "${testTagPrefix}_increment",
             onClick = { onChangeValue(value + 1) },
@@ -378,6 +459,7 @@ private fun StyleItemsPerRowStepper(
 @Composable
 private fun StyleStepperControl(
     text: String,
+    actionLabel: String,
     enabled: Boolean,
     testTag: String,
     onClick: () -> Unit,
@@ -385,12 +467,15 @@ private fun StyleStepperControl(
     Box(
         modifier = Modifier
             .size(size = dimensionResource(id = R.dimen.style_settings_stepper_target_size))
+            .clip(RoundedCornerShape(dimensionResource(R.dimen.style_settings_stepper_radius)))
             .clickable(
                 enabled = enabled,
                 role = Role.Button,
+                onClickLabel = actionLabel,
                 onClick = onClick,
             )
-            .alpha(alpha = if (enabled) 1f else 0.38f)
+            .semantics { contentDescription = actionLabel }
+            .alpha(alpha = styleSettingsContentAlpha(enabled))
             .testTag(tag = testTag),
         contentAlignment = Alignment.Center,
     ) {
@@ -405,7 +490,15 @@ private fun StyleStepperControl(
                 .background(color = colorResource(id = R.color.style_settings_control_surface)),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = text, color = MaterialTheme.colorScheme.onSurface)
+            Text(
+                text = text,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.clearAndSetSemantics { },
+            )
         }
     }
 }
+
+@Composable
+private fun styleSettingsContentAlpha(enabled: Boolean): Float =
+    if (enabled) 1f else integerResource(R.integer.disabled_content_alpha_percent) / 100f

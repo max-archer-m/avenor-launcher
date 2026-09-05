@@ -47,7 +47,7 @@ Primary risks are locale-dependent search behavior, stale result identity, Back/
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
 | [Iteration 26: Drawer Search and Ordinary Navigation](iteration-26-drawer-search-and-ordinary-navigation.md) | `Completed` | 2026-09-04 | The author reported basic acceptance of the complete implemented scope after incremental device validation and final gap review. |
-| [Iteration 27: Drawer Display Settings](iteration-27-drawer-display-settings.md) | `Planned` | 2026-09-01 | Durable layout, anchor, and background controls depend on the revised ordinary Drawer surface. |
+| [Iteration 27: Drawer Display Settings](iteration-27-drawer-display-settings.md) | `In Progress` | 2026-09-05 | Implementation is authorized and the author reported basic acceptance of incremental display-setting changes; integrated validation and background calibration remain open. |
 | [Iteration 28: Upgrade, Regression, and Version Closure](iteration-28-upgrade-regression-and-version-closure.md) | `Planned` | 2026-09-01 | Version completion requires integrated Drawer, upgrade, compatibility, artifact, and author-acceptance evidence after the selected Drawer loop is complete. |
 
 ## Iteration evidence and results
@@ -64,7 +64,9 @@ Agent `git diff --check` and affected manifest/resource XML parsing passed after
 
 ### Iteration 27
 
-[Contract](iteration-27-drawer-display-settings.md). No implementation or validation evidence exists. Status remains `Planned`; absent evidence is not a pass.
+[Contract](iteration-27-drawer-display-settings.md). Status is `In Progress`, synchronized on 2026-09-05 with the author's existing implementation authorization. Commit `7bc9ae4764d87edf579dd0a30b14349e0bf0de8b` established persistent display geometry. Subsequent implementation adds section-anchor controls and position restoration, experimental background rendering and capability fallback, selection-animation isolation, accessibility improvements, and publication of committed settings before the cancellable IO return boundary.
+
+The author reported basic acceptance of incremental panel, anchor, and background changes, including the corrected IconButton import. These reports do not identify a complete device matrix or validate the latest storage-cancellation correction. Agent diff checks and affected resource XML checks passed; Gradle and instrumentation were not run by the agent. Test sources cover settings interaction, anchors, backgrounds, cancellation at commit, and failed-write retry. Integrated UI save/failure/dismissal and lifecycle validation, specified-device background calibration, and final iteration acceptance remain open. Experimental visual values are not final calibration results.
 
 ### Iteration 28
 
@@ -100,4 +102,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.5.0` identif
 
 ## Completion result
 
-Iteration 26 is `Completed` with the implementation and author-reported basic acceptance recorded above. `1.5.0` remains incomplete and Iterations 27–28 remain `Planned`. This result does not complete the version or authorize push, tag, artifact movement, publication, or release.
+Iteration 26 is `Completed` with the implementation and author-reported basic acceptance recorded above. `1.5.0` remains incomplete; Iteration 27 is `In Progress` and Iteration 28 remains `Planned`. This result does not complete the version or authorize push, tag, artifact movement, publication, or release.

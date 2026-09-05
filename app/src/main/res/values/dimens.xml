@@ -1,4 +1,10 @@
 <resources>
+    <dimen name="drawer_background_selector_width">224dp</dimen>
+    <!-- Experimental Drawer calibration candidates, pending author-device acceptance. -->
+    <dimen name="drawer_background_blur_radius">32dp</dimen>
+    <dimen name="drawer_foreground_shadow_offset_x">0dp</dimen>
+    <dimen name="drawer_foreground_shadow_offset_y">1dp</dimen>
+    <dimen name="drawer_foreground_shadow_radius">2dp</dimen>
     <!-- Home screen / Root content container -->
     <dimen name="home_horizontal_padding">16dp</dimen>
     <dimen name="home_vertical_padding">32dp</dimen>
@@ -136,6 +142,7 @@
     <!-- Home screen / Module style editor / Arrangement selector -->
     <dimen name="style_settings_selector_width">148dp</dimen>
     <dimen name="style_settings_selector_height">44dp</dimen>
+    <dimen name="style_settings_selector_thumb_height">40dp</dimen>
     <dimen name="style_settings_selector_border_width">1dp</dimen>
     <dimen name="style_settings_selector_inner_padding">2dp</dimen>
     <dimen name="style_settings_selector_frame_radius">22dp</dimen>
@@ -171,6 +178,9 @@
 
     <!-- Drawer / Application list / Alphabet section header -->
     <dimen name="drawer_section_header_height">40dp</dimen>
+    <dimen name="drawer_section_anchor_column_width">40dp</dimen>
+    <dimen name="drawer_section_anchor_top_inset">8dp</dimen>
+    <dimen name="drawer_settings_anchor_icon_size">16dp</dimen>
 
     <!-- Drawer / Application list / Alphabet index rail -->
     <dimen name="drawer_index_width">32dp</dimen>

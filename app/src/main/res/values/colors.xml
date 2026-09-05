@@ -1,4 +1,6 @@
 <resources>
+    <!-- Experimental Drawer calibration candidate, pending author-device acceptance. -->
+    <color name="drawer_foreground_shadow">#A6000000</color>
     <color name="avenor_transparent">#00000000</color>
     <color name="avenor_foreground">#FFFFFFFF</color>
     <color name="avenor_secondary_foreground">#FFCAC4D0</color>

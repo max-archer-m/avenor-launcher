@@ -47,7 +47,7 @@
 | 迭代 | 状态 | 更新日期 | 依据 |
 | --- | --- | --- | --- |
 | [迭代 26：Drawer 搜索与普通导航](iteration-26-drawer-search-and-ordinary-navigation.zh-CN.md) | `Completed` | 2026-09-04 | 作者在增量设备验证和最终查漏后，报告完整已实施范围基本验收通过。 |
-| [迭代 27：Drawer 展示设置](iteration-27-drawer-display-settings.zh-CN.md) | `Planned` | 2026-09-01 | 持久布局、锚点和背景控制依赖修订后的普通 Drawer 表面。 |
+| [迭代 27：Drawer 展示设置](iteration-27-drawer-display-settings.zh-CN.md) | `In Progress` | 2026-09-05 | 实施已获授权，作者报告增量展示设置改动基本验收通过；集成验证和背景校准仍未完成。 |
 | [迭代 28：升级、回归与版本收尾](iteration-28-upgrade-regression-and-version-closure.zh-CN.md) | `Planned` | 2026-09-01 | 所选 Drawer 闭环完成后，版本完成需要集成的 Drawer、升级、兼容性、产物和作者验收证据。 |
 
 ## 迭代证据和结果
@@ -64,7 +64,9 @@
 
 ### 迭代 27
 
-[契约](iteration-27-drawer-display-settings.zh-CN.md)。当前没有实施或验证证据。状态保持 `Planned`；缺少证据不代表通过。
+[契约](iteration-27-drawer-display-settings.zh-CN.md)。状态为 `In Progress`，于 2026-09-05 根据作者既有实施授权同步。提交 `7bc9ae4764d87edf579dd0a30b14349e0bf0de8b` 建立了持久展示几何设置。后续实现增加分节锚点控制和位置恢复、实验背景渲染及能力回退、选择动画隔离、无障碍改进，以及在可取消的 IO 返回边界之前发布已提交设置。
+
+作者报告增量面板、锚点及背景改动基本验收通过，包括修正后的 IconButton 导入。这些报告不构成完整设备矩阵，也不验证最新的存储取消修正。Agent 差异检查和受影响资源 XML 检查通过；Agent 未运行 Gradle 或 instrumentation。测试源码覆盖设置交互、锚点、背景、提交时取消和写入失败后重试。完整 UI 保存/失败/关闭与生命周期验证、指定设备背景校准及迭代最终验收仍未完成。实验视觉值不是最终校准结果。
 
 ### 迭代 28
 
@@ -100,4 +102,4 @@
 
 ## 完成结果
 
-迭代 26 已按上述实现和作者报告的基本验收结果标记为 `Completed`。`1.5.0` 仍未完成，迭代 27–28 保持 `Planned`。本结果不完成版本，也不授权推送、tag、产物移动、发布或发行。
+迭代 26 已按上述实现和作者报告的基本验收结果标记为 `Completed`。`1.5.0` 仍未完成；迭代 27 为 `In Progress`，迭代 28 保持 `Planned`。本结果不完成版本，也不授权推送、tag、产物移动、发布或发行。

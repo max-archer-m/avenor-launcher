@@ -1,4 +1,8 @@
 <resources>
+    <!-- Experimental Drawer calibration candidates, pending author-device acceptance. -->
+    <integer name="drawer_glass_tint_alpha_percent">32</integer>
+    <integer name="drawer_glass_fallback_alpha_percent">88</integer>
+    <integer name="style_settings_selector_border_alpha_percent">70</integer>
     <integer name="disabled_content_alpha_percent">38</integer>
     <integer name="short_property_animation_duration_ms">200</integer>
     <integer name="home_drag_preview_alpha_percent">100</integer>

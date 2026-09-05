@@ -1,4 +1,13 @@
 <resources>
+    <string name="drawer_background">Background</string>
+    <string name="drawer_background_transparent">Transparent</string>
+    <string name="drawer_background_frosted_glass">Frosted glass</string>
+    <string name="drawer_section_anchor_presentation">Section anchors</string>
+    <string name="drawer_section_anchor_inline">Inline</string>
+    <string name="drawer_section_anchor_left">Left side</string>
+    <string name="style_settings_items_per_row">Items per row</string>
+    <string name="style_settings_decrease_items_per_row">Decrease items per row</string>
+    <string name="style_settings_increase_items_per_row">Increase items per row</string>
     <string name="app_name">Avenor Launcher</string>
     <string name="clock_unavailable">Unable to open Clock</string>
     <string name="calendar_unavailable">Unable to open Calendar</string>

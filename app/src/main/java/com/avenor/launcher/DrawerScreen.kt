@@ -37,7 +37,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
+import com.avenor.launcher.DrawerIcon as Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -76,6 +76,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Job
@@ -120,395 +121,410 @@ internal fun DrawerScreen(
     onCancelFavoriteSelection: () -> Unit = {},
     onConfirmFavoriteSelection: () -> Unit = {},
 ) {
-    var loadRequest by remember { mutableIntStateOf(0) }
-    var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
-    var hasBeenActive by remember { mutableStateOf(false) }
-    val state by inventoryCoordinator.state.collectAsState()
-    val activationGuard = remember { RapidActivationGuard() }
-    val context = LocalContext.current
-    val locale = LocalConfiguration.current.locales[0]
-    val launchFailureMessage = stringResource(R.string.application_unable_to_open)
-    val currentState by rememberUpdatedState(state)
-    var previousContent by remember { mutableStateOf<LaunchableInventorySnapshot?>(null) }
-    var searchActive by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
-    var ordinaryPosition by remember { mutableStateOf<DrawerListPosition?>(null) }
-    var displaySettingsPosition by remember { mutableStateOf<DrawerListPosition?>(null) }
-    var displaySettingsPanelVisible by remember { mutableStateOf(false) }
-    val searchFocusRequester = remember { FocusRequester() }
-    val searchScope = rememberCoroutineScope()
-    val keyboardController = LocalSoftwareKeyboardController.current
+    DrawerBackgroundSurface(mode = displaySettings.backgroundMode, active = active) {
+        var loadRequest by remember { mutableIntStateOf(0) }
+        var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
+        var hasBeenActive by remember { mutableStateOf(false) }
+        val state by inventoryCoordinator.state.collectAsState()
+        val activationGuard = remember { RapidActivationGuard() }
+        val context = LocalContext.current
+        val locale = LocalConfiguration.current.locales[0]
+        val launchFailureMessage = stringResource(R.string.application_unable_to_open)
+        val currentState by rememberUpdatedState(state)
+        var previousContent by remember { mutableStateOf<LaunchableInventorySnapshot?>(null) }
+        var searchActive by remember { mutableStateOf(false) }
+        var searchQuery by remember { mutableStateOf("") }
+        var ordinaryPosition by remember { mutableStateOf<DrawerListPosition?>(null) }
+        var displaySettingsPosition by remember { mutableStateOf<DrawerListPosition?>(null) }
+        var displaySettingsPanelVisible by remember { mutableStateOf(false) }
+        val searchFocusRequester = remember { FocusRequester() }
+        val searchScope = rememberCoroutineScope()
+        val keyboardController = LocalSoftwareKeyboardController.current
 
-    LaunchedEffect(key1 = active) {
-        if (!active) {
-            searchActive = false
-            searchQuery = ""
-            ordinaryPosition = null
-            displaySettingsPosition = null
-            displaySettingsPanelVisible = false
+        LaunchedEffect(key1 = active) {
+            if (!active) {
+                searchActive = false
+                searchQuery = ""
+                ordinaryPosition = null
+                displaySettingsPosition = null
+                displaySettingsPanelVisible = false
+            }
         }
-    }
 
-    LaunchedEffect(key1 = favoriteSelectionTarget) {
-        if (favoriteSelectionTarget != null) {
-            displaySettingsPanelVisible = false
+        LaunchedEffect(key1 = favoriteSelectionTarget) {
+            if (favoriteSelectionTarget != null) {
+                displaySettingsPanelVisible = false
+            }
         }
-    }
 
-    LaunchedEffect(key1 = state is LaunchableInventoryState.Content) {
-        if (state !is LaunchableInventoryState.Content) {
-            displaySettingsPanelVisible = false
+        LaunchedEffect(key1 = state is LaunchableInventoryState.Content) {
+            if (state !is LaunchableInventoryState.Content) {
+                displaySettingsPanelVisible = false
+            }
         }
-    }
 
-    LaunchedEffect(inventoryLoader, loadRequest) {
-        if (loadRequest == 0 &&
-            (initialLoadHandledExternally || state is LaunchableInventoryState.Content)
-        ) {
-            return@LaunchedEffect
-        }
-        val positionBeforeRefresh = if (
-            loadTrigger == DrawerLoadTrigger.LiveUpdate ||
-            loadTrigger == DrawerLoadTrigger.LaunchFailureRefresh
-        ) {
-            (state as? LaunchableInventoryState.Content)?.let { content ->
-                captureDrawerListPosition(
-                    sections = content.snapshot.drawerSectionsForCurrentMode(
+        LaunchedEffect(inventoryLoader, loadRequest) {
+            if (loadRequest == 0 &&
+                (initialLoadHandledExternally || state is LaunchableInventoryState.Content)
+            ) {
+                return@LaunchedEffect
+            }
+            val positionBeforeRefresh = if (
+                loadTrigger == DrawerLoadTrigger.LiveUpdate ||
+                loadTrigger == DrawerLoadTrigger.LaunchFailureRefresh
+            ) {
+                (state as? LaunchableInventoryState.Content)?.let { content ->
+                    captureDrawerListPosition(
+                        sections = content.snapshot.drawerSectionsForCurrentMode(
+                            locale = locale,
+                            searchActive = searchActive,
+                            searchQuery = searchQuery,
+                        ),
+                        firstVisibleItemIndex = listState.firstVisibleItemIndex,
+                        firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+                        itemsPerRow = displaySettings.itemsPerRow,
+                        anchorPresentation = displaySettings.sectionAnchorPresentation,
+                    )
+                }
+            } else {
+                null
+            }
+            inventoryCoordinator.load(
+                showLoading = loadTrigger != DrawerLoadTrigger.LiveUpdate &&
+                    loadTrigger != DrawerLoadTrigger.LaunchFailureRefresh,
+                preserveContentOnFailure = loadTrigger == DrawerLoadTrigger.LaunchFailureRefresh,
+            )
+            val updatedState = inventoryCoordinator.state.value
+
+            if (positionBeforeRefresh != null && updatedState is LaunchableInventoryState.Content) {
+                val restorationTarget = resolveDrawerRestorationTarget(
+                    position = positionBeforeRefresh,
+                    sections = updatedState.snapshot.drawerSectionsForCurrentMode(
                         locale = locale,
                         searchActive = searchActive,
                         searchQuery = searchQuery,
                     ),
-                    firstVisibleItemIndex = listState.firstVisibleItemIndex,
-                    firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
                     itemsPerRow = displaySettings.itemsPerRow,
+                    anchorPresentation = displaySettings.sectionAnchorPresentation,
                 )
+                if (restorationTarget != null) {
+                    withFrameNanos { }
+                    listState.scrollToItem(
+                        index = restorationTarget.itemIndex,
+                        scrollOffset = restorationTarget.scrollOffset,
+                    )
+                }
             }
-        } else {
-            null
         }
-        inventoryCoordinator.load(
-            showLoading = loadTrigger != DrawerLoadTrigger.LiveUpdate &&
-                loadTrigger != DrawerLoadTrigger.LaunchFailureRefresh,
-            preserveContentOnFailure = loadTrigger == DrawerLoadTrigger.LaunchFailureRefresh,
-        )
-        val updatedState = inventoryCoordinator.state.value
 
-        if (positionBeforeRefresh != null && updatedState is LaunchableInventoryState.Content) {
+        LaunchedEffect(inventoryLoader, active, initialLoadHandledExternally) {
+            if (active && !initialLoadHandledExternally) {
+                if (!hasBeenActive) {
+                    hasBeenActive = true
+                    return@LaunchedEffect
+                }
+                when (currentState) {
+                    is LaunchableInventoryState.Content -> {
+                        loadTrigger = DrawerLoadTrigger.LiveUpdate
+                        loadRequest += 1
+                    }
+
+                    is LaunchableInventoryState.Error -> {
+                        loadTrigger = DrawerLoadTrigger.Initial
+                        loadRequest += 1
+                    }
+
+                    LaunchableInventoryState.Loading -> Unit
+                }
+            }
+        }
+
+        LaunchedEffect(state, initialLoadHandledExternally) {
+            if (!initialLoadHandledExternally) return@LaunchedEffect
+            val content = state as? LaunchableInventoryState.Content ?: return@LaunchedEffect
+            val oldContent = previousContent
+            previousContent = content.snapshot
+            if (oldContent == null) return@LaunchedEffect
+            val position = captureDrawerListPosition(
+                sections = oldContent.drawerSectionsForCurrentMode(
+                    locale = locale,
+                    searchActive = searchActive,
+                    searchQuery = searchQuery,
+                ),
+                firstVisibleItemIndex = listState.firstVisibleItemIndex,
+                firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+                itemsPerRow = displaySettings.itemsPerRow,
+                anchorPresentation = displaySettings.sectionAnchorPresentation,
+            ) ?: return@LaunchedEffect
             val restorationTarget = resolveDrawerRestorationTarget(
-                position = positionBeforeRefresh,
-                sections = updatedState.snapshot.drawerSectionsForCurrentMode(
+                position = position,
+                sections = content.snapshot.drawerSectionsForCurrentMode(
                     locale = locale,
                     searchActive = searchActive,
                     searchQuery = searchQuery,
                 ),
                 itemsPerRow = displaySettings.itemsPerRow,
+                anchorPresentation = displaySettings.sectionAnchorPresentation,
+            ) ?: return@LaunchedEffect
+            withFrameNanos { }
+            listState.scrollToItem(
+                index = restorationTarget.itemIndex,
+                scrollOffset = restorationTarget.scrollOffset,
             )
-            if (restorationTarget != null) {
-                withFrameNanos { }
-                listState.scrollToItem(
-                    index = restorationTarget.itemIndex,
-                    scrollOffset = restorationTarget.scrollOffset,
+        }
+
+        DisposableEffect(inventoryLoader, active, initialLoadHandledExternally) {
+            val observation = if (active && !initialLoadHandledExternally) {
+                inventoryCoordinator.observe {
+                    if (currentState is LaunchableInventoryState.Content) {
+                        loadTrigger = DrawerLoadTrigger.LiveUpdate
+                        loadRequest += 1
+                    }
+                }
+            } else {
+                null
+            }
+            onDispose {
+                observation?.stop()
+            }
+        }
+
+        if (!displaySettingsReady) {
+            if (favoriteSelectionTarget == null) {
+                DrawerOrdinaryMessage(
+                    modifier = modifier,
+                    message = stringResource(R.string.drawer_loading_applications),
+                    showProgress = true,
+                    action = null,
+                    testTag = "drawer_loading",
+                    onNavigateBack = onNavigateBack,
+                )
+            } else {
+                DrawerSelectionMessage(
+                    modifier = modifier,
+                    target = favoriteSelectionTarget,
+                    message = stringResource(R.string.drawer_loading_applications),
+                    showProgress = true,
+                    retry = null,
+                    selection = favoriteSelection,
+                    saving = favoriteSelectionSaving,
+                    onCancel = onCancelFavoriteSelection,
+                    onConfirm = onConfirmFavoriteSelection,
                 )
             }
-        }
-    }
-
-    LaunchedEffect(inventoryLoader, active, initialLoadHandledExternally) {
-        if (active && !initialLoadHandledExternally) {
-            if (!hasBeenActive) {
-                hasBeenActive = true
-                return@LaunchedEffect
-            }
-            when (currentState) {
-                is LaunchableInventoryState.Content -> {
-                    loadTrigger = DrawerLoadTrigger.LiveUpdate
-                    loadRequest += 1
-                }
-
-                is LaunchableInventoryState.Error -> {
-                    loadTrigger = DrawerLoadTrigger.Initial
-                    loadRequest += 1
-                }
-
-                LaunchableInventoryState.Loading -> Unit
-            }
-        }
-    }
-
-    LaunchedEffect(state, initialLoadHandledExternally) {
-        if (!initialLoadHandledExternally) return@LaunchedEffect
-        val content = state as? LaunchableInventoryState.Content ?: return@LaunchedEffect
-        val oldContent = previousContent
-        previousContent = content.snapshot
-        if (oldContent == null) return@LaunchedEffect
-        val position = captureDrawerListPosition(
-            sections = oldContent.drawerSectionsForCurrentMode(
-                locale = locale,
-                searchActive = searchActive,
-                searchQuery = searchQuery,
-            ),
-            firstVisibleItemIndex = listState.firstVisibleItemIndex,
-            firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
-            itemsPerRow = displaySettings.itemsPerRow,
-        ) ?: return@LaunchedEffect
-        val restorationTarget = resolveDrawerRestorationTarget(
-            position = position,
-            sections = content.snapshot.drawerSectionsForCurrentMode(
-                locale = locale,
-                searchActive = searchActive,
-                searchQuery = searchQuery,
-            ),
-            itemsPerRow = displaySettings.itemsPerRow,
-        ) ?: return@LaunchedEffect
-        withFrameNanos { }
-        listState.scrollToItem(
-            index = restorationTarget.itemIndex,
-            scrollOffset = restorationTarget.scrollOffset,
-        )
-    }
-
-    DisposableEffect(inventoryLoader, active, initialLoadHandledExternally) {
-        val observation = if (active && !initialLoadHandledExternally) {
-            inventoryCoordinator.observe {
-                if (currentState is LaunchableInventoryState.Content) {
-                    loadTrigger = DrawerLoadTrigger.LiveUpdate
-                    loadRequest += 1
-                }
-            }
-        } else {
-            null
-        }
-        onDispose {
-            observation?.stop()
-        }
-    }
-
-    if (!displaySettingsReady) {
-        if (favoriteSelectionTarget == null) {
-            DrawerOrdinaryMessage(
-                modifier = modifier,
-                message = stringResource(R.string.drawer_loading_applications),
-                showProgress = true,
-                action = null,
-                testTag = "drawer_loading",
-                onNavigateBack = onNavigateBack,
-            )
-        } else {
-            DrawerSelectionMessage(
-                modifier = modifier,
-                target = favoriteSelectionTarget,
-                message = stringResource(R.string.drawer_loading_applications),
-                showProgress = true,
-                retry = null,
-                selection = favoriteSelection,
-                saving = favoriteSelectionSaving,
-                onCancel = onCancelFavoriteSelection,
-                onConfirm = onConfirmFavoriteSelection,
-            )
-        }
-        return
-    }
-
-    when (val currentState = state) {
-        LaunchableInventoryState.Loading -> if (favoriteSelectionTarget == null) {
-            DrawerOrdinaryMessage(
-                modifier = modifier,
-                message = stringResource(R.string.drawer_loading_applications),
-                showProgress = true,
-                action = null,
-                testTag = "drawer_loading",
-                onNavigateBack = onNavigateBack,
-            )
-        } else {
-            DrawerSelectionMessage(
-                modifier = modifier,
-                target = favoriteSelectionTarget,
-                message = stringResource(R.string.drawer_loading_applications),
-                showProgress = true,
-                retry = null,
-                selection = favoriteSelection,
-                saving = favoriteSelectionSaving,
-                onCancel = onCancelFavoriteSelection,
-                onConfirm = onConfirmFavoriteSelection,
-            )
+            return@DrawerBackgroundSurface
         }
 
-        is LaunchableInventoryState.Error -> if (favoriteSelectionTarget == null) {
-            DrawerOrdinaryMessage(
-                modifier = modifier,
-                message = stringResource(R.string.drawer_unable_to_load_applications),
-                showProgress = false,
-                showErrorIcon = true,
-                action = {
-                    TextButton(
-                        onClick = {
-                            loadTrigger = DrawerLoadTrigger.ManualRetry
-                            loadRequest += 1
-                        },
-                    ) {
-                        Text(stringResource(R.string.retry))
-                    }
-                },
-                testTag = "drawer_error",
-                onNavigateBack = onNavigateBack,
-            )
-        } else {
-            DrawerSelectionMessage(
-                modifier = modifier,
-                target = favoriteSelectionTarget,
-                message = stringResource(R.string.drawer_unable_to_load_applications),
-                showProgress = false,
-                retry = {
-                    loadTrigger = DrawerLoadTrigger.ManualRetry
-                    loadRequest += 1
-                },
-                selection = favoriteSelection,
-                saving = favoriteSelectionSaving,
-                onCancel = onCancelFavoriteSelection,
-                onConfirm = onConfirmFavoriteSelection,
-            )
-        }
-
-        is LaunchableInventoryState.Content -> if (favoriteSelectionTarget == null) {
-            val completeSections = currentState.snapshot.drawerSectionsFor(locale)
-            val visibleSections = remember(
-                key1 = completeSections,
-                key2 = searchActive,
-                key3 = searchQuery,
-                calculation = {
-                    if (searchActive) {
-                        filterDrawerSections(sections = completeSections, query = searchQuery)
-                    } else {
-                        completeSections
-                    }
-                },
-            )
-            val exitSearch: () -> Unit = {
-                val restorationPosition = ordinaryPosition
-                searchActive = false
-                searchQuery = ""
-                ordinaryPosition = null
-                keyboardController?.hide()
-                if (restorationPosition != null) {
-                    searchScope.launch {
-                        withFrameNanos { }
-                        resolveDrawerOrdinaryRestorationTarget(
-                            position = restorationPosition,
-                            sections = completeSections,
-                            itemsPerRow = displaySettings.itemsPerRow,
-                        )?.let { target ->
-                            listState.scrollToItem(
-                                index = target.itemIndex,
-                                scrollOffset = target.scrollOffset,
-                            )
-                        }
-                    }
-                }
-            }
-            BackHandler(enabled = searchActive, onBack = exitSearch)
-            LaunchedEffect(key1 = searchActive, key2 = searchQuery) {
-                if (searchActive) {
-                    listState.scrollToItem(index = 0)
-                }
-            }
-            LaunchedEffect(
-                key1 = displaySettings,
-                key2 = displaySettingsMutationEnabled,
-                key3 = completeSections,
-            ) {
-                val position = displaySettingsPosition ?: return@LaunchedEffect
-                withFrameNanos { }
-                resolveDrawerOrdinaryRestorationTarget(
-                    position = position,
-                    sections = completeSections,
-                    itemsPerRow = displaySettings.itemsPerRow,
-                )?.let { target ->
-                    listState.scrollToItem(
-                        index = target.itemIndex,
-                        scrollOffset = target.scrollOffset,
-                    )
-                }
-                if (displaySettingsMutationEnabled) {
-                    displaySettingsPosition = null
-                }
-            }
-            Box(modifier = Modifier.fillMaxSize()) {
-                DrawerApplicationList(
+        when (val currentState = state) {
+            LaunchableInventoryState.Loading -> if (favoriteSelectionTarget == null) {
+                DrawerOrdinaryMessage(
                     modifier = modifier,
-                    listState = listState,
-                    sections = visibleSections,
-                    displaySettings = displaySettings,
-                    searchActive = searchActive,
-                    searchQuery = searchQuery,
-                    searchFocusRequester = searchFocusRequester,
-                    onLaunch = { entry ->
-                        if (activationGuard.tryAcquire()) {
-                            if (entryLauncher.launch(entry)) {
-                                searchActive = false
-                                searchQuery = ""
-                                ordinaryPosition = null
-                                keyboardController?.hide()
-                                onExternalLaunch()
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    launchFailureMessage,
-                                    Toast.LENGTH_SHORT,
-                                ).show()
-                                loadTrigger = DrawerLoadTrigger.LaunchFailureRefresh
+                    message = stringResource(R.string.drawer_loading_applications),
+                    showProgress = true,
+                    action = null,
+                    testTag = "drawer_loading",
+                    onNavigateBack = onNavigateBack,
+                )
+            } else {
+                DrawerSelectionMessage(
+                    modifier = modifier,
+                    target = favoriteSelectionTarget,
+                    message = stringResource(R.string.drawer_loading_applications),
+                    showProgress = true,
+                    retry = null,
+                    selection = favoriteSelection,
+                    saving = favoriteSelectionSaving,
+                    onCancel = onCancelFavoriteSelection,
+                    onConfirm = onConfirmFavoriteSelection,
+                )
+            }
+
+            is LaunchableInventoryState.Error -> if (favoriteSelectionTarget == null) {
+                DrawerOrdinaryMessage(
+                    modifier = modifier,
+                    message = stringResource(R.string.drawer_unable_to_load_applications),
+                    showProgress = false,
+                    showErrorIcon = true,
+                    action = {
+                        TextButton(
+                            onClick = {
+                                loadTrigger = DrawerLoadTrigger.ManualRetry
                                 loadRequest += 1
+                            },
+                        ) {
+                            Text(stringResource(R.string.retry))
+                        }
+                    },
+                    testTag = "drawer_error",
+                    onNavigateBack = onNavigateBack,
+                )
+            } else {
+                DrawerSelectionMessage(
+                    modifier = modifier,
+                    target = favoriteSelectionTarget,
+                    message = stringResource(R.string.drawer_unable_to_load_applications),
+                    showProgress = false,
+                    retry = {
+                        loadTrigger = DrawerLoadTrigger.ManualRetry
+                        loadRequest += 1
+                    },
+                    selection = favoriteSelection,
+                    saving = favoriteSelectionSaving,
+                    onCancel = onCancelFavoriteSelection,
+                    onConfirm = onConfirmFavoriteSelection,
+                )
+            }
+
+            is LaunchableInventoryState.Content -> if (favoriteSelectionTarget == null) {
+                val completeSections = currentState.snapshot.drawerSectionsFor(locale)
+                val visibleSections = remember(
+                    key1 = completeSections,
+                    key2 = searchActive,
+                    key3 = searchQuery,
+                    calculation = {
+                        if (searchActive) {
+                            filterDrawerSections(sections = completeSections, query = searchQuery)
+                        } else {
+                            completeSections
+                        }
+                    },
+                )
+                val exitSearch: () -> Unit = {
+                    val restorationPosition = ordinaryPosition
+                    searchActive = false
+                    searchQuery = ""
+                    ordinaryPosition = null
+                    keyboardController?.hide()
+                    if (restorationPosition != null) {
+                        searchScope.launch {
+                            withFrameNanos { }
+                            resolveDrawerOrdinaryRestorationTarget(
+                                position = restorationPosition,
+                                sections = completeSections,
+                                itemsPerRow = displaySettings.itemsPerRow,
+                                anchorPresentation = displaySettings.sectionAnchorPresentation,
+                            )?.let { target ->
+                                listState.scrollToItem(
+                                    index = target.itemIndex,
+                                    scrollOffset = target.scrollOffset,
+                                )
                             }
                         }
-                    },
-                    onLongPress = onLongPress,
-                    onNavigateBack = onNavigateBack,
-                    onEnterSearch = {
-                        ordinaryPosition = captureDrawerOrdinaryListPosition(
-                            sections = completeSections,
-                            firstVisibleItemIndex = listState.firstVisibleItemIndex,
-                            firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
-                            itemsPerRow = displaySettings.itemsPerRow,
+                    }
+                }
+                BackHandler(enabled = searchActive, onBack = exitSearch)
+                LaunchedEffect(key1 = searchActive, key2 = searchQuery) {
+                    if (searchActive) {
+                        listState.scrollToItem(index = 0)
+                    }
+                }
+                LaunchedEffect(
+                    key1 = displaySettings,
+                    key2 = displaySettingsMutationEnabled,
+                    key3 = completeSections,
+                ) {
+                    val position = displaySettingsPosition ?: return@LaunchedEffect
+                    withFrameNanos { }
+                    resolveDrawerOrdinaryRestorationTarget(
+                        position = position,
+                        sections = completeSections,
+                        itemsPerRow = displaySettings.itemsPerRow,
+                        anchorPresentation = displaySettings.sectionAnchorPresentation,
+                    )?.let { target ->
+                        listState.scrollToItem(
+                            index = target.itemIndex,
+                            scrollOffset = target.scrollOffset,
                         )
-                        searchActive = true
-                    },
-                    onQueryChange = { query -> searchQuery = query },
-                    onClearSearch = { searchQuery = "" },
-                    onCancelSearch = exitSearch,
-                    onOpenDisplaySettings = { displaySettingsPanelVisible = true },
-                    onOpenSettings = onOpenSettings,
-                )
-                if (displaySettingsPanelVisible) {
-                    DrawerDisplaySettingsPanel(
-                        settings = displaySettings,
-                        enabled = displaySettingsMutationEnabled,
-                        onChangeSettings = { candidateSettings ->
-                            displaySettingsPosition = captureDrawerOrdinaryListPosition(
+                    }
+                    if (displaySettingsMutationEnabled) {
+                        displaySettingsPosition = null
+                    }
+                }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    DrawerApplicationList(
+                        modifier = modifier,
+                        listState = listState,
+                        sections = visibleSections,
+                        displaySettings = displaySettings,
+                        searchActive = searchActive,
+                        searchQuery = searchQuery,
+                        searchFocusRequester = searchFocusRequester,
+                        onLaunch = { entry ->
+                            if (activationGuard.tryAcquire()) {
+                                if (entryLauncher.launch(entry)) {
+                                    searchActive = false
+                                    searchQuery = ""
+                                    ordinaryPosition = null
+                                    keyboardController?.hide()
+                                    onExternalLaunch()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        launchFailureMessage,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                    loadTrigger = DrawerLoadTrigger.LaunchFailureRefresh
+                                    loadRequest += 1
+                                }
+                            }
+                        },
+                        onLongPress = onLongPress,
+                        onNavigateBack = onNavigateBack,
+                        onEnterSearch = {
+                            ordinaryPosition = captureDrawerOrdinaryListPosition(
                                 sections = completeSections,
                                 firstVisibleItemIndex = listState.firstVisibleItemIndex,
-                                firstVisibleItemScrollOffset =
-                                    listState.firstVisibleItemScrollOffset,
+                                firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
                                 itemsPerRow = displaySettings.itemsPerRow,
+                                anchorPresentation = displaySettings.sectionAnchorPresentation,
                             )
-                            onChangeDisplaySettings(candidateSettings)
+                            searchActive = true
                         },
-                        onDismiss = { displaySettingsPanelVisible = false },
+                        onQueryChange = { query -> searchQuery = query },
+                        onClearSearch = { searchQuery = "" },
+                        onCancelSearch = exitSearch,
+                        onOpenDisplaySettings = { displaySettingsPanelVisible = true },
+                        onOpenSettings = onOpenSettings,
                     )
+                    if (displaySettingsPanelVisible) {
+                        DrawerDisplaySettingsPanel(
+                            settings = displaySettings,
+                            enabled = displaySettingsMutationEnabled,
+                            onChangeSettings = { candidateSettings ->
+                                val topApplicationRow = listState.layoutInfo.visibleItemsInfo.firstOrNull {
+                                    it.key.toString().startsWith("row:") &&
+                                        it.offset + it.size > listState.layoutInfo.viewportStartOffset
+                                }
+                                displaySettingsPosition = captureDrawerOrdinaryListPosition(
+                                    sections = completeSections,
+                                    firstVisibleItemIndex = topApplicationRow?.index ?: listState.firstVisibleItemIndex,
+                                    firstVisibleItemScrollOffset = topApplicationRow?.let { -it.offset }
+                                        ?: listState.firstVisibleItemScrollOffset,
+                                    itemsPerRow = displaySettings.itemsPerRow,
+                                    anchorPresentation = displaySettings.sectionAnchorPresentation,
+                                    preserveApplicationIdentity = true,
+                                )
+                                onChangeDisplaySettings(candidateSettings)
+                            },
+                            onDismiss = { displaySettingsPanelVisible = false },
+                        )
+                    }
                 }
+            } else {
+                DrawerFavoriteSelectionList(
+                    modifier = modifier,
+                    listState = listState,
+                    sections = currentState.snapshot.drawerSectionsFor(locale),
+                    displaySettings = displaySettings,
+                    target = favoriteSelectionTarget,
+                    selection = favoriteSelection,
+                    favoriteMembership = favoriteMembership,
+                    saving = favoriteSelectionSaving,
+                    onToggle = onToggleFavoriteSelection,
+                    onCancel = onCancelFavoriteSelection,
+                    onConfirm = onConfirmFavoriteSelection,
+                )
             }
-        } else {
-            DrawerFavoriteSelectionList(
-                modifier = modifier,
-                listState = listState,
-                sections = currentState.snapshot.drawerSectionsFor(locale),
-                displaySettings = displaySettings,
-                target = favoriteSelectionTarget,
-                selection = favoriteSelection,
-                favoriteMembership = favoriteMembership,
-                saving = favoriteSelectionSaving,
-                onToggle = onToggleFavoriteSelection,
-                onCancel = onCancelFavoriteSelection,
-                onConfirm = onConfirmFavoriteSelection,
-            )
         }
     }
 }
@@ -652,20 +668,18 @@ private fun DrawerFavoriteSelectionList(
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    val sectionAnchors = remember(sections, displaySettings.itemsPerRow) {
-        buildMap {
-            var itemIndex = 0
-            sections.forEach { section ->
-                put(section.label, itemIndex)
-                itemIndex += 1 + drawerApplicationRowCount(
-                    entryCount = section.entries.size,
-                    itemsPerRow = displaySettings.itemsPerRow,
-                )
-            }
-        }
+    val leftAnchors = displaySettings.sectionAnchorPresentation == DrawerSectionAnchorPresentation.LeftSide
+    val sectionRanges = remember(sections, displaySettings.itemsPerRow, displaySettings.sectionAnchorPresentation) {
+        drawerSectionRanges(sections, displaySettings.itemsPerRow, displaySettings.sectionAnchorPresentation, false)
     }
+    val sectionAnchors = sectionRanges.associate { it.label to it.startIndex }
     val coroutineScope = rememberCoroutineScope()
     var activeIndexLabel by remember { mutableStateOf<String?>(null) }
+    var indexJumpJob by remember { mutableStateOf<Job?>(null) }
+    LaunchedEffect(sectionRanges) {
+        indexJumpJob?.cancel()
+        activeIndexLabel = null
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -688,22 +702,25 @@ private fun DrawerFavoriteSelectionList(
                     .fillMaxSize()
                     .testTag("drawer_favorite_selection_list"),
                 contentPadding = PaddingValues(
-                    start = dimensionResource(R.dimen.drawer_application_grid_boundary),
+                    start = dimensionResource(R.dimen.drawer_application_grid_boundary) +
+                        if (leftAnchors) dimensionResource(R.dimen.drawer_section_anchor_column_width) else 0.dp,
                     end = dimensionResource(R.dimen.drawer_application_grid_boundary) +
                         dimensionResource(R.dimen.drawer_index_width),
                 ),
                 state = listState,
             ) {
                 sections.forEach { section ->
-                    item(key = "selection_section:${section.label}") {
-                        DrawerSectionHeader(
-                            label = section.label,
-                            modifier = Modifier.padding(
-                                start = dimensionResource(
-                                    id = R.dimen.drawer_application_cell_horizontal_inset,
+                    if (!leftAnchors) {
+                        item(key = "selection_section:${section.label}") {
+                            DrawerSectionHeader(
+                                label = section.label,
+                                modifier = Modifier.padding(
+                                    start = dimensionResource(
+                                        id = R.dimen.drawer_application_cell_horizontal_inset,
+                                    ),
                                 ),
-                            ),
-                        )
+                            )
+                        }
                     }
                     items(
                         items = section.entries.chunked(size = displaySettings.itemsPerRow),
@@ -734,6 +751,9 @@ private fun DrawerFavoriteSelectionList(
                     }
                 }
             }
+            if (leftAnchors) {
+                DrawerLeftSectionAnchors(ranges = sectionRanges, listState = listState)
+            }
             DrawerAlphabetIndex(
                 labels = sections.map(DrawerSection::label),
                 modifier = Modifier
@@ -742,7 +762,8 @@ private fun DrawerFavoriteSelectionList(
                 onSelect = { label, immediate ->
                     if (!saving) {
                         val anchor = sectionAnchors.getValue(label)
-                        coroutineScope.launch {
+                        indexJumpJob?.cancel()
+                        indexJumpJob = coroutineScope.launch {
                             if (immediate) {
                                 listState.scrollToItem(anchor)
                             } else {
@@ -942,35 +963,22 @@ private fun DrawerApplicationList(
     onOpenDisplaySettings: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
-    val sectionAnchors = remember(sections, displaySettings.itemsPerRow) {
-        buildMap {
-            var itemIndex = 0
-            sections.forEach { section ->
-                put(section.label, itemIndex)
-                itemIndex += 1 + drawerApplicationRowCount(
-                    entryCount = section.entries.size,
-                    itemsPerRow = displaySettings.itemsPerRow,
-                )
-            }
-        }
+    val leftAnchors = displaySettings.sectionAnchorPresentation == DrawerSectionAnchorPresentation.LeftSide
+    val sectionRanges = remember(sections, displaySettings.itemsPerRow, displaySettings.sectionAnchorPresentation) {
+        drawerSectionRanges(sections, displaySettings.itemsPerRow, displaySettings.sectionAnchorPresentation, false)
     }
-    val settingsAnchor = remember(sections, displaySettings.itemsPerRow) {
-        sections.sumOf { section ->
-            1 + drawerApplicationRowCount(
-                entryCount = section.entries.size,
-                itemsPerRow = displaySettings.itemsPerRow,
-            )
-        }
+    val sectionAnchors = sectionRanges.associate { it.label to it.startIndex }
+    val allRanges = remember(sectionRanges, searchActive, displaySettings.sectionAnchorPresentation) {
+        drawerSectionRanges(sections, displaySettings.itemsPerRow, displaySettings.sectionAnchorPresentation, !searchActive)
     }
+    val settingsAnchor = sectionRanges.lastOrNull()?.endIndex ?: 0
     val coroutineScope = rememberCoroutineScope()
     val hapticFeedback = LocalHapticFeedback.current
     var activeIndexLabel by remember { mutableStateOf<String?>(null) }
     var indexJumpJob by remember { mutableStateOf<Job?>(null) }
-    LaunchedEffect(key1 = searchActive) {
-        if (searchActive) {
-            indexJumpJob?.cancel()
-            activeIndexLabel = null
-        }
+    LaunchedEffect(searchActive, allRanges) {
+        indexJumpJob?.cancel()
+        activeIndexLabel = null
     }
     Column(
         modifier = Modifier
@@ -1015,17 +1023,20 @@ private fun DrawerApplicationList(
                         .fillMaxSize()
                         .testTag(tag = "drawer_application_list"),
                     contentPadding = PaddingValues(
-                        start = gridBoundary,
+                        start = gridBoundary +
+                            if (leftAnchors) dimensionResource(R.dimen.drawer_section_anchor_column_width) else 0.dp,
                         end = gridBoundary + indexWidth,
                     ),
                     state = listState,
                 ) {
                     sections.forEach { section ->
-                        item(key = "section:${section.label}") {
-                            DrawerSectionHeader(
-                                label = section.label,
-                                modifier = Modifier.padding(start = cellInset),
-                            )
+                        if (!leftAnchors) {
+                            item(key = "section:${section.label}") {
+                                DrawerSectionHeader(
+                                    label = section.label,
+                                    modifier = Modifier.padding(start = cellInset),
+                                )
+                            }
                         }
                         items(
                             items = section.entries.chunked(size = displaySettings.itemsPerRow),
@@ -1053,13 +1064,15 @@ private fun DrawerApplicationList(
                         }
                     }
                     if (!searchActive) {
-                        item(key = "section:settings") {
-                            DrawerSectionHeader(
-                                label = stringResource(id = R.string.settings),
-                                modifier = Modifier
-                                    .padding(start = cellInset)
-                                    .testTag(tag = "drawer_settings_anchor"),
-                            )
+                        if (!leftAnchors) {
+                            item(key = "section:settings") {
+                                DrawerSectionHeader(
+                                    label = stringResource(id = R.string.settings),
+                                    modifier = Modifier
+                                        .padding(start = cellInset)
+                                        .testTag(tag = "drawer_settings_anchor"),
+                                )
+                            }
                         }
                         item(key = "settings") {
                             DrawerSettingsRow(
@@ -1068,6 +1081,9 @@ private fun DrawerApplicationList(
                             )
                         }
                     }
+                }
+                if (leftAnchors) {
+                    DrawerLeftSectionAnchors(ranges = allRanges, listState = listState)
                 }
                 if (!searchActive || sections.isNotEmpty()) {
                     DrawerAlphabetIndex(

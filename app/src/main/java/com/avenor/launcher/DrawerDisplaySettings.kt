@@ -99,7 +99,7 @@ internal sealed interface DrawerDisplaySettingsReadState {
     data object ReadFailure : DrawerDisplaySettingsReadState
 }
 
-internal class DrawerDisplaySettingsStore private constructor(
+internal class DrawerDisplaySettingsStore internal constructor(
     private val atomicFile: AtomicFile,
 ) {
     constructor(context: Context) : this(
@@ -158,17 +158,15 @@ internal class DrawerDisplaySettingsStore private constructor(
         val succeeded = try {
             withContext(context = Dispatchers.IO) {
                 writeDocument(settings = settings)
+                // Publish before returning across the cancellable dispatcher boundary.
+                // A committed file must agree with this store even if its caller is destroyed.
+                mutableState.value = DrawerDisplaySettingsReadState.Readable(settings = settings)
                 true
             }
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (_: Exception) {
             false
-        }
-        if (succeeded) {
-            mutableState.value = DrawerDisplaySettingsReadState.Readable(
-                settings = settings,
-            )
         }
         succeeded
     }
