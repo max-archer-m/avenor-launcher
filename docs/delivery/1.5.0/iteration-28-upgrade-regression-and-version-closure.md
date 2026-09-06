@@ -24,6 +24,7 @@ One traceable installable candidate upgrades the accepted prior-version baseline
 - Reconcile product contracts, implementation, tests, identifiers, and evidence for Iterations 26–27.
 - Validate in-place upgrade, readable-state preservation, missing-field Drawer defaults, clean-install defaults, and unreadable-data protection.
 - Validate Drawer search, Settings row, source-specific action sheet, display settings, blur fallback, persistence, inventory changes, and navigation.
+- Apply and validate the revised shared style settings panel layout (stacked title and content lines, application-size block last, compact selector geometry with author-accepted `40dp` targets, and baseline-device content-line non-overflow) across Drawer display settings and the Home module-style panel.
 - Regress accepted Home modules, favorites, launch, Settings, double-tap lock, Privacy, offline, and profile behavior.
 - Confirm backup exclusion for Drawer display-setting and favorite-module data.
 - Produce or identify an installable candidate with accepted identifiers, allocated `versionCode`, source commit, signing category, digest when available, and upgrade limitation.
@@ -71,3 +72,7 @@ The physical-device in-place upgrade, preservation/default-adoption result, comp
 ## Related decisions and technical assessments
 
 Use applicable persistence, identity, privacy, validation, and release decisions. Create or amend a durable decision only if closure evidence establishes a consequential boundary.
+
+### Amendment: style settings panel layout on 2026-09-06
+
+The author directed on 2026-09-06 that the revised shared style settings panel layout be delivered and validated within this iteration instead of a new iteration. This is an authorized scope addition to this incomplete iteration: it expands the included work above to apply and validate the presentation change, and it updates the corresponding acceptance and validation boundaries. No new iteration is created. The original `48d5bd470c84d222b6e89e128f438da1f25e595b` baseline remains this iteration's baseline; the presentation change's accepted product-contract revision is recorded with its implementation branch. The change reopens the Iteration 27-accepted panel presentation, and its acceptance is part of this iteration's author acceptance.

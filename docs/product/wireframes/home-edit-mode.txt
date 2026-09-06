@@ -14,7 +14,11 @@
 |  MAIN LIST REMAINS VERTICALLY SCROLLABLE.....................................|
 |................STYLE SETTINGS PANEL / EXPANDED / NON-MODAL...................|
 |  SELECTION PROMPT OR FIXED-RIBBON MESSAGE....................................|
-|  APPLICABLE VERTICAL-MODULE STYLE CONTROLS / NO ADD ACTIONS..................|
+|  ARRANGEMENT TITLE / TITLE LINE............................................|
+|  [NAME POSITION: RIGHT|BELOW] [ITEMS PER ROW: - 1 +] / CONTENT LINE..........|
+|  APPLICATION SIZE TITLE / TITLE LINE (SIZE BLOCK LAST).......................|
+|  [SMALL] [MEDIUM] [LARGE] / CONTENT LINE....................................|
+|  CONTENT LINES SHARE RELATED CONTROLS; SCROLL ONLY ON CONTENT OVERFLOW.......|
 |........32DP EDIT DOCK: TAP TO SELECT - HOLD TO MOVE.............[24DP DOWN]..|
 |..............................BOTTOM SAFE AREA................................|
 +------------------------------------------------------------------------------+
