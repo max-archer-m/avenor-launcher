@@ -136,6 +136,7 @@ internal fun DrawerScreen(
         var searchQuery by remember { mutableStateOf("") }
         var ordinaryPosition by remember { mutableStateOf<DrawerListPosition?>(null) }
         var displaySettingsPosition by remember { mutableStateOf<DrawerListPosition?>(null) }
+        var positionedDisplaySettings by remember { mutableStateOf(displaySettings) }
         var displaySettingsPanelVisible by remember { mutableStateOf(false) }
         val searchFocusRequester = remember { FocusRequester() }
         val searchScope = rememberCoroutineScope()
@@ -423,7 +424,14 @@ internal fun DrawerScreen(
                     key2 = displaySettingsMutationEnabled,
                     key3 = completeSections,
                 ) {
-                    val position = displaySettingsPosition ?: return@LaunchedEffect
+                    val geometryChanged = positionedDisplaySettings.copy(backgroundMode = displaySettings.backgroundMode) !=
+                        displaySettings
+                    val position = displaySettingsPosition
+                    if (!geometryChanged || position == null || searchActive) {
+                        positionedDisplaySettings = displaySettings
+                        if (displaySettingsMutationEnabled || searchActive) displaySettingsPosition = null
+                        return@LaunchedEffect
+                    }
                     withFrameNanos { }
                     resolveDrawerOrdinaryRestorationTarget(
                         position = position,
@@ -436,6 +444,7 @@ internal fun DrawerScreen(
                             scrollOffset = target.scrollOffset,
                         )
                     }
+                    positionedDisplaySettings = displaySettings
                     if (displaySettingsMutationEnabled) {
                         displaySettingsPosition = null
                     }
@@ -471,6 +480,7 @@ internal fun DrawerScreen(
                         onLongPress = onLongPress,
                         onNavigateBack = onNavigateBack,
                         onEnterSearch = {
+                            displaySettingsPosition = null
                             ordinaryPosition = captureDrawerOrdinaryListPosition(
                                 sections = completeSections,
                                 firstVisibleItemIndex = listState.firstVisibleItemIndex,

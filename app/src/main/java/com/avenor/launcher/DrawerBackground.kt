@@ -109,13 +109,14 @@ private fun rememberDrawerBlurApplied(requested: Boolean): Boolean {
                 manager.addCrossWindowBlurEnabledListener(activity.mainExecutor, listener)
             }.isSuccess
             if (!registered) {
+                disposed = true
                 session.close()
                 applied = false
             }
             onDispose {
                 disposed = true
                 try {
-                    if (registered) manager.removeCrossWindowBlurEnabledListener(listener)
+                    if (registered) runCatching { manager.removeCrossWindowBlurEnabledListener(listener) }
                 } finally {
                     session.close()
                 }

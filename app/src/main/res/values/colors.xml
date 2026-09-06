@@ -1,5 +1,5 @@
 <resources>
-    <!-- Experimental Drawer calibration candidate, pending author-device acceptance. -->
+    <!-- Drawer parameters accepted on 2026-09-06; further calibration is non-blocking follow-up. -->
     <color name="drawer_foreground_shadow">#A6000000</color>
     <color name="avenor_transparent">#00000000</color>
     <color name="avenor_foreground">#FFFFFFFF</color>

@@ -1,6 +1,6 @@
 <resources>
     <dimen name="drawer_background_selector_width">224dp</dimen>
-    <!-- Experimental Drawer calibration candidates, pending author-device acceptance. -->
+    <!-- Drawer parameters accepted on 2026-09-06; further calibration is non-blocking follow-up. -->
     <dimen name="drawer_background_blur_radius">32dp</dimen>
     <dimen name="drawer_foreground_shadow_offset_x">0dp</dimen>
     <dimen name="drawer_foreground_shadow_offset_y">1dp</dimen>

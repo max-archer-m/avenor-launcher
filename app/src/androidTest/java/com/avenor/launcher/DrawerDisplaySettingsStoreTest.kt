@@ -2,10 +2,14 @@ package com.avenor.launcher
 
 import androidx.test.core.app.ApplicationProvider
 import android.util.AtomicFile
+import android.content.ContextWrapper
 import java.io.FileOutputStream
 import java.io.DataOutputStream
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -18,6 +22,47 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class DrawerDisplaySettingsStoreTest {
+    @Test
+    fun recreatedStoreWaitsForThePreviousOwnersPendingWrite(): Unit = runBlocking {
+        val file = temporarySettingsFile()
+        val entered = CountDownLatch(1)
+        val release = CountDownLatch(1)
+        val readerStarted = CountDownLatch(1)
+        val candidate = DrawerDisplaySettings(backgroundMode = DrawerBackgroundMode.Transparent)
+        val oldStore = DrawerDisplaySettingsStore(object : AtomicFile(file) {
+            override fun startWrite(): FileOutputStream {
+                val stream = super.startWrite()
+                entered.countDown()
+                if (!release.await(5, TimeUnit.SECONDS)) {
+                    super.failWrite(stream)
+                    throw java.io.IOException("Write gate timed out")
+                }
+                return stream
+            }
+        })
+        oldStore.load()
+        val saving = async(Dispatchers.IO) { oldStore.replace(candidate) }
+        try {
+            assertTrue(entered.await(5, TimeUnit.SECONDS))
+            val recreatedStore = DrawerDisplaySettingsStore(file)
+            val loading = async(Dispatchers.IO) {
+                readerStarted.countDown()
+                recreatedStore.load()
+            }
+            assertTrue(readerStarted.await(5, TimeUnit.SECONDS))
+            // Reading AtomicFile during startWrite can discard its unfinished .new file.
+            // Releasing the writer and awaiting both must always yield the committed state.
+            release.countDown()
+            assertTrue(saving.await())
+            loading.await()
+            assertEquals(DrawerDisplaySettingsReadState.Readable(candidate), recreatedStore.state.value)
+        } finally {
+            release.countDown()
+            saving.join()
+            deleteSettingsFiles(file)
+        }
+    }
+
     @Test
     fun cancellationAtCommitKeepsMemoryAndReloadedStateConsistent(): Unit = runBlocking {
         val file = temporarySettingsFile()
@@ -251,7 +296,12 @@ class DrawerDisplaySettingsStoreTest {
 
     @Test
     fun contextStoreUsesBackupExcludedFilesDirectory(): Unit = runBlocking {
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val application = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val isolatedDirectory = File(application.cacheDir, "drawer-context-${UUID.randomUUID()}")
+        assertTrue(isolatedDirectory.mkdirs())
+        val context = object : ContextWrapper(application) {
+            override fun getFilesDir(): File = isolatedDirectory
+        }
         val file = context.filesDir.resolve("drawer-display-settings.bin")
         deleteSettingsFiles(file = file)
         val store = DrawerDisplaySettingsStore(context = context)
@@ -269,6 +319,7 @@ class DrawerDisplaySettingsStoreTest {
             assertEquals(context.filesDir.canonicalFile, file.parentFile?.canonicalFile)
         } finally {
             deleteSettingsFiles(file = file)
+            isolatedDirectory.delete()
         }
     }
 

@@ -8,9 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -105,8 +105,8 @@ class DrawerDisplaySettingsUiTest {
 
     @Test
     fun belowPlacementEnablesFourColumnsAndRightClampsToTwo() {
+        var settings by mutableStateOf(DrawerDisplaySettings())
         composeRule.setContent {
-            var settings by remember { mutableStateOf(DrawerDisplaySettings()) }
             AvenorTheme {
                 DrawerScreen(
                     inventoryLoader = inventory(),

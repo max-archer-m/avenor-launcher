@@ -163,6 +163,7 @@ internal fun AvenorApp(
     entryLauncher: LaunchableEntryLauncher = LaunchableEntryLauncher { false },
     favoriteStore: FavoriteStore? = null,
     drawerDisplaySettingsStore: DrawerDisplaySettingsStore? = null,
+    onDrawerDisplaySettingsSaveFailure: (() -> Unit)? = null,
     informationLauncher: ApplicationInformationLauncher = ApplicationInformationLauncher { false },
     uninstallLauncher: ApplicationUninstallLauncher = EmptyApplicationUninstallLauncher,
     shortcutController: ApplicationShortcutController = EmptyApplicationShortcutController,
@@ -1172,11 +1173,15 @@ internal fun AvenorApp(
                                     )
                                     if (!saved) {
                                         drawerDisplaySettingsCandidate = null
-                                        Toast.makeText(
-                                            androidContext,
-                                            R.string.drawer_unable_to_save_display_settings,
-                                            Toast.LENGTH_SHORT,
-                                        ).show()
+                                        if (onDrawerDisplaySettingsSaveFailure != null) {
+                                            onDrawerDisplaySettingsSaveFailure()
+                                        } else {
+                                            Toast.makeText(
+                                                androidContext,
+                                                R.string.drawer_unable_to_save_display_settings,
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        }
                                     }
                                     drawerDisplaySettingsSaving = false
                                 },

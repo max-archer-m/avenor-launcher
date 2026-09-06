@@ -115,7 +115,6 @@ internal fun StyleApplicationSizeRow(
                             role = Role.RadioButton,
                             onClick = { if (index != selectedIndex) onSelectIndex(index) },
                         )
-                        .alpha(alpha = styleSettingsContentAlpha(enabled))
                         .padding(
                             horizontal = dimensionResource(
                                 id = R.dimen.style_settings_size_option_horizontal_padding,
@@ -363,7 +362,6 @@ private fun StyleTwoOptionSelector(
                             role = Role.RadioButton,
                             onClick = { if (!selected) onSelectIndex(index) },
                         )
-                        .alpha(alpha = styleSettingsContentAlpha(enabled))
                         .testTag(tag = "${testTagPrefix}_$index"),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -408,13 +406,13 @@ private fun StyleItemsPerRowStepper(
             text = decrementLabel,
             actionLabel = stringResource(R.string.style_settings_decrease_items_per_row),
             enabled = enabled && value > minimum,
+            available = value > minimum,
             testTag = "${testTagPrefix}_decrement",
             onClick = { onChangeValue(value - 1) },
         )
         Box(
             modifier = Modifier
                 .size(size = dimensionResource(id = R.dimen.style_settings_stepper_target_size))
-                .alpha(alpha = styleSettingsContentAlpha(enabled))
                 .clearAndSetSemantics {
                     contentDescription = valueLabel
                     stateDescription = value.toString()
@@ -450,6 +448,7 @@ private fun StyleItemsPerRowStepper(
             text = incrementLabel,
             actionLabel = stringResource(R.string.style_settings_increase_items_per_row),
             enabled = enabled && value < maximum,
+            available = value < maximum,
             testTag = "${testTagPrefix}_increment",
             onClick = { onChangeValue(value + 1) },
         )
@@ -461,6 +460,7 @@ private fun StyleStepperControl(
     text: String,
     actionLabel: String,
     enabled: Boolean,
+    available: Boolean,
     testTag: String,
     onClick: () -> Unit,
 ) {
@@ -475,7 +475,7 @@ private fun StyleStepperControl(
                 onClick = onClick,
             )
             .semantics { contentDescription = actionLabel }
-            .alpha(alpha = styleSettingsContentAlpha(enabled))
+            .alpha(alpha = styleSettingsContentAlpha(available))
             .testTag(tag = testTag),
         contentAlignment = Alignment.Center,
     ) {

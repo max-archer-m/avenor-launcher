@@ -67,6 +67,7 @@ private data class NormalizedDrawerSearchText(
 )
 
 private fun normalizeDrawerSearchText(text: String): NormalizedDrawerSearchText {
+    val normalizer = checkNotNull(drawerSearchLatinNormalizer.get())
     val normalized = StringBuilder()
     val starts = mutableListOf<Int>()
     val ends = mutableListOf<Int>()
@@ -74,7 +75,7 @@ private fun normalizeDrawerSearchText(text: String): NormalizedDrawerSearchText 
     while (originalIndex < text.length) {
         val codePoint = text.codePointAt(originalIndex)
         val originalLength = Character.charCount(codePoint)
-        val folded = drawerSearchLatinNormalizer.get().transliterate(
+        val folded = normalizer.transliterate(
             String(Character.toChars(codePoint)),
         )
         folded.forEach { character ->

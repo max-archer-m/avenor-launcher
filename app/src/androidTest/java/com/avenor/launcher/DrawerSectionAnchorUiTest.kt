@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
@@ -108,6 +107,34 @@ class DrawerSectionAnchorUiTest {
         }
         composeRule.onNodeWithTag("drawer_left_section_anchors").assertDoesNotExist()
         assertEquals(before, topRowKey())
+    }
+
+    @Test
+    fun successfulSaveDoesNotUndoSubsequentScrolling() {
+        var settings by mutableStateOf(DrawerDisplaySettings())
+        var saving by mutableStateOf(false)
+        composeRule.setContent {
+            listState = rememberLazyListState()
+            scope = rememberCoroutineScope()
+            AvenorTheme {
+                DrawerScreen(
+                    inventoryLoader = inventory,
+                    listState = listState,
+                    displaySettings = settings,
+                    displaySettingsMutationEnabled = !saving,
+                    onChangeDisplaySettings = { settings = it; saving = true },
+                )
+            }
+        }
+        scrollTo(11, 12)
+        composeRule.onNodeWithTag("drawer_display_settings_entry").performClick()
+        composeRule.onNodeWithTag("drawer_section_anchor_1").performClick()
+        // Moving the list models a new position reached after dismissing the panel.
+        scrollTo(25, 7)
+        val current = topRowKey()
+        composeRule.runOnIdle { saving = false }
+        assertEquals(current, topRowKey())
+        composeRule.runOnIdle { assertEquals(7, listState.firstVisibleItemScrollOffset) }
     }
 
     @Test

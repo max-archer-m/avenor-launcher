@@ -18,23 +18,23 @@ This document owns exact Drawer layout, typography, component geometry, and visu
 
 ## Background modes and contrast
 
-- `Transparent` leaves the wallpaper clear across the complete Drawer and adds no full-surface tint, scrim, glass layer, or blur. Text and monochrome foreground artwork drawn over the wallpaper use `primaryTextColor` and one fixed dark glyph- or artwork-following shadow. Exact shadow color, opacity, offset, and blur radius are `To be decided` through author-device wallpaper calibration.
-- `Frosted glass` uses one fixed full-surface platform background blur when cross-window blur is available, combined with a low-opacity neutral glass tint. It does not sample the wallpaper or change blur, tint, or contrast by list position, pointer position, search result, or local luminance. Exact blur radius, tint role, and tint opacity are `To be decided` through Samsung Galaxy S23 Ultra and Google Pixel 8 calibration.
-- When platform blur is unavailable, the selected `Frosted glass` mode replaces blur with a more-opaque fixed neutral glass surface. Exact fallback role and opacity are `To be decided`; the fallback must preserve content contrast without presenting itself as an Error, warning, disabled setting, or automatic switch to `Transparent`.
+- `Transparent` leaves the wallpaper clear across the complete Drawer and adds no full-surface tint, scrim, glass layer, or blur. Text and monochrome foreground artwork drawn over the wallpaper use `primaryTextColor` and one fixed dark glyph- or artwork-following shadow using the accepted parameters below.
+- `Frosted glass` uses one fixed full-surface platform background blur when cross-window blur is available, combined with a low-opacity neutral glass tint using the accepted parameters below. It does not sample the wallpaper or change blur, tint, or contrast by list position, pointer position, search result, or local luminance.
+- When platform blur is unavailable, the selected `Frosted glass` mode replaces blur with the more-opaque fixed neutral glass surface specified below. The fallback must preserve content contrast without presenting itself as an Error, warning, disabled setting, or automatic switch to `Transparent`.
 - Background mode changes only the Drawer background and applicable contrast treatment. Top-app-bar, application, anchor, search, AlphabetIndex, Settings, multi-selection, modal, and interaction geometry remain unchanged.
 
-### Device-calibration candidates
+### Accepted background parameters
 
-The following experimental values are approved inputs for author-device comparison, not accepted final presentation values:
+The author accepted the following current delivery values on 2026-09-06. Further optimization remains follow-up work and does not block Iteration 27:
 
-| Treatment | Calibration candidate |
+| Treatment | Accepted value |
 | --- | --- |
 | Transparent foreground shadow | Black at `65%` opacity (`#A6000000`), `0dp` horizontal offset, `1dp` vertical offset, `2dp` blur radius |
 | Frosted-glass blur | Fixed `32dp` background-blur radius |
 | Frosted-glass tint | `darkSurfaceBaseColor` at `32%` opacity |
 | Blur-unavailable fallback | `darkSurfaceBaseColor` at `88%` opacity |
 
-Calibration must compare both Samsung Galaxy S23 Ultra and Google Pixel 8 across representative bright, dark, and visually complex wallpapers. Acceptance may replace any candidate independently. Until that evidence is recorded, the preceding `To be decided` values remain unresolved and an implementation must label results as experimental rather than claiming final visual acceptance.
+Follow-up calibration should compare Samsung Galaxy S23 Ultra and Google Pixel 8 across representative bright, dark, and visually complex wallpapers. That matrix has not been established as passed; its absence no longer blocks acceptance of the current parameters or Iteration 27. Future parameter changes require author acceptance and an update to this specification.
 
 ## Search field and matching emphasis
 

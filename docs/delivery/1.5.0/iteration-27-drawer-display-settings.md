@@ -65,4 +65,12 @@ Recommended evidence covers every contracted setting combination and boundary; s
 
 ## Related decisions and technical assessments
 
+### Amendment: temporary lock appearance on 2026-09-06
+
+The author directed that temporary saving and selector-animation locks reject activation without greying out the style panel. Previously the linked behavior required shared disabled presentation during unresolved saves. The accepted boundary now preserves current colors and opacity during temporary locks while retaining disabled semantics and count-boundary dimming. Validation must distinguish temporary locking from unavailable count actions. This changes presentation acceptance only, not serialization or dismissal behavior.
+
+### Amendment: background acceptance on 2026-09-06
+
+The author accepted the currently implemented background parameters as sufficient for this iteration and directed that later optimization be non-blocking. Previously, the linked presentation contract treated these values as experimental pending Samsung Galaxy S23 Ultra and Google Pixel 8 wallpaper calibration. The current values are now the accepted delivery parameters owned by that presentation contract; further calibration and optimization are follow-up work, not an iteration exit gate. This amendment changes the calibration acceptance obligation only: background-mode behavior, capability fallback, persistence, and other acceptance criteria remain applicable. It does not claim the unperformed device matrix passed.
+
 No new decision is selected. Create an ADR only if evidence establishes a consequential persistence, rendering, or platform-compatibility boundary.

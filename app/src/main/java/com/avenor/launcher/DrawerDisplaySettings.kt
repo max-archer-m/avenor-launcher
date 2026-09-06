@@ -8,6 +8,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -110,7 +111,11 @@ internal class DrawerDisplaySettingsStore internal constructor(
         atomicFile = AtomicFile(file),
     )
 
-    private val mutationMutex = Mutex()
+    // Activity recreation can create a new store while the old owner's IO finishes.
+    // AtomicFile itself does not serialize readers/writers across store instances.
+    private val mutationMutex = fileMutexes.getOrPut(atomicFile.baseFile.absoluteFile.normalize().path) {
+        Mutex()
+    }
     private val mutableState = MutableStateFlow<DrawerDisplaySettingsReadState>(
         DrawerDisplaySettingsReadState.Loading,
     )
@@ -270,6 +275,7 @@ internal class DrawerDisplaySettingsStore internal constructor(
         baseFile.exists() || File(baseFile.path + BACKUP_SUFFIX).exists()
 
     private companion object {
+        val fileMutexes = ConcurrentHashMap<String, Mutex>()
         const val FILE_NAME = "drawer-display-settings.bin"
         const val BACKUP_SUFFIX = ".bak"
         const val MAGIC = 0x44525331
