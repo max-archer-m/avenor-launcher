@@ -30,6 +30,8 @@
 | Badge | 标记 | 平台提供的分身或资料身份视觉标记 |
 | Application information | 应用信息 | 系统负责的应用信息与管理界面 |
 | Private Space | 私密空间 | 当前产品契约之外的 Android 隐藏资料能力；Avenor 不申请 `ACCESS_HIDDEN_PROFILES` 访问该能力 |
+| Backup file | 备份文件 | 一个由用户选择、带 schema 版本号的本地 JSON 文件，包含完整的收藏模块与 Drawer 显示设置状态；仅由 Settings 中明确的备份操作创建，永不上传或自动写入 |
+| Restore | 恢复 | Settings 中读取用户选择的备份文件，并在确认后原子替换当前收藏与 Drawer 显示设置状态的操作 |
 
 产品文档统一使用上述术语。只有实现确实需要额外区分且形成文档时，技术命名才可以不同。
 
@@ -41,5 +43,7 @@
 | --- | --- | --- |
 | 纵向收藏模块 | 收藏列表 | Favorite list |
 | 横向收藏织带 | 收藏织带 | Favorite ribbon |
+| Backup | 备份收藏与设置 | Back up favorites and settings |
+| Restore | 从备份恢复 | Restore from backup |
 
 `收藏主列表` 是 favorite main list 的规范中文工作术语。`home 收藏区` 是同一区域的口语同义说法，不是独立术语。

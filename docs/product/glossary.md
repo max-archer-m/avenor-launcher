@@ -30,6 +30,8 @@
 | Badge | 标记 | Platform-provided visual identity for a clone or profile context |
 | Application information | 应用信息 | The system-owned information and management surface for an application |
 | Private Space | 私密空间 | Android hidden-profile capability outside the current product contract; Avenor does not request `ACCESS_HIDDEN_PROFILES` to access it |
+| Backup file | 备份文件 | One user-chosen, schema-versioned local JSON file containing the complete favorite-module and Drawer display-setting state, created only by the explicit Settings backup action and never uploaded or written automatically |
+| Restore | 恢复 | The Settings action that reads a user-selected backup file and, after confirmation, atomically replaces the current favorite and Drawer display-setting state |
 
 Use these terms consistently in product documents. Technical names may differ only when an implementation distinction is necessary and documented.
 
@@ -41,5 +43,7 @@ Specification terms and user-facing interface labels are separate. Interface lab
 | --- | --- | --- |
 | Vertical favorite module | 收藏列表 | Favorite list |
 | Horizontal favorite ribbon | 收藏织带 | Favorite ribbon |
+| Backup | 备份收藏与设置 | Back up favorites and settings |
+| Restore | 从备份恢复 | Restore from backup |
 
 `收藏主列表` is the canonical Chinese working term for the favorite main list. `home 收藏区` is an informal synonym for the same region and is not a separate term.

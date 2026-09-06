@@ -74,7 +74,7 @@ The product compatibility boundary requires `minSdk` 31. Current configured `com
 - Double-tap lock: an optional, purpose-limited accessibility-service capability for eligible blank Home space. It does not gate independent Launcher paths.
 - Drawer: every launchable entry successfully read from Android-exposed sources, including cloned and work-profile entries when available, with ordinary-mode local application-name search and a user-selected Transparent or Frosted-glass background. A fresh configuration defaults to Frosted glass. An isolated non-current-profile read failure does not block usable entries from other profiles.
 - Application actions: application information and platform shortcuts on Home or Drawer; Home additionally provides remove-favorite, edit, and uninstall when the platform can safely address the selected identity. Drawer has no Launcher-action region.
-- Settings: default-Launcher state and system destination, double-tap-lock disclosure, Privacy, licenses, repository link, and version information as applicable.
+- Settings: default-Launcher state and system destination, double-tap-lock disclosure, Privacy, licenses, repository link, and version information as applicable; plus local manual backup and restore of favorites and Drawer display settings through the system document picker.
 - English and Simplified Chinese resources selected from system locale, with English fallback.
 - Offline availability for core tasks, local core-data storage, and only permissions traceable to necessary core capabilities.
 
@@ -82,7 +82,7 @@ The product compatibility boundary requires `minSdk` 31. Current configured `com
 
 - Visual polish whose primary purpose is aesthetic refinement.
 - Widgets, folder-like grouping, Home paging, themes, and unrestricted layout or visual customization.
-- One-action clearing, export, cloud deletion, or restoration of all local configuration.
+- One-action clearing or cloud deletion of all local configuration.
 - Network-backed information such as weather.
 - Accounts, cloud synchronization, a self-hosted server, or cross-device backup.
 - Behavioral analytics, automatic ordering, recommendations, AI assistance, or agent integration.
@@ -124,6 +124,7 @@ An additive capability does not enter current scope merely because it can be bui
 - Drawer presents, locally searches, and launches the reliable inventory available within Avenor's Android role and least-privilege boundary.
 - Inventory refresh, partial-source failure, permanent disappearance, Loading, and Error behavior preserve usable paths and do not convert uncertain data into destructive conclusions.
 - Application actions and Settings open only destinations valid for the selected identity and report defined local failures without corrupting favorite state.
+- Avenor can back up the complete favorite-module and Drawer display-setting state to one user-chosen local file and restore it through a confirmed atomic replacement without network access or automatic backup.
 - Double-tap lock requests the system lock action only after the user enables the applicable accessibility service and performs the defined gesture in an eligible area.
 - English and Simplified Chinese are complete supported resource sets; unsupported locales fall back to English without a manual in-app language selector.
 - Core Home, Drawer, application launch, and Settings tasks remain usable offline.
@@ -150,6 +151,7 @@ Minimum acceptable performance, power, memory, and startup-response thresholds a
 - Favorite identity, module destination, application order, applicable vertical-module style, and module order survive applicable recreation without unexpected loss, duplication, or reassignment.
 - Failed or uncertain reads remain distinguishable from valid empty data and do not overwrite the last reliable favorite state.
 - Permission denial or revocation affects only the dependent capability and leaves independent Launcher paths available.
+- Local backup and restore preserve and restore the complete favorite and display-setting state without network access, automatic backup, or loss of unrelated configuration.
 - English, Simplified Chinese, and English fallback resolve according to system locale.
 - Applicable surface behavior and presentation contracts are satisfied for the delivery's explicitly selected scope and evidence baseline.
 - Results intended as daily-use acceptance are observed on the author's applicable physical devices; implementation completion alone is insufficient.
@@ -160,7 +162,7 @@ Core success means that Home, Drawer, and Settings form a reliable minimum utili
 
 ## User control
 
-The product lets users maintain Home favorites and use individual Settings entries. It does not provide one-action clearing, export, cloud deletion, or restoration of all configuration. Users can clear application data through Android system settings. Favorite changes result from explicit user actions, and language follows system locale rather than observed behavior.
+The product lets users maintain Home favorites and use individual Settings entries. It provides manual local backup and restore of favorites and Drawer display settings through the system document picker; it does not provide one-action clearing, cloud deletion, automatic backup, or cloud restoration of all configuration. Users can clear application data through Android system settings. Favorite changes result from explicit user actions, and language follows system locale rather than observed behavior.
 
 ## Local data boundary
 
@@ -170,7 +172,8 @@ The product lets users maintain Home favorites and use individual Settings entri
 - The latest eligible application-removal snapshot is transient Undo state, not durable undo history.
 - Time and date come from the device system and are not retained historically.
 - Avenor does not collect or store accessibility window content or events, notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.
-- Avenor has no account, cloud synchronization, server, cloud backup, or cross-device backup. Android cloud backup and device-to-device transfer backup remain disabled for Avenor-owned favorite and display-setting data until an author-approved restoration contract exists.
+- Avenor has no account, cloud synchronization, server, cloud backup, or cross-device backup. Android cloud backup and device-to-device transfer backup remain disabled for Avenor-owned favorite and display-setting data; only the user-initiated local backup described below is provided.
+- A user-initiated local backup writes one schema-versioned JSON file containing the complete favorite-module and Drawer display-setting state to a location the user chooses through the system document picker. The file is user-managed, stays outside Avenor's app-private storage, and is never uploaded or written automatically.
 
 ## Dependencies and risks
 

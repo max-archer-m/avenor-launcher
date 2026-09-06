@@ -28,7 +28,7 @@ Avenor also reads current system information needed for its interface and contro
 
 ### Storage, backup, and deletion
 
-Favorites and Drawer display settings remain on the device until you change them or Android clears Avenor's application data. Avenor does not currently provide an in-app clear-all action, export, restoration, cloud synchronization, cloud backup, or device-to-device transfer of its application data. Android cloud backup and device-transfer backup must be disabled for Avenor-owned favorite and display-setting data under the current product contract.
+Favorites and Drawer display settings remain on the device until you change them or Android clears Avenor's application data. Avenor provides a manual local backup and restore for these data. Back up writes one JSON file containing your current favorites and Drawer display settings to a location you choose through the system document picker; the file stays under your control and is never uploaded. Restore reads a backup file you select and, after your explicit confirmation, replaces the current favorites and display settings in one atomic operation. Avenor does not provide an in-app clear-all action, automatic backup, cloud synchronization, cloud backup, or device-to-device transfer of its application data. Android cloud backup and device-transfer backup must remain disabled for Avenor-owned favorite and display-setting data under the current product contract.
 
 The one-time adoption of the current Home module model starts Home favorites empty rather than migrating the former favorite structure. This author-accepted product transition does not clear independent Drawer display settings or other unrelated local configuration.
 

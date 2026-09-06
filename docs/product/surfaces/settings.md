@@ -28,6 +28,13 @@
 - A system-language change updates Avenor to the corresponding supported resource set without requiring an Avenor-specific selection.
 - Manual application-language selection is an additive future capability and is outside the current contract.
 
+### Data
+
+This heading organizes the behavior contract and is not a visible Settings group heading; the two entries below appear as stacked settings items using the primary settings-item presentation.
+
+- **Back up favorites and settings:** Selecting it opens the system document picker to choose a local save location and writes one JSON file containing the complete current Home favorite state (ordered favorite modules with their type, order, stable identities, style, and per-module application order) and the complete Drawer display settings (application size, name placement, items per row, section-anchor presentation, and background). The file carries a schema version and is not encrypted. No new permission is required. The exported file is user-managed and lives outside Avenor's app-private storage. A failed write shows the localized short message `Unable to back up favorites and settings`.
+- **Restore from backup:** Selecting it opens the system document picker to choose a backup file, then shows a confirmation dialog stating that confirming replaces the current favorites and display settings, with `Restore` and `Cancel` actions; `Cancel` changes nothing. Confirming replaces the complete current state with the backup state as one atomic operation. Restore does not validate the backup against the current application inventory; afterwards the ordinary inventory-refresh rules apply, so disabled identities are retained, reliably disappeared identities are removed, and failed launches show the ordinary launch-failure feedback. An unreadable, malformed, or version-incompatible file fails without overwriting the current state and shows the localized short message `Unable to restore from backup`. An empty backup with no modules is valid. Restore does not trigger the one-time Home-model adoption reset, and Avenor performs no automatic backup or upload of the file.
+
 ### About
 
 This heading organizes the behavior contract and is not a visible Settings group heading.
