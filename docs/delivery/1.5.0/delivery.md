@@ -26,7 +26,7 @@ The planned application identity remains `com.avenor.launcher` with `versionName
 
 ## Included scope and user journey
 
-In ordinary Drawer, the author can search the reliable local inventory by displayed application name, open Settings from the final Settings row, and configure application size, arrangement, section anchors, and Transparent or Frosted-glass background. The accepted Home module and favorite state remain intact and Drawer action sheets preserve their source-specific boundary.
+In ordinary Drawer, the author can search the reliable local inventory by displayed application name, open Settings from the final Settings row, and configure application size, arrangement, section anchors, and Transparent or Frosted-glass background through the revised stacked display-settings panel (title line plus content line, application-size block last). The accepted Home module and favorite state remain intact and Drawer action sheets preserve their source-specific boundary.
 
 ## Exclusions
 
@@ -48,7 +48,7 @@ Primary risks are locale-dependent search behavior, stale result identity, Back/
 | --- | --- | --- | --- |
 | [Iteration 26: Drawer Search and Ordinary Navigation](iteration-26-drawer-search-and-ordinary-navigation.md) | `Completed` | 2026-09-04 | The author reported basic acceptance of the complete implemented scope after incremental device validation and final gap review. |
 | [Iteration 27: Drawer Display Settings](iteration-27-drawer-display-settings.md) | `Completed` | 2026-09-06 | The author explicitly accepted the complete iteration result and directed local completion; recorded validation gaps and background optimization remain non-blocking follow-up. |
-| [Iteration 28: Upgrade, Regression, and Version Closure](iteration-28-upgrade-regression-and-version-closure.md) | `Planned` | 2026-09-01 | Version completion requires integrated Drawer, upgrade, compatibility, artifact, and author-acceptance evidence after the selected Drawer loop is complete. |
+| [Iteration 28: Upgrade, Regression, and Version Closure](iteration-28-upgrade-regression-and-version-closure.md) | `Planned` | 2026-09-01 | Version completion requires integrated Drawer, upgrade, compatibility, artifact, and author-acceptance evidence after the selected Drawer loop is complete; amended 2026-09-06 to deliver and validate the revised style settings panel layout. |
 
 ## Iteration evidence and results
 
@@ -88,7 +88,7 @@ The author subsequently reported basic build/package acceptance on 2026-09-06. N
 
 ### Iteration 28
 
-[Contract](iteration-28-upgrade-regression-and-version-closure.md). No implementation or validation evidence exists. Status remains `Planned`; absent evidence is not a pass.
+[Contract](iteration-28-upgrade-regression-and-version-closure.md). No implementation or validation evidence exists. Status remains `Planned`; absent evidence is not a pass. On 2026-09-06 the author directed that the revised style settings panel layout be delivered and validated within this iteration instead of a new iteration; the contract records the amendment. Implementation and validation evidence for that scope remain absent.
 
 ## Dependencies and sequence
 

@@ -26,7 +26,7 @@
 
 ## 纳入范围和用户旅程
 
-在普通 Drawer 中，作者可以按展示的应用名称搜索可靠本地清单，从最终设置行打开设置，并配置应用尺寸、排列、分区锚点以及透明或毛玻璃背景。已接受的 Home 模块与收藏状态保持不变，Drawer 应用操作面板保持其来源特定边界。
+在普通 Drawer 中，作者可以按展示的应用名称搜索可靠本地清单，从最终设置行打开设置，并通过修订后的堆叠式展示设置面板（标题行加内容行，应用尺寸块置后）配置应用尺寸、排列、分区锚点以及透明或毛玻璃背景。已接受的 Home 模块与收藏状态保持不变，Drawer 应用操作面板保持其来源特定边界。
 
 ## 排除范围
 
@@ -48,7 +48,7 @@
 | --- | --- | --- | --- |
 | [迭代 26：Drawer 搜索与普通导航](iteration-26-drawer-search-and-ordinary-navigation.zh-CN.md) | `Completed` | 2026-09-04 | 作者在增量设备验证和最终查漏后，报告完整已实施范围基本验收通过。 |
 | [迭代 27：Drawer 展示设置](iteration-27-drawer-display-settings.zh-CN.md) | `Completed` | 2026-09-06 | 作者明确接受完整迭代结果并指示本地记录完成；已记录的验证缺口及背景优化保留为不阻塞后续事项。 |
-| [迭代 28：升级、回归与版本收尾](iteration-28-upgrade-regression-and-version-closure.zh-CN.md) | `Planned` | 2026-09-01 | 所选 Drawer 闭环完成后，版本完成需要集成的 Drawer、升级、兼容性、产物和作者验收证据。 |
+| [迭代 28：升级、回归与版本收尾](iteration-28-upgrade-regression-and-version-closure.zh-CN.md) | `Planned` | 2026-09-01 | 所选 Drawer 闭环完成后，版本完成需要集成的 Drawer、升级、兼容性、产物和作者验收证据；2026-09-06 修订为同时交付并验证修订后的样式设置面板布局。 |
 
 ## 迭代证据和结果
 
@@ -88,7 +88,7 @@ Agent 于 2026-09-05 执行的验证：
 
 ### 迭代 28
 
-[契约](iteration-28-upgrade-regression-and-version-closure.zh-CN.md)。当前没有实施或验证证据。状态保持 `Planned`；缺少证据不代表通过。
+[契约](iteration-28-upgrade-regression-and-version-closure.zh-CN.md)。当前没有实施或验证证据。状态保持 `Planned`；缺少证据不代表通过。2026-09-06 作者指示将修订后的样式设置面板布局在本迭代内交付与验证，而不是新建迭代；契约已记录该修订。该范围的实施与验证证据仍然缺失。
 
 ## 依赖和顺序
 

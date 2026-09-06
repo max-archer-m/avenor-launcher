@@ -82,6 +82,7 @@
 |  SEARCH: FILTERED ANCHORS/INDEX; SETTINGS HIDDEN         Y                   |
 |  MULTI: ORDER SLOT LEFT OF ICON                                              |
 |  ORDINARY: SECTION ANCHORS, SETTINGS, AND DISPLAY SETTINGS                   |
+|  DISPLAY SETTINGS MODAL: 4 STACKED BLOCKS; APPLICATION SIZE LAST............|
 |                                                                              |
 |                                                                              |
 |                                                           Z                  |
