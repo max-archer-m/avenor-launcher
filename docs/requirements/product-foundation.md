@@ -70,7 +70,7 @@ The product compatibility boundary requires `minSdk` 31. Current configured `com
 
 - Home: one non-pageable, non-collapsible default Home with fixed time and date above one vertically scrolling, full-width favorite main list and the Drawer gesture entry.
 - Favorites: one ordered heterogeneous sequence of full-width vertical modules and single-row horizontal ribbons, without an artificial module-count limit. A launchable identity appears in only one module. Vertical modules persist module-level size, name placement, and items-per-row values; ribbons use one fixed style.
-- Favorite editing: explicit add, remove, move, reorder, resize, confirmation, cancellation, and latest-removal Undo behavior defined by the Home and Drawer contracts.
+- Favorite editing: explicit add, remove, move, reorder, resize, confirmation, cancellation, latest-removal Undo, and Drawer drag-to-favorite behavior defined by the Home and Drawer contracts.
 - Double-tap lock: an optional, purpose-limited accessibility-service capability for eligible blank Home space. It does not gate independent Launcher paths.
 - Drawer: every launchable entry successfully read from Android-exposed sources, including cloned and work-profile entries when available, with ordinary-mode local application-name search and a user-selected Transparent or Frosted-glass background. A fresh configuration defaults to Frosted glass. An isolated non-current-profile read failure does not block usable entries from other profiles.
 - Application actions: application information and platform shortcuts on Home or Drawer; Home additionally provides remove-favorite, edit, and uninstall when the platform can safely address the selected identity. Drawer has no Launcher-action region.
