@@ -90,6 +90,7 @@ When a delivery record needs to explain a boundary, it should prefer positive se
 | 1.3.0 completed delivery | [`docs/delivery/1.3.0/delivery.md`](delivery/1.3.0/delivery.md) | [`docs/delivery/1.3.0/delivery.zh-CN.md`](delivery/1.3.0/delivery.zh-CN.md) | Delivery records | Records the completed unified-favorite-model delivery, included Iterations 15-21, evidence, known observations, and author disposition |
 | 1.4.0 planned delivery | [`docs/delivery/1.4.0/delivery.md`](delivery/1.4.0/delivery.md) | [`docs/delivery/1.4.0/delivery.zh-CN.md`](delivery/1.4.0/delivery.zh-CN.md) | Delivery records | Plans the ordered favorite-module Home loop and version closure through Iterations 22-25 |
 | 1.5.0 planned delivery | [`docs/delivery/1.5.0/delivery.md`](delivery/1.5.0/delivery.md) | [`docs/delivery/1.5.0/delivery.zh-CN.md`](delivery/1.5.0/delivery.zh-CN.md) | Delivery records | Plans Drawer search, ordinary navigation, display settings, and version closure through Iterations 26-28 |
+| 1.6.0 planned delivery | [`docs/delivery/1.6.0/delivery.md`](delivery/1.6.0/delivery.md) | [`docs/delivery/1.6.0/delivery.zh-CN.md`](delivery/1.6.0/delivery.zh-CN.md) | Delivery records | Plans the Settings local backup and restore journey through Iteration 29 |
 | Architecture decisions | [`docs/decisions/`](decisions/) | - | Decision rationale | Records consequential implemented and accepted architecture decisions; only an active ADR establishes its stated current architecture boundary |
 | License | [`LICENSE`](../LICENSE) | - | - | Contains the Apache License 2.0 text |
 
