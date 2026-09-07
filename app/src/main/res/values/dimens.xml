@@ -125,35 +125,37 @@
     <dimen name="home_favorite_insertion_line_thickness">2dp</dimen>
     <dimen name="home_favorite_insertion_boundary_band">12dp</dimen>
 
-    <!-- Home screen / Module style editor / Panel container and rows -->
+    <!-- Home screen / Module style editor / Panel container and block lines -->
     <dimen name="home_style_panel_minimum_list_viewport">112dp</dimen>
-    <dimen name="style_settings_panel_row_height">56dp</dimen>
+    <dimen name="style_settings_title_line_height">32dp</dimen>
+    <dimen name="style_settings_content_line_height">48dp</dimen>
+    <dimen name="style_settings_application_size_line_height">56dp</dimen>
+    <dimen name="style_settings_informational_row_height">48dp</dimen>
     <dimen name="style_settings_panel_row_inset">12dp</dimen>
     <dimen name="style_settings_panel_corner_radius">12dp</dimen>
     <dimen name="style_settings_panel_elevation">12dp</dimen>
     <dimen name="style_settings_secondary_text_size">14sp</dimen>
     <dimen name="style_settings_secondary_line_height">20sp</dimen>
-    <dimen name="style_settings_title_control_gap">16dp</dimen>
-    <dimen name="style_settings_size_option_horizontal_padding">0dp</dimen>
+    <dimen name="style_settings_size_option_end_padding">16dp</dimen>
     <dimen name="style_settings_indicator_size">24dp</dimen>
     <dimen name="style_settings_indicator_icon_gap">4dp</dimen>
     <dimen name="style_settings_icon_label_gap">8dp</dimen>
 
     <!-- Home screen / Module style editor / Arrangement selector -->
-    <dimen name="style_settings_selector_width">148dp</dimen>
-    <dimen name="style_settings_selector_height">44dp</dimen>
-    <dimen name="style_settings_selector_thumb_height">40dp</dimen>
+    <dimen name="style_settings_selector_width">140dp</dimen>
+    <dimen name="style_settings_selector_height">40dp</dimen>
+    <dimen name="style_settings_selector_thumb_height">36dp</dimen>
     <dimen name="style_settings_selector_border_width">1dp</dimen>
     <dimen name="style_settings_selector_inner_padding">2dp</dimen>
-    <dimen name="style_settings_selector_frame_radius">22dp</dimen>
-    <dimen name="style_settings_selector_thumb_radius">20dp</dimen>
+    <dimen name="style_settings_selector_frame_radius">20dp</dimen>
+    <dimen name="style_settings_selector_thumb_radius">18dp</dimen>
 
     <!-- Home screen / Module style editor / Quantity stepper -->
     <dimen name="style_settings_control_gap">8dp</dimen>
-    <dimen name="style_settings_stepper_target_size">48dp</dimen>
-    <dimen name="style_settings_stepper_visible_size">32dp</dimen>
-    <dimen name="style_settings_stepper_value_width">36dp</dimen>
-    <dimen name="style_settings_stepper_visible_height">32dp</dimen>
+    <dimen name="style_settings_stepper_target_size">40dp</dimen>
+    <dimen name="style_settings_stepper_visible_size">28dp</dimen>
+    <dimen name="style_settings_stepper_value_width">32dp</dimen>
+    <dimen name="style_settings_stepper_visible_height">28dp</dimen>
     <dimen name="style_settings_stepper_radius">4dp</dimen>
 
     <!-- Drawer / Transition gesture from Home -->

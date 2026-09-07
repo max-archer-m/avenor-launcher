@@ -65,11 +65,6 @@ internal fun HomeModuleStylePanel(
                 label = stringResource(R.string.home_select_favorite_list_prompt),
             )
         } else if (selectedModule.type == OrderedFavoriteModuleType.Vertical) {
-            HomeApplicationSizeRow(
-                selected = selectedModule.applicationSize,
-                enabled = enabled,
-                onSelect = onChangeSize,
-            )
             HomeStyleArrangementRow(
                 placement = selectedModule.namePlacement,
                 value = selectedModule.itemsPerRow,
@@ -77,6 +72,11 @@ internal fun HomeModuleStylePanel(
                 enabled = enabled,
                 onChangePlacement = onChangeNamePlacement,
                 onChangeCount = onChangeItemsPerRow,
+            )
+            HomeApplicationSizeRow(
+                selected = selectedModule.applicationSize,
+                enabled = enabled,
+                onSelect = onChangeSize,
             )
         } else {
             HomeStylePanelRow(
@@ -91,7 +91,7 @@ private fun HomeStylePanelRow(label: String, value: String? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(dimensionResource(R.dimen.style_settings_panel_row_height))
+            .height(dimensionResource(R.dimen.style_settings_informational_row_height))
             .padding(horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -114,7 +114,7 @@ private fun HomeApplicationSizeRow(
     onSelect: (FavoriteListSize) -> Unit,
 ) {
     val options = FavoriteListSize.values()
-    StyleApplicationSizeRow(
+    StyleApplicationSizeBlock(
         title = stringResource(id = R.string.home_application_size),
         optionLabels = options.map { option ->
             stringResource(
@@ -144,7 +144,7 @@ private fun HomeStyleArrangementRow(
     onChangeCount: (Int) -> Unit,
 ) {
     val options = FavoriteNamePlacement.values()
-    StyleArrangementRow(
+    StyleArrangementBlock(
         title = stringResource(id = R.string.home_application_arrangement),
         optionLabels = options.map { option ->
             stringResource(

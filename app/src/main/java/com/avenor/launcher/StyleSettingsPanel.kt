@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,7 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 
 @Composable
-internal fun StyleApplicationSizeRow(
+internal fun StyleApplicationSizeBlock(
     title: String,
     optionLabels: List<String>,
     optionIconSizes: List<Dp>,
@@ -67,101 +68,100 @@ internal fun StyleApplicationSizeRow(
     require(selectedIndex in optionLabels.indices)
     val context = LocalContext.current
 
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height = dimensionResource(id = R.dimen.style_settings_panel_row_height))
-            .padding(
-                horizontal = dimensionResource(id = R.dimen.style_settings_panel_row_inset),
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        modifier = modifier.fillMaxWidth(),
     ) {
-        Text(
-            text = title,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-        )
-        Spacer(
-            modifier = Modifier.width(
-                width = dimensionResource(id = R.dimen.style_settings_title_control_gap),
-            ),
-        )
+        StyleTitleLine(text = title)
         Row(
             modifier = Modifier
-                .weight(weight = 1f)
-                .selectableGroup()
-                .semantics { contentDescription = title }
-                .horizontalScroll(state = rememberScrollState()),
+                .fillMaxWidth()
+                .height(
+                    height = dimensionResource(
+                        id = R.dimen.style_settings_application_size_line_height,
+                    ),
+                )
+                .padding(
+                    horizontal = dimensionResource(id = R.dimen.style_settings_panel_row_inset),
+                ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            optionLabels.indices.forEach { index ->
-                val iconSize = optionIconSizes[index]
-                val iconPixels = with(LocalDensity.current) { iconSize.roundToPx() }
-                val icon = remember(key1 = index, key2 = iconPixels) {
-                    context.packageManager.defaultActivityIcon
-                        .toBitmap(width = iconPixels, height = iconPixels)
-                        .asImageBitmap()
-                }
-                Row(
-                    modifier = Modifier
-                        .height(
-                            height = dimensionResource(
-                                id = R.dimen.style_settings_panel_row_height,
+            Row(
+                modifier = Modifier
+                    .weight(weight = 1f)
+                    .selectableGroup()
+                    .semantics { contentDescription = title }
+                    .horizontalScroll(state = rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                optionLabels.indices.forEach { index ->
+                    val iconSize = optionIconSizes[index]
+                    val iconPixels = with(LocalDensity.current) { iconSize.roundToPx() }
+                    val icon = remember(key1 = index, key2 = iconPixels) {
+                        context.packageManager.defaultActivityIcon
+                            .toBitmap(width = iconPixels, height = iconPixels)
+                            .asImageBitmap()
+                    }
+                    Row(
+                        modifier = Modifier
+                            .height(
+                                height = dimensionResource(
+                                    id = R.dimen.style_settings_application_size_line_height,
+                                ),
+                            )
+                            .selectable(
+                                selected = index == selectedIndex,
+                                enabled = enabled,
+                                role = Role.RadioButton,
+                                onClick = { if (index != selectedIndex) onSelectIndex(index) },
+                            )
+                            .padding(
+                                end = dimensionResource(
+                                    id = R.dimen.style_settings_size_option_end_padding,
+                                ),
+                            )
+                            .then(
+                                optionTestTagPrefix?.let { prefix ->
+                                    Modifier.testTag(tag = "${prefix}_$index")
+                                } ?: Modifier,
                             ),
-                        )
-                        .selectable(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
                             selected = index == selectedIndex,
-                            enabled = enabled,
-                            role = Role.RadioButton,
-                            onClick = { if (index != selectedIndex) onSelectIndex(index) },
-                        )
-                        .padding(
-                            horizontal = dimensionResource(
-                                id = R.dimen.style_settings_size_option_horizontal_padding,
+                            onClick = null,
+                            modifier = Modifier.size(
+                                size = dimensionResource(id = R.dimen.style_settings_indicator_size),
+                            ).clearAndSetSemantics { },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = MaterialTheme.colorScheme.onSurface,
+                                unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                disabledSelectedColor = MaterialTheme.colorScheme.onSurface,
+                                disabledUnselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             ),
                         )
-                        .then(
-                            optionTestTagPrefix?.let { prefix ->
-                                Modifier.testTag(tag = "${prefix}_$index")
-                            } ?: Modifier,
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = index == selectedIndex,
-                        onClick = null,
-                        modifier = Modifier.size(
-                            size = dimensionResource(id = R.dimen.style_settings_indicator_size),
-                        ).clearAndSetSemantics { },
-                        colors = RadioButtonDefaults.colors(
-                            selectedColor = MaterialTheme.colorScheme.onSurface,
-                            unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            disabledSelectedColor = MaterialTheme.colorScheme.onSurface,
-                            disabledUnselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        ),
-                    )
-                    Spacer(
-                        modifier = Modifier.width(
-                            width = dimensionResource(
-                                id = R.dimen.style_settings_indicator_icon_gap,
+                        Spacer(
+                            modifier = Modifier.width(
+                                width = dimensionResource(
+                                    id = R.dimen.style_settings_indicator_icon_gap,
+                                ),
                             ),
-                        ),
-                    )
-                    Image(
-                        bitmap = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(size = iconSize),
-                    )
-                    Spacer(
-                        modifier = Modifier.width(
-                            width = dimensionResource(id = R.dimen.style_settings_icon_label_gap),
-                        ),
-                    )
-                    Text(
-                        text = optionLabels[index],
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                    )
+                        )
+                        Image(
+                            bitmap = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(size = iconSize),
+                        )
+                        Spacer(
+                            modifier = Modifier.width(
+                                width = dimensionResource(id = R.dimen.style_settings_icon_label_gap),
+                            ),
+                        )
+                        Text(
+                            text = optionLabels[index],
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
                 }
             }
         }
@@ -169,7 +169,24 @@ internal fun StyleApplicationSizeRow(
 }
 
 @Composable
-internal fun StyleArrangementRow(
+private fun StyleTitleLine(text: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(id = R.dimen.style_settings_title_line_height))
+            .padding(horizontal = dimensionResource(id = R.dimen.style_settings_panel_row_inset)),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+        )
+    }
+}
+
+@Composable
+internal fun StyleArrangementBlock(
     title: String,
     optionLabels: List<String>,
     selectedIndex: Int,
@@ -187,61 +204,57 @@ internal fun StyleArrangementRow(
     require(optionLabels.size == 2)
     require(selectedIndex in optionLabels.indices)
     require(value in minimum..maximum)
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(height = dimensionResource(id = R.dimen.style_settings_panel_row_height))
-            .padding(
-                horizontal = dimensionResource(id = R.dimen.style_settings_panel_row_inset),
-            )
             .testTag(tag = "${testTagPrefix}_application_arrangement"),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = title,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-        )
-        Spacer(
-            modifier = Modifier.width(
-                width = dimensionResource(id = R.dimen.style_settings_title_control_gap),
-            ),
-        )
+        StyleTitleLine(text = title)
         Row(
             modifier = Modifier
-                .weight(weight = 1f)
-                .horizontalScroll(state = rememberScrollState()),
+                .fillMaxWidth()
+                .height(height = dimensionResource(id = R.dimen.style_settings_content_line_height))
+                .padding(
+                    horizontal = dimensionResource(id = R.dimen.style_settings_panel_row_inset),
+                ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            StyleTwoOptionSelector(
-                title = title,
-                optionLabels = optionLabels,
-                selectedIndex = selectedIndex,
-                enabled = enabled,
-                onSelectIndex = onSelectIndex,
-                testTagPrefix = "${testTagPrefix}_name_placement",
-            )
-            Spacer(
-                modifier = Modifier.width(
-                    width = dimensionResource(id = R.dimen.style_settings_control_gap),
-                ),
-            )
-            StyleItemsPerRowStepper(
-                value = value,
-                minimum = minimum,
-                maximum = maximum,
-                decrementLabel = decrementLabel,
-                incrementLabel = incrementLabel,
-                enabled = enabled,
-                onChangeValue = onChangeValue,
-                testTagPrefix = "${testTagPrefix}_items_per_row",
-            )
+            Row(
+                modifier = Modifier
+                    .weight(weight = 1f)
+                    .horizontalScroll(state = rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                StyleTwoOptionSelector(
+                    title = title,
+                    optionLabels = optionLabels,
+                    selectedIndex = selectedIndex,
+                    enabled = enabled,
+                    onSelectIndex = onSelectIndex,
+                    testTagPrefix = "${testTagPrefix}_name_placement",
+                )
+                Spacer(
+                    modifier = Modifier.width(
+                        width = dimensionResource(id = R.dimen.style_settings_control_gap),
+                    ),
+                )
+                StyleItemsPerRowStepper(
+                    value = value,
+                    minimum = minimum,
+                    maximum = maximum,
+                    decrementLabel = decrementLabel,
+                    incrementLabel = incrementLabel,
+                    enabled = enabled,
+                    onChangeValue = onChangeValue,
+                    testTagPrefix = "${testTagPrefix}_items_per_row",
+                )
+            }
         }
     }
 }
 
 @Composable
-internal fun StyleSelectorRow(
+internal fun StyleSelectorBlock(
     title: String,
     optionLabels: List<String>,
     selectedIndex: Int,
@@ -252,28 +265,31 @@ internal fun StyleSelectorRow(
 ) {
     require(optionLabels.size == 2)
     require(selectedIndex in optionLabels.indices)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(R.dimen.style_settings_panel_row_height))
-            .padding(horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset)),
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Text(text = title, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
-        Spacer(Modifier.width(dimensionResource(R.dimen.style_settings_title_control_gap)))
+        StyleTitleLine(text = title)
         Row(
-            modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(R.dimen.style_settings_content_line_height))
+                .padding(horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset)),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            StyleTwoOptionSelector(
-                title = title,
-                optionLabels = optionLabels,
-                selectedIndex = selectedIndex,
-                enabled = enabled,
-                onSelectIndex = onSelectIndex,
-                testTagPrefix = testTagPrefix,
-                wide = wide,
-            )
+            Row(
+                modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                StyleTwoOptionSelector(
+                    title = title,
+                    optionLabels = optionLabels,
+                    selectedIndex = selectedIndex,
+                    enabled = enabled,
+                    onSelectIndex = onSelectIndex,
+                    testTagPrefix = testTagPrefix,
+                    wide = wide,
+                )
+            }
         }
     }
 }

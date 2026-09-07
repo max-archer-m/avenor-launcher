@@ -132,8 +132,8 @@ class StyleSettingsInteractionTest {
                 context.getString(R.string.style_settings_decrease_items_per_row),
             )
         composeRule.onNodeWithTag("drawer_name_placement_1")
-            .assertHeightIsEqualTo(48.dp)
-            // Touch above the visible 44dp frame, inside the option's own target.
+            .assertHeightIsEqualTo(40.dp)
+            // Touch above the visible 40dp frame, inside the option's own target.
             .performTouchInput { click(Offset(center.x, 1f)) }
         composeRule.onNodeWithTag("drawer_name_placement_1").assertIsSelected()
         composeRule.runOnIdle { assertEquals(DrawerNamePlacement.Below, settings.namePlacement) }
@@ -163,7 +163,7 @@ class StyleSettingsInteractionTest {
         }
         composeRule.onNodeWithTag("home_name_placement_0").assertIsSelected()
         composeRule.onNodeWithTag("home_items_per_row_increment").assertIsNotEnabled()
-        composeRule.onNodeWithTag("home_name_placement_1").assertHeightIsEqualTo(48.dp)
+        composeRule.onNodeWithTag("home_name_placement_1").assertHeightIsEqualTo(40.dp)
             .performClick()
         composeRule.onNodeWithTag("home_items_per_row_increment").assertIsEnabled()
             .performClick()

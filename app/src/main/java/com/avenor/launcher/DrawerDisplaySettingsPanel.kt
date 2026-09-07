@@ -125,36 +125,11 @@ internal fun DrawerDisplaySettingsPanel(
                     }
                     .testTag(tag = "drawer_display_settings_panel"),
             ) {
-                val options = DrawerApplicationSize.values()
-                StyleApplicationSizeRow(
-                    title = stringResource(id = R.string.drawer_application_size),
-                    optionLabels = options.map { option ->
-                        stringResource(
-                            id = when (option) {
-                                DrawerApplicationSize.Large -> R.string.favorite_list_large
-                                DrawerApplicationSize.Medium -> R.string.favorite_list_medium
-                                DrawerApplicationSize.Small -> R.string.favorite_list_small
-                            },
-                        )
-                    },
-                    optionIconSizes = options.map { option ->
-                        dimensionResource(id = option.iconSizeResource())
-                    },
-                    selectedIndex = options.indexOf(element = settings.applicationSize),
-                    enabled = mutationEnabled,
-                    onSelectIndex = { index ->
-                        changeSettings(
-                            settings.copy(applicationSize = options[index]),
-                        )
-                    },
-                    optionTestTagPrefix = "drawer_application_size_option",
-                    modifier = Modifier.testTag(tag = "drawer_application_size_setting"),
-                )
                 val placementOptions = DrawerNamePlacement.values()
                 val validRange = validItemsPerRowRange(
                     namePlacement = settings.namePlacement,
                 )
-                StyleArrangementRow(
+                StyleArrangementBlock(
                     title = stringResource(id = R.string.drawer_application_arrangement),
                     optionLabels = placementOptions.map { placement ->
                         stringResource(
@@ -188,7 +163,7 @@ internal fun DrawerDisplaySettingsPanel(
                     testTagPrefix = "drawer",
                 )
                 val anchorOptions = DrawerSectionAnchorPresentation.entries
-                StyleSelectorRow(
+                StyleSelectorBlock(
                     title = stringResource(R.string.drawer_section_anchor_presentation),
                     optionLabels = listOf(
                         stringResource(R.string.drawer_section_anchor_inline),
@@ -202,7 +177,7 @@ internal fun DrawerDisplaySettingsPanel(
                     testTagPrefix = "drawer_section_anchor",
                 )
                 val backgroundOptions = DrawerBackgroundMode.entries
-                StyleSelectorRow(
+                StyleSelectorBlock(
                     title = stringResource(R.string.drawer_background),
                     optionLabels = listOf(
                         stringResource(R.string.drawer_background_transparent),
@@ -215,6 +190,31 @@ internal fun DrawerDisplaySettingsPanel(
                     },
                     testTagPrefix = "drawer_background",
                     wide = true,
+                )
+                val options = DrawerApplicationSize.values()
+                StyleApplicationSizeBlock(
+                    title = stringResource(id = R.string.drawer_application_size),
+                    optionLabels = options.map { option ->
+                        stringResource(
+                            id = when (option) {
+                                DrawerApplicationSize.Large -> R.string.favorite_list_large
+                                DrawerApplicationSize.Medium -> R.string.favorite_list_medium
+                                DrawerApplicationSize.Small -> R.string.favorite_list_small
+                            },
+                        )
+                    },
+                    optionIconSizes = options.map { option ->
+                        dimensionResource(id = option.iconSizeResource())
+                    },
+                    selectedIndex = options.indexOf(element = settings.applicationSize),
+                    enabled = mutationEnabled,
+                    onSelectIndex = { index ->
+                        changeSettings(
+                            settings.copy(applicationSize = options[index]),
+                        )
+                    },
+                    optionTestTagPrefix = "drawer_application_size_option",
+                    modifier = Modifier.testTag(tag = "drawer_application_size_setting"),
                 )
             }
         }

@@ -48,7 +48,7 @@ Primary risks are locale-dependent search behavior, stale result identity, Back/
 | --- | --- | --- | --- |
 | [Iteration 26: Drawer Search and Ordinary Navigation](iteration-26-drawer-search-and-ordinary-navigation.md) | `Completed` | 2026-09-04 | The author reported basic acceptance of the complete implemented scope after incremental device validation and final gap review. |
 | [Iteration 27: Drawer Display Settings](iteration-27-drawer-display-settings.md) | `Completed` | 2026-09-06 | The author explicitly accepted the complete iteration result and directed local completion; recorded validation gaps and background optimization remain non-blocking follow-up. |
-| [Iteration 28: Upgrade, Regression, and Version Closure](iteration-28-upgrade-regression-and-version-closure.md) | `Planned` | 2026-09-01 | Version completion requires integrated Drawer, upgrade, compatibility, artifact, and author-acceptance evidence after the selected Drawer loop is complete; amended 2026-09-06 to deliver and validate the revised style settings panel layout. |
+| [Iteration 28: Upgrade, Regression, and Version Closure](iteration-28-upgrade-regression-and-version-closure.md) | `Completed` | 2026-09-07 | The author accepted the revised style settings panel layout after build/package and primary-device upgrade acceptance and directed local completion without a tag or candidate artifact; the contract records the 2026-09-06 layout amendment and the 2026-09-07 1.5.0 scope boundary. |
 
 ## Iteration evidence and results
 
@@ -88,7 +88,11 @@ The author subsequently reported basic build/package acceptance on 2026-09-06. N
 
 ### Iteration 28
 
-[Contract](iteration-28-upgrade-regression-and-version-closure.md). No implementation or validation evidence exists. Status remains `Planned`; absent evidence is not a pass. On 2026-09-06 the author directed that the revised style settings panel layout be delivered and validated within this iteration instead of a new iteration; the contract records the amendment. Implementation and validation evidence for that scope remain absent.
+[Contract](iteration-28-upgrade-regression-and-version-closure.md). On 2026-09-06 the author directed that the revised shared style settings panel layout be delivered and validated within this iteration; the contract records the amendment. On 2026-09-07 the author confirmed the 1.5.0 scope boundary, deferring the local backup and restore contract and the hidden-name and vertical-list-geometry presentation contract to the next version; the contract records that amendment.
+
+The author authorized production implementation on 2026-09-07. The implementation restructures the shared style settings panel into title-line and content-line blocks (32dp title lines, 48dp content lines, a 56dp application-size content line placed last), adopts 40dp interaction targets with the compact 140dp x 40dp two-option selector and 28dp stepper controls, and adds 16dp end spacing after each application-size option label. The implementation, the 1.5.0 identifier update (`versionName` `1.5.0`, `versionCode` 6), and this delivery record are included in the same delivery commit.
+
+Author-reported evidence on 2026-09-07: the style settings panel changes package successfully and received basic acceptance; the 1.5.0 identifiers are in place; and the direct upgrade from the accepted prior version basically passed on the author-designated primary device. The author directed local completion without producing a tag or a formal candidate APK artifact; the traceable-candidate requirement is therefore recorded as author-directed out of scope for this closure, and version completion and tag disposition remain the author's separate decision. Source-level contract reconciliation for Iterations 26–27 found no unresolved material mismatch in the selected scope. Unperformed checks, including the broader device/API/OEM matrix and journey regression beyond the reported upgrade acceptance, remain recorded gaps, not passes.
 
 ## Dependencies and sequence
 
@@ -120,4 +124,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.5.0` identif
 
 ## Completion result
 
-Iteration 26 is `Completed` with the implementation and author-reported basic acceptance recorded above. `1.5.0` remains incomplete; Iteration 27 is `Completed` by explicit author acceptance and Iteration 28 remains `Planned`. This result does not complete the version or authorize push, tag, artifact movement, publication, or release.
+Iterations 26–28 are `Completed` with the implementation and author-reported acceptance recorded above. The author accepted the revised style settings panel layout and the 1.5.0 identifier update, reported basic upgrade acceptance on the primary device, and directed local completion without a tag or candidate artifact. This record does not authorize push, artifact movement, publication, or release; those actions remain separately authorized.
