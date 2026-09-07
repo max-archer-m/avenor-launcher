@@ -6,7 +6,7 @@
 
 ## Version intent
 
-`1.6.0` delivers the Settings local backup and restore contract that the author confirmed on 2026-09-07 as the first change of the next version, after it was deferred from the `1.5.0` scope boundary. The selected result lets the author export the complete Home favorite state and Drawer display settings to one user-managed local JSON file and later replace the current state with a backup's contents after explicit confirmation. Per the author's direction for this version, its content remains feature addition and optimization; UI-animation and experience-polish work is not part of this version.
+`1.6.0` delivers the Settings local backup and restore contract that the author confirmed on 2026-09-07 as the first change of the next version, after it was deferred from the `1.5.0` scope boundary. The selected result lets the author export the complete Home favorite state and Drawer display settings to one user-managed local JSON file and later replace the current state with a backup's contents after explicit confirmation. The version also delivers the Drawer drag-to-favorite journey the author decided on the same day: long-pressing and dragging an eligible Drawer application adds it to favorites through Home edit-mode destinations in one atomic operation. Per the author's direction for this version, its content remains feature addition and optimization; UI-animation and experience-polish work is not part of this version.
 
 Author-confirmed next-version directions that are not yet assigned to an iteration — the more visible shadow around the style-edit dialog, and the frosted-glass darkness/blur calibration (with an optional adjustable-strength control still undecided) — remain candidate scope for later iterations of this version or a later version. They are not included scope until an iteration contract selects them.
 
@@ -22,20 +22,25 @@ The planned application identity remains `com.avenor.launcher` with `versionName
 - [Product foundation](../../requirements/product-foundation.md)
 - [Settings behavior](../../product/surfaces/settings.md), including the Data section backup and restore contract
 - [Settings presentation](../../product/presentation/settings.md)
+- [Drawer behavior](../../product/surfaces/drawer.md), including the Drag-to-favorite section
+- [Home behavior](../../product/surfaces/home.md), including the Drag-to-favorite journeys section
+- [Application action sheet](../../product/surfaces/app-action-sheet.md)
 - [Navigation](../../product/navigation.md)
 - [Privacy and data handling](../../product/features/privacy.md)
 - [Validation guide](../../validation.md)
 
 ## Included scope and user journey
 
-In Settings, the author can select Back up favorites and settings to write one JSON file — containing the complete current Home favorite state and Drawer display settings — to a location chosen through the system document picker under a versioned, timestamped suggested name, and select Restore from backup to choose a backup file and, after a detailed confirmation dialog, replace the complete current state as one atomic operation. Success and failure use localized short messages; picker cancellation and in-flight behavior are defined; schema compatibility is directional; partially structured backups have defined validity. The accepted Home module model, Drawer behavior, and privacy boundaries remain intact.
+In Settings, the author can select Back up favorites and settings to write one JSON file — containing the complete current Home favorite state and Drawer display settings — to a location chosen through the system document picker under a versioned, timestamped suggested name, and select Restore from backup to choose a backup file and, after a detailed confirmation dialog, replace the complete current state as one atomic operation. Success and failure use localized short messages; picker cancellation and in-flight behavior are defined; schema compatibility is directional; partially structured backups have defined validity.
+
+In ordinary Drawer and search results, the author can long-press an eligible application and drag it through the programmatic Drawer-to-Home transition into Home edit mode, releasing it on an edit-mode destination to add it to favorites in one atomic operation; ineligible rows show their contracted toasts, and cancellation paths leave normal Home without returning to Drawer. The accepted Home module model, Drawer behavior, and privacy boundaries remain intact.
 
 ## Exclusions
 
 - Automatic backup, scheduled backup, cloud synchronization, cloud backup, device-to-device transfer, and any upload of the backup file.
 - Backup or restore of any state beyond the Home favorite state and Drawer display settings; the backup file is not encrypted.
-- Drawer long-press drag-to-favorite, which remains a to-be-refined proposal in the author's private working notes.
 - A vertical favorites list, which the author confirmed on 2026-09-07 does not enter this version.
+- The third favorite-module type (column favorites), which the author confirmed on 2026-09-07 stays out of this version pending a demonstrated layout need.
 - Style-edit dialog shadow and frosted-glass presentation changes, which are unassigned candidate directions, not selected scope.
 - UI-animation and experience-polish work for this version, per author direction.
 - Third-party License presentation until its separate inventory and acceptance conditions are satisfied.
@@ -52,6 +57,7 @@ Primary risks are OEM document-picker behavior differences, suggested-name and t
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
 | [Iteration 29: Settings Backup and Restore](iteration-29-settings-backup-restore.md) | `Planned` | 2026-09-07 | The author confirmed the backup and restore feature as the next version's next iteration on 2026-09-07; production implementation is not yet authorized. |
+| [Iteration 30: Drawer Drag-to-Favorite](iteration-30-drawer-drag-to-favorite.md) | `Planned` | 2026-09-07 | The author designated drag-to-favorite as the following iteration on 2026-09-07 after its contract revision; production implementation is not yet authorized. |
 
 ## Iteration evidence and results
 
@@ -59,9 +65,13 @@ Primary risks are OEM document-picker behavior differences, suggested-name and t
 
 [Contract](iteration-29-settings-backup-restore.md). Planned only; no implementation, evidence, or result is recorded yet. The contract's product-contract baseline records the full commit ID of the commit that integrates the accepted 2026-09-07 contract optimization.
 
+### Iteration 30
+
+[Contract](iteration-30-drawer-drag-to-favorite.md). Planned only; no implementation, evidence, or result is recorded yet. The contract's product-contract baseline is `c0a1a44e38cf38919fbb3e9cf10dc75970081764`, the commit integrating the accepted drag-to-favorite contract revision.
+
 ## Dependencies and sequence
 
-Iteration 29 depends on the accepted backup and restore product contract and the current integrated mainline; it has no other planned in-version dependencies. Later author-confirmed directions (dialog shadow, frosted-glass calibration) would be additional iterations with independent reviewable results if the author assigns them. These dependencies do not bind work to a branch, terminal, contributor, forecast date, or permanent task line.
+Iteration 29 depends on the accepted backup and restore product contract and the current integrated mainline. Iteration 30 depends on the accepted drag-to-favorite contract revision, integrated in `c0a1a44e38cf38919fbb3e9cf10dc75970081764`. The two iterations overlap only in shared state stores and strings resources, so they must not run concurrently on one line; their relative order is otherwise free. Later author-confirmed directions (dialog shadow, frosted-glass calibration) would be additional iterations with independent reviewable results if the author assigns them. These dependencies do not bind work to a branch, terminal, contributor, forecast date, or permanent task line.
 
 ## Validation
 
