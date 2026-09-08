@@ -60,7 +60,7 @@ Primary risks are OEM document-picker behavior differences, suggested-name and t
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
 | [Iteration 29: Settings Backup and Restore](iteration-29-settings-backup-restore.md) | `Completed` | 2026-09-08 | The author confirmed the backup and restore feature as the next version's next iteration on 2026-09-07; implemented and accepted at the author daily-use baseline on 2026-09-08. |
-| [Iteration 30: Drawer Drag-to-Favorite](iteration-30-drawer-drag-to-favorite.md) | `In progress` | 2026-09-08 | The author designated drag-to-favorite as the following iteration on 2026-09-07; implementation is delivered and under device acceptance on 2026-09-08. |
+| [Iteration 30: Drawer Drag-to-Favorite](iteration-30-drawer-drag-to-favorite.md) | `Completed` | 2026-09-08 | The author designated drag-to-favorite as the following iteration on 2026-09-07; implemented and accepted at the author daily-use baseline on 2026-09-08. |
 | [Iteration 31: Edit Dock, Drawer Background, Panel Shadow, and Multi-Selection Presentation Rework](iteration-31-edit-dock-drawer-background-shadow.md) | `Planned` | 2026-09-08 | The author designated the edit-dock, background, and shadow reworks as the next iteration on 2026-09-08 and amended the iteration the same day to add the multi-selection presentation rework; production implementation is not yet authorized. |
 
 ## Iteration evidence and results
@@ -71,7 +71,7 @@ Primary risks are OEM document-picker behavior differences, suggested-name and t
 
 ### Iteration 30
 
-[Contract](iteration-30-drawer-drag-to-favorite.md). `In progress` on 2026-09-08. The implementation delivers the contracted gesture split, eligibility and toasts, the non-interactive Drawer-row preview, the programmatic Drawer-to-Home transition into collapsed-panel edit mode, destination resolution through the existing edit-mode rules (module insertion boundaries and both main-list add-favorite entries), the one atomic favorite mutation with save-failure feedback, and the cancellation paths including Back during the journey. The agent's local checks (`git diff --check`, line-length sweep) passed; the agent ran no Gradle build or test command (`Not run`), and the focused test sources for this iteration are not yet written. The author performed the build, installation, and device checks and reports the core drag-to-favorite journey accepted on the primary device; completion remains pending the focused tests and the remaining acceptance scenarios. The contract's product-contract baseline is `c0a1a44e38cf38919fbb3e9cf10dc75970081764`.
+[Contract](iteration-30-drawer-drag-to-favorite.md). `Completed` on 2026-09-08. The implementation delivers the contracted gesture split, eligibility and toasts, the non-interactive Drawer-row preview, the programmatic Drawer-to-Home transition into collapsed-panel edit mode, destination resolution through the existing edit-mode rules (module insertion boundaries and both main-list add-favorite entries), the one atomic favorite mutation with save-failure feedback, and the cancellation paths including Back and pointer-stream cancellation during the journey. Focused instrumentation test sources cover eligibility resolution, the external-journey session lifecycle and its mutual exclusion with Home-originated drag sessions, external-favorite insertion and creation commits with their rejection paths, and the row gesture discrimination; the author executed these tests and reports them passing, and performed the build, installation, and device checks on the primary physical device, accepting the drag-to-favorite journey at the author daily-use baseline. Test and acceptance results are author-reported; the agent ran no Gradle command (`Not run`). The contract's product-contract baseline is `c0a1a44e38cf38919fbb3e9cf10dc75970081764`.
 
 ### Iteration 31
 
@@ -107,4 +107,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.6.0` identif
 
 ## Completion result
 
-This version is incomplete. Iteration 29 is completed and accepted at the author daily-use baseline; iterations 30 and 31 remain planned. Version identifiers, artifacts, tags, and release actions remain unauthorized and unrecorded.
+This version is incomplete. Iteration 29 is completed and accepted at the author daily-use baseline, and iteration 30 is completed with author-reported passing focused tests and device acceptance; iteration 31 remains planned. Version identifiers, artifacts, tags, and release actions remain unauthorized and unrecorded.

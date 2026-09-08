@@ -88,6 +88,7 @@ internal fun Modifier.drawerDragToFavoriteDetection(
         val down = awaitFirstDown(requireUnconsumed = false)
         val longPress = awaitLongPressOrCancellation(down.id) ?: return@awaitEachGesture
         var dispatched = false
+        var beyondSlopHandled = false
         var endDelivered = false
         // Cumulative distance since the long-press, tracked with consumption ignored so
         // a slow drag still crosses the platform touch slop before the list scrolls.
@@ -114,9 +115,11 @@ internal fun Modifier.drawerDragToFavoriteDetection(
             draggedDistance += tracked.positionChangeIgnoreConsumed().getDistance()
             val trackedUp = tracked.changedToUp()
             if (!dispatched) {
-                if (draggedDistance > viewConfiguration.touchSlop) {
-                    // The journey only owns the gesture once its start is confirmed;
-                    // a rejected start keeps the release-opens-sheet behavior.
+                if (draggedDistance > viewConfiguration.touchSlop && !beyondSlopHandled) {
+                    // The slop crossing is dispatched exactly once; the journey only
+                    // owns the gesture when the start is confirmed, and a rejected
+                    // start keeps the release-opens-sheet behavior.
+                    beyondSlopHandled = true
                     dispatched = onDragBeyondSlop(tracked)
                 } else if (trackedUp) {
                     endDelivered = true

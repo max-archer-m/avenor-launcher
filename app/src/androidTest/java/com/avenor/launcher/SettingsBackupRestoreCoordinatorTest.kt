@@ -10,7 +10,7 @@ import org.junit.Test
 class SettingsBackupRestoreCoordinatorTest {
     @Test
     fun successfulRestoreReplacesFavoritesAndDisplaySettings() = runBlocking {
-        val favorites = FakeFavoritesAccess()
+        val favorites = FakeFavoritesAccess(null)
         val settings = FakeSettingsAccess()
         val coordinator = SettingsBackupRestoreCoordinator(
             favorites = favorites,
@@ -80,7 +80,7 @@ class SettingsBackupRestoreCoordinatorTest {
 
     @Test
     fun restoreWithoutReadableDisplaySettingsChangesNothing() = runBlocking {
-        val favorites = FakeFavoritesAccess()
+        val favorites = FakeFavoritesAccess(null)
         val settings = FakeSettingsAccess(initial = null)
         val coordinator = SettingsBackupRestoreCoordinator(
             favorites = favorites,
