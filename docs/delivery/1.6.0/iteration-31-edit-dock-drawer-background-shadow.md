@@ -1,26 +1,26 @@
-# Iteration 31: Edit Dock, Drawer Background, and Panel Shadow Rework
+# Iteration 31: Edit Dock, Drawer Background, Panel Shadow, and Multi-Selection Presentation Rework
 
 > Applicable version contract: [1.6.0 delivery](delivery.md). This contract defines the authorized delivery boundary only. It does not own execution state, evidence, commits, or results, and it does not by itself authorize production implementation, a commit, a push, a tag, or any release action.
 
 ## Objective
 
-Deliver three author-accepted reworks exactly as defined by the accepted product contracts: the Home edit dock moved to the top of safe content with the purely presentational panel slot-swap animation, the Drawer background reworked into one frosted-glass switch with a ten-level blur-intensity slider and no tint or opaque fallback, and the shared style settings panel edge shadow.
+Deliver four author-accepted reworks exactly as defined by the accepted product contracts: the Home edit dock moved to the top of safe content with the purely presentational panel slot-swap animation, the Drawer background reworked into one frosted-glass switch with a ten-level blur-intensity slider and no tint or opaque fallback, the shared style settings panel edge shadow, and the favorite multi-selection presentation redefined with unified overlay badges.
 
 ## Product and version references
 
-- Product-contract baseline: `5997845de3c099f20b5f1d6184538a1ee8f24936` — the commit that integrates the accepted edit-dock, Drawer-background, and panel-shadow contract revisions.
+- Product-contract baseline: `7af7adba15b018886dd613c587dfedd9299136b4` — the commit that integrates the accepted edit-dock, Drawer-background, panel-shadow, and favorite-multi-selection contract revisions.
 - Applicable product documents:
   - [Home behavior](../../product/surfaces/home.md), edit mode, collapsed dock, and expanded panel sections
   - [Home presentation](../../product/presentation/home.md), including the panel animation duration and easing values
-  - [Drawer behavior](../../product/surfaces/drawer.md), display settings section
-  - [Drawer presentation](../../product/presentation/drawer.md)
+  - [Drawer behavior](../../product/surfaces/drawer.md), display-settings and favorite multi-selection sections
+  - [Drawer presentation](../../product/presentation/drawer.md), including the multi-selection presentation section
   - [Style settings panel presentation](../../product/presentation/style-settings-panel.md), including the switch-and-slider row and edge shadow values
   - [Design foundations](../../product/design-foundations.md), shared placement and toggle hot-zone principles
 - Applicable version contract: `delivery.md`
 
 ## Observable outcome
 
-On the primary device, Home edit mode shows the fixed dock row at the top of safe content in both panel states; expanding and collapsing the style settings panel animates the information region and panel as one slot swap without covering the list. The Drawer display-settings background group offers one switch and one ten-level slider with the contracted defaults, preview, save, and fallback behavior. The Home and Drawer style settings panels both render the contracted soft edge shadow ring.
+On the primary device, Home edit mode shows the fixed dock row at the top of safe content in both panel states; expanding and collapsing the style settings panel animates the information region and panel as one slot swap without covering the list. The Drawer display-settings background group offers one switch and one ten-level slider with the contracted defaults, preview, save, and fallback behavior. The Home and Drawer style settings panels both render the contracted soft edge shadow ring. Favorite multi-selection presents no leading indicator, and a selected row shows the scaled, outlined cell with its overlaid order badge while unselected and disabled rows stay plain.
 
 ## Included work
 
@@ -34,6 +34,8 @@ On the primary device, Home edit mode shows the fixed dock row at the top of saf
 - Persistence of the new background state with versioned migration: existing configurations and absent fields resolve per the contract default rule, and the blur-intensity level enters the backup file contents and the local data enumeration.
 - The shared switch-and-slider row geometry with the primaryTextColor accent and the contracted control gap.
 - The style settings panel edge shadow as the contracted soft dark ring on the Home and Drawer panels, realized as the contracted layered or equivalent gradient treatment with per-layer radii, using the author-accepted delivery values.
+- The favorite multi-selection presentation rework: multi-selection rows reusing the ordinary inventory's items-per-row grid and arrangements without layout change, no selection indicator on available unselected rows, and selected cells treated with the approximately `90%` visual scale transform with unchanged layout bounds, the complete `2dp` `primaryTextColor` outline with `12dp` corners, and one non-interactive overlaid top-left order badge styled per the presentation specification.
+- The disabled already-favorited rows stripped of badge, outline, and scaling, with the preserved selection toggling, order numbering and renumbering, confirm and save semantics, and accessibility semantics of the selection model.
 - Localized English and Simplified Chinese strings for any new or changed user-visible text, including the background switch and slider labels.
 - Focused test sources covering dock placement and hot-zone stability, animation interruption and retargeting, slider mapping and save coalescing, fallback presentation, migration of prior background values, and shadow realization.
 
@@ -41,7 +43,8 @@ On the primary device, Home edit mode shows the fixed dock row at the top of saf
 
 - Wallpaper sampling, position- or pointer-dependent blur, user-authored visual values, or a translucent tint layer in any mode.
 - Any change to the shadow treatment's structure or rules: device comparison may calibrate values only, never the ring structure, step model, or mapping relationships.
-- Behavior changes outside the Home edit-mode layout, the Drawer display-settings background group, and the style settings panel presentation.
+- Behavior changes outside the Home edit-mode layout, the Drawer display-settings background group, the style settings panel presentation, and the favorite multi-selection presentation.
+- Any change to favorite multi-selection interaction semantics: selection toggling, order numbering and renumbering, Confirm and save behavior, and the selection model's accessibility semantics remain unchanged.
 - The Iteration 29 backup and restore scope and the Iteration 30 drag-to-favorite scope, beyond the shared display-settings persistence that carries the intensity level.
 - The `1.6.0` version identifier update (`versionName`/`versionCode`), which remains a version-level closure concern unless a later authorized amendment assigns it here.
 - The third favorite-module type, a vertical favorites list, and third-party License presentation.
@@ -52,13 +55,14 @@ On the primary device, Home edit mode shows the fixed dock row at the top of saf
 - Drawer background rendering: platform cross-window blur with the parameterized radius, availability detection, and the Transparent-presentation fallback; removal of the tint layer and opaque fallback.
 - Display-settings store: the background field reworked into the switch and intensity level with versioned migration, and the slider-gesture save-coalescing path.
 - Style settings panel UI: the switch-and-slider row and the edge shadow drawable or equivalent treatment shared by Home and Drawer panels.
+- Drawer multi-selection UI: row composition on the ordinary items-per-row grid, the selected-cell scale and outline treatment, and the non-interactive order-badge overlay, without changes to the selection model.
 - Backup and restore serialization: the blur-intensity level within the display-settings section.
 - Resources: new or changed English and Simplified Chinese strings with complete name parity.
 - Tests: focused local and instrumentation sources for the behaviors above.
 
 ## Dependencies and sequence
 
-This iteration depends on the three accepted contract revisions integrated in `5997845de3c099f20b5f1d6184538a1ee8f24936` and the current integrated mainline. Its code areas overlap Iteration 29 in the display-settings store, backup serialization, and style panel, and Iteration 30 in the Home edit-mode layout, so the three iterations must not run concurrently on one line; their relative order is otherwise free, with the implementation line of each later iteration containing the integrated results of the earlier ones it depends on.
+This iteration depends on the four accepted contract revisions integrated in `7af7adba15b018886dd613c587dfedd9299136b4` and the current integrated mainline. Its code areas overlap Iteration 29 in the display-settings store, backup serialization, and style panel, and Iteration 30 in the Home edit-mode layout and Drawer application-row UI, so the three iterations must not run concurrently on one line; their relative order is otherwise free, with the implementation line of each later iteration containing the integrated results of the earlier ones it depends on.
 
 ## Migration and compatibility impact
 
@@ -78,6 +82,12 @@ This iteration depends on the three accepted contract revisions integrated in `5
 - The slot-swap animation must keep hit testing, scroll position, and drag-to-favorite destination geometry consistent with the committed state, including during interruptions and retargeting.
 - The slider's coalesced save must respect the single-unresolved-save rule and cannot begin a second change before the coalesced save resolves.
 - Shadow values are author-accepted delivery values subject to device comparison; per the author's 2026-09-08 direction, device calibration modifies values only and never the treatment's structure, step model, or mapping rules.
+- The selected-cell scale must remain a purely visual transform with unchanged layout bounds and hit targets, and the order badge must stay a non-interactive overlay that occupies no layout space and exposes no second focus target.
+- Reusing the ordinary items-per-row grid in multi-selection must not alter ordinary Content layout or launch behavior.
+
+## Amendment record
+
+- 2026-09-08: Author-directed material amendment. The author accepted the favorite multi-selection presentation rework on 2026-09-08 (contract integrated in `7af7adba15b018886dd613c587dfedd9299136b4`) and directed that it join this iteration as a fourth presentation-only rework. Previous boundary: the edit-dock, Drawer-background, and panel-shadow reworks under baseline `5997845de3c099f20b5f1d6184538a1ee8f24936`. New boundary: the favorite multi-selection presentation rework is added as included work, with interaction semantics explicitly excluded; the baseline moves to `7af7adba15b018886dd613c587dfedd9299136b4`. Affected obligations: multi-selection acceptance criteria and validation scenarios are added; the iteration identifier and file slug remain unchanged.
 
 ## Acceptance criteria
 
@@ -88,6 +98,7 @@ This iteration depends on the three accepted contract revisions integrated in `5
 - A slider drag previews continuously and commits exactly one display-setting save at release or pause; the single-unresolved-save rule holds.
 - Existing configurations and absent fields migrate per the contract default rule; the blur-intensity level persists, survives recreation and restart, and appears in backup contents.
 - The Home and Drawer style settings panels render the contracted edge shadow with the accepted values.
+- Favorite multi-selection reuses the ordinary grid without layout change; available unselected rows show no indicator; selected cells show the scaled outline treatment with the top-left order badge; deselecting closes numbering gaps; disabled already-favorited rows show no badge, outline, or scaling; ordinary selection toggling, Confirm, save, and accessibility semantics are unchanged.
 - All new or changed user-visible strings exist in English and Simplified Chinese with complete name parity.
 - No regression of ordinary Home editing, Drawer launching, search, or the remaining display-setting groups.
 
@@ -99,6 +110,7 @@ Recommended scenarios unless explicitly promoted:
 - Background journeys: default state, each boundary level, switch-off, fallback with platform blur unavailable, persistence across recreation and restart, and migration from a prior enum-valued configuration.
 - Slider save coalescing: continuous drag with release and with pause; one save per gesture; no second change during the unresolved save.
 - Shadow rendering on both panels against the accepted values.
+- Multi-selection presentation journeys: select and deselect across the three arrangements with renumbering, badge presentation and its non-interactivity, disabled already-favorited rows, and parity of multi-selection row geometry with ordinary Content.
 - Backup round trip including the blur-intensity level, coordinated with the Iteration 29 implementation state.
 - String parity between English and Simplified Chinese resources.
 - Regression of ordinary Home editing, Drawer search, launching, and the other display-setting groups.
