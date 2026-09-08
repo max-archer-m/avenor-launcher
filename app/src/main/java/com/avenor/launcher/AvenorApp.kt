@@ -37,6 +37,8 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -241,6 +243,10 @@ internal fun AvenorApp(
     var selectedEntry by remember { mutableStateOf<LaunchableEntry?>(null) }
     var selectedEntryFromHome by remember { mutableStateOf(false) }
     var homeEditMode by remember { mutableStateOf(false) }
+    var drawerDragJourney by remember { mutableStateOf<DrawerDragJourney?>(null) }
+    var drawerDragTouchPosition by remember { mutableStateOf(Offset.Zero) }
+    var drawerDragDropping by remember { mutableStateOf(false) }
+    var rootOriginInWindow by remember { mutableStateOf(Offset.Zero) }
     var homeStylePanelExpanded by remember { mutableStateOf(false) }
     var drawerDisplaySettingsCandidate by remember {
         mutableStateOf<DrawerDisplaySettings?>(null)
@@ -406,6 +412,10 @@ internal fun AvenorApp(
             favoriteEditor.invalidateUndo()
             homeStylePanelExpanded = false
             selectedHomeModuleId = null
+            // A drag-to-favorite journey ends when its edit mode ends: without a
+            // committed destination the journey resolves as a cancellation that leaves
+            // normal Home without a mutation and without returning to Drawer.
+            drawerDragJourney = null
         }
     }
 
@@ -1041,6 +1051,9 @@ internal fun AvenorApp(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .onGloballyPositioned { coordinates ->
+                rootOriginInWindow = coordinates.positionInWindow()
+            }
             .onSizeChanged { size ->
                 val previousHeight = containerHeightPx
                 containerHeightPx = size.height.toFloat()
@@ -1068,6 +1081,32 @@ internal fun AvenorApp(
                 companionFavoriteNestedScrollConnection =
                     companionNestedScrollConnection.takeUnless { homeEditMode },
                 accessibilityLockController = accessibilityLockController,
+                drawerDragJourney = drawerDragJourney,
+                drawerDragTouchInWindow = drawerDragTouchPosition,
+                drawerDragDropping = drawerDragDropping,
+                onDrawerDragCommit = { identity, drop ->
+                    favoriteEditor.insertExternalFavorite(
+                        identity = identity,
+                        destinationModuleId = (drop as? DrawerDragDrop.Insertion)?.moduleId,
+                        boundary = (drop as? DrawerDragDrop.Insertion)?.boundary ?: 0,
+                        newModuleType = (drop as? DrawerDragDrop.Creation)?.moduleType,
+                    )
+                },
+                onDrawerDragJourneyFinished = { saved, cancelled ->
+                    drawerDragDropping = false
+                    drawerDragJourney = null
+                    if (!saved && !cancelled) {
+                        Toast.makeText(
+                            androidContext,
+                            R.string.drawer_drag_unable_to_save_favorite,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                    // The edit-mode exit is part of the same state change as the
+                    // completed operation, regardless of its outcome.
+                    homeEditMode = false
+                    selectedHomeModuleId = null
+                },
                 favoriteAvailability = favoriteAvailability,
                 editMode = homeEditMode,
                 stylePanelExpanded = homeStylePanelExpanded,
@@ -1211,6 +1250,27 @@ internal fun AvenorApp(
                         }
                     },
                     favoriteSelectionTarget = favoriteAddTarget?.label,
+                    favoriteAvailability = favoriteAvailability,
+                    onDragToFavoriteStart = { journey ->
+                        if (!favoriteEditor.isSaving) {
+                            favoriteEditor.invalidateUndo()
+                            drawerDragJourney = journey
+                            drawerDragTouchPosition = journey.touchStartInWindow
+                            homeEditMode = true
+                            homeStylePanelExpanded = false
+                            selectedHomeModuleId = null
+                            drawerActivated = true
+                            settleTo(target = AvenorSurface.Home)
+                        }
+                    },
+                    onDragToFavoriteMove = { position ->
+                        drawerDragTouchPosition = position
+                    },
+                    onDragToFavoriteEnd = {
+                        // Resolve the release through the Home edit-mode destination
+                        // rules; the journey finishes with the commit callback below.
+                        drawerDragDropping = true
+                    },
                     favoriteSelection = favoriteSelection,
                     favoriteMembership = favoriteMembership.orEmpty(),
                     favoriteSelectionSaving = favoriteSelectionSaving,
@@ -1237,6 +1297,15 @@ internal fun AvenorApp(
                     },
                 )
             }
+        }
+
+        drawerDragJourney?.let { journey ->
+            DrawerDragPreviewOverlay(
+                journey = journey,
+                displaySettings = presentedDrawerDisplaySettings,
+                touchInWindow = drawerDragTouchPosition,
+                rootOriginInWindow = rootOriginInWindow,
+            )
         }
 
         selectedEntry?.let { entry ->

@@ -190,20 +190,55 @@ internal fun HomeScreen(
     ) -> FavoriteAggregate? = { transform -> transform(FavoriteAggregate()) },
     onCommitModuleOrder: suspend (List<String>) -> Boolean = { false },
     accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
+    drawerDragJourney: DrawerDragJourney? = null,
+    drawerDragTouchInWindow: Offset = Offset.Zero,
+    drawerDragDropping: Boolean = false,
+    onDrawerDragCommit: suspend (LaunchableIdentity, DrawerDragDrop) -> Boolean = { _, _ -> false },
+    onDrawerDragJourneyFinished: (saved: Boolean, cancelled: Boolean) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
     val orderedApplicationMovement = remember(calculation = { HomeApplicationMovement() })
+    LaunchedEffect(drawerDragJourney) {
+        val journey = drawerDragJourney ?: return@LaunchedEffect
+        orderedApplicationMovement.startExternalJourney(
+            identity = journey.entry.identity,
+            pointer = drawerDragTouchInWindow,
+        )
+    }
+    LaunchedEffect(drawerDragTouchInWindow) {
+        if (drawerDragJourney != null) orderedApplicationMovement.move(drawerDragTouchInWindow)
+    }
+    LaunchedEffect(drawerDragDropping) {
+        if (!drawerDragDropping) return@LaunchedEffect
+        val journey = drawerDragJourney
+        val drop = orderedApplicationMovement.finishExternalJourney()
+        // An invalid release (no drop target) resolves as a cancellation, not as a
+        // save failure; only a resolved drop that fails to persist reports failure.
+        val saved = journey != null && drop != null &&
+            onDrawerDragCommit(journey.entry.identity, drop)
+        onDrawerDragJourneyFinished(saved = saved, cancelled = drop == null)
+    }
     val favoriteEnterBatch = rememberHomeFavoriteEnterBatch(
         modules = (favoriteState as? FavoriteReadState.Readable)?.orderedModules,
     )
     val applicationMovementActive = orderedApplicationMovement.activeIdentity != null
-    BackHandler(enabled = editMode && orderedApplicationMovement.isDragging, onBack = { orderedApplicationMovement.cancel() })
+    BackHandler(enabled = editMode && orderedApplicationMovement.isDragging, onBack = {
+        if (orderedApplicationMovement.session?.module?.id == EXTERNAL_JOURNEY_MODULE_ID) {
+            // Back during the Drawer journey is a cancellation: end the whole journey
+            // without a mutation and without the save-failure feedback path.
+            orderedApplicationMovement.cancel()
+            onDrawerDragJourneyFinished(saved = false, cancelled = true)
+        } else {
+            orderedApplicationMovement.cancel()
+        }
+    })
     LaunchedEffect(editMode, stylePanelExpanded, favoriteState, favoriteAvailability) {
         val session = orderedApplicationMovement.session ?: return@LaunchedEffect
         val module = (favoriteState as? FavoriteReadState.Readable)?.orderedModules
             ?.firstOrNull(predicate = { it.id == session.module.id })
         val availability = favoriteAvailability[session.identity]
         val invalidSource = orderedApplicationMovement.isDragging &&
+            session.module.id != EXTERNAL_JOURNEY_MODULE_ID &&
             (module != session.module || (availability !is FavoriteAvailability.Available && availability !is FavoriteAvailability.Disabled))
         if (!editMode || stylePanelExpanded || invalidSource || availability == FavoriteAvailability.ConfirmedRemoved
         ) orderedApplicationMovement.cancel()

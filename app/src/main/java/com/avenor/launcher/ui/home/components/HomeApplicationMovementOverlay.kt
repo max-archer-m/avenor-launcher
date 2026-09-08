@@ -41,16 +41,11 @@ internal fun HomeApplicationMovementOverlay(
     movement: HomeApplicationMovement,
     rootOrigin: Offset,
 ) {
-    val source = movement.previewSource ?: return
+    // The Drawer drag-to-favorite journey drives this overlay without a Home-side
+    // previewSource: the feedback canvases below render from the session alone, and
+    // only the frozen preview Box requires a captured source.
+    val source = movement.previewSource
     val density = LocalDensity.current
-    val width = with(receiver = density, block = { source.sourceBounds.width.toDp() })
-    val height = with(receiver = density, block = { source.sourceBounds.height.toDp() })
-    val ribbon = source.module.type == OrderedFavoriteModuleType.Ribbon
-    val shape = if (ribbon) {
-        RoundedCornerShape(size = dimensionResource(id = R.dimen.home_favorite_bar_corner_radius))
-    } else {
-        RectangleShape
-    }
     val lineColor = MaterialTheme.colorScheme.onBackground
     val lineWidth = dimensionResource(id = R.dimen.home_favorite_insertion_line_thickness)
     val edgeColor = lineColor.copy(alpha = integerResource(id = R.integer.home_favorite_edge_feedback_alpha_percent) / 100f)
@@ -140,47 +135,59 @@ internal fun HomeApplicationMovementOverlay(
             },
         )
     }
-    Box(
-        modifier = Modifier
-            .offset(
-                offset = {
-                    val origin = (previewOrigin.value ?: source.previewOrigin) - rootOrigin
-                    IntOffset(x = origin.x.roundToInt(), y = origin.y.roundToInt())
-                },
+    if (source != null) {
+        val width = with(receiver = density, block = { source.sourceBounds.width.toDp() })
+        val height = with(receiver = density, block = { source.sourceBounds.height.toDp() })
+        val ribbon = source.module.type == OrderedFavoriteModuleType.Ribbon
+        val shape = if (ribbon) {
+            RoundedCornerShape(
+                size = dimensionResource(id = R.dimen.home_favorite_bar_corner_radius),
             )
-            .size(width = width, height = height)
-            .shadow(
-                elevation = dimensionResource(id = R.dimen.home_module_drag_shadow_elevation),
-                shape = shape,
-                clip = false,
-            )
-            .clearAndSetSemantics(properties = {})
-            .testTag(tag = "home_application_movement_preview"),
-        content = {
-            if (!ribbon && source.module.namePlacement == FavoriteNamePlacement.Below) {
-                HomeFavoriteBelowItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    availability = source.availability,
-                    listSize = source.module.applicationSize,
-                    onClick = {},
-                    onLongClick = {},
-                    interactionEnabled = false,
+        } else {
+            RectangleShape
+        }
+        Box(
+            modifier = Modifier
+                .offset(
+                    offset = {
+                        val origin = (previewOrigin.value ?: source.previewOrigin) - rootOrigin
+                        IntOffset(x = origin.x.roundToInt(), y = origin.y.roundToInt())
+                    },
                 )
-            } else {
-                HomeFavoriteRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    availability = source.availability,
-                    listSize = source.module.applicationSize,
-                    onClick = {},
-                    onLongClick = {},
-                    editMode = false,
-                    compact = ribbon,
-                    exchangeHighlight = false,
-                    onRowBoundsInWindow = { _, _ -> },
-                    onHandleBoundsInWindow = {},
-                    interactionEnabled = false,
+                .size(width = width, height = height)
+                .shadow(
+                    elevation = dimensionResource(id = R.dimen.home_module_drag_shadow_elevation),
+                    shape = shape,
+                    clip = false,
                 )
-            }
-        },
-    )
+                .clearAndSetSemantics(properties = {})
+                .testTag(tag = "home_application_movement_preview"),
+            content = {
+                if (!ribbon && source.module.namePlacement == FavoriteNamePlacement.Below) {
+                    HomeFavoriteBelowItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        availability = source.availability,
+                        listSize = source.module.applicationSize,
+                        onClick = {},
+                        onLongClick = {},
+                        interactionEnabled = false,
+                    )
+                } else {
+                    HomeFavoriteRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        availability = source.availability,
+                        listSize = source.module.applicationSize,
+                        onClick = {},
+                        onLongClick = {},
+                        editMode = false,
+                        compact = ribbon,
+                        exchangeHighlight = false,
+                        onRowBoundsInWindow = { _, _ -> },
+                        onHandleBoundsInWindow = {},
+                        interactionEnabled = false,
+                    )
+                }
+            },
+        )
+    }
 }

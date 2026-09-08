@@ -59,6 +59,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -117,9 +121,13 @@ internal fun DrawerScreen(
     favoriteSelection: List<LaunchableIdentity> = emptyList(),
     favoriteMembership: Set<LaunchableIdentity> = emptySet(),
     favoriteSelectionSaving: Boolean = false,
+    favoriteAvailability: Map<LaunchableIdentity, FavoriteAvailability> = emptyMap(),
     onToggleFavoriteSelection: (LaunchableIdentity) -> Unit = {},
     onCancelFavoriteSelection: () -> Unit = {},
     onConfirmFavoriteSelection: () -> Unit = {},
+    onDragToFavoriteStart: (DrawerDragJourney) -> Unit = {},
+    onDragToFavoriteMove: (Offset) -> Unit = {},
+    onDragToFavoriteEnd: (Offset?) -> Unit = {},
 ) {
     DrawerBackgroundSurface(mode = displaySettings.backgroundMode, active = active) {
         var loadRequest by remember { mutableIntStateOf(0) }
@@ -449,6 +457,24 @@ internal fun DrawerScreen(
                         displaySettingsPosition = null
                     }
                 }
+                val alreadyFavoritedDragToast = stringResource(
+                    R.string.drawer_drag_already_favorite,
+                )
+                val unableToAddDragToast = stringResource(
+                    R.string.drawer_drag_unable_to_add,
+                )
+                val startDragToFavorite: (DrawerDragJourney) -> Unit = { journey ->
+                    if (searchActive) {
+                        // The search-mode journey leaves through the same programmatic
+                        // downward transition and clears the transient query and mode
+                        // under the existing search-exit rule.
+                        searchActive = false
+                        searchQuery = ""
+                        ordinaryPosition = null
+                        keyboardController?.hide()
+                    }
+                    onDragToFavoriteStart(journey)
+                }
                 Box(modifier = Modifier.fillMaxSize()) {
                     DrawerApplicationList(
                         modifier = modifier,
@@ -458,6 +484,8 @@ internal fun DrawerScreen(
                         searchActive = searchActive,
                         searchQuery = searchQuery,
                         searchFocusRequester = searchFocusRequester,
+                        favoriteMembership = favoriteMembership,
+                        favoriteAvailability = favoriteAvailability,
                         onLaunch = { entry ->
                             if (activationGuard.tryAcquire()) {
                                 if (entryLauncher.launch(entry)) {
@@ -478,6 +506,11 @@ internal fun DrawerScreen(
                             }
                         },
                         onLongPress = onLongPress,
+                        alreadyFavoritedDragToast = alreadyFavoritedDragToast,
+                        unableToAddDragToast = unableToAddDragToast,
+                        onDragToFavoriteStart = startDragToFavorite,
+                        onDragToFavoriteMove = onDragToFavoriteMove,
+                        onDragToFavoriteEnd = onDragToFavoriteEnd,
                         onNavigateBack = onNavigateBack,
                         onEnterSearch = {
                             displaySettingsPosition = null
@@ -963,8 +996,15 @@ private fun DrawerApplicationList(
     searchActive: Boolean,
     searchQuery: String,
     searchFocusRequester: FocusRequester,
+    favoriteMembership: Set<LaunchableIdentity>,
+    favoriteAvailability: Map<LaunchableIdentity, FavoriteAvailability>,
     onLaunch: (LaunchableEntry) -> Unit,
     onLongPress: (LaunchableEntry) -> Unit,
+    alreadyFavoritedDragToast: String,
+    unableToAddDragToast: String,
+    onDragToFavoriteStart: (DrawerDragJourney) -> Unit,
+    onDragToFavoriteMove: (Offset) -> Unit,
+    onDragToFavoriteEnd: (Offset?) -> Unit,
     onNavigateBack: () -> Unit,
     onEnterSearch: () -> Unit,
     onQueryChange: (String) -> Unit,
@@ -973,6 +1013,7 @@ private fun DrawerApplicationList(
     onOpenDisplaySettings: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
+    val context = LocalContext.current
     val leftAnchors = displaySettings.sectionAnchorPresentation == DrawerSectionAnchorPresentation.LeftSide
     val sectionRanges = remember(sections, displaySettings.itemsPerRow, displaySettings.sectionAnchorPresentation) {
         drawerSectionRanges(sections, displaySettings.itemsPerRow, displaySettings.sectionAnchorPresentation, false)
@@ -1062,8 +1103,29 @@ private fun DrawerApplicationList(
                                         entry = entry,
                                         displaySettings = displaySettings,
                                         searchQuery = searchQuery.takeIf { searchActive },
+                                        dragEligibility = resolveDrawerDragEligibility(
+                                            isFavoriteMember = entry.identity in favoriteMembership,
+                                            availability = favoriteAvailability[entry.identity],
+                                        ),
                                         onLaunch = onLaunch,
                                         onLongPress = onLongPress,
+                                        onAlreadyFavoritedDrag = {
+                                            Toast.makeText(
+                                                context,
+                                                alreadyFavoritedDragToast,
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        },
+                                        onUnableToAddDrag = {
+                                            Toast.makeText(
+                                                context,
+                                                unableToAddDragToast,
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        },
+                                        onDragToFavoriteStart = onDragToFavoriteStart,
+                                        onDragToFavoriteMove = onDragToFavoriteMove,
+                                        onDragToFavoriteEnd = onDragToFavoriteEnd,
                                         modifier = Modifier.weight(weight = 1f),
                                     )
                                 }
@@ -1214,8 +1276,14 @@ private fun DrawerApplicationRow(
     entry: LaunchableEntry,
     displaySettings: DrawerDisplaySettings,
     searchQuery: String?,
+    dragEligibility: DrawerDragEligibility,
     onLaunch: (LaunchableEntry) -> Unit,
     onLongPress: (LaunchableEntry) -> Unit,
+    onAlreadyFavoritedDrag: () -> Unit,
+    onUnableToAddDrag: () -> Unit,
+    onDragToFavoriteStart: (DrawerDragJourney) -> Unit,
+    onDragToFavoriteMove: (Offset) -> Unit,
+    onDragToFavoriteEnd: (Offset?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val applicationSize = displaySettings.applicationSize
@@ -1227,16 +1295,56 @@ private fun DrawerApplicationRow(
         },
     )
     val hapticFeedback = LocalHapticFeedback.current
+    var rowCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Box(
         modifier = modifier
             .height(height = rowHeight)
+            .onGloballyPositioned { rowCoordinates = it }
             .combinedClickable(
                 role = Role.Button,
                 onClick = { onLaunch(entry) },
+                // The long-press haptic arms the drag-to-favorite discrimination; the
+                // action sheet opens on release through the pointer detector below.
                 onLongClick = {
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onLongPress(entry)
+                },
+            )
+            .drawerDragToFavoriteDetection(
+                key1 = entry.identity,
+                onReleaseAfterLongPress = { onLongPress(entry) },
+                onDragBeyondSlop = { change ->
+                    // Never drop the journey silently: if row geometry is not yet
+                    // captured, start with degraded geometry rather than no journey.
+                    val coordinates = rowCoordinates
+                    when (dragEligibility) {
+                        DrawerDragEligibility.Eligible -> onDragToFavoriteStart(
+                            DrawerDragJourney(
+                                entry = entry,
+                                originInWindow = coordinates?.localToWindow(
+                                    Offset.Zero,
+                                ) ?: Offset.Zero,
+                                size = coordinates?.size ?: IntSize.Zero,
+                                touchStartInWindow = coordinates?.localToWindow(
+                                    change.position,
+                                ) ?: Offset.Zero,
+                            ),
+                        )
+                        DrawerDragEligibility.AlreadyFavorited -> onAlreadyFavoritedDrag()
+                        DrawerDragEligibility.ReliablyDisabled -> onUnableToAddDrag()
+                    }
+                },
+                onDragMove = { change ->
+                    rowCoordinates?.let { coordinates ->
+                        onDragToFavoriteMove(coordinates.localToWindow(change.position))
+                    }
+                },
+                onDragEnd = { change ->
+                    onDragToFavoriteEnd(
+                        change?.let { currentChange ->
+                            rowCoordinates?.localToWindow(currentChange.position)
+                        },
+                    )
                 },
             )
             .testTag("drawer_application_row"),
@@ -1256,7 +1364,7 @@ private fun DrawerApplicationRow(
 }
 
 @Composable
-private fun DrawerApplicationContent(
+internal fun DrawerApplicationContent(
     entry: LaunchableEntry,
     displaySettings: DrawerDisplaySettings,
     searchQuery: String?,

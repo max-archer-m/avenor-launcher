@@ -60,7 +60,7 @@
 | 迭代 | 状态 | 更新 | 依据 |
 | --- | --- | --- | --- |
 | [迭代 29：Settings 备份与恢复](iteration-29-settings-backup-restore.zh-CN.md) | `Completed` | 2026-09-08 | 作者于 2026-09-07 确认备份恢复功能作为下一版本的下一个迭代；2026-09-08 完成实现并按作者日用基线验收。 |
-| [迭代 30：Drawer 拖动收藏](iteration-30-drawer-drag-to-favorite.zh-CN.md) | `Planned` | 2026-09-07 | 作者于 2026-09-07 在其契约修订完成后指定拖动收藏为后续迭代；生产实现尚未授权。 |
+| [迭代 30：Drawer 拖动收藏](iteration-30-drawer-drag-to-favorite.zh-CN.md) | `In progress` | 2026-09-08 | 作者于 2026-09-07 在其契约修订完成后指定拖动收藏为后续迭代；2026-09-08 实现已交付并处于真机验收中。 |
 | [迭代 31：编辑坞、Drawer 背景与面板阴影重构](iteration-31-edit-dock-drawer-background-shadow.zh-CN.md) | `Planned` | 2026-09-08 | 作者于 2026-09-08 在三笔契约修订完成后指定编辑坞、背景与阴影重构为下一迭代，并于同日修订迭代加入多选呈现重构；生产实现尚未授权。 |
 
 ## 迭代证据与结果
@@ -71,7 +71,7 @@
 
 ### 迭代 30
 
-[契约](iteration-30-drawer-drag-to-favorite.zh-CN.md)。仅为规划状态；尚未记录任何实现、证据或结果。契约的产品契约基线为 `c0a1a44e38cf38919fbb3e9cf10dc75970081764`，即纳入已接受拖动收藏契约修订的提交。
+[契约](iteration-30-drawer-drag-to-favorite.zh-CN.md)。2026-09-08 `In progress`。实现交付了契约的手势分层、资格判定与 Toast、非交互 Drawer 行拖影、进入折叠面板编辑模式的程序化 Drawer-to-Home 过渡、经既有编辑模式规则的目的地解析（模块插入边界与两个主列表加收藏入口）、一次原子收藏变更与保存失败反馈，以及包括旅程期间 Back 在内的取消路径。Agent 本地检查（`git diff --check`、行长检查）通过；Agent 未运行任何 Gradle 构建或测试命令（`Not run`），本迭代的聚焦测试源尚未编写。作者在主设备上执行构建、安装与设备检查，报告核心拖动收藏旅程已验收；完成仍待聚焦测试与其余验收场景。契约的产品契约基线为 `c0a1a44e38cf38919fbb3e9cf10dc75970081764`。
 
 ### 迭代 31
 

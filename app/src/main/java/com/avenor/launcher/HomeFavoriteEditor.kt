@@ -252,4 +252,70 @@ internal class HomeFavoriteEditor(private val store: FavoriteStore) {
             isSaving = false
         }
     }
+
+    /**
+     * Commits one Drawer drag-to-favorite drop for an identity that originates outside
+     * every favorite module: either an insertion into an existing module at the given
+     * boundary, or the creation of a new module of the requested type with the identity
+     * as its first favorite. Invalid targets leave the durable state untouched.
+     */
+    suspend fun insertExternalFavorite(
+        identity: LaunchableIdentity,
+        destinationModuleId: String?,
+        boundary: Int,
+        newModuleType: OrderedFavoriteModuleType?,
+    ): Boolean {
+        if (isSaving) return false
+        isSaving = true
+        var applied = false
+        return try {
+            val persisted = store.updateOrderedAggregate(
+                transform = { aggregate ->
+                    if (identity in aggregate.identities) return@updateOrderedAggregate aggregate
+                    val updated = when {
+                        newModuleType != null -> aggregate.copy(
+                            modules = aggregate.modules + OrderedFavoriteModule(
+                                id = UUID.randomUUID().toString(),
+                                type = newModuleType,
+                                identities = listOf(element = identity),
+                            ),
+                        )
+                        destinationModuleId != null -> {
+                            val moduleIndex = aggregate.modules.indexOfFirst(
+                                predicate = { it.id == destinationModuleId },
+                            )
+                            if (moduleIndex < 0) return@updateOrderedAggregate aggregate
+                            val module = aggregate.modules[moduleIndex]
+                            if (boundary !in 0..module.identities.size) {
+                                return@updateOrderedAggregate aggregate
+                            }
+                            aggregate.copy(
+                                modules = aggregate.modules.toMutableList().apply {
+                                    this[moduleIndex] = module.copy(
+                                        identities = module.identities.toMutableList().apply {
+                                            add(index = boundary, element = identity)
+                                        },
+                                    )
+                                },
+                            )
+                        }
+                        else -> return@updateOrderedAggregate aggregate
+                    }
+                    if (!isValidOrderedFavoriteAggregate(updated)) {
+                        aggregate
+                    } else {
+                        applied = true
+                        updated
+                    }
+                },
+            )
+            (persisted != null && applied).also(block = { saved -> if (saved) invalidateUndo() })
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (_: Exception) {
+            false
+        } finally {
+            isSaving = false
+        }
+    }
 }

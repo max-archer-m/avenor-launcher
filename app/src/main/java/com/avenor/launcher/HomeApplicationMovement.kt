@@ -83,6 +83,8 @@ internal fun applyApplicationOrderChange(
     )
 }
 
+internal const val EXTERNAL_JOURNEY_MODULE_ID = "drawer-journey-source"
+
 internal data class HomeApplicationMovementSession(
     val module: OrderedFavoriteModule,
     val identity: LaunchableIdentity,
@@ -257,6 +259,48 @@ internal class HomeApplicationMovement {
         activeIdentity = null
         pendingChange = null
         edgeFeedback = null
+    }
+
+    /**
+     * Starts candidate tracking for the Drawer drag-to-favorite journey: the dragged
+     * identity originates outside every favorite module, so no source row is omitted
+     * and no Home-side preview is created; the Drawer preview owns the presentation.
+     */
+    fun startExternalJourney(identity: LaunchableIdentity, pointer: Offset): Boolean {
+        if (session != null) return false
+        session = HomeApplicationMovementSession(
+            module = OrderedFavoriteModule(
+                id = EXTERNAL_JOURNEY_MODULE_ID,
+                type = OrderedFavoriteModuleType.Vertical,
+                identities = listOf(element = identity),
+            ),
+            identity = identity,
+            availability = FavoriteAvailability.Unknown(presentationEntry = null),
+            sourceBounds = Rect.Zero,
+            pointerOffset = Offset.Zero,
+            pointer = pointer,
+        )
+        activeIdentity = identity
+        refreshCandidate()
+        return true
+    }
+
+    /** Resolves the journey release into its drop target, or null for an invalid release. */
+    fun finishExternalJourney(): DrawerDragDrop? {
+        refreshCandidate()
+        val resolved = session ?: return null
+        val drop = when {
+            resolved.creation != null -> DrawerDragDrop.Creation(
+                moduleType = resolved.creation.first,
+            )
+            resolved.insertion != null && resolved.destination != null -> DrawerDragDrop.Insertion(
+                moduleId = resolved.destination.id,
+                boundary = resolved.insertion.boundary,
+            )
+            else -> null
+        }
+        cancel()
+        return drop
     }
 
     /** Only this save may hand off its preview; a late callback cannot clear a newer gesture. */
