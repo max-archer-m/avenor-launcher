@@ -74,7 +74,10 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -125,9 +128,9 @@ internal fun DrawerScreen(
     onToggleFavoriteSelection: (LaunchableIdentity) -> Unit = {},
     onCancelFavoriteSelection: () -> Unit = {},
     onConfirmFavoriteSelection: () -> Unit = {},
-    onDragToFavoriteStart: (DrawerDragJourney) -> Unit = {},
+    onDragToFavoriteStart: (DrawerDragJourney) -> Boolean = { false },
     onDragToFavoriteMove: (Offset) -> Unit = {},
-    onDragToFavoriteEnd: (Offset?) -> Unit = {},
+    onDragToFavoriteEnd: (Offset?, Boolean) -> Unit = { _, _ -> },
 ) {
     DrawerBackgroundSurface(mode = displaySettings.backgroundMode, active = active) {
         var loadRequest by remember { mutableIntStateOf(0) }
@@ -463,8 +466,9 @@ internal fun DrawerScreen(
                 val unableToAddDragToast = stringResource(
                     R.string.drawer_drag_unable_to_add,
                 )
-                val startDragToFavorite: (DrawerDragJourney) -> Unit = { journey ->
-                    if (searchActive) {
+                val startDragToFavorite: (DrawerDragJourney) -> Boolean = { journey ->
+                    val started = onDragToFavoriteStart(journey)
+                    if (started && searchActive) {
                         // The search-mode journey leaves through the same programmatic
                         // downward transition and clears the transient query and mode
                         // under the existing search-exit rule.
@@ -473,7 +477,7 @@ internal fun DrawerScreen(
                         ordinaryPosition = null
                         keyboardController?.hide()
                     }
-                    onDragToFavoriteStart(journey)
+                    started
                 }
                 Box(modifier = Modifier.fillMaxSize()) {
                     DrawerApplicationList(
@@ -1002,9 +1006,9 @@ private fun DrawerApplicationList(
     onLongPress: (LaunchableEntry) -> Unit,
     alreadyFavoritedDragToast: String,
     unableToAddDragToast: String,
-    onDragToFavoriteStart: (DrawerDragJourney) -> Unit,
+    onDragToFavoriteStart: (DrawerDragJourney) -> Boolean,
     onDragToFavoriteMove: (Offset) -> Unit,
-    onDragToFavoriteEnd: (Offset?) -> Unit,
+    onDragToFavoriteEnd: (Offset?, Boolean) -> Unit,
     onNavigateBack: () -> Unit,
     onEnterSearch: () -> Unit,
     onQueryChange: (String) -> Unit,
@@ -1281,9 +1285,9 @@ private fun DrawerApplicationRow(
     onLongPress: (LaunchableEntry) -> Unit,
     onAlreadyFavoritedDrag: () -> Unit,
     onUnableToAddDrag: () -> Unit,
-    onDragToFavoriteStart: (DrawerDragJourney) -> Unit,
+    onDragToFavoriteStart: (DrawerDragJourney) -> Boolean,
     onDragToFavoriteMove: (Offset) -> Unit,
-    onDragToFavoriteEnd: (Offset?) -> Unit,
+    onDragToFavoriteEnd: (Offset?, Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val applicationSize = displaySettings.applicationSize
@@ -1295,12 +1299,21 @@ private fun DrawerApplicationRow(
         },
     )
     val hapticFeedback = LocalHapticFeedback.current
+    val openActionsLabel = stringResource(R.string.drawer_open_application_actions)
     var rowCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Box(
         modifier = modifier
             .height(height = rowHeight)
             .onGloballyPositioned { rowCoordinates = it }
+            .semantics {
+                customActions = listOf(
+                    CustomAccessibilityAction(
+                        label = openActionsLabel,
+                        action = { onLongPress(entry); true },
+                    ),
+                )
+            }
             .combinedClickable(
                 role = Role.Button,
                 onClick = { onLaunch(entry) },
@@ -1316,6 +1329,8 @@ private fun DrawerApplicationRow(
                 onDragBeyondSlop = { change ->
                     // Never drop the journey silently: if row geometry is not yet
                     // captured, start with degraded geometry rather than no journey.
+                    // Ineligible rows keep dispatched=false so the release still
+                    // opens the action sheet per the contract.
                     val coordinates = rowCoordinates
                     when (dragEligibility) {
                         DrawerDragEligibility.Eligible -> onDragToFavoriteStart(
@@ -1330,8 +1345,14 @@ private fun DrawerApplicationRow(
                                 ) ?: Offset.Zero,
                             ),
                         )
-                        DrawerDragEligibility.AlreadyFavorited -> onAlreadyFavoritedDrag()
-                        DrawerDragEligibility.ReliablyDisabled -> onUnableToAddDrag()
+                        DrawerDragEligibility.AlreadyFavorited -> {
+                            onAlreadyFavoritedDrag()
+                            false
+                        }
+                        DrawerDragEligibility.ReliablyDisabled -> {
+                            onUnableToAddDrag()
+                            false
+                        }
                     }
                 },
                 onDragMove = { change ->
@@ -1339,11 +1360,12 @@ private fun DrawerApplicationRow(
                         onDragToFavoriteMove(coordinates.localToWindow(change.position))
                     }
                 },
-                onDragEnd = { change ->
+                onDragEnd = { change, cancelled ->
                     onDragToFavoriteEnd(
                         change?.let { currentChange ->
                             rowCoordinates?.localToWindow(currentChange.position)
                         },
+                        cancelled,
                     )
                 },
             )

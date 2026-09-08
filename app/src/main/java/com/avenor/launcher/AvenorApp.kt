@@ -416,6 +416,7 @@ internal fun AvenorApp(
             // committed destination the journey resolves as a cancellation that leaves
             // normal Home without a mutation and without returning to Drawer.
             drawerDragJourney = null
+            drawerDragDropping = false
         }
     }
 
@@ -1085,11 +1086,13 @@ internal fun AvenorApp(
                 drawerDragTouchInWindow = drawerDragTouchPosition,
                 drawerDragDropping = drawerDragDropping,
                 onDrawerDragCommit = { identity, drop ->
+                    val insertion = drop as? DrawerDragDrop.Insertion
+                    val creation = drop as? DrawerDragDrop.Creation
                     favoriteEditor.insertExternalFavorite(
                         identity = identity,
-                        destinationModuleId = (drop as? DrawerDragDrop.Insertion)?.moduleId,
-                        boundary = (drop as? DrawerDragDrop.Insertion)?.boundary ?: 0,
-                        newModuleType = (drop as? DrawerDragDrop.Creation)?.moduleType,
+                        destinationModuleId = insertion?.moduleId,
+                        boundary = insertion?.boundary ?: 0,
+                        newModuleType = creation?.moduleType,
                     )
                 },
                 onDrawerDragJourneyFinished = { saved, cancelled ->
@@ -1252,7 +1255,9 @@ internal fun AvenorApp(
                     favoriteSelectionTarget = favoriteAddTarget?.label,
                     favoriteAvailability = favoriteAvailability,
                     onDragToFavoriteStart = { journey ->
-                        if (!favoriteEditor.isSaving) {
+                        if (favoriteEditor.isSaving) {
+                            false
+                        } else {
                             favoriteEditor.invalidateUndo()
                             drawerDragJourney = journey
                             drawerDragTouchPosition = journey.touchStartInWindow
@@ -1261,15 +1266,23 @@ internal fun AvenorApp(
                             selectedHomeModuleId = null
                             drawerActivated = true
                             settleTo(target = AvenorSurface.Home)
+                            true
                         }
                     },
                     onDragToFavoriteMove = { position ->
                         drawerDragTouchPosition = position
                     },
-                    onDragToFavoriteEnd = {
-                        // Resolve the release through the Home edit-mode destination
-                        // rules; the journey finishes with the commit callback below.
-                        drawerDragDropping = true
+                    onDragToFavoriteEnd = { _, cancelled ->
+                        if (cancelled) {
+                            // A cancelled gesture stream resolves as a cancellation:
+                            // no drop resolution, no mutation, no return to Drawer.
+                            homeEditMode = false
+                            selectedHomeModuleId = null
+                        } else {
+                            // Resolve the release through the Home edit-mode
+                            // destination rules via the commit callback below.
+                            drawerDragDropping = true
+                        }
                     },
                     favoriteSelection = favoriteSelection,
                     favoriteMembership = favoriteMembership.orEmpty(),

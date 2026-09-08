@@ -101,6 +101,7 @@
     <string name="drawer_drag_already_favorite">App is already in favorites</string>
     <string name="drawer_drag_unable_to_add">Unable to add to favorites</string>
     <string name="drawer_drag_unable_to_save_favorite">Unable to save favorite</string>
+    <string name="drawer_open_application_actions">Application actions</string>
     <string name="favorite_application_unavailable">Application unavailable</string>
     <string name="favorite_application_disabled">Application disabled</string>
     <string name="favorite_disabled_format">%1$s — Disabled</string>

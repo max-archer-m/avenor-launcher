@@ -287,6 +287,9 @@ internal class HomeApplicationMovement {
 
     /** Resolves the journey release into its drop target, or null for an invalid release. */
     fun finishExternalJourney(): DrawerDragDrop? {
+        // Only the external journey session may be consumed here; a concurrent
+        // Home-originated drag session must survive this call untouched.
+        if (session?.module?.id != EXTERNAL_JOURNEY_MODULE_ID) return null
         refreshCandidate()
         val resolved = session ?: return null
         val drop = when {

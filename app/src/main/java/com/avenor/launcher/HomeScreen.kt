@@ -93,8 +93,6 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputScope
@@ -200,23 +198,24 @@ internal fun HomeScreen(
     val orderedApplicationMovement = remember(calculation = { HomeApplicationMovement() })
     LaunchedEffect(drawerDragJourney) {
         val journey = drawerDragJourney ?: return@LaunchedEffect
-        orderedApplicationMovement.startExternalJourney(
+        val started = orderedApplicationMovement.startExternalJourney(
             identity = journey.entry.identity,
             pointer = drawerDragTouchInWindow,
         )
+        if (!started) onDrawerDragJourneyFinished(false, true)
     }
     LaunchedEffect(drawerDragTouchInWindow) {
         if (drawerDragJourney != null) orderedApplicationMovement.move(drawerDragTouchInWindow)
     }
     LaunchedEffect(drawerDragDropping) {
         if (!drawerDragDropping) return@LaunchedEffect
-        val journey = drawerDragJourney
+        val journey = drawerDragJourney ?: return@LaunchedEffect
         val drop = orderedApplicationMovement.finishExternalJourney()
         // An invalid release (no drop target) resolves as a cancellation, not as a
         // save failure; only a resolved drop that fails to persist reports failure.
         val saved = journey != null && drop != null &&
             onDrawerDragCommit(journey.entry.identity, drop)
-        onDrawerDragJourneyFinished(saved = saved, cancelled = drop == null)
+        onDrawerDragJourneyFinished(saved, drop == null)
     }
     val favoriteEnterBatch = rememberHomeFavoriteEnterBatch(
         modules = (favoriteState as? FavoriteReadState.Readable)?.orderedModules,
@@ -227,7 +226,7 @@ internal fun HomeScreen(
             // Back during the Drawer journey is a cancellation: end the whole journey
             // without a mutation and without the save-failure feedback path.
             orderedApplicationMovement.cancel()
-            onDrawerDragJourneyFinished(saved = false, cancelled = true)
+            onDrawerDragJourneyFinished(false, true)
         } else {
             orderedApplicationMovement.cancel()
         }
@@ -3521,7 +3520,7 @@ private fun HomeFavoriteProvisionalList(
         onCreateRibbon: () -> Unit,
         onLaunchFavorite: (FavoriteAvailability) -> Unit,
         onLongPressFavorite: (LaunchableEntry) -> Unit,
-        modifier: Modifier = Modifier,
+        @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
         onRemoveFavorite: (LaunchableIdentity) -> Unit = {},
         applicationMovement: HomeApplicationMovement? = null,
         onCommitApplicationOrder: (ApplicationOrderChange) -> Unit = {},

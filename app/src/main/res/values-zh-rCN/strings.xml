@@ -100,6 +100,7 @@
     <string name="drawer_drag_already_favorite">该应用已在收藏中</string>
     <string name="drawer_drag_unable_to_add">无法添加到收藏</string>
     <string name="drawer_drag_unable_to_save_favorite">无法保存收藏</string>
+    <string name="drawer_open_application_actions">应用操作</string>
     <string name="favorite_application_unavailable">应用暂不可用</string>
     <string name="favorite_application_disabled">应用已停用</string>
     <string name="favorite_disabled_format">%1$s — 已停用</string>

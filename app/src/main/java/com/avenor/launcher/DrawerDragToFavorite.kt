@@ -80,45 +80,62 @@ internal sealed interface DrawerDragDrop {
 internal fun Modifier.drawerDragToFavoriteDetection(
     key1: Any?,
     onReleaseAfterLongPress: () -> Unit,
-    onDragBeyondSlop: (PointerInputChange) -> Unit,
+    onDragBeyondSlop: (PointerInputChange) -> Boolean,
     onDragMove: (PointerInputChange) -> Unit,
-    onDragEnd: (PointerInputChange?) -> Unit,
+    onDragEnd: (PointerInputChange?, cancelled: Boolean) -> Unit,
 ): Modifier = this.pointerInput(key1) {
     awaitEachGesture {
         val down = awaitFirstDown(requireUnconsumed = false)
         val longPress = awaitLongPressOrCancellation(down.id) ?: return@awaitEachGesture
         var dispatched = false
+        var endDelivered = false
         // Cumulative distance since the long-press, tracked with consumption ignored so
         // a slow drag still crosses the platform touch slop before the list scrolls.
         var draggedDistance = 0f
+        try {
         while (true) {
             val event = awaitPointerEvent()
             val tracked = event.changes.firstOrNull { it.id == longPress.id }
                 ?: event.changes.firstOrNull()
                 ?: continue
             if (event.changes.none(PointerInputChange::pressed)) {
-                // Every pointer lifted, or the sequence was cancelled: both end the
-                // gesture exactly once, on the branch that was actually dispatched.
-                if (dispatched) onDragEnd(tracked)
-                else onReleaseAfterLongPress()
+                // A stream end without a genuine up transition is a system
+                // cancellation: it must not commit a drop or open the action sheet.
+                val cancelled = tracked.changedToUp().not()
+                if (dispatched) {
+                    endDelivered = true
+                    onDragEnd(tracked, cancelled)
+                } else if (!cancelled) {
+                    endDelivered = true
+                    onReleaseAfterLongPress()
+                }
                 break
             }
             draggedDistance += tracked.positionChangeIgnoreConsumed().getDistance()
             val trackedUp = tracked.changedToUp()
             if (!dispatched) {
                 if (draggedDistance > viewConfiguration.touchSlop) {
-                    dispatched = true
-                    onDragBeyondSlop(tracked)
+                    // The journey only owns the gesture once its start is confirmed;
+                    // a rejected start keeps the release-opens-sheet behavior.
+                    dispatched = onDragBeyondSlop(tracked)
                 } else if (trackedUp) {
+                    endDelivered = true
                     onReleaseAfterLongPress()
                     break
                 }
             } else {
-                if (!trackedUp) onDragMove(tracked) else onDragEnd(tracked)
+                endDelivered = true
+                if (!trackedUp) onDragMove(tracked) else onDragEnd(tracked, false)
+                if (trackedUp) break
             }
             if (dispatched) {
                 event.changes.forEach { if (!it.changedToUp()) it.consume() }
             }
+        }
+        } finally {
+            // A cancelled detector coroutine must still end the journey, or the
+            // frozen preview and edit mode are left dangling without an owner.
+            if (dispatched && !endDelivered) onDragEnd(null, true)
         }
     }
 }
