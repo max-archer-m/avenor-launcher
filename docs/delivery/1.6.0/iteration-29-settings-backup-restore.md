@@ -8,7 +8,7 @@ Deliver the Settings Data backup and restore journey exactly as defined by the a
 
 ## Product and version references
 
-- Product-contract baseline: `To be recorded` — the full 40-character Git commit ID of the commit that integrates the accepted 2026-09-07 backup and restore contract optimization in [settings.md](../../product/surfaces/settings.md). Current mainline `f29913d760b1cd3b8cbca3e504bcc47b24d18680` predates that optimization and is not a sufficient baseline for the selected scope; record the baseline before production implementation proceeds.
+- Product-contract baseline: `1d98b078b1d8ac087cf8f4893aa2390b8bcf6ba3` — the commit that integrates the accepted 2026-09-07 backup and restore contract optimization and the later 2026-09-08 Drawer-background revision that changed the contracted backup contents. The originally integrating commit `b35ccd3` predates that background revision, so under the baseline-change rule the baseline is recorded at the later commit, which contains every product rule the selected scope depends on. Production implementation must be based on or otherwise include this baseline.
 - Applicable product documents:
   - [Settings behavior](../../product/surfaces/settings.md), Data section
   - [Settings presentation](../../product/presentation/settings.md)

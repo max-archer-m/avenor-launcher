@@ -8,7 +8,7 @@
 
 ## 产品与版本引用
 
-- 产品契约基线：`待记录`——即纳入 2026-09-07 已接受的备份恢复契约优化（[settings.md](../../product/surfaces/settings.md)）的提交的完整 40 位 Git commit ID。当前主线 `f29913d760b1cd3b8cbca3e504bcc47b24d18680` 早于该优化，对选定范围而言不是充分基线；生产实现开始前必须记录该基线。
+- 产品契约基线：`1d98b078b1d8ac087cf8f4893aa2390b8bcf6ba3`——纳入 2026-09-07 已接受备份恢复契约优化，以及其后 2026-09-08 改变契约备份内容规则的 Drawer 背景修订的提交。最初纳入该优化的提交 `b35ccd3` 早于该背景修订，因此按基线变更规则把基线记录在后续提交上，该提交包含选定范围依赖的全部产品规则。生产实现必须基于或包含该基线。
 - 适用产品文档：
   - [Settings 行为](../../product/surfaces/settings.zh-CN.md)，数据节
   - [Settings 表现](../../product/presentation/settings.zh-CN.md)
