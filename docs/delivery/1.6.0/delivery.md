@@ -59,7 +59,7 @@ Primary risks are OEM document-picker behavior differences, suggested-name and t
 
 | Iteration | Status | Updated | Basis |
 | --- | --- | --- | --- |
-| [Iteration 29: Settings Backup and Restore](iteration-29-settings-backup-restore.md) | `Planned` | 2026-09-07 | The author confirmed the backup and restore feature as the next version's next iteration on 2026-09-07; production implementation is not yet authorized. |
+| [Iteration 29: Settings Backup and Restore](iteration-29-settings-backup-restore.md) | `Completed` | 2026-09-08 | The author confirmed the backup and restore feature as the next version's next iteration on 2026-09-07; implemented and accepted at the author daily-use baseline on 2026-09-08. |
 | [Iteration 30: Drawer Drag-to-Favorite](iteration-30-drawer-drag-to-favorite.md) | `Planned` | 2026-09-07 | The author designated drag-to-favorite as the following iteration on 2026-09-07 after its contract revision; production implementation is not yet authorized. |
 | [Iteration 31: Edit Dock, Drawer Background, and Panel Shadow Rework](iteration-31-edit-dock-drawer-background-shadow.md) | `Planned` | 2026-09-08 | The author designated the edit-dock, background, and shadow reworks as the next iteration on 2026-09-08 after their contract revisions; production implementation is not yet authorized. |
 
@@ -67,7 +67,7 @@ Primary risks are OEM document-picker behavior differences, suggested-name and t
 
 ### Iteration 29
 
-[Contract](iteration-29-settings-backup-restore.md). Planned only; no implementation, evidence, or result is recorded yet. The contract's product-contract baseline is `1d98b078b1d8ac087cf8f4893aa2390b8bcf6ba3`, recorded under the baseline-change rule because the 2026-09-08 Drawer-background revision changed the contracted backup contents.
+[Contract](iteration-29-settings-backup-restore.md). `Completed` on 2026-09-08. The implementation delivers the contracted backup and restore journey, including the 2026-09-08 scope amendments (backup contents limited to the display-settings fields present in the current application model; the in-app Privacy statement copy update). The agent's local checks (`git diff --check`, line-length sweep) passed; the agent ran no Gradle build or test command (`Not run`). The author performed the build, installation, and device checks on the primary physical device and accepted the mandatory backup → restore round trip and uninstall/reinstall state recovery, together with the recommended cancel, Back, in-flight, interruption, and partially structured backup scenarios, at the author daily-use baseline. Acceptance evidence is author-reported. The contract's product-contract baseline is `1d98b078b1d8ac087cf8f4893aa2390b8bcf6ba3`, recorded under the baseline-change rule because the 2026-09-08 Drawer-background revision changed the contracted backup contents.
 
 ### Iteration 30
 
@@ -93,7 +93,7 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.6.0` identif
 
 ## Known limitations and legacy issues
 
-- Document-picker presentation and suggested-name handling vary across OEMs and remain unknown until exercised on the primary device.
+- Document-picker presentation and suggested-name handling vary across OEMs; the primary-device journey was exercised and accepted, and per-OEM variance remains accepted presentation variance.
 - The backup file is not encrypted; its content is user-managed outside Avenor's private storage by contract.
 - Older-schema backups are accepted and interpreted under the current schema; no cross-version migration guarantees beyond that rule are committed.
 - Broader device, API, OEM, and locale coverage remains unknown until performed.
@@ -107,4 +107,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.6.0` identif
 
 ## Completion result
 
-This version is incomplete. The record plans the selected scope and its first iteration; implementation, identifiers, evidence, and completion remain unauthorized and unrecorded.
+This version is incomplete. Iteration 29 is completed and accepted at the author daily-use baseline; iterations 30 and 31 remain planned. Version identifiers, artifacts, tags, and release actions remain unauthorized and unrecorded.

@@ -1,6 +1,8 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.settings
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +35,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,25 +48,76 @@ import androidx.compose.ui.semantics.Role
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.avenor.launcher.AccessibilityLockController
+import com.avenor.launcher.EmptyAccessibilityLockController
+import com.avenor.launcher.R
+import com.avenor.launcher.SettingsBackupControl
+import com.avenor.launcher.SettingsBackupState
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun SettingsScreen(
     platform: SettingsPlatform,
     licenseText: String,
     accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
+    backupController: SettingsBackupControl? = null,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val scope = rememberCoroutineScope()
     var isDefaultHome by remember(platform) { mutableStateOf(platform.isDefaultHome()) }
     var showLicense by remember { mutableStateOf(false) }
     var showPrivacy by remember { mutableStateOf(false) }
     var showDoubleTapExplanation by remember { mutableStateOf(false) }
     var showProminentDisclosure by remember { mutableStateOf(false) }
+    var backupInFlight by remember { mutableStateOf(false) }
+    var pendingRestore by remember { mutableStateOf<SettingsBackupState?>(null) }
     var isAccessibilitySystemEnabled by remember(accessibilityLockController) {
         mutableStateOf(accessibilityLockController.isSystemEnabled())
     }
     val isAccessibilityConnected by accessibilityLockController.connectionState.collectAsState()
+
+    val backupDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument(JSON_MIME_TYPE),
+    ) { uri ->
+        if (uri != null && backupController != null) {
+            scope.launch {
+                backupInFlight = true
+                val succeeded = backupController.writeBackup(uri = uri)
+                backupInFlight = false
+                Toast.makeText(
+                    context,
+                    if (succeeded) {
+                        R.string.settings_data_backup_success
+                    } else {
+                        R.string.settings_data_backup_failure
+                    },
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        }
+    }
+    val restoreDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null && backupController != null) {
+            scope.launch {
+                backupInFlight = true
+                val backup = backupController.readBackup(uri = uri)
+                backupInFlight = false
+                if (backup == null) {
+                    Toast.makeText(
+                        context,
+                        R.string.settings_data_restore_failure,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                } else {
+                    pendingRestore = backup
+                }
+            }
+        }
+    }
 
     DisposableEffect(lifecycleOwner, platform, accessibilityLockController) {
         val observer = LifecycleEventObserver { _, event ->
@@ -125,6 +179,34 @@ internal fun SettingsScreen(
                             testTag = "settings_double_tap_lock",
                         )
                     }
+                }
+                if (backupController != null) {
+                    item(key = "data-backup") {
+                        PrimarySettingsItem(
+                            title = stringResource(R.string.settings_data_backup),
+                            supportingText = null,
+                            onClick = {
+                                backupDocumentLauncher.launch(
+                                    backupController.suggestedFileName(),
+                                )
+                            },
+                            enabled = !backupInFlight,
+                            testTag = "settings_data_backup",
+                        )
+                    }
+                    item(key = "data-restore") {
+                        PrimarySettingsItem(
+                            title = stringResource(R.string.settings_data_restore),
+                            supportingText = null,
+                            onClick = {
+                                restoreDocumentLauncher.launch(RESTORE_MIME_TYPES)
+                            },
+                            enabled = !backupInFlight,
+                            testTag = "settings_data_restore",
+                        )
+                    }
+                }
+                if (accessibilityLockController.availableForValidation) {
                     item(key = "privacy") {
                         SecondarySettingsItem(
                             text = stringResource(R.string.privacy),
@@ -226,6 +308,31 @@ internal fun SettingsScreen(
             },
         )
     }
+
+    pendingRestore?.let { backup ->
+        RestoreConfirmationDialog(
+            onConfirm = {
+                pendingRestore = null
+                if (backupController != null) {
+                    scope.launch {
+                        backupInFlight = true
+                        val succeeded = backupController.restore(backup = backup)
+                        backupInFlight = false
+                        Toast.makeText(
+                            context,
+                            if (succeeded) {
+                                R.string.settings_data_restore_success
+                            } else {
+                                R.string.settings_data_restore_failure
+                            },
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                }
+            },
+            onCancel = { pendingRestore = null },
+        )
+    }
 }
 
 @Composable
@@ -260,6 +367,7 @@ private fun PrimarySettingsItem(
     supportingText: String?,
     onClick: () -> Unit,
     testTag: String,
+    enabled: Boolean = true,
 ) {
     Row(
         modifier = Modifier
@@ -273,7 +381,7 @@ private fun PrimarySettingsItem(
                     },
                 ),
             )
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = dimensionResource(R.dimen.settings_horizontal_padding))
             .testTag(testTag),
         verticalAlignment = Alignment.CenterVertically,
@@ -533,3 +641,35 @@ private fun LicenseBottomSheet(
         )
     }
 }
+
+@Composable
+internal fun RestoreConfirmationDialog(
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.settings_data_restore_dialog_title)) },
+        text = { Text(stringResource(R.string.settings_data_restore_dialog_body)) },
+        dismissButton = {
+            TextButton(
+                onClick = onCancel,
+                modifier = Modifier.testTag("settings_restore_cancel"),
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                modifier = Modifier.testTag("settings_restore_confirm"),
+            ) {
+                Text(stringResource(R.string.settings_data_restore_confirm))
+            }
+        },
+        modifier = Modifier.testTag("settings_restore_dialog"),
+    )
+}
+
+private const val JSON_MIME_TYPE = "application/json"
+private val RESTORE_MIME_TYPES = arrayOf(JSON_MIME_TYPE, "*/*")

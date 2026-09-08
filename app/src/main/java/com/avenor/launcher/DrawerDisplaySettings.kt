@@ -102,7 +102,7 @@ internal sealed interface DrawerDisplaySettingsReadState {
 
 internal class DrawerDisplaySettingsStore internal constructor(
     private val atomicFile: AtomicFile,
-) {
+) : BackupSettingsAccess {
     constructor(context: Context) : this(
         atomicFile = AtomicFile(context.filesDir.resolve(FILE_NAME)),
     )
@@ -153,6 +153,12 @@ internal class DrawerDisplaySettingsStore internal constructor(
             }
         }
     }
+
+    override fun currentSettings(): DrawerDisplaySettings? =
+        (mutableState.value as? DrawerDisplaySettingsReadState.Readable)?.settings
+
+    override suspend fun restoreSettings(settings: DrawerDisplaySettings): Boolean =
+        replace(settings = settings)
 
     suspend fun replace(settings: DrawerDisplaySettings): Boolean = mutationMutex.withLock {
         val current = (mutableState.value as? DrawerDisplaySettingsReadState.Readable)

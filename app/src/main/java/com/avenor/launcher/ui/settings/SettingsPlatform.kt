@@ -1,4 +1,4 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.settings
 
 import android.app.role.RoleManager
 import android.content.ActivityNotFoundException
@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import androidx.core.net.toUri
+import com.avenor.launcher.R
 
 internal interface SettingsPlatform {
     fun openPrivacyContact(): Boolean = false

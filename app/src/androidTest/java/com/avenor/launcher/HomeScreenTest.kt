@@ -36,6 +36,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.avenor.launcher.ui.settings.EmptySettingsPlatform
+import com.avenor.launcher.ui.settings.SettingsPlatform
+import com.avenor.launcher.ui.settings.SettingsScreen
 
 @RunWith(AndroidJUnit4::class)
 class HomeScreenTest {

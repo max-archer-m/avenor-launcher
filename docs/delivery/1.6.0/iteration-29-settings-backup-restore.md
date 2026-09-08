@@ -23,9 +23,10 @@ On the primary device, from Settings: selecting Back up favorites and settings p
 ## Included work
 
 - The two Settings Data entries with their order, titles, trailing-arrow primary presentation, and entry into the system document picker.
-- Backup serialization of the complete current Home favorite state (ordered modules with type, order, stable identities, style, and per-module application order) and complete Drawer display settings into one schema-versioned JSON file with the suggested display name `avenor-backup-<version-name>-<yyyyMMddHHmm>`.
+- Backup serialization of the complete current Home favorite state (ordered modules with type, order, stable identities, style, and per-module application order) and the Drawer display-settings fields present in the current application model (application size, name placement, items per row, section-anchor presentation, and background mode) into one schema-versioned JSON file with the suggested display name `avenor-backup-<version-name>-<yyyyMMddHHmm>`. The blur-intensity level is not serialized: the intensity setting does not exist in the application model until its implementing iteration delivers it.
 - Restore selection, the detailed confirmation dialog (replacement warning including irreversibility, `Restore` and `Cancel` actions, Cancel/dismiss/Back no-ops), and the atomic replacement of favorites and display settings.
 - Localized short messages for backup success, backup failure, restore success, and restore failure, in English and Simplified Chinese.
+- The in-app Privacy statement copy update, in English and Simplified Chinese, that aligns the Storage, backup, and deletion paragraph with the manual backup and restore disclosure already recorded by the Privacy contract.
 - Directional schema-version compatibility (higher than current fails; equal or lower accepted and interpreted under the current schema) and the defined validity of a missing favorites section, a missing display-settings section, a missing field inside a present section, and an empty backup.
 - Non-interactive Data entries while a backup write or restore apply is in progress, with no partial-state outcome on interruption.
 - Focused test sources covering serialization round trip, schema compatibility, partial-file validity, dialog and cancel paths, and failure paths that leave current state untouched.
@@ -34,6 +35,7 @@ On the primary device, from Settings: selecting Back up favorites and settings p
 
 - Automatic, scheduled, cloud, or uploaded backup of any kind; encryption of the backup file.
 - Backup or restore of state beyond the Home favorite state and Drawer display settings.
+- Serializing or restoring a blur-intensity level before the intensity setting exists in the application model; the backup schema gains that field through the directional schema-compatibility rule when the setting ships.
 - The `1.6.0` version identifier update (`versionName`/`versionCode`), which remains a version-level closure concern unless a later authorized amendment assigns it here.
 - Style-edit dialog shadow and frosted-glass presentation changes; UI-animation and experience-polish work.
 - Third-party License presentation.
@@ -43,7 +45,7 @@ On the primary device, from Settings: selecting Back up favorites and settings p
 - Settings UI: the two Data entries, the confirmation dialog, message presentation, and entry enabled/disabled state during in-flight operations.
 - Backup and restore serialization: schema version, JSON structure for favorites and display settings, suggested file name construction, and directional compatibility interpretation.
 - State stores: atomic replacement path for favorites and display settings consistent with existing versioned atomic persistence; backup exclusion and app-private-storage boundaries remain unchanged.
-- Resources: English and Simplified Chinese strings for the two entry titles, dialog text and actions, and the four short messages.
+- Resources: English and Simplified Chinese strings for the two entry titles, dialog text and actions, and the four short messages, plus the updated Privacy statement copy in both languages.
 - Manifest and permissions: none; no new permission and no manifest change is expected.
 - Tests: focused local and instrumentation sources for the behaviors above.
 
@@ -61,7 +63,7 @@ This iteration depends on the accepted product contract and the current integrat
 
 - No new permission, networking, account, or external service is introduced.
 - The backup file is unencrypted and user-managed outside Avenor's private storage, as the Privacy contract already discloses; this iteration must keep the file free of any data beyond the contracted favorites and display-settings state.
-- Privacy copy does not require changes; if implementation reveals a material divergence from the Privacy statement, stop and obtain author direction.
+- The in-app Privacy statement copy is updated within this iteration to match the manual backup-and-restore disclosure in the Privacy contract; no other Privacy statement change is authorized. If implementation reveals any further material divergence from the Privacy statement, stop and obtain author direction.
 
 ## Risks and unresolved decisions
 
@@ -69,11 +71,13 @@ This iteration depends on the accepted product contract and the current integrat
 - Timestamp construction across locales and 12/24-hour settings must always produce the `yyyyMMddHHmm` form; a mistake silently changes suggested names.
 - Races between restore and other in-flight settings persistence must not produce a mixed state; the atomic-replacement path must cover both stores together.
 - The partial-file rule (missing display-settings section restores Avenor defaults) was confirmed by the author on 2026-09-07 as part of accepting partially structured backups as valid; if device use shows this default-reset reading to be surprising, reopening it is a product decision, not an implementation choice.
+- Backup-contents scope (2026-09-08 author decision): this iteration's backup serializes only the display-settings fields that exist in the current application model. The Settings behavior contract names the blur-intensity level among the backup contents; that phrase becomes fully implementable when the intensity setting ships, and the author owns any future alignment of that product wording.
 
 ## Acceptance criteria
 
 - The two Data entries appear in the contracted order with the primary settings-item presentation and trailing arrows, and open the system document picker without new permissions.
-- Backup writes one schema-versioned JSON file containing the complete favorites and display-settings state under the suggested name; cancel writes nothing and shows no message; success and failure show the contracted localized messages.
+- Backup writes one schema-versioned JSON file containing the complete favorites state and the display-settings fields present in the current application model under the suggested name; cancel writes nothing and shows no message; success and failure show the contracted localized messages.
+- The in-app Privacy statement, in both languages, discloses the manual local backup and restore and no longer claims that export or restoration is not provided.
 - Restore shows the detailed confirmation dialog; Cancel, dismissal, and Back change nothing; confirming atomically replaces both stores and shows the contracted success message; Home and Drawer present the restored state on next view.
 - Unreadable, malformed, and higher-schema files fail without overwriting current state and show the contracted failure message; equal-or-lower schema backups, missing-section backups, missing-field cases, and the empty backup behave per the validity rule.
 - During an in-flight backup or restore apply, both Data entries are non-interactive, and interruption leaves no partial state.

@@ -54,6 +54,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlin.math.roundToInt
+import com.avenor.launcher.ui.settings.AndroidSettingsPlatform
+import com.avenor.launcher.ui.settings.EmptySettingsPlatform
+import com.avenor.launcher.ui.settings.SettingsPlatform
+import com.avenor.launcher.ui.settings.SettingsScreen
+import com.avenor.launcher.ui.settings.readAvenorLicense
 
 internal enum class AvenorSurface {
     Home,
@@ -208,6 +213,23 @@ internal fun AvenorApp(
         key1 = effectiveFavoriteStore,
         calculation = { HomeFavoriteEditor(store = effectiveFavoriteStore) },
     )
+    val settingsBackupController = remember(
+        androidContext,
+        effectiveFavoriteStore,
+        effectiveDrawerDisplaySettingsStore,
+    ) {
+        val favoritesAccess = effectiveFavoriteStore as? BackupFavoritesAccess
+        val settingsAccess = effectiveDrawerDisplaySettingsStore as? BackupSettingsAccess
+        if (favoritesAccess == null || settingsAccess == null) {
+            null
+        } else {
+            SettingsBackupController(
+                context = androidContext,
+                favorites = favoritesAccess,
+                settings = settingsAccess,
+            )
+        }
+    }
     val removalSnackbarHostState = remember(calculation = { SnackbarHostState() })
     val inventoryCoordinator = remember(inventoryLoader) {
         LaunchableInventoryCoordinator(inventoryLoader)
@@ -1286,6 +1308,7 @@ internal fun AvenorApp(
                 platform = settingsPlatform,
                 licenseText = licenseText,
                 accessibilityLockController = accessibilityLockController,
+                backupController = settingsBackupController,
                 onBack = { settingsOpen = false },
             )
         }

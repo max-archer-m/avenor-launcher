@@ -305,7 +305,7 @@ internal class OrderedFavoriteModuleStore private constructor(
 
 internal class OrderedFavoriteStoreAdapter private constructor(
     private val store: OrderedFavoriteModuleStore,
-) : FavoriteStore {
+) : FavoriteStore, BackupFavoritesAccess {
     constructor(context: Context) : this(OrderedFavoriteModuleStore(context))
     internal constructor(file: File, legacyFile: File? = null) : this(
         OrderedFavoriteModuleStore(file, legacyFile),
@@ -438,6 +438,17 @@ internal class OrderedFavoriteStoreAdapter private constructor(
         action = { update(transform = transform) },
     )
 
+    override fun currentOrderedAggregate(): OrderedFavoriteAggregate =
+        (store.state.value as? OrderedFavoriteReadState.Readable)?.aggregate
+            ?: OrderedFavoriteAggregate()
+
+    override suspend fun restoreAggregate(aggregate: OrderedFavoriteAggregate): Boolean =
+        mutationMutex.withLock {
+            store.replaceAggregate(aggregate).also { succeeded ->
+                if (succeeded) publish()
+            }
+        }
+
     private suspend fun update(
         transform: (OrderedFavoriteAggregate) -> OrderedFavoriteAggregate,
     ): OrderedFavoriteAggregate? {
@@ -448,10 +459,6 @@ internal class OrderedFavoriteStoreAdapter private constructor(
         publish()
         return updated
     }
-
-    private fun currentOrderedAggregate(): OrderedFavoriteAggregate =
-        (store.state.value as? OrderedFavoriteReadState.Readable)?.aggregate
-            ?: OrderedFavoriteAggregate()
 
     private fun publish() {
         mutableState.value = when (val current = store.state.value) {
