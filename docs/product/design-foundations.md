@@ -69,6 +69,8 @@ The current shared text-size tokens are:
 
 ## Shared interaction and accessibility
 
+- Important interactive elements belong in the middle or upper regions of a surface. Bottom placement is a cautious exception that requires an author-accepted reachability reason.
+- A control that toggles a state keeps its position, size, and interaction target across that state change. Its content may change, but the user's tap point must not move, shrink, or disappear.
 - Interactive controls should provide a focusable target of at least `48dp x 48dp`. A smaller component-specific target requires an author-accepted reason and focused device evidence; dense layouts should first separate visible size from hit geometry.
 - Pressed, focused, selected, and disabled states must not rely on color alone.
 - Shared disabled content uses `38%` opacity, retains an explicit disabled accessibility state, and suppresses actionable ripple or activation. A component-specific contract may define an additional non-color indicator but must not invent an independent opacity as a durable product value.
