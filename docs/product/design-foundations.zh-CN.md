@@ -18,7 +18,7 @@
 
 - Avenor 所有界面均使用深色主题。文字、图标、控件和语义颜色角色使用其深色主题表现。
 - Home 不绘制可见应用背景，保持系统壁纸清晰，不增加持久背景渐变、固定遮罩、模糊、玻璃效果或其他全界面对比度保护层。允许使用的前景对比度处理由 Home 表现规范负责。
-- Drawer 的应用背景遵循 [Drawer 行为](surfaces/drawer.zh-CN.md#显示设置)和 [Drawer 表现](presentation/drawer.zh-CN.md#背景模式与对比度)规范定义的用户选定模式。这项受限界面选择不改变共享深色主题语义角色。
+- Drawer 的应用背景遵循 [Drawer 行为](surfaces/drawer.zh-CN.md#显示设置)和 [Drawer 表现](presentation/drawer.zh-CN.md#背景不透明度与对比度)规范定义的用户选定背景不透明度。这项受限界面选择不改变共享深色主题语义角色。
 - Home 和 Drawer 请求透明系统栏区域并进行 edge-to-edge 绘制，使各自适用的界面处理在系统栏下方保持可见。组件规范定义的瞬时局部交互提示仍可使用。
 - Settings 通过 Material 3 语义角色使用不透明的 Avenor 深色配色方案。组件使用下方共享角色，不创建页面特定的深色十六进制颜色。
 - 模态面板使用 `darkSurfaceBaseColor`；组件表现另有定义时可以使用其他深色表面，并继续保留浅色状态栏图标。

@@ -16,23 +16,23 @@ This document owns exact Drawer layout, typography, component geometry, and visu
 - Columns use `0dp` separate spacing and divide the available application-grid width by the selected items-per-row count. Every rendered name uses one static line and end ellipsis.
 - At every application size, right-side-name arrangement supports one or two equal-width columns, below-icon-name arrangement supports one through four equal-width columns, and hidden-name arrangement supports one through six equal-width columns. The stepper's decrement and increment targets retain their ordinary geometry at a boundary but use the shared disabled presentation and expose disabled state rather than actionable Ripple. Their enabled or disabled presentation updates with the effective count in the same frame as a label-placement change; switching to `Below` at two enables increment, switching to `Right` from three or four presents two with increment disabled, switching to `Hidden` preserves the count and enables increment up to six, and switching from `Hidden` to `Right` presents two or from `Hidden` to `Below` presents four when the count exceeds that boundary, with increment disabled.
 
-## Background modes and contrast
+## Background opacity and contrast
 
-- `Transparent` leaves the wallpaper clear across the complete Drawer and adds no full-surface tint, scrim, glass layer, or blur. Text and monochrome foreground artwork drawn over the wallpaper use `primaryTextColor` and one fixed dark glyph- or artwork-following shadow using the accepted parameters below.
-- The frosted-glass mode uses one fixed full-surface platform background blur at the user-selected intensity when cross-window blur is available. It adds no translucent tint layer, does not sample the wallpaper, and does not change blur or contrast by list position, pointer position, search result, or local luminance. The fixed text and monochrome-artwork shadow defined for `Transparent` remain in effect in this mode.
-- When platform blur is unavailable, the frosted-glass mode renders as the `Transparent` presentation—clear wallpaper with the fixed shadows—without presenting itself as an Error, warning, or disabled setting. The selected intensity is retained and the blur returns when it becomes available. Because the frosted-glass mode adds no tint layer, its readability over bright wallpapers depends on the blurred wallpaper luminance; this is a recorded known limitation judged by author-device acceptance.
-- Background mode changes only the Drawer background and applicable contrast treatment. Top-app-bar, application, anchor, search, AlphabetIndex, Settings, multi-selection, modal, and interaction geometry remain unchanged.
+- The Drawer background composites one full-surface layer of `darkSurfaceBaseColor` over the wallpaper at the user-selected opacity percentage. `0` leaves the wallpaper clear across the complete Drawer, and `100` presents the complete solid surface color; intermediate percentages present that color blended over the wallpaper. The background adds no blur, glass effect, or additional scrim, does not sample the wallpaper, and does not change by list position, pointer position, search result, or local luminance.
+- Text and monochrome foreground artwork use `primaryTextColor` and one fixed dark glyph- or artwork-following shadow at every percentage, using the accepted parameters below. At low percentages the foreground contrast relies on that shadow; readability over bright wallpapers is the user's selected trade-off, judged by author-device acceptance.
+- The background opacity changes only the Drawer background and applicable contrast treatment. Top-app-bar, application, anchor, search, AlphabetIndex, Settings, multi-selection, modal, and interaction geometry remain unchanged.
 
 ### Accepted background parameters
 
-The author accepted the following current delivery values on 2026-09-06, amended on 2026-09-07 by the pure-blur decision that removed the tint and fallback treatments. Further optimization remains follow-up work and does not block Iteration 27:
+The author accepted the following current delivery values on 2026-09-06; the 2026-09-07 pure-blur decision and its parameters were superseded on 2026-09-09 by the continuous background-opacity decision. Further optimization remains follow-up work and does not block delivery:
 
 | Treatment | Accepted value |
 | --- | --- |
-| Foreground shadow (both modes) | Black at `65%` opacity (`#A6000000`), `0dp` horizontal offset, `1dp` vertical offset, `2dp` blur radius |
-| Frosted-glass blur radius | `15dp` per selected intensity level; levels `1` through `10`, maximum `150dp` |
+| Foreground shadow (all percentages) | Black at `65%` opacity (`#A6000000`), `0dp` horizontal offset, `1dp` vertical offset, `2dp` blur radius |
+| Background color | Shared `darkSurfaceBaseColor`, composited over the wallpaper at the selected percentage |
+| Background-opacity granularity | Whole percentages `0` through `100`; tentatively accepted |
 
-Follow-up calibration should compare Samsung Galaxy S23 Ultra and Google Pixel 8 across representative bright, dark, and visually complex wallpapers. That matrix has not been established as passed; its absence no longer blocks acceptance of the current parameters or Iteration 27. Future parameter changes require author acceptance and an update to this specification.
+Future parameter changes require author acceptance and an update to this specification.
 
 ## Search field and matching emphasis
 
@@ -71,4 +71,4 @@ Follow-up calibration should compare Samsung Galaxy S23 Ultra and Google Pixel 8
 
 - Drawer hosts the shared [style settings panel](style-settings-panel.md) as a compact custom surface that may enter from the bottom. It uses the shared horizontal outer margin and adds a Drawer-specific bottom margin. A transparent modal layer blocks underlying input without dimming the exposed Drawer or system background; the shared edge shadow must preserve visible separation from both exposed layers.
 - Drawer presents four setting blocks through the shared panel: application arrangement, section anchors, Drawer background, and application size. The application-size block is last because its content line is the tallest. The section-anchor control uses the shared compact two-option selector; the name-placement (`Right` / `Below` / `Hidden`) control uses the shared compact selector; application size and items per row use the shared application-size selector and stepper. Drawer retains its own setting names, option labels, availability, and save behavior.
-- The Drawer-background block presents one on-off switch and one blur-intensity slider on its content line using the shared background-row geometry defined by the [style settings panel presentation](style-settings-panel.md): a `48dp x 48dp` switch target at the physical left, a `16dp` gap, and a snapping ten-stop slider filling the remaining width. The switch's selected track and the slider's active track and thumb use shared `primaryTextColor`; the slider displays no current-level number and uses the shared `38%` disabled opacity while the switch is off.
+- The Drawer-background block presents one percentage readout and one background-opacity slider on its content line using the shared background-row geometry, readout treatment, and slider accent defined by the [style settings panel presentation](style-settings-panel.md): a fixed-width percentage readout at the physical left, a `16dp` gap, and a continuous slider filling the remaining width.

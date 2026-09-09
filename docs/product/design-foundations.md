@@ -18,7 +18,7 @@ The applicable navigation, surface, or feature specification owns product state 
 
 - All Avenor surfaces use the dark theme. Text, icons, controls, and semantic color roles use their dark-theme presentation.
 - Home paints no visible application background, preserving the system wallpaper without a persistent backdrop gradient, fixed scrim, blur, glass effect, or other full-surface contrast-protection layer. Its presentation specification owns the permitted foreground contrast treatment.
-- Drawer's application background follows the user-selected mode defined by the [Drawer behavior](surfaces/drawer.md#display-settings) and [Drawer presentation](presentation/drawer.md#background-modes-and-contrast) specifications. This bounded surface choice does not change the shared dark-theme semantic roles.
+- Drawer's application background follows the user-selected background opacity defined by the [Drawer behavior](surfaces/drawer.md#display-settings) and [Drawer presentation](presentation/drawer.md#background-opacity-and-contrast) specifications. This bounded surface choice does not change the shared dark-theme semantic roles.
 - Home and Drawer request transparent system-bar regions and draw edge to edge so their applicable surface treatment remains visible beneath the system bars. A transient local interaction cue remains permitted where its component specification defines one.
 - Settings uses the opaque Avenor dark color scheme through Material 3 semantic roles. Components use the shared roles below instead of page-specific dark hex colors.
 - Modal sheets use `darkSurfaceBaseColor` unless their component presentation defines another dark surface, and preserve light status-bar icons.
