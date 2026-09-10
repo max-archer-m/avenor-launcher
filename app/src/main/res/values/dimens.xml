@@ -214,10 +214,12 @@
     <dimen name="drawer_display_settings_horizontal_margin">8dp</dimen>
     <dimen name="drawer_display_settings_bottom_margin">8dp</dimen>
 
-    <!-- Drawer / Favorite selection mode / Top app bar and row indicator -->
-    <dimen name="drawer_selection_indicator_region_width">40dp</dimen>
-    <dimen name="drawer_selection_indicator_size">24dp</dimen>
-    <dimen name="drawer_selection_indicator_border_width">1dp</dimen>
+    <!-- Drawer / Favorite selection mode / Selected cell treatment -->
+    <dimen name="drawer_selection_outline_width">2dp</dimen>
+    <dimen name="drawer_selection_outline_corner_radius">12dp</dimen>
+    <dimen name="drawer_selection_badge_corner_radius">12dp</dimen>
+    <dimen name="drawer_selection_badge_min_size">20dp</dimen>
+    <dimen name="drawer_selection_badge_content_padding">4dp</dimen>
 
     <!-- Settings screen / Root layout and top app bar -->
     <dimen name="settings_top_bar_min_height">56dp</dimen>

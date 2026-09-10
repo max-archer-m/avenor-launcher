@@ -75,11 +75,11 @@ Primary risks are OEM document-picker behavior differences, suggested-name and t
 
 ### Iteration 31
 
-[Contract](iteration-31-edit-dock-drawer-background-shadow.md). `In Progress` since 2026-09-09; no implementation evidence or result is recorded yet. The contract's product-contract baseline is `4f596a5fe9de30785dd0e06c2f66a727e481bb9a`, the commit integrating the accepted edge-border and Drawer-panel-animation presentation revisions; the contract records the 2026-09-09 authorized amendments.
+[Contract](iteration-31-edit-dock-drawer-background-shadow.md). `In Progress` since 2026-09-09; no implementation evidence or result is recorded yet. The contract's product-contract baseline is `212b8b569461169a82346562f865ae3f113f3aec`, the commit integrating the accepted multi-selection presentation refinements; the contract records the 2026-09-09 authorized amendments.
 
 ## Dependencies and sequence
 
-Iteration 29 depends on the accepted backup and restore product contract. Iteration 30 depends on the accepted drag-to-favorite contract revision, integrated in `c0a1a44e38cf38919fbb3e9cf10dc75970081764`. Iteration 31 depends on the accepted edit-dock, Drawer-background, panel-edge, and favorite-multi-selection contract revisions, integrated from `7af7adba15b018886dd613c587dfedd9299136b4` through `4f596a5fe9de30785dd0e06c2f66a727e481bb9a`. The three iterations overlap in shared state stores, strings resources, the style settings panel, the Home edit-mode layout, and Drawer application-row UI, so they must not run concurrently on one line; their relative order is otherwise free, with each later implementation line containing the integrated results of the earlier ones it depends on. These dependencies do not bind work to a branch, terminal, contributor, forecast date, or permanent task line.
+Iteration 29 depends on the accepted backup and restore product contract. Iteration 30 depends on the accepted drag-to-favorite contract revision, integrated in `c0a1a44e38cf38919fbb3e9cf10dc75970081764`. Iteration 31 depends on the accepted edit-dock, Drawer-background, panel-edge, and favorite-multi-selection contract revisions, integrated from `7af7adba15b018886dd613c587dfedd9299136b4` through `212b8b569461169a82346562f865ae3f113f3aec`. The three iterations overlap in shared state stores, strings resources, the style settings panel, the Home edit-mode layout, and Drawer application-row UI, so they must not run concurrently on one line; their relative order is otherwise free, with each later implementation line containing the integrated results of the earlier ones it depends on. These dependencies do not bind work to a branch, terminal, contributor, forecast date, or permanent task line.
 
 ## Validation
 
