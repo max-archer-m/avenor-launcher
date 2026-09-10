@@ -71,8 +71,13 @@ internal fun DrawerPanelAppearance(content: @Composable () -> Unit) {
     }
 }
 
+/**
+ * The one shared foreground shadow construction from the drawer shadow resources.
+ * Every surface that renders text or artwork over the wallpaper without the drawer
+ * provider must reuse this instead of re-assembling the values.
+ */
 @Composable
-private fun drawerForegroundShadow(): Shadow {
+internal fun drawerForegroundShadow(): Shadow {
     val color = colorResource(R.color.drawer_foreground_shadow)
     val x = dimensionResource(R.dimen.drawer_foreground_shadow_offset_x)
     val y = dimensionResource(R.dimen.drawer_foreground_shadow_offset_y)

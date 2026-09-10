@@ -96,7 +96,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -3523,22 +3522,7 @@ private fun HomeFavoriteProvisionalList(
                 style = LocalTextStyle.current.copy(
                     // The dock sits over the wallpaper; the instruction carries the same
                     // fixed dark text shadow as the Drawer foreground content.
-                    shadow = with(LocalDensity.current) {
-                        Shadow(
-                            color = colorResource(R.color.drawer_foreground_shadow),
-                            offset = Offset(
-                                x = dimensionResource(
-                                    R.dimen.drawer_foreground_shadow_offset_x,
-                                ).toPx(),
-                                y = dimensionResource(
-                                    R.dimen.drawer_foreground_shadow_offset_y,
-                                ).toPx(),
-                            ),
-                            blurRadius = dimensionResource(
-                                R.dimen.drawer_foreground_shadow_radius,
-                            ).toPx(),
-                        )
-                    },
+                    shadow = drawerForegroundShadow(),
                 ),
             )
             Box(
