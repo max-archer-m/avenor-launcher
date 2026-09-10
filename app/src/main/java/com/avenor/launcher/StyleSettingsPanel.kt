@@ -564,6 +564,7 @@ internal fun StyleBackgroundOpacityBlock(
     enabled: Boolean,
     onOpacityChange: (Int) -> Unit,
     onOpacityChangeFinished: (Int) -> Unit,
+    sliderTestTag: String,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
 ) {
     require(opacity in DrawerDisplaySettings.BACKGROUND_OPACITY_RANGE) {
@@ -643,7 +644,7 @@ internal fun StyleBackgroundOpacityBlock(
                 modifier = Modifier
                     .weight(weight = 1f)
                     .fillMaxHeight()
-                    .testTag(tag = "drawer_background_opacity_slider"),
+                    .testTag(tag = sliderTestTag),
             )
         }
     }
