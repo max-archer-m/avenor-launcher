@@ -160,6 +160,7 @@ import com.avenor.launcher.ui.home.components.awaitHomeHandleLongPress
 import com.avenor.launcher.ui.home.components.detectHomeReorderDrag
 import com.avenor.launcher.ui.home.components.homeEditSurface
 import com.avenor.launcher.ui.drawer.drawerForegroundShadow
+import com.avenor.launcher.ui.style.HomeModuleStylePanel
 
 
 @Composable

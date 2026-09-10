@@ -36,11 +36,11 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.stringResource
 import com.avenor.launcher.R
-import com.avenor.launcher.StyleApplicationSizeBlock
-import com.avenor.launcher.StyleArrangementBlock
-import com.avenor.launcher.StyleBackgroundOpacityBlock
-import com.avenor.launcher.StyleSelectorBlock
-import com.avenor.launcher.styleSettingsPanelSurface
+import com.avenor.launcher.ui.style.StyleApplicationSizeBlock
+import com.avenor.launcher.ui.style.StyleArrangementBlock
+import com.avenor.launcher.ui.style.StyleBackgroundOpacityBlock
+import com.avenor.launcher.ui.style.StyleSelectorBlock
+import com.avenor.launcher.ui.style.styleSettingsPanelSurface
 
 @Composable
 internal fun DrawerDisplaySettingsPanel(

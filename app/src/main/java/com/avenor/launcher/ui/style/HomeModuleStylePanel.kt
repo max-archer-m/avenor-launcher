@@ -1,4 +1,4 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.style
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -22,6 +22,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
+import com.avenor.launcher.FavoriteListSize
+import com.avenor.launcher.FavoriteNamePlacement
+import com.avenor.launcher.OrderedFavoriteModule
+import com.avenor.launcher.OrderedFavoriteModuleType
+import com.avenor.launcher.R
+import com.avenor.launcher.iconSizeResource
 
 @Composable
 internal fun HomeModuleStylePanel(

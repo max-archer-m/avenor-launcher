@@ -1,4 +1,4 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.style
 
 import android.annotation.SuppressLint
 import android.view.HapticFeedbackConstants
@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import kotlin.math.roundToInt
 import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.R
 
 @Composable
 internal fun StyleApplicationSizeBlock(
@@ -327,7 +328,7 @@ private fun StyleTwoOptionSelector(
         modifier = Modifier
             .size(
                 width = dimensionResource(
-                    id = if (wide) R.dimen.drawer_background_selector_width
+                    id = if (wide) R.dimen.style_settings_selector_wide_width
                     else R.dimen.style_settings_selector_width,
                 ),
                 height = dimensionResource(id = R.dimen.style_settings_stepper_target_size),
