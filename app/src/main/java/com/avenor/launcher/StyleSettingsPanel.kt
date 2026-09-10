@@ -518,3 +518,22 @@ private fun StyleStepperControl(
 @Composable
 private fun styleSettingsContentAlpha(enabled: Boolean): Float =
     if (enabled) 1f else integerResource(R.integer.disabled_content_alpha_percent) / 100f
+
+/**
+ * The one shared style settings panel surface consumed by both hosts: border, corner
+ * radius, and surface color. Hosts keep only their own placement, sizing, scrolling, and
+ * insets; they must not re-assemble these surface values.
+ */
+@Composable
+internal fun Modifier.styleSettingsPanelSurface(): Modifier {
+    val panelCornerRadius = dimensionResource(R.dimen.style_settings_panel_corner_radius)
+    val panelShape = RoundedCornerShape(size = panelCornerRadius)
+    return this
+        .clip(shape = panelShape)
+        .background(color = colorResource(R.color.avenor_sheet_surface))
+        .border(
+            width = dimensionResource(R.dimen.style_settings_panel_border_width),
+            color = colorResource(R.color.style_settings_panel_border),
+            shape = panelShape,
+        )
+}

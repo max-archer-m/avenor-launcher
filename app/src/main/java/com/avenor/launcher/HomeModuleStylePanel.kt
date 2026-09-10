@@ -2,7 +2,6 @@ package com.avenor.launcher
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,17 +9,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.stringResource
@@ -37,9 +32,6 @@ internal fun HomeModuleStylePanel(
     onChangeNamePlacement: (FavoriteNamePlacement) -> Unit,
     onChangeItemsPerRow: (Int) -> Unit,
 ) {
-    val panelShape = RoundedCornerShape(
-        dimensionResource(R.dimen.style_settings_panel_corner_radius),
-    )
     val animationDuration = integerResource(
         R.integer.short_property_animation_duration_ms,
     )
@@ -47,16 +39,10 @@ internal fun HomeModuleStylePanel(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(max = maximumHeight)
+            .styleSettingsPanelSurface()
             .animateContentSize(
                 animationSpec = tween(durationMillis = animationDuration),
             )
-            .shadow(
-                elevation = dimensionResource(R.dimen.style_settings_panel_elevation),
-                shape = panelShape,
-                clip = false,
-            )
-            .clip(panelShape)
-            .background(colorResource(R.color.avenor_sheet_surface))
             .verticalScroll(rememberScrollState())
             .testTag("home_style_panel"),
     ) {
