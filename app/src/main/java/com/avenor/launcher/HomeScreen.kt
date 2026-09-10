@@ -66,7 +66,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -91,6 +96,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -1209,29 +1215,125 @@ internal fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing)
-            .padding(dimensionResource(R.dimen.home_content_padding))
             .onGloballyPositioned { dragRootOriginInWindow = it.positionInWindow() },
     ) {
+        val contentPadding = dimensionResource(R.dimen.home_content_padding)
+        val animationDuration = integerResource(R.integer.short_property_animation_duration_ms)
+        val orderedModules = (favoriteState as? FavoriteReadState.Readable)
+            ?.orderedModules
+            .orEmpty()
+        val previewAggregate = editTransaction.previewAggregate(
+            (favoriteState as? FavoriteReadState.Readable)?.aggregate ?: FavoriteAggregate(),
+        )
+        val displayedModules = orderedModules.withPresentationFrom(previewAggregate)
+        val selectedModule = displayedModules.firstOrNull { it.id == selectedModuleId }
+        val styleSaving = applicationEditingSaving || editMutationJob?.isActive == true ||
+            moduleDragSession != null
         val stylePanelMaximumHeight = (
             maxHeight -
                 dimensionResource(R.dimen.home_edit_dock_height) -
+                contentPadding -
                 dimensionResource(R.dimen.home_style_panel_minimum_list_viewport)
             ).coerceAtLeast(0.dp)
         Column(modifier = Modifier.fillMaxSize()) {
-            if (!editMode || !stylePanelExpanded) {
-                HomeBasicInformation(
-                    editMode = editMode,
-                    accessibilityLockController = accessibilityLockController,
-                    onRequestEditMode = onRequestEditMode,
+            if (editMode) {
+                HomeEditDock(
+                    hasFavorites = orderedModules.isNotEmpty(),
+                    expanded = stylePanelExpanded,
+                    onToggleExpanded = {
+                        if (!applicationMovementActive) {
+                            onStylePanelExpandedChange(!stylePanelExpanded)
+                        }
+                    },
                 )
             }
-            if (!editMode || !stylePanelExpanded) {
+            if (editMode) {
+                AnimatedContent(
+                    targetState = stylePanelExpanded,
+                    modifier = Modifier.padding(horizontal = contentPadding),
+                    transitionSpec = {
+                        expandVertically(
+                            animationSpec = tween(durationMillis = animationDuration),
+                            expandFrom = Alignment.Top,
+                        ) togetherWith shrinkVertically(
+                            animationSpec = tween(durationMillis = animationDuration),
+                            shrinkTowards = Alignment.Top,
+                        )
+                    },
+                    label = "home_panel_slot_swap",
+                ) { panelExpanded ->
+                    if (panelExpanded) {
+                        Column {
+                            HomeModuleStylePanel(
+                                selectedModule = selectedModule,
+                                enabled = !styleSaving,
+                                maximumHeight = stylePanelMaximumHeight,
+                                onChangeSize = { size ->
+                                    selectedModule?.let { module ->
+                                        commitVerticalModuleStyle(module.id) {
+                                            it.copy(listSize = size)
+                                        }
+                                    }
+                                },
+                                onChangeNamePlacement = { placement ->
+                                    selectedModule?.let { module ->
+                                        commitVerticalModuleStyle(module.id) { container ->
+                                            container.copy(
+                                                namePlacement = placement,
+                                                itemsPerRow = if (
+                                                    placement == FavoriteNamePlacement.Right
+                                                ) {
+                                                    container.itemsPerRow.coerceAtMost(2)
+                                                } else {
+                                                    container.itemsPerRow
+                                                },
+                                            )
+                                        }
+                                    }
+                                },
+                                onChangeItemsPerRow = { count ->
+                                    selectedModule?.let { module ->
+                                        commitVerticalModuleStyle(module.id) {
+                                            it.copy(itemsPerRow = count)
+                                        }
+                                    }
+                                },
+                            )
+                            Spacer(Modifier.height(dimensionResource(R.dimen.home_module_spacing)))
+                        }
+                    } else {
+                        Column {
+                            HomeBasicInformation(
+                                editMode = true,
+                                accessibilityLockController = accessibilityLockController,
+                                onRequestEditMode = onRequestEditMode,
+                            )
+                            Spacer(Modifier.height(dimensionResource(R.dimen.home_module_spacing)))
+                        }
+                    }
+                }
+            } else {
+                HomeBasicInformation(
+                    editMode = false,
+                    accessibilityLockController = accessibilityLockController,
+                    onRequestEditMode = onRequestEditMode,
+                    modifier = Modifier.padding(
+                        top = contentPadding,
+                        start = contentPadding,
+                        end = contentPadding,
+                    ),
+                )
                 Spacer(Modifier.height(dimensionResource(R.dimen.home_module_spacing)))
             }
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
+                    .padding(
+                        start = contentPadding,
+                        end = contentPadding,
+                        bottom = contentPadding,
+                    )
                     .onGloballyPositioned(onGloballyPositioned = { coordinates ->
                         favoriteEnterBatch.exitTransitions?.viewport = Rect(
                             offset = coordinates.positionInWindow(), size = coordinates.size.toSize(),
@@ -2015,65 +2117,6 @@ internal fun HomeScreen(
                         },
                     )
                 }
-            }
-            if (editMode) {
-                val orderedModules = (favoriteState as? FavoriteReadState.Readable)
-                    ?.orderedModules
-                    .orEmpty()
-                val previewAggregate = editTransaction.previewAggregate(
-                    (favoriteState as? FavoriteReadState.Readable)?.aggregate
-                        ?: FavoriteAggregate(),
-                )
-                val displayedModules = orderedModules.withPresentationFrom(previewAggregate)
-                val selectedModule = displayedModules.firstOrNull {
-                    it.id == selectedModuleId
-                }
-                val styleSaving = applicationEditingSaving || editMutationJob?.isActive == true ||
-                    moduleDragSession != null
-                if (stylePanelExpanded) {
-                    HomeModuleStylePanel(
-                        selectedModule = selectedModule,
-                        enabled = !styleSaving,
-                        maximumHeight = stylePanelMaximumHeight,
-                        onChangeSize = { size ->
-                            selectedModule?.let { module ->
-                                commitVerticalModuleStyle(module.id) {
-                                    it.copy(listSize = size)
-                                }
-                            }
-                        },
-                        onChangeNamePlacement = { placement ->
-                            selectedModule?.let { module ->
-                                commitVerticalModuleStyle(module.id) { container ->
-                                    container.copy(
-                                        namePlacement = placement,
-                                        itemsPerRow = if (
-                                            placement == FavoriteNamePlacement.Right
-                                        ) {
-                                            container.itemsPerRow.coerceAtMost(2)
-                                        } else {
-                                            container.itemsPerRow
-                                        },
-                                    )
-                                }
-                            }
-                        },
-                        onChangeItemsPerRow = { count ->
-                            selectedModule?.let { module ->
-                                commitVerticalModuleStyle(module.id) {
-                                    it.copy(itemsPerRow = count)
-                                }
-                            }
-                        },
-                    )
-                }
-                HomeEditDock(
-                    hasFavorites = orderedModules.isNotEmpty(),
-                    expanded = stylePanelExpanded,
-                    onToggleExpanded = {
-                        if (!applicationMovementActive) onStylePanelExpandedChange(!stylePanelExpanded)
-                    },
-                )
             }
         }
         HomeFavoriteExitOverlay(owner = favoriteEnterBatch.exitTransitions, rootOrigin = dragRootOriginInWindow)
@@ -3473,7 +3516,30 @@ private fun HomeFavoriteProvisionalList(
                 maxLines = 1,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Medium,
-                fontSize = dimensionResource(R.dimen.home_edit_dock_text_size).value.sp,
+                fontSize = dimensionResource(R.dimen.style_settings_secondary_text_size).value.sp,
+                lineHeight = dimensionResource(
+                    R.dimen.style_settings_secondary_line_height,
+                ).value.sp,
+                style = LocalTextStyle.current.copy(
+                    // The dock sits over the wallpaper; the instruction carries the same
+                    // fixed dark text shadow as the Drawer foreground content.
+                    shadow = with(LocalDensity.current) {
+                        Shadow(
+                            color = colorResource(R.color.drawer_foreground_shadow),
+                            offset = Offset(
+                                x = dimensionResource(
+                                    R.dimen.drawer_foreground_shadow_offset_x,
+                                ).toPx(),
+                                y = dimensionResource(
+                                    R.dimen.drawer_foreground_shadow_offset_y,
+                                ).toPx(),
+                            ),
+                            blurRadius = dimensionResource(
+                                R.dimen.drawer_foreground_shadow_radius,
+                            ).toPx(),
+                        )
+                    },
+                ),
             )
             Box(
                 modifier = Modifier

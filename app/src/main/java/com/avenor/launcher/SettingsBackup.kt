@@ -109,7 +109,7 @@ internal object SettingsBackupJson {
                 "sectionAnchorPresentation",
                 settings.sectionAnchorPresentation.storageValue,
             )
-            .put("backgroundMode", settings.backgroundMode.storageValue)
+            .put("backgroundOpacity", settings.backgroundOpacity)
         return JSONObject()
             .put("schemaVersion", BACKUP_SCHEMA_VERSION)
             .put("favorites", favorites)
@@ -219,10 +219,14 @@ internal object SettingsBackupJson {
                 ) { value ->
                     drawerSectionAnchorPresentationFromStorageValue(value)
                 } ?: return null,
-                backgroundMode = displaySettings.enumField(
-                    name = "backgroundMode",
-                    default = defaults.backgroundMode,
-                ) { value -> drawerBackgroundModeFromStorageValue(value) } ?: return null,
+                // Backups written before the opacity contract carried a transparent /
+                // frosted-glass mode choice under "backgroundMode"; that choice is
+                // intentionally not mapped and a missing opacity resolves to the
+                // contracted default.
+                backgroundOpacity = displaySettings.optInt(
+                    "backgroundOpacity",
+                    defaults.backgroundOpacity,
+                ),
             )
         } catch (_: IllegalArgumentException) {
             null
@@ -300,12 +304,6 @@ internal object SettingsBackupJson {
             DrawerSectionAnchorPresentation.LeftSide -> "left_side"
         }
 
-    private val DrawerBackgroundMode.storageValue: String
-        get() = when (this) {
-            DrawerBackgroundMode.Transparent -> "transparent"
-            DrawerBackgroundMode.FrostedGlass -> "frosted_glass"
-        }
-
     private fun drawerApplicationSizeFromStorageValue(
         value: String,
     ): DrawerApplicationSize? = when (value) {
@@ -329,13 +327,6 @@ internal object SettingsBackupJson {
         "left_side" -> DrawerSectionAnchorPresentation.LeftSide
         else -> null
     }
-
-    private fun drawerBackgroundModeFromStorageValue(value: String): DrawerBackgroundMode? =
-        when (value) {
-            "transparent" -> DrawerBackgroundMode.Transparent
-            "frosted_glass" -> DrawerBackgroundMode.FrostedGlass
-            else -> null
-        }
 }
 
 /**

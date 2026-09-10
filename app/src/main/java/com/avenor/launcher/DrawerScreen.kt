@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -34,9 +37,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LocalTextStyle
 import com.avenor.launcher.DrawerIcon as Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
@@ -76,8 +81,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -132,7 +139,12 @@ internal fun DrawerScreen(
     onDragToFavoriteMove: (Offset) -> Unit = {},
     onDragToFavoriteEnd: (Offset?, Boolean) -> Unit = { _, _ -> },
 ) {
-    DrawerBackgroundSurface(mode = displaySettings.backgroundMode, active = active) {
+    // Live drag preview of the background opacity; null means render the persisted value.
+    // It never reaches the display-settings store: the release commits exactly one save.
+    var backgroundOpacityPreview by remember { mutableStateOf<Int?>(null) }
+    DrawerBackgroundSurface(
+        opacity = backgroundOpacityPreview ?: displaySettings.backgroundOpacity,
+    ) {
         var loadRequest by remember { mutableIntStateOf(0) }
         var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
         var hasBeenActive by remember { mutableStateOf(false) }
@@ -160,18 +172,21 @@ internal fun DrawerScreen(
                 ordinaryPosition = null
                 displaySettingsPosition = null
                 displaySettingsPanelVisible = false
+                backgroundOpacityPreview = null
             }
         }
 
         LaunchedEffect(key1 = favoriteSelectionTarget) {
             if (favoriteSelectionTarget != null) {
                 displaySettingsPanelVisible = false
+                backgroundOpacityPreview = null
             }
         }
 
         LaunchedEffect(key1 = state is LaunchableInventoryState.Content) {
             if (state !is LaunchableInventoryState.Content) {
                 displaySettingsPanelVisible = false
+                backgroundOpacityPreview = null
             }
         }
 
@@ -435,8 +450,9 @@ internal fun DrawerScreen(
                     key2 = displaySettingsMutationEnabled,
                     key3 = completeSections,
                 ) {
-                    val geometryChanged = positionedDisplaySettings.copy(backgroundMode = displaySettings.backgroundMode) !=
-                        displaySettings
+                    val geometryChanged = positionedDisplaySettings.copy(
+                        backgroundOpacity = displaySettings.backgroundOpacity,
+                    ) != displaySettings
                     val position = displaySettingsPosition
                     if (!geometryChanged || position == null || searchActive) {
                         positionedDisplaySettings = displaySettings
@@ -553,7 +569,13 @@ internal fun DrawerScreen(
                                 )
                                 onChangeDisplaySettings(candidateSettings)
                             },
-                            onDismiss = { displaySettingsPanelVisible = false },
+                            onPreviewOpacity = { previewOpacity ->
+                                backgroundOpacityPreview = previewOpacity
+                            },
+                            onDismiss = {
+                                displaySettingsPanelVisible = false
+                                backgroundOpacityPreview = null
+                            },
                         )
                     }
                 }
@@ -900,7 +922,7 @@ private fun DrawerSelectionHeader(
 }
 
 @Composable
-private fun DrawerFavoriteSelectionRow(
+internal fun DrawerFavoriteSelectionRow(
     entry: LaunchableEntry,
     displaySettings: DrawerDisplaySettings,
     order: Int?,
@@ -909,8 +931,6 @@ private fun DrawerFavoriteSelectionRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val selected = order != null
-    val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
     val applicationSize = displaySettings.applicationSize
     val rowHeight = dimensionResource(
         id = if (displaySettings.namePlacement == DrawerNamePlacement.Right) {
@@ -919,73 +939,109 @@ private fun DrawerFavoriteSelectionRow(
             applicationSize.belowRowHeightResource()
         },
     )
-    Row(
+    val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
+    val selectedScale = integerResource(R.integer.drawer_selection_selected_scale_percent) / 100f
+    val animationDuration = integerResource(R.integer.short_property_animation_duration_ms)
+    val scale by animateFloatAsState(
+        targetValue = if (order != null) selectedScale else 1f,
+        animationSpec = tween(durationMillis = animationDuration),
+        label = "drawer_favorite_selection_cell_scale",
+    )
+    val stateLabel = when {
+        alreadyFavorite -> stringResource(R.string.drawer_selection_already_favorite_unavailable)
+        order != null -> stringResource(R.string.drawer_selection_order_format, order)
+        else -> stringResource(R.string.drawer_selection_not_selected)
+    }
+    Box(
         modifier = modifier
             .height(height = rowHeight)
+            .alpha(alpha = if (alreadyFavorite) disabledAlpha else 1f)
+            .clickable(
+                interactionSource = null,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick,
+            )
+            .semantics { stateDescription = stateLabel }
+            .testTag(tag = "drawer_favorite_selection_row")
+            .graphicsLayer {
+                // Purely visual: the layout bounds and the click target above stay unchanged.
+                scaleX = scale
+                scaleY = scale
+            }
             .then(
-                if (selected) {
-                    Modifier.background(colorResource(R.color.drawer_selection_background))
+                if (order != null) {
+                    Modifier.border(
+                        width = dimensionResource(R.dimen.drawer_selection_outline_width),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        shape = RoundedCornerShape(
+                            size = dimensionResource(
+                                R.dimen.drawer_selection_outline_corner_radius,
+                            ),
+                        ),
+                    )
                 } else {
                     Modifier
                 },
-            )
-            .alpha(if (alreadyFavorite) disabledAlpha else 1f)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .testTag("drawer_favorite_selection_row")
-            .padding(
-                horizontal = dimensionResource(
-                    id = R.dimen.drawer_application_cell_horizontal_inset,
-                ),
             ),
-        verticalAlignment = Alignment.CenterVertically,
+        contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .width(dimensionResource(R.dimen.drawer_selection_indicator_region_width))
-                .height(height = rowHeight),
-            contentAlignment = Alignment.Center,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(dimensionResource(R.dimen.drawer_selection_indicator_size))
-                    .testTag("drawer_favorite_selection_indicator")
-                    .then(
-                        if (selected) {
-                            Modifier.background(
-                                color = MaterialTheme.colorScheme.onBackground,
-                                shape = CircleShape,
-                            )
-                        } else {
-                            Modifier.border(
-                                width = dimensionResource(
-                                    R.dimen.drawer_selection_indicator_border_width,
-                                ),
-                                color = MaterialTheme.colorScheme.onBackground,
-                                shape = CircleShape,
-                            )
-                        },
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (order != null) {
-                    Text(
-                        text = order.toString(),
-                        color = colorResource(
-                            R.color.drawer_selection_indicator_content,
-                        ),
-                        modifier = Modifier.testTag(
-                            "drawer_favorite_selection_number",
-                        ),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                }
-            }
-        }
         DrawerApplicationContent(
             entry = entry,
             displaySettings = displaySettings,
             searchQuery = null,
-            modifier = Modifier.weight(weight = 1f),
+            modifier = Modifier.padding(
+                horizontal = dimensionResource(
+                    id = R.dimen.drawer_application_cell_horizontal_inset,
+                ),
+            ),
+        )
+        if (order != null) {
+            DrawerFavoriteSelectionBadge(
+                order = order,
+                modifier = Modifier.align(alignment = Alignment.TopStart),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DrawerFavoriteSelectionBadge(
+    order: Int,
+    modifier: Modifier = Modifier,
+) {
+    val badgeShape = RoundedCornerShape(
+        topStart = dimensionResource(R.dimen.drawer_selection_badge_corner_radius),
+        topEnd = 0.dp,
+        bottomStart = 0.dp,
+        bottomEnd = dimensionResource(R.dimen.drawer_selection_badge_corner_radius),
+    )
+    // Overlays the cell without layout space, focus, or a second description; the row's
+    // state description already announces the order.
+    Box(
+        modifier = modifier
+            .defaultMinSize(
+                minWidth = dimensionResource(R.dimen.drawer_selection_badge_min_size),
+                minHeight = dimensionResource(R.dimen.drawer_selection_badge_min_size),
+            )
+            .background(color = MaterialTheme.colorScheme.onBackground, shape = badgeShape)
+            .padding(
+                horizontal = dimensionResource(R.dimen.drawer_selection_badge_content_padding),
+            )
+            .clearAndSetSemantics { }
+            .testTag(tag = "drawer_favorite_selection_number"),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = order.toString(),
+            color = colorResource(R.color.avenor_sheet_surface),
+            fontWeight = FontWeight.Medium,
+            fontSize = dimensionResource(R.dimen.style_settings_secondary_text_size).value.sp,
+            lineHeight = dimensionResource(R.dimen.style_settings_secondary_line_height).value.sp,
+            // The badge sits on an opaque primaryTextColor surface; the drawer-wide
+            // foreground shadow applies only to content over the variable background.
+            style = LocalTextStyle.current.copy(shadow = null),
         )
     }
 }

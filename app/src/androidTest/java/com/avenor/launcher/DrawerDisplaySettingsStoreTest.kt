@@ -28,7 +28,7 @@ class DrawerDisplaySettingsStoreTest {
         val entered = CountDownLatch(1)
         val release = CountDownLatch(1)
         val readerStarted = CountDownLatch(1)
-        val candidate = DrawerDisplaySettings(backgroundMode = DrawerBackgroundMode.Transparent)
+        val candidate = DrawerDisplaySettings(backgroundOpacity = 0)
         val oldStore = DrawerDisplaySettingsStore(object : AtomicFile(file) {
             override fun startWrite(): FileOutputStream {
                 val stream = super.startWrite()
@@ -81,7 +81,7 @@ class DrawerDisplaySettingsStoreTest {
                 namePlacement = DrawerNamePlacement.Below,
                 itemsPerRow = 4,
                 sectionAnchorPresentation = DrawerSectionAnchorPresentation.LeftSide,
-                backgroundMode = DrawerBackgroundMode.Transparent,
+                backgroundOpacity = 0,
             )
             saving = launch(start = CoroutineStart.LAZY) { store.replace(candidate) }
             saving.start()
@@ -116,7 +116,7 @@ class DrawerDisplaySettingsStoreTest {
                 sectionAnchorPresentation = DrawerSectionAnchorPresentation.LeftSide,
             )
             assertTrue(store.replace(original))
-            val candidate = original.copy(backgroundMode = DrawerBackgroundMode.Transparent)
+            val candidate = original.copy(backgroundOpacity = 0)
             fail = true
             assertFalse(store.replace(candidate))
             assertEquals(DrawerDisplaySettingsReadState.Readable(original), store.state.value)
@@ -158,7 +158,7 @@ class DrawerDisplaySettingsStoreTest {
             namePlacement = DrawerNamePlacement.Below,
             itemsPerRow = 4,
             sectionAnchorPresentation = DrawerSectionAnchorPresentation.LeftSide,
-            backgroundMode = DrawerBackgroundMode.Transparent,
+            backgroundOpacity = 0,
         )
         val store = DrawerDisplaySettingsStore(file = file)
         store.load()
@@ -193,7 +193,7 @@ class DrawerDisplaySettingsStoreTest {
             namePlacement = DrawerNamePlacement.Below,
             itemsPerRow = 1,
             sectionAnchorPresentation = DrawerSectionAnchorPresentation.Inline,
-            backgroundMode = DrawerBackgroundMode.FrostedGlass,
+            backgroundOpacity = DrawerDisplaySettings.DEFAULT_BACKGROUND_OPACITY,
         )
         assertEquals(
             DrawerDisplaySettingsReadState.Readable(settings = expected),
@@ -311,7 +311,7 @@ class DrawerDisplaySettingsStoreTest {
             assertTrue(
                 store.replace(
                     settings = DrawerDisplaySettings(
-                        backgroundMode = DrawerBackgroundMode.Transparent,
+                        backgroundOpacity = 0,
                     ),
                 ),
             )
@@ -354,6 +354,50 @@ class DrawerDisplaySettingsStoreTest {
         "name_placement" to "right",
         "items_per_row" to "1",
         "section_anchor" to "inline",
-        "background" to "frosted_glass",
+        "background_opacity" to "50",
     )
+
+    @Test
+    fun legacyBackgroundModeIsNotMappedAndMissingOpacityAdoptsTheDefault(): Unit = runBlocking {
+        val file = temporarySettingsFile()
+        writeRawDocument(
+            file = file,
+            fields = listOf(
+                "application_size" to "large",
+                "background" to "frosted_glass",
+            ),
+        )
+        val store = DrawerDisplaySettingsStore(file = file)
+
+        store.load()
+
+        assertEquals(
+            DrawerDisplaySettingsReadState.Readable(
+                settings = DrawerDisplaySettings(
+                    applicationSize = DrawerApplicationSize.Large,
+                    backgroundOpacity = DrawerDisplaySettings.DEFAULT_BACKGROUND_OPACITY,
+                ),
+            ),
+            store.state.value,
+        )
+
+        // The readable adopted state is rewritten in the current form without the
+        // legacy mode field, so a reload observes the identical state.
+        val reloadedStore = DrawerDisplaySettingsStore(file = file)
+        reloadedStore.load()
+        assertEquals(store.state.value, reloadedStore.state.value)
+        deleteSettingsFiles(file = file)
+    }
+
+    @Test
+    fun outOfRangeOpacityPublishesFailure(): Unit = runBlocking {
+        val file = temporarySettingsFile()
+        writeRawDocument(file = file, fields = listOf("background_opacity" to "150"))
+        val store = DrawerDisplaySettingsStore(file = file)
+
+        store.load()
+
+        assertEquals(DrawerDisplaySettingsReadState.ReadFailure, store.state.value)
+        deleteSettingsFiles(file = file)
+    }
 }

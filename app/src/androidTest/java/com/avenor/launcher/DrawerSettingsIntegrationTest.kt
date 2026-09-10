@@ -1,5 +1,6 @@
 package com.avenor.launcher
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.graphics.Color
@@ -20,6 +21,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.action.ViewActions.swipeRight
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -45,6 +47,7 @@ class DrawerSettingsIntegrationTest {
     @Test fun failedSaveWithPanelOpenReportsOnceAndAllowsRetry() =
         exerciseSave(true, dismissDuringSave = false)
 
+    @SuppressLint("CheckResult")
     @Test fun recreationDuringWriteWaitsForCompletePersistedState() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val directory = File(context.cacheDir, "drawer-recreation-${UUID.randomUUID()}")
@@ -70,7 +73,8 @@ class DrawerSettingsIntegrationTest {
             }
             composeRule.waitUntil(5_000) { oldStore.state.value is DrawerDisplaySettingsReadState.Readable }
             openDrawerPanel()
-            composeRule.onNodeWithTag("drawer_background_0").performClick()
+            composeRule.onNodeWithTag("drawer_background_opacity_slider")
+                .performTouchInput { swipeRight() }
             assertTrue(entered.await(5, TimeUnit.SECONDS))
             composeRule.activityRule.scenario.recreate()
             val recreatedStore = DrawerDisplaySettingsStore(file)
@@ -86,11 +90,11 @@ class DrawerSettingsIntegrationTest {
             composeRule.onNodeWithTag("drawer_display_settings_entry").assertDoesNotExist()
             release.countDown()
             val expected = DrawerDisplaySettingsReadState.Readable(
-                DrawerDisplaySettings(backgroundMode = DrawerBackgroundMode.Transparent),
+                DrawerDisplaySettings(backgroundOpacity = 100),
             )
             composeRule.waitUntil(5_000) { recreatedStore.state.value == expected }
             composeRule.onNodeWithTag("drawer_display_settings_entry").performClick()
-            composeRule.onNodeWithTag("drawer_background_0").assertIsSelected()
+            composeRule.onNodeWithTag("drawer_background_opacity_slider").assertExists()
         } finally {
             release.countDown()
             runBlocking { oldStore.load() }
@@ -99,6 +103,7 @@ class DrawerSettingsIntegrationTest {
         }
     }
 
+    @SuppressLint("CheckResult")
     private fun exerciseSave(
         failFirstWrite: Boolean,
         useBack: Boolean = false,
@@ -118,7 +123,7 @@ class DrawerSettingsIntegrationTest {
             itemsPerRow = 4,
             sectionAnchorPresentation = DrawerSectionAnchorPresentation.LeftSide,
         )
-        val candidate = initial.copy(backgroundMode = DrawerBackgroundMode.Transparent)
+        val candidate = initial.copy(backgroundOpacity = 100)
         runBlocking {
             DrawerDisplaySettingsStore(file).apply { load(); assertTrue(replace(initial)) }
         }
@@ -155,17 +160,19 @@ class DrawerSettingsIntegrationTest {
             }
             composeRule.waitUntil(5_000) { store.state.value is DrawerDisplaySettingsReadState.Readable }
             openDrawerPanel()
-            composeRule.onNodeWithTag("drawer_background_0").performClick()
+            composeRule.onNodeWithTag("drawer_background_opacity_slider")
+                .performTouchInput { swipeRight() }
             assertTrue(entered.await(5, TimeUnit.SECONDS))
-            composeRule.onNodeWithTag("drawer_background_0").assertIsSelected()
+            composeRule.onNodeWithTag("drawer_background_opacity_slider").assertIsNotEnabled()
             if (dismissDuringSave) {
                 dismissPanel(useBack)
                 composeRule.onNodeWithTag("drawer_display_settings_entry").performClick()
             }
             for (tag in listOf("drawer_application_size_option_0", "drawer_name_placement_0",
-                "drawer_section_anchor_0", "drawer_background_1", "drawer_items_per_row_decrement")) {
+                "drawer_section_anchor_0", "drawer_items_per_row_decrement")) {
                 composeRule.onNodeWithTag(tag).assertIsNotEnabled()
             }
+            composeRule.onNodeWithTag("drawer_background_opacity_slider").assertIsNotEnabled()
             if (dismissDuringSave) dismissPanel(useBack)
             release.countDown()
             assertTrue(finished.await(5, TimeUnit.SECONDS))
@@ -177,16 +184,16 @@ class DrawerSettingsIntegrationTest {
             } else {
                 composeRule.onNodeWithTag("drawer_display_settings_panel").assertIsDisplayed()
             }
-            composeRule.waitUntil(5_000) {
-                runCatching {
-                    composeRule.onNodeWithTag("drawer_background_0").assertIsEnabled()
-                }.isSuccess
-            }
             if (failFirstWrite) {
                 assertEquals(1, failureNotifications.get())
-                composeRule.onNodeWithTag("drawer_background_1").assertIsSelected()
                 assertEquals(DrawerDisplaySettingsReadState.Readable(initial), store.state.value)
-                composeRule.onNodeWithTag("drawer_background_0").performClick()
+                composeRule.onNodeWithTag("drawer_background_opacity_slider")
+                    .performTouchInput { swipeRight() }
+            } else {
+                composeRule.waitUntil(5_000) {
+                    (store.state.value as? DrawerDisplaySettingsReadState.Readable)
+                        ?.settings?.backgroundOpacity == 100
+                }
             }
             composeRule.waitUntil(5_000) {
                 store.state.value == DrawerDisplaySettingsReadState.Readable(candidate)
@@ -208,7 +215,7 @@ class DrawerSettingsIntegrationTest {
             composeRule.waitUntil(5_000) { recreatedStore.state.value is DrawerDisplaySettingsReadState.Readable }
             openDrawerPanel()
             for (tag in listOf("drawer_application_size_option_2", "drawer_name_placement_1",
-                "drawer_section_anchor_1", "drawer_background_0")) {
+                "drawer_section_anchor_1")) {
                 composeRule.onNodeWithTag(tag).assertIsSelected()
             }
             assertEquals(DrawerDisplaySettingsReadState.Readable(candidate), recreatedStore.state.value)

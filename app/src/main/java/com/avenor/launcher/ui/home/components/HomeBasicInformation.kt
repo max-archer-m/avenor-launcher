@@ -54,6 +54,7 @@ internal fun HomeBasicInformation(
     editMode: Boolean,
     accessibilityLockController: AccessibilityLockController,
     onRequestEditMode: () -> Unit,
+    modifier: Modifier = Modifier,
     clock: () -> ZonedDateTime = { ZonedDateTime.now() },
 ) {
     val context = LocalContext.current
@@ -69,7 +70,7 @@ internal fun HomeBasicInformation(
     }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
             .homeEditSurface(enabled = editMode),

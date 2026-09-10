@@ -71,7 +71,7 @@ class SettingsBackupJsonTest {
     fun missingFieldInsidePresentSectionRestoresThatFieldDefault() {
         val displaySettings = validBackupDocument()
             .getJSONObject("displaySettings")
-            .remove("backgroundMode")
+            .remove("backgroundOpacity")
         val document = validBackupDocument()
             .put("displaySettings", displaySettings)
 
@@ -79,8 +79,8 @@ class SettingsBackupJsonTest {
 
         assertNotNull(parsed)
         assertEquals(
-            DrawerBackgroundMode.FrostedGlass,
-            parsed?.settings?.backgroundMode,
+            DrawerDisplaySettings.DEFAULT_BACKGROUND_OPACITY,
+            parsed?.settings?.backgroundOpacity,
         )
     }
 
@@ -205,7 +205,7 @@ class SettingsBackupJsonTest {
         namePlacement = DrawerNamePlacement.Below,
         itemsPerRow = 2,
         sectionAnchorPresentation = DrawerSectionAnchorPresentation.LeftSide,
-        backgroundMode = DrawerBackgroundMode.Transparent,
+        backgroundOpacity = 100,
     )
 
     private fun identity(serial: Long) = LaunchableIdentity(

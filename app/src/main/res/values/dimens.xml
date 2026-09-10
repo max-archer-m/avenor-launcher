@@ -100,11 +100,10 @@
 
     <!-- Home screen / Edit mode / Module surface and bottom dock -->
     <dimen name="home_edit_surface_radius">8dp</dimen>
-    <dimen name="home_edit_dock_height">32dp</dimen>
+    <dimen name="home_edit_dock_height">48dp</dimen>
     <dimen name="home_edit_dock_affordance_width">48dp</dimen>
     <dimen name="home_edit_dock_icon_size">24dp</dimen>
     <dimen name="home_edit_dock_text_padding">8dp</dimen>
-    <dimen name="home_edit_dock_text_size">14sp</dimen>
 
     <!-- Home screen / Edit mode / Module selection and drag decoration -->
     <dimen name="home_module_mark_arm">16dp</dimen>
@@ -133,7 +132,7 @@
     <dimen name="style_settings_informational_row_height">48dp</dimen>
     <dimen name="style_settings_panel_row_inset">12dp</dimen>
     <dimen name="style_settings_panel_corner_radius">12dp</dimen>
-    <dimen name="style_settings_panel_elevation">12dp</dimen>
+    <dimen name="style_settings_panel_border_width">1dp</dimen>
     <dimen name="style_settings_secondary_text_size">14sp</dimen>
     <dimen name="style_settings_secondary_line_height">20sp</dimen>
     <dimen name="style_settings_size_option_end_padding">16dp</dimen>
@@ -152,6 +151,7 @@
 
     <!-- Home screen / Module style editor / Quantity stepper -->
     <dimen name="style_settings_control_gap">8dp</dimen>
+    <dimen name="style_settings_readout_slider_gap">16dp</dimen>
     <dimen name="style_settings_stepper_target_size">40dp</dimen>
     <dimen name="style_settings_stepper_visible_size">28dp</dimen>
     <dimen name="style_settings_stepper_value_width">32dp</dimen>
@@ -214,10 +214,12 @@
     <dimen name="drawer_display_settings_horizontal_margin">8dp</dimen>
     <dimen name="drawer_display_settings_bottom_margin">8dp</dimen>
 
-    <!-- Drawer / Favorite selection mode / Top app bar and row indicator -->
-    <dimen name="drawer_selection_indicator_region_width">40dp</dimen>
-    <dimen name="drawer_selection_indicator_size">24dp</dimen>
-    <dimen name="drawer_selection_indicator_border_width">1dp</dimen>
+    <!-- Drawer / Favorite selection mode / Selected cell treatment -->
+    <dimen name="drawer_selection_outline_width">2dp</dimen>
+    <dimen name="drawer_selection_outline_corner_radius">12dp</dimen>
+    <dimen name="drawer_selection_badge_corner_radius">12dp</dimen>
+    <dimen name="drawer_selection_badge_min_size">20dp</dimen>
+    <dimen name="drawer_selection_badge_content_padding">4dp</dimen>
 
     <!-- Settings screen / Root layout and top app bar -->
     <dimen name="settings_top_bar_min_height">56dp</dimen>

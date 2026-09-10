@@ -39,6 +39,7 @@ class StyleSettingsInteractionTest {
                     settings = settings,
                     enabled = true,
                     onChangeSettings = { settings = it; changes++ },
+                    onPreviewOpacity = {},
                     onDismiss = {},
                 )
             }
@@ -73,6 +74,7 @@ class StyleSettingsInteractionTest {
                     enabled = true,
                     // Model a save failure rolled back before the next composition.
                     onChangeSettings = { changes++ },
+                    onPreviewOpacity = {},
                     onDismiss = {},
                 )
             }
@@ -94,6 +96,7 @@ class StyleSettingsInteractionTest {
                     settings = settings,
                     enabled = !saving,
                     onChangeSettings = { settings = it; saving = true },
+                    onPreviewOpacity = {},
                     onDismiss = { dismissals++ },
                 )
             }
@@ -120,6 +123,7 @@ class StyleSettingsInteractionTest {
                     settings = settings,
                     enabled = true,
                     onChangeSettings = { settings = it },
+                    onPreviewOpacity = {},
                     onDismiss = {},
                 )
             }

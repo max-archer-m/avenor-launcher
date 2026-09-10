@@ -19,7 +19,7 @@ class SettingsBackupRestoreCoordinatorTest {
         val backup = SettingsBackupState(
             aggregate = aggregateWithIdentity(serial = 2),
             settings = DrawerDisplaySettings(
-                backgroundMode = DrawerBackgroundMode.Transparent,
+                backgroundOpacity = 100,
             ),
         )
 
@@ -43,7 +43,7 @@ class SettingsBackupRestoreCoordinatorTest {
         val backup = SettingsBackupState(
             aggregate = aggregateWithIdentity(serial = 2),
             settings = DrawerDisplaySettings(
-                backgroundMode = DrawerBackgroundMode.Transparent,
+                backgroundOpacity = 100,
             ),
         )
 
