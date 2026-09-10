@@ -33,23 +33,26 @@ internal enum class DrawerSectionAnchorPresentation {
     LeftSide,
 }
 
-internal enum class DrawerBackgroundMode {
-    Transparent,
-    FrostedGlass,
-}
-
 internal data class DrawerDisplaySettings(
     val applicationSize: DrawerApplicationSize = DrawerApplicationSize.Medium,
     val namePlacement: DrawerNamePlacement = DrawerNamePlacement.Right,
     val itemsPerRow: Int = 1,
     val sectionAnchorPresentation: DrawerSectionAnchorPresentation =
         DrawerSectionAnchorPresentation.Inline,
-    val backgroundMode: DrawerBackgroundMode = DrawerBackgroundMode.FrostedGlass,
+    val backgroundOpacity: Int = DEFAULT_BACKGROUND_OPACITY,
 ) {
     init {
         require(itemsPerRow in validItemsPerRowRange(namePlacement = namePlacement)) {
             "Invalid Drawer items-per-row count for the selected name placement"
         }
+        require(backgroundOpacity in BACKGROUND_OPACITY_RANGE) {
+            "Invalid Drawer background opacity"
+        }
+    }
+
+    companion object {
+        const val DEFAULT_BACKGROUND_OPACITY = 50
+        val BACKGROUND_OPACITY_RANGE = 0..100
     }
 }
 
@@ -226,9 +229,14 @@ internal class DrawerDisplaySettingsStore internal constructor(
                 sectionAnchorPresentation = fields[FIELD_SECTION_ANCHOR]?.let(
                     ::drawerSectionAnchorPresentationFromStorageValue,
                 ) ?: defaults.sectionAnchorPresentation,
-                backgroundMode = fields[FIELD_BACKGROUND]?.let(
-                    ::drawerBackgroundModeFromStorageValue,
-                ) ?: defaults.backgroundMode,
+                // Version 1 stored a transparent/frosted-glass mode choice under a
+                // different field name; that choice is intentionally not mapped and a
+                // missing opacity resolves to the contracted default.
+                backgroundOpacity = fields[FIELD_BACKGROUND_OPACITY]?.let { value ->
+                    requireNotNull(value.toIntOrNull()) {
+                        "Invalid Drawer background opacity"
+                    }
+                } ?: defaults.backgroundOpacity,
             )
             DrawerDisplaySettingsDocument(
                 settings = settings,
@@ -260,8 +268,8 @@ internal class DrawerDisplaySettingsStore internal constructor(
                 value = settings.sectionAnchorPresentation.storageValue,
             )
             output.writeField(
-                key = FIELD_BACKGROUND,
-                value = settings.backgroundMode.storageValue,
+                key = FIELD_BACKGROUND_OPACITY,
+                value = settings.backgroundOpacity.toString(),
             )
             output.flush()
             atomicFile.finishWrite(outputStream)
@@ -286,21 +294,21 @@ internal class DrawerDisplaySettingsStore internal constructor(
         const val BACKUP_SUFFIX = ".bak"
         const val MAGIC = 0x44525331
         const val MIN_READABLE_SCHEMA_VERSION = 1
-        const val SCHEMA_VERSION = 1
+        const val SCHEMA_VERSION = 2
         const val MAX_FIELD_COUNT = 64
 
         const val FIELD_APPLICATION_SIZE = "application_size"
         const val FIELD_NAME_PLACEMENT = "name_placement"
         const val FIELD_ITEMS_PER_ROW = "items_per_row"
         const val FIELD_SECTION_ANCHOR = "section_anchor"
-        const val FIELD_BACKGROUND = "background"
+        const val FIELD_BACKGROUND_OPACITY = "background_opacity"
 
         val KNOWN_FIELDS = setOf(
             FIELD_APPLICATION_SIZE,
             FIELD_NAME_PLACEMENT,
             FIELD_ITEMS_PER_ROW,
             FIELD_SECTION_ANCHOR,
-            FIELD_BACKGROUND,
+            FIELD_BACKGROUND_OPACITY,
         )
     }
 }
@@ -347,18 +355,4 @@ private fun drawerSectionAnchorPresentationFromStorageValue(
     "inline" -> DrawerSectionAnchorPresentation.Inline
     "left_side" -> DrawerSectionAnchorPresentation.LeftSide
     else -> throw IllegalArgumentException("Invalid Drawer section-anchor presentation")
-}
-
-private val DrawerBackgroundMode.storageValue: String
-    get() = when (this) {
-        DrawerBackgroundMode.Transparent -> "transparent"
-        DrawerBackgroundMode.FrostedGlass -> "frosted_glass"
-    }
-
-private fun drawerBackgroundModeFromStorageValue(
-    value: String,
-): DrawerBackgroundMode = when (value) {
-    "transparent" -> DrawerBackgroundMode.Transparent
-    "frosted_glass" -> DrawerBackgroundMode.FrostedGlass
-    else -> throw IllegalArgumentException("Invalid Drawer background mode")
 }

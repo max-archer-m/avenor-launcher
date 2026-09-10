@@ -1,6 +1,7 @@
 package com.avenor.launcher
 
 import android.annotation.SuppressLint
+import android.view.HapticFeedbackConstants
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,13 +23,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -36,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.colorResource
@@ -47,11 +55,15 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import kotlin.math.roundToInt
 
 @Composable
 internal fun StyleApplicationSizeBlock(
@@ -536,4 +548,103 @@ internal fun Modifier.styleSettingsPanelSurface(): Modifier {
             color = colorResource(R.color.style_settings_panel_border),
             shape = panelShape,
         )
+}
+
+/**
+ * The background block: one percentage readout and one platform-standard continuous
+ * progress slider on a shared `48dp` content row. The readout is start-aligned inside a
+ * fixed-width reservation measured at the complete widest value `100%`, is read-only,
+ * and exposes no independent focus target. The active track and thumb use
+ * `primaryTextColor`; the inactive track uses `secondaryTextColor`.
+ */
+@Composable
+internal fun StyleBackgroundOpacityBlock(
+    title: String,
+    opacity: Int,
+    enabled: Boolean,
+    onOpacityChange: (Int) -> Unit,
+    onOpacityChangeFinished: (Int) -> Unit,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
+) {
+    require(opacity in DrawerDisplaySettings.BACKGROUND_OPACITY_RANGE) {
+        "Invalid Drawer background opacity"
+    }
+    val view = LocalView.current
+    val readoutFormat = stringResource(R.string.drawer_background_opacity_readout)
+    val readoutStyle = LocalTextStyle.current.copy(
+        color = MaterialTheme.colorScheme.onBackground,
+        fontSize = dimensionResource(R.dimen.style_settings_secondary_text_size).value.sp,
+        lineHeight = dimensionResource(R.dimen.style_settings_secondary_line_height).value.sp,
+    )
+    val textMeasurer = rememberTextMeasurer()
+    val readoutReservationWidth = with(LocalDensity.current) {
+        textMeasurer
+            .measure(
+                text = AnnotatedString(
+                    readoutFormat.format(DrawerDisplaySettings.BACKGROUND_OPACITY_RANGE.last),
+                ),
+                style = readoutStyle,
+            )
+            .size
+            .width
+            .toDp()
+    }
+    var lastTickedOpacity by remember { mutableIntStateOf(value = opacity) }
+    Column(modifier = modifier.fillMaxWidth()) {
+        StyleTitleLine(text = title)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height = dimensionResource(R.dimen.style_settings_content_line_height))
+                .padding(
+                    horizontal = dimensionResource(R.dimen.style_settings_panel_row_inset),
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = readoutFormat.format(opacity),
+                style = readoutStyle,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier
+                    .width(width = readoutReservationWidth)
+                    .clearAndSetSemantics { },
+            )
+            Spacer(
+                modifier = Modifier.width(
+                    width = dimensionResource(R.dimen.style_settings_readout_slider_gap),
+                ),
+            )
+            Slider(
+                value = opacity.toFloat(),
+                onValueChange = { value ->
+                    // The slider exposes the contracted 0..100 percentage range directly.
+                    val rounded = value.roundToInt()
+                    if (rounded != opacity) {
+                        onOpacityChange(rounded)
+                        if (rounded != lastTickedOpacity) {
+                            // One short tick per whole-percentage crossing during the drag.
+                            lastTickedOpacity = rounded
+                            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        }
+                    }
+                },
+                onValueChangeFinished = {
+                    lastTickedOpacity = opacity
+                    onOpacityChangeFinished(opacity)
+                },
+                valueRange = 0f..DrawerDisplaySettings.BACKGROUND_OPACITY_RANGE.last.toFloat(),
+                enabled = enabled,
+                colors = SliderDefaults.colors(
+                    activeTrackColor = MaterialTheme.colorScheme.onBackground,
+                    thumbColor = MaterialTheme.colorScheme.onBackground,
+                    inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+                modifier = Modifier
+                    .weight(weight = 1f)
+                    .fillMaxHeight()
+                    .testTag(tag = "drawer_background_opacity_slider"),
+            )
+        }
+    }
 }

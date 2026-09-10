@@ -139,7 +139,12 @@ internal fun DrawerScreen(
     onDragToFavoriteMove: (Offset) -> Unit = {},
     onDragToFavoriteEnd: (Offset?, Boolean) -> Unit = { _, _ -> },
 ) {
-    DrawerBackgroundSurface(mode = displaySettings.backgroundMode, active = active) {
+    // Live drag preview of the background opacity; null means render the persisted value.
+    // It never reaches the display-settings store: the release commits exactly one save.
+    var backgroundOpacityPreview by remember { mutableStateOf<Int?>(null) }
+    DrawerBackgroundSurface(
+        opacity = backgroundOpacityPreview ?: displaySettings.backgroundOpacity,
+    ) {
         var loadRequest by remember { mutableIntStateOf(0) }
         var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
         var hasBeenActive by remember { mutableStateOf(false) }
@@ -167,18 +172,21 @@ internal fun DrawerScreen(
                 ordinaryPosition = null
                 displaySettingsPosition = null
                 displaySettingsPanelVisible = false
+                backgroundOpacityPreview = null
             }
         }
 
         LaunchedEffect(key1 = favoriteSelectionTarget) {
             if (favoriteSelectionTarget != null) {
                 displaySettingsPanelVisible = false
+                backgroundOpacityPreview = null
             }
         }
 
         LaunchedEffect(key1 = state is LaunchableInventoryState.Content) {
             if (state !is LaunchableInventoryState.Content) {
                 displaySettingsPanelVisible = false
+                backgroundOpacityPreview = null
             }
         }
 
@@ -442,8 +450,9 @@ internal fun DrawerScreen(
                     key2 = displaySettingsMutationEnabled,
                     key3 = completeSections,
                 ) {
-                    val geometryChanged = positionedDisplaySettings.copy(backgroundMode = displaySettings.backgroundMode) !=
-                        displaySettings
+                    val geometryChanged = positionedDisplaySettings.copy(
+                        backgroundOpacity = displaySettings.backgroundOpacity,
+                    ) != displaySettings
                     val position = displaySettingsPosition
                     if (!geometryChanged || position == null || searchActive) {
                         positionedDisplaySettings = displaySettings
@@ -560,7 +569,13 @@ internal fun DrawerScreen(
                                 )
                                 onChangeDisplaySettings(candidateSettings)
                             },
-                            onDismiss = { displaySettingsPanelVisible = false },
+                            onPreviewOpacity = { previewOpacity ->
+                                backgroundOpacityPreview = previewOpacity
+                            },
+                            onDismiss = {
+                                displaySettingsPanelVisible = false
+                                backgroundOpacityPreview = null
+                            },
                         )
                     }
                 }

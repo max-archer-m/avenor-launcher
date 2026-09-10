@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -40,6 +41,7 @@ internal fun DrawerDisplaySettingsPanel(
     settings: DrawerDisplaySettings,
     enabled: Boolean,
     onChangeSettings: (DrawerDisplaySettings) -> Unit,
+    onPreviewOpacity: (Int?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     DrawerPanelAppearance {
@@ -62,13 +64,18 @@ internal fun DrawerDisplaySettingsPanel(
             }
         }
         BackHandler(onBack = { requestDismiss() })
+        DisposableEffect(key1 = Unit) {
+            // Any removal before a release (dismiss, external hide, process end) reverts
+            // the drag preview: the background and readout fall back to the persisted state
+            // and nothing is committed.
+            onDispose { onPreviewOpacity(null) }
+        }
         var panelBounds by remember { mutableStateOf(Rect.Zero) }
         var modalRootOrigin by remember { mutableStateOf(Offset.Zero) }
         val selection = listOf(
             settings.applicationSize,
             settings.namePlacement,
             settings.sectionAnchorPresentation,
-            settings.backgroundMode,
         )
         var settledSelection by remember { mutableStateOf(selection) }
         var selectionPending by remember { mutableStateOf(false) }
@@ -84,19 +91,25 @@ internal fun DrawerDisplaySettingsPanel(
             settledSelection = selection
             selectionPending = false
         }
-        val mutationEnabled = enabled && !dismissing &&
+        var previewOpacity by remember { mutableStateOf<Int?>(null) }
+        var pendingOpacityCommit by remember { mutableStateOf<Int?>(null) }
+        // The release-committed save is the single unresolved change; the gate reopens
+        // when the persisted settings round-trip (committed value or restored rollback).
+        LaunchedEffect(settings) { pendingOpacityCommit = null }
+        val opacityCommitPending = pendingOpacityCommit != null
+        val displayOpacity = previewOpacity ?: settings.backgroundOpacity
+        val mutationEnabled = enabled && !dismissing && !opacityCommitPending &&
             !selectionPending && selection == settledSelection
         fun changeSettings(candidate: DrawerDisplaySettings) {
             if (
-                !enabled || dismissing || selectionPending ||
+                !enabled || dismissing || opacityCommitPending || selectionPending ||
                 selection != settledSelection || candidate == settings
             ) {
                 return
             }
             if (candidate.applicationSize != settings.applicationSize ||
                 candidate.namePlacement != settings.namePlacement ||
-                candidate.sectionAnchorPresentation != settings.sectionAnchorPresentation ||
-                candidate.backgroundMode != settings.backgroundMode
+                candidate.sectionAnchorPresentation != settings.sectionAnchorPresentation
             ) {
                 // Close the gate synchronously, before another activation can arrive.
                 selectionPending = true
@@ -209,20 +222,22 @@ internal fun DrawerDisplaySettingsPanel(
                         },
                         testTagPrefix = "drawer_section_anchor",
                     )
-                    val backgroundOptions = DrawerBackgroundMode.entries
-                    StyleSelectorBlock(
-                        title = stringResource(R.string.drawer_background),
-                        optionLabels = listOf(
-                            stringResource(R.string.drawer_background_transparent),
-                            stringResource(R.string.drawer_background_frosted_glass),
-                        ),
-                        selectedIndex = backgroundOptions.indexOf(settings.backgroundMode),
+                    StyleBackgroundOpacityBlock(
+                        title = stringResource(R.string.drawer_background_opacity),
+                        opacity = displayOpacity,
                         enabled = mutationEnabled,
-                        onSelectIndex = { index ->
-                            changeSettings(settings.copy(backgroundMode = backgroundOptions[index]))
+                        onOpacityChange = { value ->
+                            previewOpacity = value
+                            onPreviewOpacity(value)
                         },
-                        testTagPrefix = "drawer_background",
-                        wide = true,
+                        onOpacityChangeFinished = { value ->
+                            previewOpacity = null
+                            onPreviewOpacity(null)
+                            if (value != settings.backgroundOpacity && !opacityCommitPending) {
+                                pendingOpacityCommit = value
+                                changeSettings(settings.copy(backgroundOpacity = value))
+                            }
+                        },
                     )
                     val options = DrawerApplicationSize.values()
                     StyleApplicationSizeBlock(
