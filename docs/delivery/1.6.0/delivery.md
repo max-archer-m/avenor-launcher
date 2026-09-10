@@ -12,7 +12,7 @@
 
 `Author daily-use baseline`, as defined by [release governance](../../release.md).
 
-The application identity is `com.avenor.launcher` with `versionName` `1.6.0`. The `versionCode` `7` is allocated as the next unused value for the accepted baseline and recorded at the identifier-bump commit `a1d43dba72f591862fcec9d2c355fe632144bdaa`; the accepted baseline APK built from that commit remains the author's packaging step.
+The application identity is `com.avenor.launcher` with `versionName` `1.6.0`. The `versionCode` `7` is allocated as the next unused value for the accepted baseline and recorded at the identifier-bump commit `a1d43dba72f591862fcec9d2c355fe632144bdaa`; the accepted baseline APK was packaged from the repository state at `19e1e861477e2742dec2553dff51f648ee2f295c`, whose only intervening change from the identifier-bump commit is documentation.
 
 ## Product references
 
@@ -107,4 +107,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.6.0` identif
 
 ## Completion result
 
-This version is not yet declared complete. All three included iterations are completed and accepted at the author daily-use baseline. The application identifiers are set to `versionName` `1.6.0` and `versionCode` `7` at `a1d43dba72f591862fcec9d2c355fe632144bdaa`. Per the author's 2026-09-10 direction, this version receives no Git tag and no retained release artifact. Remaining before the version result is declared: the author's packaging and in-place upgrade verification of the `versionCode`-7 baseline on the primary device, and the recording of the final accepted APK's source-commit identity.
+This version is complete as of 2026-09-10. All three included iterations are completed and accepted at the author daily-use baseline. The application identifiers are `versionName` `1.6.0` with `versionCode` `7`, allocated at `a1d43dba72f591862fcec9d2c355fe632144bdaa`, and the accepted baseline APK was packaged from the repository state at `19e1e861477e2742dec2553dff51f648ee2f295c` with the author-local signing identity. The author performed the packaging and the in-place upgrade from the prior `1.5.0` installation on the primary physical device and accepted the version result with preserved state and no included-path failure; acceptance evidence is author-reported. Per the author's direction, this version receives no Git tag and no retained release artifact.

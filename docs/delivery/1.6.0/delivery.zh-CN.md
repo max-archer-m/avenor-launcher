@@ -12,7 +12,7 @@
 
 `Author daily-use baseline`，定义见[发布治理](../../release.zh-CN.md)。
 
-应用标识为 `com.avenor.launcher`，`versionName` 为 `1.6.0`。`versionCode` `7` 已按下一个未使用值分配给已接受的基线，记录于标识修订提交 `a1d43dba72f591862fcec9d2c355fe632144bdaa`；从该提交构建的已接受基线 APK 仍待作者打包。
+应用标识为 `com.avenor.launcher`，`versionName` 为 `1.6.0`。`versionCode` `7` 已按下一个未使用值分配给已接受的基线，记录于标识修订提交 `a1d43dba72f591862fcec9d2c355fe632144bdaa`；已接受的基线 APK 打包自仓库状态 `19e1e861477e2742dec2553dff51f648ee2f295c`，其相对标识修订提交的变化仅为文档。
 
 ## 产品引用
 
@@ -107,4 +107,4 @@
 
 ## 完成结果
 
-本版本尚未宣告完成。全部三个纳入迭代均已完成并按作者日用基线验收。应用标识已在 `a1d43dba72f591862fcec9d2c355fe632144bdaa` 设为 `versionName` `1.6.0` 与 `versionCode` `7`。按作者 2026-09-10 指示，本版本不打 Git tag，也不保留 release 产物。宣告版本结果前剩余事项：作者在主设备上对 versionCode 7 基线完成打包与就地升级验证，以及记录最终已接受 APK 的源提交身份。
+本版本已于 2026-09-10 完成。全部三个纳入迭代均已完成并按作者日用基线验收。应用标识为 `versionName` `1.6.0` 与 `versionCode` `7`，分配于 `a1d43dba72f591862fcec9d2c355fe632144bdaa`；已接受的基线 APK 打包自仓库状态 `19e1e861477e2742dec2553dff51f648ee2f295c`，使用作者本地签名身份。作者在主物理设备上执行打包，并从既有 `1.5.0` 安装完成就地升级，验收版本结果时状态保留、无纳入路径失败；验收证据为作者报告。按作者指示，本版本不打 Git tag，也不保留 release 产物。
