@@ -12,7 +12,7 @@
 
 `Author daily-use baseline`, as defined by [release governance](../../release.md).
 
-The planned application identity remains `com.avenor.launcher` with `versionName` `1.6.0`. A candidate `versionCode` of `7` is provisional and must be selected from the next unused value only when a traceable APK is produced; planning does not reserve a value or override intervening artifact allocations.
+The application identity is `com.avenor.launcher` with `versionName` `1.6.0`. The `versionCode` `7` is allocated as the next unused value for the accepted baseline and recorded at the identifier-bump commit `a1d43dba72f591862fcec9d2c355fe632144bdaa`; the accepted baseline APK built from that commit remains the author's packaging step.
 
 ## Product references
 
@@ -61,7 +61,7 @@ Primary risks are OEM document-picker behavior differences, suggested-name and t
 | --- | --- | --- | --- |
 | [Iteration 29: Settings Backup and Restore](iteration-29-settings-backup-restore.md) | `Completed` | 2026-09-08 | The author confirmed the backup and restore feature as the next version's next iteration on 2026-09-07; implemented and accepted at the author daily-use baseline on 2026-09-08. |
 | [Iteration 30: Drawer Drag-to-Favorite](iteration-30-drawer-drag-to-favorite.md) | `Completed` | 2026-09-08 | The author designated drag-to-favorite as the following iteration on 2026-09-07; implemented and accepted at the author daily-use baseline on 2026-09-08. |
-| [Iteration 31: Edit Dock, Drawer Background, Panel Shadow, and Multi-Selection Presentation Rework](iteration-31-edit-dock-drawer-background-shadow.md) | `In Progress` | 2026-09-09 | The author designated the edit-dock, background, and shadow reworks as the next iteration on 2026-09-08, amended the iteration the same day to add the multi-selection presentation rework, and accepted the continuous background-opacity contract revision on 2026-09-09; the author authorized production implementation on 2026-09-09. |
+| [Iteration 31: Edit Dock, Drawer Background, Panel Shadow, and Multi-Selection Presentation Rework](iteration-31-edit-dock-drawer-background-shadow.md) | `Completed` | 2026-09-10 | The author designated the edit-dock, background, and shadow reworks as the next iteration on 2026-09-08, amended the iteration the same day to add the multi-selection presentation rework, and accepted the continuous background-opacity contract revision on 2026-09-09; the author authorized production implementation on 2026-09-09 and confirmed the delivered, integrated result accepted at the author daily-use baseline on 2026-09-10. |
 
 ## Iteration evidence and results
 
@@ -75,7 +75,7 @@ Primary risks are OEM document-picker behavior differences, suggested-name and t
 
 ### Iteration 31
 
-[Contract](iteration-31-edit-dock-drawer-background-shadow.md). `In Progress` since 2026-09-09; no implementation evidence or result is recorded yet. The contract's product-contract baseline is `68d8a9afeb81e43648caacb43bfdd05c0a754596`, the commit integrating the accepted background readout alignment presentation refinement; the contract records the 2026-09-09 authorized amendments.
+[Contract](iteration-31-edit-dock-drawer-background-shadow.md). `Completed` on 2026-09-10. The implementation delivers the four contracted reworks with their 2026-09-09 amendments: the top edit dock with the animated panel slot swap, the continuous background-opacity slider with its percentage readout, preview-commit-revert drag behavior, and schema-version-2 migration, the shared panel edge border, the Drawer panel height animation, and the multi-selection outline-and-badge presentation without press ripple. Focused instrumentation test sources cover dock placement and hot-zone stability, slot-swap interruption and retargeting, slider mapping, release commit and drag revert, store migration and out-of-range failure, backup field parity, border realization, and multi-selection row presentation; the author executed these tests and reports them passing, and performed the build, installation, and device checks on the primary physical device across the four group deliveries, accepting them at the author daily-use baseline. Three subsequent no-behavior-change refactors (the shared foreground-shadow construction, the parameterized opacity-slider test tag, and the consolidated panel cleanup paths) are integrated on `main` and included in the accepted result. Test and acceptance results are author-reported; the agent ran no Gradle command (`Not run`). The contract's product-contract baseline is `68d8a9afeb81e43648caacb43bfdd05c0a754596`.
 
 ## Dependencies and sequence
 
@@ -107,4 +107,4 @@ The accepted APK must retain `com.avenor.launcher`, use accepted `1.6.0` identif
 
 ## Completion result
 
-This version is incomplete. Iteration 29 is completed and accepted at the author daily-use baseline, and iteration 30 is completed with author-reported passing focused tests and device acceptance; iteration 31 is in progress. Version identifiers, artifacts, tags, and release actions remain unauthorized and unrecorded.
+This version is not yet declared complete. All three included iterations are completed and accepted at the author daily-use baseline. The application identifiers are set to `versionName` `1.6.0` and `versionCode` `7` at `a1d43dba72f591862fcec9d2c355fe632144bdaa`. Per the author's 2026-09-10 direction, this version receives no Git tag and no retained release artifact. Remaining before the version result is declared: the author's packaging and in-place upgrade verification of the `versionCode`-7 baseline on the primary device, and the recording of the final accepted APK's source-commit identity.
