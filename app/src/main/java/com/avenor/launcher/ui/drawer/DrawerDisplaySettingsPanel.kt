@@ -1,4 +1,4 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.drawer
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -35,6 +35,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.stringResource
+import com.avenor.launcher.R
+import com.avenor.launcher.StyleApplicationSizeBlock
+import com.avenor.launcher.StyleArrangementBlock
+import com.avenor.launcher.StyleBackgroundOpacityBlock
+import com.avenor.launcher.StyleSelectorBlock
+import com.avenor.launcher.styleSettingsPanelSurface
 
 @Composable
 internal fun DrawerDisplaySettingsPanel(

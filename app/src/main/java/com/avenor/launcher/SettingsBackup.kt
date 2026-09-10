@@ -11,6 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import com.avenor.launcher.ui.drawer.DrawerApplicationSize
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.ui.drawer.DrawerNamePlacement
+import com.avenor.launcher.ui.drawer.DrawerSectionAnchorPresentation
 
 /** Read and restore access to the favorite state for the backup and restore journey. */
 internal interface BackupFavoritesAccess {

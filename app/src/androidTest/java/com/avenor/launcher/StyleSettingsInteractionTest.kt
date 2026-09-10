@@ -21,6 +21,9 @@ import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsPanel
+import com.avenor.launcher.ui.drawer.DrawerNamePlacement
 
 class StyleSettingsInteractionTest {
     @get:Rule

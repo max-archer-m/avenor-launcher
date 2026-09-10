@@ -1,4 +1,4 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.drawer
 
 import android.content.Context
 import android.util.AtomicFile
@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import com.avenor.launcher.BackupSettingsAccess
+import com.avenor.launcher.R
 
 internal enum class DrawerApplicationSize {
     Large,

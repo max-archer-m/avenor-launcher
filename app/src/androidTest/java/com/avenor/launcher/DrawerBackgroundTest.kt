@@ -17,6 +17,9 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
+import com.avenor.launcher.ui.drawer.DrawerBackgroundSurface
+import com.avenor.launcher.ui.drawer.DrawerIcon
+import com.avenor.launcher.ui.drawer.DrawerPanelAppearance
 
 class DrawerBackgroundTest {
     @get:Rule

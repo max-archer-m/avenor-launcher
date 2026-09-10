@@ -39,6 +39,9 @@ import org.junit.runner.RunWith
 import com.avenor.launcher.ui.settings.EmptySettingsPlatform
 import com.avenor.launcher.ui.settings.SettingsPlatform
 import com.avenor.launcher.ui.settings.SettingsScreen
+import com.avenor.launcher.ui.drawer.DrawerScreen
+import com.avenor.launcher.ui.drawer.drawerGestureProgress
+import com.avenor.launcher.ui.drawer.drawerInteractiveDisplacement
 
 @RunWith(AndroidJUnit4::class)
 class HomeScreenTest {

@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import kotlin.math.roundToInt
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
 
 @Composable
 internal fun StyleApplicationSizeBlock(

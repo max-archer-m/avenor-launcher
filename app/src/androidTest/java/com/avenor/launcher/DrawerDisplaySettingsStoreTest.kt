@@ -20,6 +20,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import com.avenor.launcher.ui.drawer.DrawerApplicationSize
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsStore
+import com.avenor.launcher.ui.drawer.DrawerNamePlacement
+import com.avenor.launcher.ui.drawer.DrawerSectionAnchorPresentation
 
 class DrawerDisplaySettingsStoreTest {
     @Test

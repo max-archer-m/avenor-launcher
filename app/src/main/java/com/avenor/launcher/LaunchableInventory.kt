@@ -21,6 +21,8 @@ import androidx.core.content.getSystemService
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
+import com.avenor.launcher.ui.drawer.DrawerSection
+import com.avenor.launcher.ui.drawer.buildDrawerSections
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow

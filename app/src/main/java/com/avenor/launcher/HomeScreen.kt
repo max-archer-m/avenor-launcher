@@ -146,6 +146,8 @@ import com.avenor.launcher.ui.home.components.HomeMainListAddFavoriteEntry
 import com.avenor.launcher.ui.home.components.HomeApplicationMovementOverlay
 import com.avenor.launcher.ui.home.components.HomeApplicationAutoScroll
 import androidx.compose.runtime.SideEffect
+import com.avenor.launcher.ui.drawer.DrawerDragDrop
+import com.avenor.launcher.ui.drawer.DrawerDragJourney
 import com.avenor.launcher.ui.home.components.detectHomeApplicationMovement
 import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonRailDivider
 import com.avenor.launcher.ui.home.components.HomeFavoriteAddControl
@@ -157,6 +159,7 @@ import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonLayoutRegistry
 import com.avenor.launcher.ui.home.components.awaitHomeHandleLongPress
 import com.avenor.launcher.ui.home.components.detectHomeReorderDrag
 import com.avenor.launcher.ui.home.components.homeEditSurface
+import com.avenor.launcher.ui.drawer.drawerForegroundShadow
 
 
 @Composable

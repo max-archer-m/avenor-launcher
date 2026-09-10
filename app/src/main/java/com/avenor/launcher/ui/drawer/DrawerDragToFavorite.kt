@@ -1,4 +1,4 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.drawer
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -23,6 +23,10 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import kotlin.math.roundToInt
+import com.avenor.launcher.FavoriteAvailability
+import com.avenor.launcher.LaunchableEntry
+import com.avenor.launcher.OrderedFavoriteModuleType
+import com.avenor.launcher.R
 
 /** Eligibility of a Drawer application row for the drag-to-favorite journey. */
 internal enum class DrawerDragEligibility {

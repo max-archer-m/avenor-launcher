@@ -6,6 +6,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
 
 class SettingsBackupRestoreCoordinatorTest {
     @Test

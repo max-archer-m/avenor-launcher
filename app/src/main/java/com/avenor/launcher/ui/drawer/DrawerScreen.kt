@@ -1,4 +1,4 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.drawer
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
@@ -40,8 +40,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
-import com.avenor.launcher.DrawerIcon as Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -100,6 +100,17 @@ import com.avenor.launcher.ui.drawer.components.DrawerIndexBubble
 import com.avenor.launcher.ui.drawer.components.DrawerNavigationTopBar
 import com.avenor.launcher.ui.drawer.components.DrawerSearchTopBar
 import java.util.Locale
+import com.avenor.launcher.FavoriteAvailability
+import com.avenor.launcher.LaunchableEntry
+import com.avenor.launcher.LaunchableEntryLauncher
+import com.avenor.launcher.LaunchableIdentity
+import com.avenor.launcher.LaunchableInventoryCoordinator
+import com.avenor.launcher.LaunchableInventoryLoader
+import com.avenor.launcher.LaunchableInventorySnapshot
+import com.avenor.launcher.LaunchableInventoryState
+import com.avenor.launcher.R
+import com.avenor.launcher.RapidActivationGuard
+import com.avenor.launcher.drawerSectionsFor
 
 private enum class DrawerLoadTrigger {
     Initial,

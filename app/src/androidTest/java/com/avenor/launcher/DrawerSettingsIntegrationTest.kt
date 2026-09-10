@@ -34,6 +34,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import com.avenor.launcher.ui.drawer.DrawerApplicationSize
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsStore
+import com.avenor.launcher.ui.drawer.DrawerNamePlacement
+import com.avenor.launcher.ui.drawer.DrawerSectionAnchorPresentation
 
 class DrawerSettingsIntegrationTest {
     @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()

@@ -1,4 +1,4 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.drawer
 
 import android.app.Activity
 import android.content.Context
@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import com.avenor.launcher.R
 
 private val LocalDrawerForegroundShadow = staticCompositionLocalOf { false }
 

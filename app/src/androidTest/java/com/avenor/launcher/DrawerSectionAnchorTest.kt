@@ -7,6 +7,9 @@ import android.os.Process
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import com.avenor.launcher.ui.drawer.DrawerNamePlacement
+import com.avenor.launcher.ui.drawer.DrawerSectionAnchorPresentation
+import com.avenor.launcher.ui.drawer.validItemsPerRowRange
 
 class DrawerSectionAnchorTest {
     @Test

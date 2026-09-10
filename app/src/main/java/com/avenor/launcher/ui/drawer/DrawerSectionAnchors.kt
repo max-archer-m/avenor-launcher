@@ -1,5 +1,6 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.drawer
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
-import com.avenor.launcher.DrawerIcon as Icon
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.avenor.launcher.R
 
 internal fun drawerPinnedAnchorTop(
     sectionTop: Int,
@@ -36,6 +38,7 @@ private data class VisibleDrawerSection(
 )
 
 /** Read-only gutter; the application rows stay lazy and own scrolling and input. */
+@SuppressLint("FrequentlyChangingValue")
 @Composable
 internal fun DrawerLeftSectionAnchors(
     ranges: List<DrawerSectionRange>,

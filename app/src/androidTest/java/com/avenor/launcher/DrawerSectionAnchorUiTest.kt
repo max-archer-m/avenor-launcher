@@ -28,6 +28,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.ui.drawer.DrawerScreen
+import com.avenor.launcher.ui.drawer.DrawerSectionAnchorPresentation
 
 class DrawerSectionAnchorUiTest {
     @get:Rule

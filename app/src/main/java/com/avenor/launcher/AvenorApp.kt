@@ -61,6 +61,13 @@ import com.avenor.launcher.ui.settings.EmptySettingsPlatform
 import com.avenor.launcher.ui.settings.SettingsPlatform
 import com.avenor.launcher.ui.settings.SettingsScreen
 import com.avenor.launcher.ui.settings.readAvenorLicense
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsReadState
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsStore
+import com.avenor.launcher.ui.drawer.DrawerDragDrop
+import com.avenor.launcher.ui.drawer.DrawerDragJourney
+import com.avenor.launcher.ui.drawer.DrawerDragPreviewOverlay
+import com.avenor.launcher.ui.drawer.DrawerScreen
 
 internal enum class AvenorSurface {
     Home,

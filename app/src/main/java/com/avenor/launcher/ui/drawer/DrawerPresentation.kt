@@ -1,8 +1,10 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.drawer
 
 import android.icu.text.Transliterator
 import java.text.Collator
 import java.util.Locale
+import com.avenor.launcher.LaunchableEntry
+import com.avenor.launcher.LaunchableIdentity
 
 internal data class DrawerSection(
     val label: String,
