@@ -98,13 +98,14 @@ internal fun DrawerDisplaySettingsPanel(
         LaunchedEffect(settings) { pendingOpacityCommit = null }
         val opacityCommitPending = pendingOpacityCommit != null
         val displayOpacity = previewOpacity ?: settings.backgroundOpacity
-        val mutationEnabled = enabled && !dismissing && !opacityCommitPending &&
+        // One shared mutation gate. It reads the state at call time — the composition-time
+        // consumers evaluate it during recomposition and the changeSettings guard
+        // re-evaluates it per event, preserving the synchronous same-frame gate.
+        fun mutationAllowed() = enabled && !dismissing && !opacityCommitPending &&
             !selectionPending && selection == settledSelection
+        val mutationEnabled = mutationAllowed()
         fun changeSettings(candidate: DrawerDisplaySettings) {
-            if (
-                !enabled || dismissing || opacityCommitPending || selectionPending ||
-                selection != settledSelection || candidate == settings
-            ) {
+            if (!mutationAllowed() || candidate == settings) {
                 return
             }
             if (candidate.applicationSize != settings.applicationSize ||

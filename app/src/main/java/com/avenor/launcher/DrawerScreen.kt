@@ -165,28 +165,32 @@ internal fun DrawerScreen(
         val searchScope = rememberCoroutineScope()
         val keyboardController = LocalSoftwareKeyboardController.current
 
+        // One hide path for every external removal: the panel leaves the composition and
+        // the drag preview falls back to the persisted state in the same step.
+        fun hideDisplaySettingsPanel() {
+            displaySettingsPanelVisible = false
+            backgroundOpacityPreview = null
+        }
+
         LaunchedEffect(key1 = active) {
             if (!active) {
                 searchActive = false
                 searchQuery = ""
                 ordinaryPosition = null
                 displaySettingsPosition = null
-                displaySettingsPanelVisible = false
-                backgroundOpacityPreview = null
+                hideDisplaySettingsPanel()
             }
         }
 
         LaunchedEffect(key1 = favoriteSelectionTarget) {
             if (favoriteSelectionTarget != null) {
-                displaySettingsPanelVisible = false
-                backgroundOpacityPreview = null
+                hideDisplaySettingsPanel()
             }
         }
 
         LaunchedEffect(key1 = state is LaunchableInventoryState.Content) {
             if (state !is LaunchableInventoryState.Content) {
-                displaySettingsPanelVisible = false
-                backgroundOpacityPreview = null
+                hideDisplaySettingsPanel()
             }
         }
 
@@ -573,8 +577,7 @@ internal fun DrawerScreen(
                                 backgroundOpacityPreview = previewOpacity
                             },
                             onDismiss = {
-                                displaySettingsPanelVisible = false
-                                backgroundOpacityPreview = null
+                                hideDisplaySettingsPanel()
                             },
                         )
                     }

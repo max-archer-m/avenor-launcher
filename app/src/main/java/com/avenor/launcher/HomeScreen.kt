@@ -1245,8 +1245,6 @@ internal fun HomeScreen(
                         }
                     },
                 )
-            }
-            if (editMode) {
                 AnimatedContent(
                     targetState = stylePanelExpanded,
                     modifier = Modifier.padding(horizontal = contentPadding),
