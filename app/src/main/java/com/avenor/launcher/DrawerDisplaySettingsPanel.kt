@@ -238,6 +238,7 @@ internal fun DrawerDisplaySettingsPanel(
                                 changeSettings(settings.copy(backgroundOpacity = value))
                             }
                         },
+                        sliderTestTag = "drawer_background_opacity_slider",
                     )
                     val options = DrawerApplicationSize.values()
                     StyleApplicationSizeBlock(
