@@ -27,6 +27,8 @@ import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.avenor.launcher.ui.drawer.DrawerListPosition
+import com.avenor.launcher.ui.drawer.DrawerRestorationTarget
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,8 +42,11 @@ import com.avenor.launcher.ui.settings.EmptySettingsPlatform
 import com.avenor.launcher.ui.settings.SettingsPlatform
 import com.avenor.launcher.ui.settings.SettingsScreen
 import com.avenor.launcher.ui.drawer.DrawerScreen
-import com.avenor.launcher.ui.drawer.drawerGestureProgress
-import com.avenor.launcher.ui.drawer.drawerInteractiveDisplacement
+import com.avenor.launcher.ui.drawer.DrawerSection
+import com.avenor.launcher.ui.drawer.LaunchableEntryComparator
+import com.avenor.launcher.ui.drawer.buildDrawerSections
+import com.avenor.launcher.ui.drawer.captureDrawerListPosition
+import com.avenor.launcher.ui.drawer.resolveDrawerRestorationTarget
 
 @RunWith(AndroidJUnit4::class)
 class HomeScreenTest {

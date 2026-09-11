@@ -3,6 +3,9 @@ package com.avenor.launcher
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.test.assertCountEquals
@@ -15,6 +18,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import com.avenor.launcher.ui.drawer.DrawerBackgroundSurface
@@ -27,15 +31,23 @@ class DrawerBackgroundTest {
 
     @Test
     fun foregroundShadowIsPresentAtEveryOpacity() {
-        for (opacity in listOf(0, 50, 100)) {
-            composeRule.setContent {
-                AvenorTheme {
-                    DrawerBackgroundSurface(opacity = opacity) {
-                        assertNotNull(MaterialTheme.typography.bodyLarge.shadow)
+        // One content set driven through states: a second setContent on the same activity throws.
+        val missingAt = mutableListOf<Int>()
+        var opacity by mutableStateOf(0)
+        composeRule.setContent {
+            AvenorTheme {
+                DrawerBackgroundSurface(opacity = opacity) {
+                    if (MaterialTheme.typography.bodyLarge.shadow == null) {
+                        missingAt.add(opacity)
                     }
                 }
             }
         }
+        for (value in listOf(50, 100)) {
+            opacity = value
+            composeRule.waitForIdle()
+        }
+        assertTrue("foreground shadow missing at $missingAt", missingAt.isEmpty())
     }
 
     @Test

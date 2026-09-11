@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Process
 import android.util.AtomicFile
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.ui.geometry.Offset
@@ -16,12 +17,13 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.test.swipeUp
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.action.ViewActions.swipeRight
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -36,6 +38,7 @@ import org.junit.Rule
 import org.junit.Test
 import com.avenor.launcher.ui.drawer.DrawerApplicationSize
 import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsReadState
 import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsStore
 import com.avenor.launcher.ui.drawer.DrawerNamePlacement
 import com.avenor.launcher.ui.drawer.DrawerSectionAnchorPresentation
@@ -78,8 +81,11 @@ class DrawerSettingsIntegrationTest {
             }
             composeRule.waitUntil(5_000) { oldStore.state.value is DrawerDisplaySettingsReadState.Readable }
             openDrawerPanel()
-            composeRule.onNodeWithTag("drawer_background_opacity_slider")
-                .performTouchInput { swipeRight() }
+            val slider = composeRule.onNodeWithTag("drawer_background_opacity_slider")
+            slider.assertIsDisplayed()
+            slider.assertIsEnabled()
+            slider.performTouchInput { swipeRight() }
+            awaitSavingState()
             assertTrue(entered.await(5, TimeUnit.SECONDS))
             composeRule.activityRule.scenario.recreate()
             val recreatedStore = DrawerDisplaySettingsStore(file)
@@ -165,8 +171,13 @@ class DrawerSettingsIntegrationTest {
             }
             composeRule.waitUntil(5_000) { store.state.value is DrawerDisplaySettingsReadState.Readable }
             openDrawerPanel()
-            composeRule.onNodeWithTag("drawer_background_opacity_slider")
-                .performTouchInput { swipeRight() }
+            val slider = composeRule.onNodeWithTag("drawer_background_opacity_slider")
+            // Bisect the gesture failure first: the slider must be visible and enabled,
+            // otherwise a swipe cannot start the release-committed save.
+            slider.assertIsDisplayed()
+            slider.assertIsEnabled()
+            slider.performTouchInput { swipeRight() }
+            awaitSavingState()
             assertTrue(entered.await(5, TimeUnit.SECONDS))
             composeRule.onNodeWithTag("drawer_background_opacity_slider").assertIsNotEnabled()
             if (dismissDuringSave) {
@@ -232,9 +243,26 @@ class DrawerSettingsIntegrationTest {
         }
     }
 
+
+    /** Bisects a silent release-commit failure: the panel must enter its
+     *  single-unresolved-save state (slider disabled) before any store write is pending. */
+    private fun awaitSavingState() {
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithTag("drawer_background_opacity_slider")
+                .fetchSemanticsNodes().firstOrNull()
+                ?.config?.contains(SemanticsProperties.Disabled) == true
+        }
+    }
+
     private fun openDrawerPanel() {
         composeRule.onNodeWithTag("home_surface").performTouchInput { swipeUp() }
         composeRule.onNodeWithTag("drawer_display_settings_entry").performClick()
+        // The panel's height animation moves the slider while gestures inject; settle
+        // the animation clock deterministically before interacting with the slider.
+        composeRule.mainClock.autoAdvance = false
+        composeRule.mainClock.advanceTimeBy(milliseconds = 500)
+        composeRule.mainClock.autoAdvance = true
+        composeRule.waitForIdle()
     }
 
     private fun dismissPanel(useBack: Boolean = false) {

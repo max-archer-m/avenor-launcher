@@ -14,7 +14,7 @@ class CandidateConfigurationTest {
         val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
 
         assertEquals("com.avenor.launcher", context.packageName)
-        assertEquals("1.4.0", packageInfo.versionName)
-        assertEquals(5L, packageInfo.longVersionCode)
+        assertEquals("1.6.0", packageInfo.versionName)
+        assertEquals(7L, packageInfo.longVersionCode)
     }
 }

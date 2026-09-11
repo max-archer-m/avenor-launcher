@@ -4,11 +4,21 @@ import android.content.ComponentName
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Process
+import com.avenor.launcher.ui.drawer.DrawerListPosition
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import com.avenor.launcher.ui.drawer.DrawerNamePlacement
+import com.avenor.launcher.ui.drawer.DrawerRestorationTarget
+import com.avenor.launcher.ui.drawer.DrawerSection
 import com.avenor.launcher.ui.drawer.DrawerSectionAnchorPresentation
+import com.avenor.launcher.ui.drawer.captureDrawerListPosition
+import com.avenor.launcher.ui.drawer.captureDrawerOrdinaryListPosition
+import com.avenor.launcher.ui.drawer.drawerPinnedAnchorTop
+import com.avenor.launcher.ui.drawer.drawerSectionRanges
+import com.avenor.launcher.ui.drawer.headerItemCount
+import com.avenor.launcher.ui.drawer.resolveDrawerOrdinaryRestorationTarget
+import com.avenor.launcher.ui.drawer.resolveDrawerRestorationTarget
 import com.avenor.launcher.ui.drawer.validItemsPerRowRange
 
 class DrawerSectionAnchorTest {

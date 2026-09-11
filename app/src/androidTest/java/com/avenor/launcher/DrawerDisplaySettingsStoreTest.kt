@@ -22,6 +22,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import com.avenor.launcher.ui.drawer.DrawerApplicationSize
 import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsReadState
 import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsStore
 import com.avenor.launcher.ui.drawer.DrawerNamePlacement
 import com.avenor.launcher.ui.drawer.DrawerSectionAnchorPresentation
