@@ -46,7 +46,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
@@ -93,6 +92,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import com.avenor.launcher.ui.drawer.components.DrawerAlphabetIndex
@@ -159,7 +159,7 @@ internal fun DrawerScreen(
         var loadRequest by remember { mutableIntStateOf(0) }
         var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
         var hasBeenActive by remember { mutableStateOf(false) }
-        val state by inventoryCoordinator.state.collectAsState()
+        val state by inventoryCoordinator.state.collectAsStateWithLifecycle()
         val activationGuard = remember { RapidActivationGuard() }
         val context = LocalContext.current
         val locale = LocalConfiguration.current.locales[0]

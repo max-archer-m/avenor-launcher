@@ -43,13 +43,19 @@ internal class AvenorHomeCoordinator(
 ) {
     var favoriteState by mutableStateOf<FavoriteReadState>(FavoriteReadState.Loading)
     var editMode by mutableStateOf(false)
+        private set
     var stylePanelExpanded by mutableStateOf(false)
+        private set
     var selectedModuleId by mutableStateOf<String?>(null)
+        private set
     var editMembership by mutableStateOf<Set<LaunchableIdentity>>(emptySet())
     var drawerDragJourney by mutableStateOf<DrawerDragJourney?>(null)
+        private set
     var drawerDragTouchPosition by mutableStateOf(Offset.Zero)
     var drawerDragDropping by mutableStateOf(false)
+        private set
     var favoriteRevealRequest by mutableStateOf<FavoriteRevealRequest?>(null)
+        private set
 
     fun refreshEditMembership() {
         if (editMode) {
@@ -68,9 +74,30 @@ internal class AvenorHomeCoordinator(
         editMode = true
     }
 
+    fun dismissEditMode() {
+        editMode = false
+    }
+
+    fun updateStylePanelExpanded(expanded: Boolean) {
+        stylePanelExpanded = expanded
+    }
+
+    fun selectModule(moduleId: String?) {
+        selectedModuleId = moduleId
+    }
+
     fun clearEditSelection() {
         stylePanelExpanded = false
         selectedModuleId = null
+    }
+
+    fun clearDrawerDrag() {
+        drawerDragJourney = null
+        drawerDragDropping = false
+    }
+
+    fun completeFavoriteReveal() {
+        favoriteRevealRequest = null
     }
 
     fun startDrawerDrag(journey: DrawerDragJourney): Boolean {

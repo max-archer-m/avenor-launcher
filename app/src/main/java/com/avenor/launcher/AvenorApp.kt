@@ -18,7 +18,6 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +52,7 @@ import kotlinx.coroutines.flow.Flow
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.math.roundToInt
 import com.avenor.launcher.ui.settings.AndroidSettingsPlatform
 import com.avenor.launcher.ui.settings.EmptySettingsPlatform
@@ -202,13 +202,14 @@ internal fun AvenorApp(
     var homeTransitionOwnsGesture by remember { mutableStateOf(false) }
     var settleJob by remember { mutableStateOf<Job?>(null) }
     val effectiveFavoriteStore = favoriteStore ?: remember { InMemoryFavoriteStore() }
-    val favoriteState by effectiveFavoriteStore.state.collectAsState()
+    val favoriteState by effectiveFavoriteStore.state.collectAsStateWithLifecycle()
     val effectiveDrawerDisplaySettingsStore = drawerDisplaySettingsStore ?: remember(
         androidContext,
     ) {
         DrawerDisplaySettingsStore(context = androidContext)
     }
-    val drawerDisplaySettingsState by effectiveDrawerDisplaySettingsStore.state.collectAsState()
+    val drawerDisplaySettingsState by effectiveDrawerDisplaySettingsStore.state
+        .collectAsStateWithLifecycle()
     val favoriteEditor = remember(
         key1 = effectiveFavoriteStore,
         calculation = { HomeFavoriteEditor(store = effectiveFavoriteStore) },
@@ -234,7 +235,7 @@ internal fun AvenorApp(
     val inventoryCoordinator = remember(inventoryLoader) {
         LaunchableInventoryCoordinator(inventoryLoader)
     }
-    val inventoryState by inventoryCoordinator.state.collectAsState()
+    val inventoryState by inventoryCoordinator.state.collectAsStateWithLifecycle()
     var favoriteAvailability by remember {
         mutableStateOf<Map<LaunchableIdentity, FavoriteAvailability>>(emptyMap())
     }
@@ -395,10 +396,10 @@ internal fun AvenorApp(
         if (homeCoordinator.editMode) {
             val readable = state as? FavoriteReadState.Readable
             if (readable == null) {
-                homeCoordinator.editMode = false
+                homeCoordinator.dismissEditMode()
                 Toast.makeText(androidContext, inventoryFailureMessage, Toast.LENGTH_SHORT).show()
             } else if (readable.identities.toSet() != homeCoordinator.editMembership) {
-                homeCoordinator.editMode = false
+                homeCoordinator.dismissEditMode()
                 Toast.makeText(androidContext, favoritesChangedMessage, Toast.LENGTH_SHORT).show()
             }
         }
@@ -411,8 +412,7 @@ internal fun AvenorApp(
             // A drag-to-favorite journey ends when its edit mode ends: without a
             // committed destination the journey resolves as a cancellation that leaves
             // normal Home without a mutation and without returning to Drawer.
-            homeCoordinator.drawerDragJourney = null
-            homeCoordinator.drawerDragDropping = false
+            homeCoordinator.clearDrawerDrag()
         }
     }
 
@@ -423,13 +423,13 @@ internal fun AvenorApp(
             ?.mapTo(mutableSetOf(), OrderedFavoriteModule::id)
             .orEmpty()
         if (selectedId != null && selectedId !in moduleIds) {
-            homeCoordinator.selectedModuleId = null
+            homeCoordinator.selectModule(moduleId = null)
         }
     }
 
     LaunchedEffect(inventoryState) {
         if (homeCoordinator.editMode && inventoryState is LaunchableInventoryState.Error) {
-            homeCoordinator.editMode = false
+            homeCoordinator.dismissEditMode()
             Toast.makeText(androidContext, inventoryFailureMessage, Toast.LENGTH_SHORT).show()
         }
     }
@@ -558,9 +558,9 @@ internal fun AvenorApp(
         selectedEntry = null
         selectedEntryFromHome = false
         settingsOpen = false
-        homeCoordinator.editMode = false
+        homeCoordinator.dismissEditMode()
         homeCoordinator.clearEditSelection()
-        homeCoordinator.favoriteRevealRequest = null
+        homeCoordinator.completeFavoriteReveal()
         if (!favoriteSelectionSaving) {
             favoriteAddTarget = null
             favoriteSelection = emptyList()
@@ -783,7 +783,7 @@ internal fun AvenorApp(
                 Lifecycle.Event.ON_PAUSE -> {
                     wasPaused = true
                     favoriteEditor.invalidateUndo()
-                    homeCoordinator.editMode = false
+                    homeCoordinator.dismissEditMode()
                 }
                 Lifecycle.Event.ON_RESUME -> {
                     if (hasResumed && wasPaused) {
@@ -819,7 +819,7 @@ internal fun AvenorApp(
             // An Avenor action sheet is part of the journey; system-owned overlays are not.
             if (!windowInfo.isWindowFocused && selectedEntry == null) {
                 favoriteEditor.invalidateUndo()
-                homeCoordinator.editMode = false
+                homeCoordinator.dismissEditMode()
             }
         },
     )
@@ -839,10 +839,10 @@ internal fun AvenorApp(
 
     BackHandler(enabled = homeCoordinator.editMode && favoriteAddTarget == null) {
         if (homeCoordinator.stylePanelExpanded) {
-            homeCoordinator.stylePanelExpanded = false
+            homeCoordinator.updateStylePanelExpanded(expanded = false)
         } else {
-            homeCoordinator.editMode = false
-            homeCoordinator.selectedModuleId = null
+            homeCoordinator.dismissEditMode()
+            homeCoordinator.selectModule(moduleId = null)
         }
     }
 
@@ -1092,10 +1092,8 @@ internal fun AvenorApp(
                 removalSnackbarHostState = removalSnackbarHostState,
                 onRetryFavorites = { scope.launch { effectiveFavoriteStore.load() } },
                 onRequestEditMode = homeCoordinator::requestEditMode,
-                onStylePanelExpandedChange = { expanded ->
-                    homeCoordinator.stylePanelExpanded = expanded
-                },
-                onSelectModule = { moduleId -> homeCoordinator.selectedModuleId = moduleId },
+                onStylePanelExpandedChange = homeCoordinator::updateStylePanelExpanded,
+                onSelectModule = homeCoordinator::selectModule,
                 onLongPressFavorite = { entry ->
                     selectedEntryFromHome = true
                     selectedEntry = entry
@@ -1107,7 +1105,7 @@ internal fun AvenorApp(
                 favoriteRevealContainerId = homeCoordinator.favoriteRevealRequest?.containerId,
                 favoriteRevealContainerType = homeCoordinator.favoriteRevealRequest?.containerType,
                 favoriteRevealIdentity = homeCoordinator.favoriteRevealRequest?.identity,
-                onFavoriteRevealComplete = { homeCoordinator.favoriteRevealRequest = null },
+                onFavoriteRevealComplete = homeCoordinator::completeFavoriteReveal,
                 onCommitFavoriteComposition = homeCoordinator::commitFavoriteComposition,
                 onCommitModuleOrder = favoriteEditor::reorderModules,
                 onLaunchFavorite = { availability ->
