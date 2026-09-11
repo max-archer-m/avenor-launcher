@@ -25,6 +25,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
+import com.avenor.launcher.ui.home.components.stableKey
 
 class HomeApplicationHandoffUiTest {
     @get:Rule

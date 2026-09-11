@@ -3,6 +3,7 @@ package com.avenor.launcher
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import com.avenor.launcher.ui.home.components.stableKey
 
 internal enum class ApplicationDragAxis {
     Vertical,

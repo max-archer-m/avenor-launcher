@@ -17,6 +17,9 @@ import com.avenor.launcher.ui.home.components.HomeFavoriteItemFrame
 import com.avenor.launcher.ui.home.components.HomeModuleAddFavoriteEntry
 import com.avenor.launcher.ui.home.components.HomeOrderedFavoriteRibbon
 import com.avenor.launcher.ui.home.components.homeEditSurface
+import com.avenor.launcher.ui.home.components.HomeFavoriteBelowItem
+import com.avenor.launcher.ui.home.components.HomeFavoriteRow
+import com.avenor.launcher.ui.home.components.stableKey
 
 @Composable
 internal fun HomeOrderedModuleContent(

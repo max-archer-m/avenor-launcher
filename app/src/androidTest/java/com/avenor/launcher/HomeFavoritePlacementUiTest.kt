@@ -32,6 +32,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import kotlin.math.abs
+import com.avenor.launcher.ui.home.components.stableKey
 
 class HomeFavoritePlacementUiTest {
     private var animationScale = 1f

@@ -30,8 +30,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
 import com.avenor.launcher.FavoriteNamePlacement
 import com.avenor.launcher.HomeApplicationMovement
-import com.avenor.launcher.HomeFavoriteBelowItem
-import com.avenor.launcher.HomeFavoriteRow
 import com.avenor.launcher.OrderedFavoriteModuleType
 import com.avenor.launcher.R
 import kotlin.math.roundToInt

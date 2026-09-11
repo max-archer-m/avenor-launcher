@@ -17,6 +17,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
+import com.avenor.launcher.ui.home.components.stableKey
 
 class HomeApplicationMovementUiTest {
     @get:Rule

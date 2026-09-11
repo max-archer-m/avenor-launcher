@@ -34,7 +34,6 @@ import com.avenor.launcher.FavoriteNamePlacement
 import com.avenor.launcher.HomeApplicationMovement
 import com.avenor.launcher.LaunchableIdentity
 import com.avenor.launcher.R
-import com.avenor.launcher.stableKey
 
 /** Removal is a sibling overlay, so unavailable-content opacity never dims the control. */
 @Composable
