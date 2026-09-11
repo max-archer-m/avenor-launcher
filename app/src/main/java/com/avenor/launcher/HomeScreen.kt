@@ -1,6 +1,5 @@
 package com.avenor.launcher
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -62,6 +61,7 @@ import com.avenor.launcher.ui.drawer.DrawerDragDrop
 import com.avenor.launcher.ui.drawer.DrawerDragJourney
 import com.avenor.launcher.ui.home.HomeFavoriteEditOrchestration
 import com.avenor.launcher.ui.home.components.HomeApplicationMovementOverlay
+import com.avenor.launcher.ui.home.components.HomeDrawerDragHandling
 import com.avenor.launcher.ui.home.components.HomeBasicInformation
 import com.avenor.launcher.ui.home.components.HomeEditDock
 import com.avenor.launcher.ui.home.components.HomeFavoriteBarContainerDragPreview
@@ -140,52 +140,22 @@ internal fun HomeScreen(
 ) {
     val context = LocalContext.current
     val orderedApplicationMovement = remember(calculation = { HomeApplicationMovement() })
-    LaunchedEffect(drawerDragJourney) {
-        val journey = drawerDragJourney ?: return@LaunchedEffect
-        val started = orderedApplicationMovement.startExternalJourney(
-            identity = journey.entry.identity,
-            pointer = drawerDragTouchInWindow,
-        )
-        if (!started) onDrawerDragJourneyFinished(false, true)
-    }
-    LaunchedEffect(drawerDragTouchInWindow) {
-        if (drawerDragJourney != null) orderedApplicationMovement.move(drawerDragTouchInWindow)
-    }
-    LaunchedEffect(drawerDragDropping) {
-        if (!drawerDragDropping) return@LaunchedEffect
-        val journey = drawerDragJourney ?: return@LaunchedEffect
-        val drop = orderedApplicationMovement.finishExternalJourney()
-        // An invalid release (no drop target) resolves as a cancellation, not as a
-        // save failure; only a resolved drop that fails to persist reports failure.
-        val saved = journey != null && drop != null &&
-                onDrawerDragCommit(journey.entry.identity, drop)
-        onDrawerDragJourneyFinished(saved, drop == null)
-    }
+    HomeDrawerDragHandling(
+        movement = orderedApplicationMovement,
+        journey = drawerDragJourney,
+        touchInWindow = drawerDragTouchInWindow,
+        dropping = drawerDragDropping,
+        editMode = editMode,
+        stylePanelExpanded = stylePanelExpanded,
+        favoriteState = favoriteState,
+        favoriteAvailability = favoriteAvailability,
+        onCommit = onDrawerDragCommit,
+        onFinished = onDrawerDragJourneyFinished,
+    )
     val favoriteEnterBatch = rememberHomeFavoriteEnterBatch(
         modules = (favoriteState as? FavoriteReadState.Readable)?.orderedModules,
     )
     val applicationMovementActive = orderedApplicationMovement.activeIdentity != null
-    BackHandler(enabled = editMode && orderedApplicationMovement.isDragging, onBack = {
-        if (orderedApplicationMovement.session?.module?.id == EXTERNAL_JOURNEY_MODULE_ID) {
-            // Back during the Drawer journey is a cancellation: end the whole journey
-            // without a mutation and without the save-failure feedback path.
-            orderedApplicationMovement.cancel()
-            onDrawerDragJourneyFinished(false, true)
-        } else {
-            orderedApplicationMovement.cancel()
-        }
-    })
-    LaunchedEffect(editMode, stylePanelExpanded, favoriteState, favoriteAvailability) {
-        val session = orderedApplicationMovement.session ?: return@LaunchedEffect
-        val module = (favoriteState as? FavoriteReadState.Readable)?.orderedModules
-            ?.firstOrNull(predicate = { it.id == session.module.id })
-        val availability = favoriteAvailability[session.identity]
-        val invalidSource = orderedApplicationMovement.isDragging &&
-                session.module.id != EXTERNAL_JOURNEY_MODULE_ID &&
-                (module != session.module || (availability !is FavoriteAvailability.Available && availability !is FavoriteAvailability.Disabled))
-        if (!editMode || stylePanelExpanded || invalidSource || availability == FavoriteAvailability.ConfirmedRemoved
-        ) orderedApplicationMovement.cancel()
-    }
     val favoriteBarItemWidthPx = with(LocalDensity.current) {
         dimensionResource(R.dimen.home_favorite_bar_item_width).toPx()
     }

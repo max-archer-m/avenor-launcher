@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -42,8 +43,12 @@ internal fun DrawerBackgroundSurface(
     content: @Composable () -> Unit,
 ) {
     val shadow = drawerForegroundShadow()
-    MaterialTheme(typography = MaterialTheme.typography.withShadow(shadow)) {
-        CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(shadow = shadow)) {
+    val typography = MaterialTheme.typography
+    val textStyle = LocalTextStyle.current
+    val shadowedTypography = remember(typography, shadow) { typography.withShadow(shadow) }
+    val shadowedTextStyle = remember(textStyle, shadow) { textStyle.copy(shadow = shadow) }
+    MaterialTheme(typography = shadowedTypography) {
+        CompositionLocalProvider(LocalTextStyle provides shadowedTextStyle) {
             CompositionLocalProvider(LocalDrawerForegroundShadow provides true) {
                 Box(
                     Modifier
@@ -65,8 +70,12 @@ internal fun DrawerBackgroundSurface(
 /** Opaque panels retain their own contrast treatment; Home never enters the Drawer provider. */
 @Composable
 internal fun DrawerPanelAppearance(content: @Composable () -> Unit) {
-    MaterialTheme(typography = MaterialTheme.typography.withShadow(null)) {
-        CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(shadow = null)) {
+    val typography = MaterialTheme.typography
+    val textStyle = LocalTextStyle.current
+    val panelTypography = remember(typography) { typography.withShadow(null) }
+    val panelTextStyle = remember(textStyle) { textStyle.copy(shadow = null) }
+    MaterialTheme(typography = panelTypography) {
+        CompositionLocalProvider(LocalTextStyle provides panelTextStyle) {
             CompositionLocalProvider(LocalDrawerForegroundShadow provides false, content = content)
         }
     }
@@ -83,8 +92,11 @@ internal fun drawerForegroundShadow(): Shadow {
     val x = dimensionResource(R.dimen.drawer_foreground_shadow_offset_x)
     val y = dimensionResource(R.dimen.drawer_foreground_shadow_offset_y)
     val radius = dimensionResource(R.dimen.drawer_foreground_shadow_radius)
-    return with(LocalDensity.current) {
-        Shadow(color, Offset(x.toPx(), y.toPx()), radius.toPx())
+    val density = LocalDensity.current
+    return remember(color, x, y, radius, density) {
+        with(density) {
+            Shadow(color, Offset(x.toPx(), y.toPx()), radius.toPx())
+        }
     }
 }
 

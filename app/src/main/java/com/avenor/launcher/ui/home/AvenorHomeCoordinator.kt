@@ -42,6 +42,7 @@ internal class AvenorHomeCoordinator(
     private val favoriteEditor: HomeFavoriteEditor,
 ) {
     var favoriteState by mutableStateOf<FavoriteReadState>(FavoriteReadState.Loading)
+        private set
     var editMode by mutableStateOf(false)
         private set
     var stylePanelExpanded by mutableStateOf(false)
@@ -49,9 +50,11 @@ internal class AvenorHomeCoordinator(
     var selectedModuleId by mutableStateOf<String?>(null)
         private set
     var editMembership by mutableStateOf<Set<LaunchableIdentity>>(emptySet())
+        private set
     var drawerDragJourney by mutableStateOf<DrawerDragJourney?>(null)
         private set
     var drawerDragTouchPosition by mutableStateOf(Offset.Zero)
+        private set
     var drawerDragDropping by mutableStateOf(false)
         private set
     var favoriteRevealRequest by mutableStateOf<FavoriteRevealRequest?>(null)
@@ -64,6 +67,14 @@ internal class AvenorHomeCoordinator(
                 ?.toSet()
                 .orEmpty()
         }
+    }
+
+    fun updateFavoriteState(state: FavoriteReadState) {
+        favoriteState = state
+    }
+
+    fun updateEditMembership(aggregate: FavoriteAggregate) {
+        editMembership = aggregate.identities.toSet()
     }
 
     fun requestEditMode() {
@@ -124,14 +135,21 @@ internal class AvenorHomeCoordinator(
     }
 
     suspend fun commitDrawerDrop(identity: LaunchableIdentity, drop: DrawerDragDrop): Boolean {
-        val insertion = drop as? DrawerDragDrop.Insertion
-        val creation = drop as? DrawerDragDrop.Creation
-        return favoriteEditor.insertExternalFavorite(
-            identity = identity,
-            destinationModuleId = insertion?.moduleId,
-            boundary = insertion?.boundary ?: 0,
-            newModuleType = creation?.moduleType,
-        )
+        return when (drop) {
+            is DrawerDragDrop.Insertion -> favoriteEditor.insertExternalFavorite(
+                identity = identity,
+                destinationModuleId = drop.moduleId,
+                boundary = drop.boundary,
+                newModuleType = null,
+            )
+
+            is DrawerDragDrop.Creation -> favoriteEditor.insertExternalFavorite(
+                identity = identity,
+                destinationModuleId = null,
+                boundary = 0,
+                newModuleType = drop.moduleType,
+            )
+        }
     }
 
     fun finishDrawerDrag(saved: Boolean, cancelled: Boolean) {

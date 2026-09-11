@@ -290,7 +290,7 @@ internal fun AvenorApp(
             favoriteEditor = favoriteEditor,
         )
     }
-    homeCoordinator.favoriteState = favoriteState
+    homeCoordinator.updateFavoriteState(favoriteState)
 
     LaunchedEffect(
         key1 = drawerDisplaySettingsState,
@@ -743,7 +743,7 @@ internal fun AvenorApp(
                 return@launch
             }
             if (savedAggregate != null) {
-                updatedAggregate?.let { homeCoordinator.editMembership = it.identities.toSet() }
+                updatedAggregate?.let(homeCoordinator::updateEditMembership)
                 closeFavoriteSelection()
             } else {
                 favoriteSelectionSaving = false
