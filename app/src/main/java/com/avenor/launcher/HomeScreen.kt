@@ -1,84 +1,40 @@
 package com.avenor.launcher
 
-import com.avenor.launcher.ui.home.components.HomeFavoriteEnterBatch
-import com.avenor.launcher.ui.home.components.HomeFavoriteEnterKey
-import com.avenor.launcher.ui.home.components.HomeFavoriteExitOverlay
-import com.avenor.launcher.ui.home.components.homeFavoriteEnter
-import com.avenor.launcher.ui.home.components.rememberHomeFavoriteEnterBatch
-
 import androidx.activity.compose.BackHandler
-
-import android.annotation.SuppressLint
-import android.widget.Toast
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.tween
-import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -87,90 +43,59 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.integerResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toSize
-import java.util.UUID
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.stringResource
-import androidx.core.graphics.drawable.toBitmap
-import kotlin.math.roundToInt
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
-import com.avenor.launcher.ui.home.components.HomeBasicInformation
-import com.avenor.launcher.ui.home.components.HomeMainListAddFavoriteEntry
-import com.avenor.launcher.ui.home.components.HomeApplicationMovementOverlay
-import com.avenor.launcher.ui.home.components.HomeApplicationAutoScroll
-import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import com.avenor.launcher.ui.drawer.DrawerDragDrop
 import com.avenor.launcher.ui.drawer.DrawerDragJourney
-import com.avenor.launcher.ui.home.components.detectHomeApplicationMovement
-import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonRailDivider
-import com.avenor.launcher.ui.home.components.HomeFavoriteAddControl
-import com.avenor.launcher.ui.home.components.HomeFavoriteRibbon
-import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonActions
-import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonDragActions
-import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonDragState
-import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonLayoutRegistry
-import com.avenor.launcher.ui.home.components.awaitHomeHandleLongPress
-import com.avenor.launcher.ui.home.components.detectHomeReorderDrag
-import com.avenor.launcher.ui.home.components.homeEditSurface
-import com.avenor.launcher.ui.drawer.drawerForegroundShadow
-import com.avenor.launcher.ui.style.HomeModuleStylePanel
+import com.avenor.launcher.ui.home.HomeFavoriteEditOrchestration
+import com.avenor.launcher.ui.home.components.HomeApplicationMovementOverlay
+import com.avenor.launcher.ui.home.components.HomeBasicInformation
 import com.avenor.launcher.ui.home.components.HomeEditDock
 import com.avenor.launcher.ui.home.components.HomeFavoriteBarContainerDragPreview
+import com.avenor.launcher.ui.home.components.HomeFavoriteExitOverlay
 import com.avenor.launcher.ui.home.components.HomeFavoriteList
 import com.avenor.launcher.ui.home.components.HomeFavoriteListDragPreview
 import com.avenor.launcher.ui.home.components.HomeFavoriteMessage
 import com.avenor.launcher.ui.home.components.HomeFavoriteProvisionalList
+import com.avenor.launcher.ui.home.components.HomeFavoriteRibbon
+import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonActions
+import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonDragActions
+import com.avenor.launcher.ui.home.components.HomeFavoriteRibbonDragState
 import com.avenor.launcher.ui.home.components.HomeModuleDragPreview
 import com.avenor.launcher.ui.home.components.HomeOrderedModuleComposition
+import com.avenor.launcher.ui.home.components.rememberHomeFavoriteEnterBatch
 import com.avenor.launcher.ui.home.components.stableKey
 import com.avenor.launcher.ui.home.components.withPresentationFrom
+import com.avenor.launcher.ui.style.HomeModuleStylePanel
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import com.avenor.launcher.ApplicationDragContainerDescriptor
+import com.avenor.launcher.ApplicationDragAxis
+import com.avenor.launcher.ApplicationDragTargetSession
+import com.avenor.launcher.ApplicationDragTargetMode
+import com.avenor.launcher.FavoriteBarDragSession
+import com.avenor.launcher.FavoriteDragSession
+import com.avenor.launcher.NANOS_PER_SECOND
+import com.avenor.launcher.PRIMARY_LIST_ID
+import com.avenor.launcher.PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0
+import com.avenor.launcher.PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1
+
+
+
 
 
 @Composable
@@ -261,42 +186,6 @@ internal fun HomeScreen(
         if (!editMode || stylePanelExpanded || invalidSource || availability == FavoriteAvailability.ConfirmedRemoved
         ) orderedApplicationMovement.cancel()
     }
-    var dragSession by remember { mutableStateOf<FavoriteDragSession?>(null) }
-    var favoriteBarDragSession by remember {
-        mutableStateOf<FavoriteBarDragSession?>(null)
-    }
-    var applicationDragTargetSession by remember {
-        mutableStateOf<ApplicationDragTargetSession?>(null)
-    }
-    var favoriteBarContainerDragSession by remember {
-        mutableStateOf<FavoriteBarContainerDragSession?>(null)
-    }
-    var favoriteBarContainerCommittedGeneration by remember { mutableIntStateOf(-1) }
-    var listDragSession by remember { mutableStateOf<FavoriteListDragSession?>(null) }
-    var listDragCommittedGeneration by remember { mutableIntStateOf(-1) }
-    val editListStates = remember { mutableMapOf<String, LazyListState>() }
-    val favoriteBarStates = remember { mutableStateMapOf<String, LazyListState>() }
-    val favoriteBarBoundsInWindow = remember { mutableStateMapOf<String, Rect>() }
-    val applicationContainerBoundsInWindow = remember {
-        mutableStateMapOf<String, Rect>()
-    }
-    val applicationContainerDescriptors = remember {
-        mutableStateMapOf<String, ApplicationDragContainerDescriptor>()
-    }
-    val applicationItemBoundsInWindow = remember {
-        mutableStateMapOf<String, Rect>()
-    }
-    val favoriteRibbonLayoutRegistry = remember(
-        calculation = {
-            HomeFavoriteRibbonLayoutRegistry(
-                listStates = favoriteBarStates,
-                ribbonBoundsInWindow = favoriteBarBoundsInWindow,
-                applicationContainerBoundsInWindow = applicationContainerBoundsInWindow,
-                applicationContainerDescriptors = applicationContainerDescriptors,
-                applicationItemBoundsInWindow = applicationItemBoundsInWindow,
-            )
-        },
-    )
     val favoriteBarItemWidthPx = with(LocalDensity.current) {
         dimensionResource(R.dimen.home_favorite_bar_item_width).toPx()
     }
@@ -305,110 +194,11 @@ internal fun HomeScreen(
             R.dimen.home_favorite_bar_item_spacing,
         ).toPx()
     }
-    LaunchedEffect(
-        favoriteRevealContainerId,
-        favoriteRevealContainerType,
-        favoriteRevealIdentity,
-        favoriteState,
-        editMode,
-    ) {
-        val containerId = favoriteRevealContainerId ?: return@LaunchedEffect
-        val identity = favoriteRevealIdentity ?: return@LaunchedEffect
-        if (!editMode || favoriteState !is FavoriteReadState.Readable) {
-            return@LaunchedEffect
-        }
-        val aggregate = favoriteState.aggregate
-        val containerType = favoriteRevealContainerType
-            ?: FavoriteContainerType.VerticalList
-        val containers = when (containerType) {
-            FavoriteContainerType.VerticalList -> aggregate.verticalLists
-            FavoriteContainerType.FavoriteBar -> aggregate.favoriteBars
-        }
-        val containerIndex = containers.indexOfFirst { it.id == containerId }
-        val container = containers.getOrNull(containerIndex)
-        val itemIndex = container?.identities?.indexOf(identity) ?: -1
-        if (container == null || itemIndex < 0) {
-            onFavoriteRevealComplete()
-            return@LaunchedEffect
-        }
-        val listState = when (containerType) {
-            FavoriteContainerType.VerticalList -> when (containerIndex) {
-                0 -> editListStates.getOrPut(container.id) { favoriteListState }
-                1 -> editListStates.getOrPut(container.id) { companionFavoriteListState }
-                else -> null
-            }
-
-            FavoriteContainerType.FavoriteBar -> favoriteBarStates.getOrPut(container.id) {
-                LazyListState()
-            }
-        }
-        if (listState == null) {
-            onFavoriteRevealComplete()
-            return@LaunchedEffect
-        }
-        withFrameNanos { }
-        val visibleItems = listState.layoutInfo.visibleItemsInfo
-        val target = visibleItems.firstOrNull {
-            it.index == itemIndex
-        }
-        if (target != null) {
-            val viewportStart = listState.layoutInfo.viewportStartOffset
-            val viewportEnd = listState.layoutInfo.viewportEndOffset
-            val targetEnd = target.offset + target.size
-            when {
-                target.offset < viewportStart -> {
-                    listState.scrollBy((target.offset - viewportStart).toFloat())
-                }
-
-                targetEnd > viewportEnd -> {
-                    listState.scrollBy((targetEnd - viewportEnd).toFloat())
-                }
-            }
-        } else if (visibleItems.isNotEmpty() &&
-            containerType == FavoriteContainerType.FavoriteBar
-        ) {
-            val viewportStart = listState.layoutInfo.viewportStartOffset
-            val viewportEnd = listState.layoutInfo.viewportEndOffset
-            val firstVisible = visibleItems.first()
-            val targetStart = firstVisible.offset +
-                    ((itemIndex - firstVisible.index) * favoriteBarItemStridePx)
-            val targetEnd = targetStart + favoriteBarItemWidthPx
-            when {
-                targetStart < viewportStart -> {
-                    listState.scrollBy(targetStart - viewportStart)
-                }
-
-                targetEnd > viewportEnd -> {
-                    listState.scrollBy(targetEnd - viewportEnd)
-                }
-            }
-        } else if (visibleItems.isNotEmpty()) {
-            val firstVisibleIndex = visibleItems.first().index
-            val lastVisibleIndex = visibleItems.last().index
-            if (itemIndex < firstVisibleIndex) {
-                listState.scrollToItem(itemIndex)
-            } else if (itemIndex > lastVisibleIndex) {
-                listState.scrollToItem(
-                    (itemIndex - visibleItems.size + 1).coerceAtLeast(0),
-                )
-            }
-        }
-        onFavoriteRevealComplete()
-    }
     var dragGeneration by remember { mutableIntStateOf(0) }
-    val editTransaction = remember { HomeEditTransaction() }
-    var editMutationJob by remember { mutableStateOf<Job?>(null) }
-    var moduleDragSession by remember { mutableStateOf<ModuleDragSession?>(null) }
-    val moduleBoundsInWindow = remember { mutableStateMapOf<String, Rect>() }
-    var moduleListBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
     val currentFavoriteState by rememberUpdatedState(favoriteState)
     val snackbarHostState = removalSnackbarHostState ?: remember { SnackbarHostState() }
     val editScope = rememberCoroutineScope()
     var dragRootOriginInWindow by remember { mutableStateOf(Offset.Zero) }
-    var primaryListBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
-    var companionListBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
-    var primaryContainerBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
-    var companionContainerBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
     // Band at a row's top and bottom edge that a cross-group drag reads as an insertion boundary
     // instead of the favorite's body, because adjacent rows leave no gap between them.
     val insertionBoundaryBandPx = with(LocalDensity.current) {
@@ -438,139 +228,146 @@ internal fun HomeScreen(
         R.string.unable_to_save_module_order,
     )
 
-    fun cancelActiveDragSessions() {
-        dragSession = null
-        favoriteBarDragSession = null
-        applicationDragTargetSession = null
-        favoriteBarContainerDragSession = null
-        listDragSession = null
-        moduleDragSession = null
-        orderedApplicationMovement.cancel()
+    val orchestration = remember {
+        HomeFavoriteEditOrchestration(
+            orderedApplicationMovement = orderedApplicationMovement,
+            favoriteListState = favoriteListState,
+            companionFavoriteListState = companionFavoriteListState,
+            snackbarHostState = snackbarHostState,
+            editScope = editScope,
+            context = context,
+            hapticFeedback = hapticFeedback,
+        )
     }
+    orchestration.editMode = editMode
+    orchestration.applicationEditingSaving = applicationEditingSaving
+    orchestration.selectedModuleId = selectedModuleId
+    orchestration.favoriteState = currentFavoriteState
+    orchestration.favoriteAvailability = favoriteAvailability
+    orchestration.undoLabel = undoLabel
+    orchestration.favoriteRemovedMessage = favoriteRemovedMessage
+    orchestration.favoriteBarRemovedMessage = favoriteBarRemovedMessage
+    orchestration.undoUnavailableMessage = undoUnavailableMessage
+    orchestration.moduleStyleSaveFailureMessage = moduleStyleSaveFailureMessage
+    orchestration.moduleOrderSaveFailureMessage = moduleOrderSaveFailureMessage
+    orchestration.insertionBoundaryBandPx = insertionBoundaryBandPx
+    orchestration.edgeScrollBandPx = edgeScrollBandPx
+    orchestration.edgeScrollSpeedPxPerSecond = edgeScrollSpeedPxPerSecond
+    orchestration.edgeScrollStartDelayMillis = edgeScrollStartDelayMillis
+    orchestration.favoriteBarItemStridePx = favoriteBarItemStridePx
+    orchestration.onCommitFavoriteComposition = onCommitFavoriteComposition
+    orchestration.onCommitModuleOrder = onCommitModuleOrder
 
-    val advanceDrag: (Offset) -> Unit = { amount ->
-        applicationDragTargetSession = applicationDragTargetSession?.advanced(
-            amount = amount,
-            containerDescriptors = applicationContainerDescriptors,
-            itemBoundsInWindow = applicationItemBoundsInWindow,
-        )
-        val previous = dragSession
-        val advanced = previous?.advanced(
-            amount = amount,
-            primaryBoundsInWindow = primaryListBoundsInWindow,
-            primaryListState = favoriteListState,
-            companionBoundsInWindow = companionListBoundsInWindow,
-            companionListState = companionFavoriteListState,
-            boundaryBandPx = insertionBoundaryBandPx,
-        )
-        dragSession = advanced
-        // A tick marks the moment the feedback changes, so an exchange or a moved insertion
-        // boundary is felt without watching the moving rows.
-        advanced?.let { current ->
-            if (current.feedbackChangedFrom(previous)) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
+    LaunchedEffect(
+        favoriteRevealContainerId,
+        favoriteRevealContainerType,
+        favoriteRevealIdentity,
+        favoriteState,
+        editMode,
+    ) {
+        val containerId = favoriteRevealContainerId ?: return@LaunchedEffect
+        val identity = favoriteRevealIdentity ?: return@LaunchedEffect
+        if (!editMode || favoriteState !is FavoriteReadState.Readable) {
+            return@LaunchedEffect
+        }
+        val aggregate = favoriteState.aggregate
+        val containerType = favoriteRevealContainerType
+            ?: FavoriteContainerType.VerticalList
+        val containers = when (containerType) {
+            FavoriteContainerType.VerticalList -> aggregate.verticalLists
+            FavoriteContainerType.FavoriteBar -> aggregate.favoriteBars
+        }
+        val containerIndex = containers.indexOfFirst { it.id == containerId }
+        val container = containers.getOrNull(containerIndex)
+        val itemIndex = container?.identities?.indexOf(identity) ?: -1
+        if (container == null || itemIndex < 0) {
+            onFavoriteRevealComplete()
+            return@LaunchedEffect
+        }
+        val listState = when (containerType) {
+            FavoriteContainerType.VerticalList -> when (containerIndex) {
+                0 -> orchestration.editListStates.getOrPut(container.id) { favoriteListState }
+                1 -> orchestration.editListStates.getOrPut(container.id) {
+                    companionFavoriteListState
+                }
+                else -> null
+            }
+
+            FavoriteContainerType.FavoriteBar -> orchestration.favoriteBarStates.getOrPut(
+                container.id,
+            ) { LazyListState() }
+        }
+        if (listState == null) {
+            onFavoriteRevealComplete()
+            return@LaunchedEffect
+        }
+        withFrameNanos { }
+        val visibleItems = listState.layoutInfo.visibleItemsInfo
+        val target = visibleItems.firstOrNull { it.index == itemIndex }
+        if (target != null) {
+            val viewportStart = listState.layoutInfo.viewportStartOffset
+            val viewportEnd = listState.layoutInfo.viewportEndOffset
+            val targetEnd = target.offset + target.size
+            when {
+                target.offset < viewportStart -> {
+                    listState.scrollBy((target.offset - viewportStart).toFloat())
+                }
+
+                targetEnd > viewportEnd -> {
+                    listState.scrollBy((targetEnd - viewportEnd).toFloat())
+                }
+            }
+        } else if (visibleItems.isNotEmpty() &&
+            containerType == FavoriteContainerType.FavoriteBar
+        ) {
+            val viewportStart = listState.layoutInfo.viewportStartOffset
+            val viewportEnd = listState.layoutInfo.viewportEndOffset
+            val firstVisible = visibleItems.first()
+            val targetStart = firstVisible.offset +
+                    ((itemIndex - firstVisible.index) * favoriteBarItemStridePx)
+            val targetEnd = targetStart + favoriteBarItemWidthPx
+            when {
+                targetStart < viewportStart -> listState.scrollBy(targetStart - viewportStart)
+                targetEnd > viewportEnd -> listState.scrollBy(targetEnd - viewportEnd)
+            }
+        } else if (visibleItems.isNotEmpty()) {
+            val firstVisibleIndex = visibleItems.first().index
+            val lastVisibleIndex = visibleItems.last().index
+            if (itemIndex < firstVisibleIndex) {
+                listState.scrollToItem(itemIndex)
+            } else if (itemIndex > lastVisibleIndex) {
+                listState.scrollToItem(
+                    (itemIndex - visibleItems.size + 1).coerceAtLeast(0),
+                )
             }
         }
+        onFavoriteRevealComplete()
     }
-    val applicationEdgeScroll = applicationDragTargetSession?.edgeScroll(
-        descriptors = applicationContainerDescriptors,
+
+    val applicationEdgeScroll = orchestration.applicationDragTargetSession?.edgeScroll(
+        descriptors = orchestration.applicationContainerDescriptors,
         bandPx = edgeScrollBandPx,
         primaryListState = favoriteListState,
         companionListState = companionFavoriteListState,
-        editListStates = editListStates,
-        favoriteBarStates = favoriteBarStates,
+        editListStates = orchestration.editListStates,
+        favoriteBarStates = orchestration.favoriteBarStates,
     )
 
     LaunchedEffect(editMode) {
         if (!editMode) {
-            editTransaction.leave()
-            cancelActiveDragSessions()
-            editMutationJob?.cancel()
+            orchestration.editTransaction.leave()
+            orchestration.cancelActiveDragSessions()
+            orchestration.editMutationJob?.cancel()
             snackbarHostState.currentSnackbarData?.dismiss()
         } else {
-            editTransaction.enter(
+            orchestration.editTransaction.enter(
                 (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate,
             )
         }
     }
 
-    fun startModuleDrag(
-        module: OrderedFavoriteModule,
-        modules: List<OrderedFavoriteModule>,
-        touchInWindow: Offset,
-    ): Boolean {
-        if (modules.size < 2 || editMutationJob?.isActive == true || applicationEditingSaving) return false
-        val sourceIndex = modules.indexOfFirst { it.id == module.id }
-        val sourceBounds = moduleBoundsInWindow[module.id] ?: return false
-        if (sourceIndex < 0) return false
-        moduleDragSession = ModuleDragSession(
-            sourceModule = module,
-            sourceSelected = module.id == selectedModuleId,
-            sourceAvailability = module.identities.associateWith { identity ->
-                favoriteAvailability[identity] ?: FavoriteAvailability.Unknown(null)
-            },
-            initialModules = modules,
-            remainingModules = modules.filterNot { it.id == module.id },
-            insertionIndex = sourceIndex,
-            originInWindow = sourceBounds.topLeft,
-            size = IntSize(
-                sourceBounds.width.roundToInt(),
-                sourceBounds.height.roundToInt(),
-            ),
-            touchStartInWindow = touchInWindow,
-        )
-        return true
-    }
-
-    fun advanceModuleDrag(amount: Offset) {
-        val previous = moduleDragSession ?: return
-        moduleDragSession = previous.advanced(
-            amount = amount,
-            listBoundsInWindow = moduleListBoundsInWindow,
-            moduleBoundsInWindow = moduleBoundsInWindow,
-        )
-    }
-
-    fun enqueueEditMutation(mutation: suspend () -> Unit) {
-        val previousJob = editMutationJob
-        val mutationJob = editScope.launch(start = CoroutineStart.LAZY) {
-            previousJob?.join()
-            mutation()
-        }
-        editMutationJob = mutationJob
-        mutationJob.invokeOnCompletion {
-            editScope.launch {
-                if (editMutationJob === mutationJob) editMutationJob = null
-            }
-        }
-        mutationJob.start()
-    }
-
-    fun finishModuleDrag() {
-        val session = moduleDragSession ?: return
-        moduleDragSession = null
-        val reordered = session.completedModules() ?: return
-
-        val editSession = editTransaction.sessionId
-        editTransaction.beginModuleOrder(reordered)
-        enqueueEditMutation moduleOrderMutation@{
-            val persisted = onCommitModuleOrder(reordered.map { it.id })
-            if (editSession != editTransaction.sessionId || !editMode) {
-                return@moduleOrderMutation
-            }
-            editTransaction.completeModuleOrder()
-            if (!persisted) {
-                Toast.makeText(
-                    context,
-                    moduleOrderSaveFailureMessage,
-                    Toast.LENGTH_SHORT,
-                ).show()
-            }
-        }
-    }
-
-    val moduleEdgeScrollDirection = moduleDragSession?.let { session ->
-        val bounds = moduleListBoundsInWindow
+    val moduleEdgeScrollDirection = orchestration.moduleDragSession?.let { session ->
+        val bounds = orchestration.moduleListBoundsInWindow
         val band = edgeScrollBandPx.coerceAtMost(bounds.height / 2f)
         when {
             bounds == Rect.Zero || !bounds.contains(session.touchInWindow) -> 0
@@ -580,13 +377,13 @@ internal fun HomeScreen(
         }
     } ?: 0
 
-    LaunchedEffect(moduleDragSession?.sourceModule?.id, moduleEdgeScrollDirection) {
+    LaunchedEffect(orchestration.moduleDragSession?.sourceModule?.id, moduleEdgeScrollDirection) {
         if (moduleEdgeScrollDirection == 0) return@LaunchedEffect
         delay(duration = edgeScrollStartDelayMillis.milliseconds)
         var previousFrameNanos = withFrameNanos { it }
-        while (moduleDragSession != null) {
-            val session = moduleDragSession ?: break
-            val bounds = moduleListBoundsInWindow
+        while (orchestration.moduleDragSession != null) {
+            val session = orchestration.moduleDragSession ?: break
+            val bounds = orchestration.moduleListBoundsInWindow
             val band = edgeScrollBandPx.coerceAtMost(bounds.height / 2f)
             val direction = when {
                 !bounds.contains(session.touchInWindow) -> 0
@@ -608,565 +405,26 @@ internal fun HomeScreen(
                 direction * edgeScrollSpeedPxPerSecond * proximity * elapsedSeconds,
             )
             if (consumed == 0f) break
-            advanceModuleDrag(Offset.Zero)
+            orchestration.advanceModuleDrag(Offset.Zero)
         }
     }
 
     LaunchedEffect(stylePanelExpanded) {
-        if (!stylePanelExpanded) moduleDragSession = null
+        if (!stylePanelExpanded) orchestration.moduleDragSession = null
     }
 
     LaunchedEffect(favoriteState, editMode) {
         val readable = favoriteState as? FavoriteReadState.Readable
             ?: return@LaunchedEffect
-        val committed = editTransaction.committedAggregate ?: return@LaunchedEffect
+        val committed = orchestration.editTransaction.committedAggregate ?: return@LaunchedEffect
         if (editMode &&
             readable.aggregate != committed &&
-            editMutationJob?.isActive != true
+            orchestration.editMutationJob?.isActive != true
         ) {
-            cancelActiveDragSessions()
-            if (editTransaction.reconcileExternal(readable.aggregate)) {
+            orchestration.cancelActiveDragSessions()
+            if (orchestration.editTransaction.reconcileExternal(readable.aggregate)) {
                 snackbarHostState.currentSnackbarData?.dismiss()
             }
-        }
-    }
-
-    fun commitEditAggregate(
-        transform: (FavoriteAggregate) -> FavoriteAggregate,
-        message: String = "",
-        recordUndo: Boolean = false,
-        onCommitted: () -> Unit = {},
-        onFailed: () -> Unit = {
-            Toast.makeText(
-                context,
-                R.string.favorite_reorder_unavailable,
-                Toast.LENGTH_SHORT,
-            ).show()
-        },
-    ) {
-        if (favoriteState !is FavoriteReadState.Readable) return
-        val session = editTransaction.sessionId
-        enqueueEditMutation mutation@{
-            val base = editTransaction.baseAggregate(
-                (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate,
-            )
-                ?: return@mutation
-            val updated = transform(base)
-            if (!isValidAggregate(updated)) return@mutation
-            editTransaction.beginMutation(updated)
-            val persisted = onCommitFavoriteComposition(transform)
-            if (session != editTransaction.sessionId || !editMode) return@mutation
-            if (persisted == null) {
-                editTransaction.discardPending(updated)
-                withFrameNanos { }
-                if (session != editTransaction.sessionId || !editMode) return@mutation
-                editTransaction.restoreCommitted(
-                    (currentFavoriteState as? FavoriteReadState.Readable)?.aggregate,
-                )
-                cancelActiveDragSessions()
-                onFailed()
-                return@mutation
-            }
-            editTransaction.completeMutation(persisted)
-            onCommitted()
-            if (!recordUndo) {
-                editTransaction.clearUndo()
-                snackbarHostState.currentSnackbarData?.dismiss()
-                return@mutation
-            }
-            val sequence = editTransaction.recordUndo(base)
-            snackbarHostState.currentSnackbarData?.dismiss()
-            editScope.launch {
-                val result = snackbarHostState.showSnackbar(
-                    message = message,
-                    actionLabel = undoLabel,
-                    duration = SnackbarDuration.Long,
-                )
-                if (result == SnackbarResult.ActionPerformed &&
-                    session == editTransaction.sessionId
-                ) {
-                    val snapshot = editTransaction.consumeUndo(sequence) ?: return@launch
-                    commitEditAggregate(
-                        transform = { snapshot },
-                        onFailed = {
-                            editScope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = undoUnavailableMessage,
-                                    duration = SnackbarDuration.Short,
-                                )
-                            }
-                        },
-                    )
-                }
-            }
-        }
-    }
-
-    fun removeFavoriteFromContainer(
-        containerId: String,
-        identity: LaunchableIdentity,
-    ) {
-        commitEditAggregate(
-            { aggregate ->
-                aggregate.copy(
-                    verticalLists = aggregate.verticalLists.mapNotNull { container ->
-                        if (container.id != containerId) {
-                            container
-                        } else {
-                            container.copy(
-                                identities = container.identities - identity,
-                            ).takeIf { it.identities.isNotEmpty() }
-                        }
-                    },
-                    favoriteBars = aggregate.favoriteBars.mapNotNull { container ->
-                        if (container.id != containerId) {
-                            container
-                        } else {
-                            container.copy(
-                                identities = container.identities - identity,
-                            ).takeIf { it.identities.isNotEmpty() }
-                        }
-                    },
-                )
-            },
-            favoriteRemovedMessage,
-            recordUndo = true,
-        )
-    }
-
-    fun commitVerticalModuleStyle(
-        moduleId: String,
-        transform: (FavoriteContainer) -> FavoriteContainer,
-    ) {
-        if (editMutationJob?.isActive == true || applicationEditingSaving) return
-        commitEditAggregate(
-            transform = { aggregate ->
-                aggregate.updateVerticalList(moduleId, transform)
-            },
-            onFailed = {
-                Toast.makeText(
-                    context,
-                    moduleStyleSaveFailureMessage,
-                    Toast.LENGTH_SHORT,
-                ).show()
-            },
-        )
-    }
-
-    fun removeFavoriteBar(containerId: String) {
-        commitEditAggregate(
-            transform = { aggregate ->
-                aggregate.copy(
-                    favoriteBars = aggregate.favoriteBars.filterNot { it.id == containerId },
-                )
-            },
-            message = favoriteBarRemovedMessage,
-            recordUndo = true,
-        )
-    }
-
-    fun commitCrossContainerDrag(targetSession: ApplicationDragTargetSession): Boolean {
-        val targetKey = targetSession.targetContainerKey ?: return false
-        val targetType = targetSession.targetContainerType ?: return false
-        if (targetKey == targetSession.sourceContainerKey) return false
-        val sourceId = targetSession.sourceContainerKey.substringAfter(':')
-        val targetId = targetKey.substringAfter(':')
-        val provisionalTarget = targetKey.startsWith(PROVISIONAL_VERTICAL_LIST_DRAG_KEY_PREFIX) ||
-                targetKey == PROVISIONAL_FAVORITE_BAR_DRAG_KEY
-        val targetIdentity = targetSession.targetIdentity
-        val targetIndex = targetSession.targetIndex
-        val provisionalContainerId = if (provisionalTarget) UUID.randomUUID().toString() else null
-        // The pointer has already been released when this function is called. Remove the active
-        // target before starting the asynchronous save so edge scrolling cannot continue while the
-        // aggregate mutation is pending.
-        applicationDragTargetSession = null
-        commitEditAggregate(
-            transform = transform@{ aggregate ->
-                if (provisionalTarget) {
-                    val source = aggregate.containerForDragKey(targetSession.sourceContainerKey)
-                        ?: return@transform aggregate
-                    if (targetIdentity != null) return@transform aggregate
-                    val movedAggregate = aggregate.removeIdentityFromContainer(
-                        source.id,
-                        targetSession.sourceIdentity,
-                    )
-                    val newContainer = FavoriteContainer(
-                        id = provisionalContainerId ?: return@transform aggregate,
-                        type = targetType,
-                        identities = listOf(targetSession.sourceIdentity),
-                    )
-                    return@transform if (targetType ==
-                        FavoriteContainerType.VerticalList
-                    ) {
-                        movedAggregate.copy(
-                            verticalLists = movedAggregate.verticalLists + newContainer,
-                        )
-                    } else {
-                        movedAggregate.copy(
-                            favoriteBars = movedAggregate.favoriteBars + newContainer,
-                        )
-                    }
-                }
-                if (targetId.isBlank()) return@transform aggregate
-                aggregate.moveFavorite(
-                    sourceContainerId = sourceId,
-                    targetContainerId = targetId,
-                    identity = targetSession.sourceIdentity,
-                    targetIndex = targetIndex,
-                    exchangeIdentity = targetIdentity,
-                )
-            },
-            onCommitted = {
-                dragSession = null
-                favoriteBarDragSession = null
-                applicationDragTargetSession = null
-            },
-            onFailed = {
-                dragSession = null
-                favoriteBarDragSession = null
-                applicationDragTargetSession = null
-            },
-        )
-        return true
-    }
-
-    fun startFavoriteBarContainerDrag(
-        bar: FavoriteContainer,
-        index: Int,
-        touchInWindow: Offset,
-        displayedBars: List<FavoriteContainer>,
-    ) {
-        val bounds = favoriteBarBoundsInWindow[bar.id] ?: return
-        val state = favoriteBarStates[bar.id]
-        favoriteBarContainerDragSession = FavoriteBarContainerDragSession(
-            sourceContainer = bar,
-            currentIndex = index,
-            originInWindow = bounds.topLeft,
-            size = IntSize(bounds.width.roundToInt(), bounds.height.roundToInt()),
-            touchStartInWindow = touchInWindow,
-            displayedBars = displayedBars,
-            initialDisplayedBars = displayedBars,
-            visibleIdentities = state?.layoutInfo?.visibleItemsInfo
-                ?.mapNotNull { bar.identities.getOrNull(it.index) }
-                .orEmpty(),
-            visibleScrollOffset = state?.firstVisibleItemScrollOffset ?: 0,
-            canScrollBackward = state?.canScrollBackward == true,
-            canScrollForward = state?.canScrollForward == true,
-        )
-        favoriteBarContainerCommittedGeneration = -1
-    }
-
-    fun advanceFavoriteBarContainerDrag(amount: Offset) {
-        val previous = favoriteBarContainerDragSession ?: return
-        val moved = previous.copy(delta = previous.delta + amount)
-        val targetIndex = moved.displayedBars.indexOfFirst { bar ->
-            favoriteBarBoundsInWindow[bar.id]?.contains(moved.touchInWindow) == true
-        }
-        if (targetIndex < 0 || targetIndex == moved.currentIndex) {
-            favoriteBarContainerDragSession = moved.copy(targetContainerId = null)
-            return
-        }
-        val targetContainerId = moved.displayedBars[targetIndex].id
-        val reordered = moved.displayedBars.toMutableList().also { bars ->
-            val source = bars[moved.currentIndex]
-            bars[moved.currentIndex] = bars[targetIndex]
-            bars[targetIndex] = source
-        }
-        val advanced = moved.copy(
-            currentIndex = targetIndex,
-            displayedBars = reordered,
-            targetContainerId = targetContainerId,
-            exchangeGeneration = moved.exchangeGeneration + 1,
-        )
-        favoriteBarContainerDragSession = advanced
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-        val sourceId = advanced.sourceContainer.id
-        val generation = advanced.exchangeGeneration
-        val committedBars = advanced.displayedBars
-        commitEditAggregate(
-            transform = { aggregate ->
-                val currentIndex = aggregate.favoriteBars.indexOfFirst { it.id == sourceId }
-                if (currentIndex < 0 || targetIndex !in aggregate.favoriteBars.indices) {
-                    aggregate
-                } else {
-                    aggregate.copy(
-                        favoriteBars = aggregate.favoriteBars.toMutableList().also { bars ->
-                            val source = bars.removeAt(currentIndex)
-                            bars.add(targetIndex, source)
-                        },
-                    )
-                }
-            },
-            onCommitted = {
-                val active = favoriteBarContainerDragSession
-                if (active?.sourceContainer?.id == sourceId &&
-                    active.exchangeGeneration == generation &&
-                    active.displayedBars == committedBars
-                ) {
-                    favoriteBarContainerCommittedGeneration = generation
-                    if (active.released) favoriteBarContainerDragSession = null
-                }
-            },
-            onFailed = {
-                val active = favoriteBarContainerDragSession
-                if (active?.sourceContainer?.id == sourceId &&
-                    active.exchangeGeneration == generation
-                ) {
-                    favoriteBarContainerDragSession = null
-                    favoriteBarContainerCommittedGeneration = -1
-                }
-            },
-        )
-    }
-
-    fun finishFavoriteBarContainerDrag() {
-        val session = favoriteBarContainerDragSession ?: return
-        if (session.displayedBars == session.initialDisplayedBars) {
-            favoriteBarContainerDragSession = null
-            return
-        }
-        val released = session.copy(released = true)
-        favoriteBarContainerDragSession =
-            if (favoriteBarContainerCommittedGeneration == released.exchangeGeneration) {
-                null
-            } else {
-                released
-            }
-    }
-
-    fun advanceAndPersistFavoriteBarDrag(amount: Offset) {
-        applicationDragTargetSession = applicationDragTargetSession?.advanced(
-            amount = amount,
-            containerDescriptors = applicationContainerDescriptors,
-            itemBoundsInWindow = applicationItemBoundsInWindow,
-        )
-        val session = favoriteBarDragSession ?: return
-        val targetSession = applicationDragTargetSession
-        val sourceBounds = targetSession?.let { active ->
-            applicationContainerBoundsInWindow[active.sourceContainerKey]
-        }
-        if (targetSession == null || sourceBounds?.contains(targetSession.touchInWindow) != true) {
-            favoriteBarDragSession = session.copy(
-                delta = session.delta + amount,
-                residualX = 0f,
-            )
-            return
-        }
-        var residualX = session.residualX + amount.x
-        var displayed = session.displayedIdentities
-        var sourceIndex = displayed.indexOf(session.identity)
-        if (sourceIndex < 0) return
-        var exchanged = false
-        val threshold = favoriteBarItemStridePx / 2f
-        while (residualX >= threshold && sourceIndex < displayed.lastIndex) {
-            displayed = displayed.exchangedAt(sourceIndex, sourceIndex + 1)
-            sourceIndex += 1
-            residualX -= favoriteBarItemStridePx
-            exchanged = true
-        }
-        while (residualX <= -threshold && sourceIndex > 0) {
-            displayed = displayed.exchangedAt(sourceIndex, sourceIndex - 1)
-            sourceIndex -= 1
-            residualX += favoriteBarItemStridePx
-            exchanged = true
-        }
-        favoriteBarDragSession = session.copy(
-            displayedIdentities = displayed,
-            delta = session.delta + amount,
-            residualX = residualX,
-        )
-        if (!exchanged) return
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-        val generation = session.generation
-        commitEditAggregate(
-            transform = { aggregate ->
-                aggregate.copy(
-                    favoriteBars = aggregate.favoriteBars.map { bar ->
-                        if (bar.id == session.barId) {
-                            bar.copy(identities = displayed)
-                        } else {
-                            bar
-                        }
-                    },
-                )
-            },
-            onFailed = {
-                if (favoriteBarDragSession?.generation == generation) {
-                    favoriteBarDragSession = null
-                }
-            },
-        )
-    }
-
-    fun advanceAndPersistDrag(amount: Offset) {
-        val primaryViewport =
-            favoriteListState.firstVisibleItemIndex to
-                    favoriteListState.firstVisibleItemScrollOffset
-        val companionViewport =
-            companionFavoriteListState.firstVisibleItemIndex to
-                    companionFavoriteListState.firstVisibleItemScrollOffset
-        val previous = dragSession
-        advanceDrag(amount)
-        val advanced = dragSession
-        if (previous == null || advanced == null) return
-        val primaryOrderChanged = previous.displayedPrimary != advanced.displayedPrimary
-        val companionOrderChanged = previous.displayedCompanion != advanced.displayedCompanion
-        val orderChanged = primaryOrderChanged || companionOrderChanged
-        if (!orderChanged) return
-
-        // Stable item keys normally anchor the first visible item after a reorder. During a drag,
-        // keep the numeric viewport instead so exchanging the first two rows cannot move the list.
-        if (primaryOrderChanged) {
-            favoriteListState.requestScrollToItem(primaryViewport.first, primaryViewport.second)
-        }
-        if (companionOrderChanged) {
-            companionFavoriteListState.requestScrollToItem(
-                companionViewport.first,
-                companionViewport.second,
-            )
-        }
-
-        val generation = advanced.generation
-        val visiblePrimary = advanced.displayedPrimary
-        val visibleCompanion = advanced.displayedCompanion
-        commitEditAggregate(
-            transform = { aggregate ->
-                aggregate.replaceVerticalComposition(
-                    visiblePrimary,
-                    visibleCompanion,
-                )
-            },
-            onCommitted = {
-                val active = dragSession
-                if (active?.generation == generation &&
-                    active.released &&
-                    active.displayedPrimary == visiblePrimary &&
-                    active.displayedCompanion == visibleCompanion
-                ) {
-                    dragSession = null
-                }
-            },
-            onFailed = {
-                if (dragSession?.generation == generation) {
-                    dragSession = null
-                }
-            },
-        )
-    }
-
-    fun startListDrag(
-        container: FavoriteContainer,
-        index: Int,
-        bounds: Rect,
-        touchInWindow: Offset,
-        listState: LazyListState,
-        displayedLists: List<FavoriteContainer>,
-    ) {
-        val visibleIdentities = listState.layoutInfo.visibleItemsInfo.mapNotNull { item ->
-            container.identities.getOrNull(item.index)
-        }
-        listDragSession = FavoriteListDragSession(
-            sourceContainer = container,
-            currentIndex = index,
-            originInWindow = bounds.topLeft,
-            size = IntSize(bounds.width.roundToInt(), bounds.height.roundToInt()),
-            touchStartInWindow = touchInWindow,
-            displayedLists = displayedLists,
-            initialDisplayedLists = displayedLists,
-            visibleIdentities = visibleIdentities,
-            visibleScrollOffset = listState.firstVisibleItemScrollOffset,
-        )
-        listDragCommittedGeneration = -1
-    }
-
-    fun advanceListDrag(amount: Offset) {
-        val previous = listDragSession ?: return
-        val sourceState = editListStates[previous.sourceContainer.id]
-        val moved = previous.copy(
-            delta = previous.delta + amount,
-            visibleIdentities = sourceState?.layoutInfo?.visibleItemsInfo
-                ?.mapNotNull { item ->
-                    previous.sourceContainer.identities.getOrNull(item.index)
-                }
-                ?: previous.visibleIdentities,
-            visibleScrollOffset = sourceState?.firstVisibleItemScrollOffset
-                ?: previous.visibleScrollOffset,
-        )
-        val targetIndex = when {
-            primaryContainerBoundsInWindow.contains(moved.touchInWindow) -> 0
-            companionContainerBoundsInWindow.contains(moved.touchInWindow) -> 1
-            else -> {
-                listDragSession = moved
-                return
-            }
-        }
-        if (targetIndex == moved.currentIndex ||
-            targetIndex !in moved.displayedLists.indices
-        ) {
-            listDragSession = moved
-            return
-        }
-
-        val reordered = moved.displayedLists.toMutableList().also { lists ->
-            val source = lists[moved.currentIndex]
-            lists[moved.currentIndex] = lists[targetIndex]
-            lists[targetIndex] = source
-        }
-        val advanced = moved.copy(
-            currentIndex = targetIndex,
-            displayedLists = reordered,
-            exchangeGeneration = moved.exchangeGeneration + 1,
-        )
-        listDragSession = advanced
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-        val sourceId = advanced.sourceContainer.id
-        val committedLists = advanced.displayedLists
-        val exchangeGeneration = advanced.exchangeGeneration
-        commitEditAggregate(
-            transform = { aggregate ->
-                val currentIndex = aggregate.verticalLists.indexOfFirst { it.id == sourceId }
-                if (currentIndex < 0 || targetIndex !in aggregate.verticalLists.indices) {
-                    aggregate
-                } else {
-                    aggregate.moveVerticalList(currentIndex, targetIndex)
-                }
-            },
-            onCommitted = {
-                val active = listDragSession
-                if (active?.sourceContainer?.id == sourceId &&
-                    active.exchangeGeneration == exchangeGeneration &&
-                    active.displayedLists == committedLists
-                ) {
-                    listDragCommittedGeneration = exchangeGeneration
-                    if (active.released) {
-                        listDragSession = null
-                    }
-                }
-            },
-            onFailed = {
-                if (listDragSession?.sourceContainer?.id == sourceId &&
-                    listDragSession?.exchangeGeneration == exchangeGeneration
-                ) {
-                    listDragSession = null
-                    listDragCommittedGeneration = -1
-                }
-            },
-        )
-    }
-
-    fun finishListDrag() {
-        val session = listDragSession ?: return
-        if (session.displayedLists == session.initialDisplayedLists) {
-            listDragSession = null
-            return
-        }
-        val released = session.copy(released = true)
-        listDragSession = if (
-            listDragCommittedGeneration == released.exchangeGeneration
-        ) {
-            null
-        } else {
-            released
         }
     }
 
@@ -1179,13 +437,13 @@ internal fun HomeScreen(
         delay(duration = edgeScrollStartDelayMillis.milliseconds)
         var previousFrame = 0L
         while (true) {
-            val request = applicationDragTargetSession?.edgeScroll(
-                descriptors = applicationContainerDescriptors,
+            val request = orchestration.applicationDragTargetSession?.edgeScroll(
+                descriptors = orchestration.applicationContainerDescriptors,
                 bandPx = edgeScrollBandPx,
                 primaryListState = favoriteListState,
                 companionListState = companionFavoriteListState,
-                editListStates = editListStates,
-                favoriteBarStates = favoriteBarStates,
+                editListStates = orchestration.editListStates,
+                favoriteBarStates = orchestration.favoriteBarStates,
             ) ?: break
             if (request.containerKey != initialRequest.containerKey ||
                 request.axis != initialRequest.axis ||
@@ -1198,7 +456,7 @@ internal fun HomeScreen(
                     request.containerKey == PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0 ||
                             request.containerKey == PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1 -> null
 
-                    else -> editListStates[request.containerKey.substringAfter(':')]
+                    else -> orchestration.editListStates[request.containerKey.substringAfter(':')]
                         ?: if (request.containerKey == "vertical-list:${PRIMARY_LIST_ID}") {
                             favoriteListState
                         } else {
@@ -1207,7 +465,7 @@ internal fun HomeScreen(
                 }
 
                 ApplicationDragAxis.Horizontal ->
-                    favoriteBarStates[request.containerKey.substringAfter(':')]
+                    orchestration.favoriteBarStates[request.containerKey.substringAfter(':')]
             } ?: break
             if (previousFrame == 0L) {
                 previousFrame = withFrameNanos { it }
@@ -1223,10 +481,10 @@ internal fun HomeScreen(
                 if (request.forward) distance else -distance,
             )
             if (consumed == 0f) break
-            if (dragSession != null) {
-                advanceAndPersistDrag(Offset.Zero)
-            } else if (favoriteBarDragSession != null) {
-                advanceAndPersistFavoriteBarDrag(Offset.Zero)
+            if (orchestration.dragSession != null) {
+                orchestration.advanceAndPersistDrag(Offset.Zero)
+            } else if (orchestration.favoriteBarDragSession != null) {
+                orchestration.advanceAndPersistFavoriteBarDrag(Offset.Zero)
             }
             if (!state.canScroll(request.forward)) break
         }
@@ -1243,13 +501,14 @@ internal fun HomeScreen(
         val orderedModules = (favoriteState as? FavoriteReadState.Readable)
             ?.orderedModules
             .orEmpty()
-        val previewAggregate = editTransaction.previewAggregate(
+        val previewAggregate = orchestration.editTransaction.previewAggregate(
             (favoriteState as? FavoriteReadState.Readable)?.aggregate ?: FavoriteAggregate(),
         )
         val displayedModules = orderedModules.withPresentationFrom(previewAggregate)
         val selectedModule = displayedModules.firstOrNull { it.id == selectedModuleId }
-        val styleSaving = applicationEditingSaving || editMutationJob?.isActive == true ||
-                moduleDragSession != null
+        val styleSaving = applicationEditingSaving ||
+            orchestration.editMutationJob?.isActive == true ||
+                orchestration.moduleDragSession != null
         val stylePanelMaximumHeight = (
                 maxHeight -
                         dimensionResource(R.dimen.home_edit_dock_height) -
@@ -1289,14 +548,16 @@ internal fun HomeScreen(
                                 maximumHeight = stylePanelMaximumHeight,
                                 onChangeSize = { size ->
                                     selectedModule?.let { module ->
-                                        commitVerticalModuleStyle(module.id) {
+                                        orchestration.commitVerticalModuleStyle(module.id) {
                                             it.copy(listSize = size)
                                         }
                                     }
                                 },
                                 onChangeNamePlacement = { placement ->
                                     selectedModule?.let { module ->
-                                        commitVerticalModuleStyle(module.id) { container ->
+                                        orchestration.commitVerticalModuleStyle(
+                                            module.id,
+                                        ) { container ->
                                             container.copy(
                                                 namePlacement = placement,
                                                 itemsPerRow = if (
@@ -1312,7 +573,7 @@ internal fun HomeScreen(
                                 },
                                 onChangeItemsPerRow = { count ->
                                     selectedModule?.let { module ->
-                                        commitVerticalModuleStyle(module.id) {
+                                        orchestration.commitVerticalModuleStyle(module.id) {
                                             it.copy(itemsPerRow = count)
                                         }
                                     }
@@ -1383,14 +644,15 @@ internal fun HomeScreen(
                                 onClick = onAddProvisionalFavorites,
                                 testTag = "favorite_provisional_add_0",
                                 applicationDropHighlight =
-                                    applicationDragTargetSession?.showsContainerHighlight(
+                                    orchestration.applicationDragTargetSession
+                                        ?.showsContainerHighlight(
                                         PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
                                     ) == true,
                                 onBoundsInWindow = {
-                                    applicationContainerBoundsInWindow[
+                                    orchestration.applicationContainerBoundsInWindow[
                                         PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0
                                     ] = it
-                                    applicationContainerDescriptors[
+                                    orchestration.applicationContainerDescriptors[
                                         PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0
                                     ] = ApplicationDragContainerDescriptor(
                                         key = PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
@@ -1400,10 +662,10 @@ internal fun HomeScreen(
                                     )
                                 },
                                 onDisposed = {
-                                    applicationContainerBoundsInWindow.remove(
+                                    orchestration.applicationContainerBoundsInWindow.remove(
                                         PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
                                     )
-                                    applicationContainerDescriptors.remove(
+                                    orchestration.applicationContainerDescriptors.remove(
                                         PROVISIONAL_VERTICAL_LIST_DRAG_KEY_0,
                                     )
                                 },
@@ -1450,13 +712,13 @@ internal fun HomeScreen(
                                 onLongPressFavorite = onLongPressFavorite,
                             )
                         } else if (orderedModules != null) {
-                            val previewAggregate = editTransaction.previewAggregate(
+                            val previewAggregate = orchestration.editTransaction.previewAggregate(
                                 favoriteState.aggregate,
                             )
                             val styledModules =
                                 orderedModules.withPresentationFrom(previewAggregate)
-                            val displayedModules = moduleDragSession?.remainingModules
-                                ?: editTransaction.pendingModuleOrder
+                            val displayedModules = orchestration.moduleDragSession?.remainingModules
+                                ?: orchestration.editTransaction.pendingModuleOrder
                                 ?: styledModules
                             HomeOrderedModuleComposition(
                                 enterBatch = favoriteEnterBatch,
@@ -1467,14 +729,16 @@ internal fun HomeScreen(
                                 editMode = true,
                                 selectionEnabled = stylePanelExpanded,
                                 selectionInteractionEnabled = !applicationEditingSaving &&
-                                        editMutationJob?.isActive != true &&
-                                        moduleDragSession == null,
-                                selectionVisualEnabled = !applicationEditingSaving && editMutationJob?.isActive != true,
+                                        orchestration.editMutationJob?.isActive != true &&
+                                        orchestration.moduleDragSession == null,
+                                selectionVisualEnabled = !applicationEditingSaving &&
+                                    orchestration.editMutationJob?.isActive != true,
                                 selectedModuleId = selectedModuleId,
                                 onSelectModule = onSelectModule,
                                 addEntriesEnabled = !applicationEditingSaving &&
-                                        editMutationJob?.isActive != true &&
-                                        moduleDragSession == null && !applicationMovementActive,
+                                        orchestration.editMutationJob?.isActive != true &&
+                                        orchestration.moduleDragSession == null &&
+                                            !applicationMovementActive,
                                 onRemoveFavorite = onRemoveApplication,
                                 applicationMovement = orderedApplicationMovement,
                                 onCommitApplicationOrder = { change ->
@@ -1498,24 +762,30 @@ internal fun HomeScreen(
                                 onLaunchFavorite = {},
                                 onLongPressFavorite = {},
                                 moduleEdgeScrollDirection = moduleEdgeScrollDirection,
-                                moduleInsertionIndex = moduleDragSession?.insertionIndex,
+                                moduleInsertionIndex =
+                                    orchestration.moduleDragSession?.insertionIndex,
                                 onModuleBoundsInWindow = { id, bounds ->
-                                    moduleBoundsInWindow[id] = bounds
+                                    orchestration.moduleBoundsInWindow[id] = bounds
                                 },
-                                onModuleDisposed = { id -> moduleBoundsInWindow.remove(id) },
-                                onModuleListBoundsInWindow = { moduleListBoundsInWindow = it },
+                                onModuleDisposed = { id ->
+                                    orchestration.moduleBoundsInWindow.remove(id)
+                                },
+                                onModuleListBoundsInWindow = {
+                                    orchestration.moduleListBoundsInWindow = it
+                                },
                                 onModuleDragStart = { module, touch ->
-                                    startModuleDrag(module, styledModules, touch)
+                                    orchestration.startModuleDrag(module, styledModules, touch)
                                 },
-                                onModuleDrag = ::advanceModuleDrag,
-                                onModuleDragEnd = ::finishModuleDrag,
-                                onModuleDragCancel = { moduleDragSession = null },
+                                onModuleDrag = orchestration::advanceModuleDrag,
+                                onModuleDragEnd = orchestration::finishModuleDrag,
+                                onModuleDragCancel = { orchestration.moduleDragSession = null },
                             )
                         } else if (editMode) {
-                            val persistedEditAggregate = editTransaction.previewAggregate(
+                            val persistedEditAggregate =
+                                orchestration.editTransaction.previewAggregate(
                                 favoriteState.aggregate,
                             )
-                            val editAggregate = listDragSession?.let { session ->
+                            val editAggregate = orchestration.listDragSession?.let { session ->
                                 persistedEditAggregate.copy(
                                     verticalLists = session.displayedLists,
                                 )
@@ -1523,51 +793,53 @@ internal fun HomeScreen(
                             val primaryContainer = editAggregate.verticalLists.getOrNull(0)
                             val companionContainer = editAggregate.verticalLists.getOrNull(1)
                             val primaryEditListState = primaryContainer?.let { container ->
-                                editListStates.getOrPut(container.id) {
+                                orchestration.editListStates.getOrPut(container.id) {
                                     favoriteListState
                                 }
                             } ?: favoriteListState
                             val companionEditListState = companionContainer?.let { container ->
-                                editListStates.getOrPut(container.id) {
+                                orchestration.editListStates.getOrPut(container.id) {
                                     companionFavoriteListState
                                 }
                             } ?: companionFavoriteListState
                             val primaryIdentities = primaryContainer?.identities.orEmpty()
                             val companionIdentities = companionContainer?.identities.orEmpty()
-                            val activeSession = dragSession?.takeIf { it.hasInGroupExchange }
-                            val activeDraggedIdentity = dragSession
+                            val activeSession = orchestration.dragSession
+                                ?.takeIf { it.hasInGroupExchange }
+                            val activeDraggedIdentity = orchestration.dragSession
                                 ?.takeUnless { it.released }
                                 ?.identity
                             val primaryDisplayed = activeSession?.displayedPrimary
                                 ?: primaryIdentities
                             val companionDisplayed = activeSession?.displayedCompanion
                                 ?: companionIdentities
-                            val applicationTarget = applicationDragTargetSession
+                            val applicationTarget = orchestration.applicationDragTargetSession
                             // A release completes the current exchange or insertion when the touch
                             // point is inside either group; any other area restores the saved state.
                             val endDrag: () -> Unit = endDrag@{
-                                val session = dragSession
-                                val applicationTarget = applicationDragTargetSession
+                                val session = orchestration.dragSession
+                                val applicationTarget = orchestration.applicationDragTargetSession
                                 if (applicationTarget?.targetContainerType != null &&
                                     applicationTarget.targetContainerKey !=
                                     applicationTarget.sourceContainerKey
                                 ) {
-                                    commitCrossContainerDrag(applicationTarget)
+                                    orchestration.commitCrossContainerDrag(applicationTarget)
                                     return@endDrag
                                 }
-                                applicationDragTargetSession = null
+                                orchestration.applicationDragTargetSession = null
                                 if (session != null &&
                                     (session.crossGroupTarget != null || session.hasInsertion) &&
                                     (
-                                            primaryListBoundsInWindow.contains(session.touchInWindow) ||
-                                                    companionListBoundsInWindow
+                                            orchestration.primaryListBoundsInWindow
+                                                .contains(session.touchInWindow) ||
+                                                    orchestration.companionListBoundsInWindow
                                                         .contains(session.touchInWindow)
                                             )
                                 ) {
                                     val committed = session.committedComposition()
                                     val generation = session.generation
-                                    dragSession = session.copy(released = true)
-                                    commitEditAggregate(
+                                    orchestration.dragSession = session.copy(released = true)
+                                    orchestration.commitEditAggregate(
                                         transform = { aggregate ->
                                             aggregate.replaceVerticalComposition(
                                                 committed.first,
@@ -1575,13 +847,17 @@ internal fun HomeScreen(
                                             )
                                         },
                                         onCommitted = {
-                                            if (dragSession?.generation == generation) {
-                                                dragSession = null
+                                            if (orchestration.dragSession?.generation ==
+                                                    generation
+                                            ) {
+                                                orchestration.dragSession = null
                                             }
                                         },
                                         onFailed = {
-                                            if (dragSession?.generation == generation) {
-                                                dragSession = null
+                                            if (orchestration.dragSession?.generation ==
+                                                    generation
+                                            ) {
+                                                orchestration.dragSession = null
                                             }
                                         },
                                     )
@@ -1589,9 +865,9 @@ internal fun HomeScreen(
                                     // In-group exchanges are persisted as they happen. End the session
                                     // immediately so releasing near an edge cannot re-enable the legacy
                                     // edge-scroll effect during the release recomposition.
-                                    dragSession = null
+                                    orchestration.dragSession = null
                                 } else {
-                                    dragSession = null
+                                    orchestration.dragSession = null
                                 }
                             }
                             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -1643,7 +919,7 @@ internal fun HomeScreen(
                                                 ) {
                                                     applicationTarget.targetIdentity
                                                 } else {
-                                                    dragSession?.crossGroupTarget
+                                                    orchestration.dragSession?.crossGroupTarget
                                                 },
                                             insertionBoundaryIndex =
                                                 if (applicationTarget?.targetContainerKey ==
@@ -1653,30 +929,32 @@ internal fun HomeScreen(
                                                 ) {
                                                     applicationTarget.targetIndex
                                                 } else {
-                                                    dragSession?.insertionBoundaryIn(companion = false)
+                                                    orchestration.dragSession
+                                                        ?.insertionBoundaryIn(companion = false)
                                                 },
                                             onBoundsInWindow = {
-                                                primaryListBoundsInWindow = it
-                                                applicationContainerBoundsInWindow[
+                                                orchestration.primaryListBoundsInWindow = it
+                                                orchestration.applicationContainerBoundsInWindow[
                                                     primaryContainer.applicationDragKey()
                                                 ] = it
-                                                applicationContainerDescriptors[
+                                                orchestration.applicationContainerDescriptors[
                                                     primaryContainer.applicationDragKey()
                                                 ] = primaryContainer.applicationDragDescriptor(it)
                                             },
                                             applicationDropHighlight =
-                                                applicationDragTargetSession?.showsContainerHighlight(
+                                                orchestration.applicationDragTargetSession
+                                                    ?.showsContainerHighlight(
                                                     primaryContainer.applicationDragKey(),
                                                 ) == true,
                                             applicationDragKey =
                                                 primaryContainer.applicationDragKey(),
                                             applicationDragActive =
-                                                applicationDragTargetSession != null,
+                                                orchestration.applicationDragTargetSession != null,
                                             applicationEdgeScroll = applicationEdgeScroll,
                                             onLaunchFavorite = onLaunchFavorite,
                                             onLongPressFavorite = onLongPressFavorite,
                                             onRemoveFavorite = { identity ->
-                                                removeFavoriteFromContainer(
+                                                orchestration.removeFavoriteFromContainer(
                                                     primaryContainer.id,
                                                     identity,
                                                 )
@@ -1684,7 +962,7 @@ internal fun HomeScreen(
                                             listIndex = 0,
                                             listCount = editAggregate.verticalLists.size,
                                             onChangeListSize = { size ->
-                                                commitEditAggregate(
+                                                orchestration.commitEditAggregate(
                                                     { aggregate ->
                                                         aggregate.updateVerticalList(
                                                             primaryContainer.id,
@@ -1696,7 +974,7 @@ internal fun HomeScreen(
                                                 )
                                             },
                                             onRemoveList = {
-                                                commitEditAggregate(
+                                                orchestration.commitEditAggregate(
                                                     { aggregate ->
                                                         aggregate.updateVerticalList(
                                                             primaryContainer.id,
@@ -1710,55 +988,64 @@ internal fun HomeScreen(
                                                 onAddFavoritesToList(primaryContainer.id)
                                             },
                                             onContainerBoundsInWindow = {
-                                                primaryContainerBoundsInWindow = it
+                                                orchestration.primaryContainerBoundsInWindow = it
                                             },
                                             onContainerDisposed = {
-                                                applicationContainerBoundsInWindow.remove(
+                                                orchestration
+                                                    .applicationContainerBoundsInWindow.remove(
                                                     primaryContainer.applicationDragKey(),
                                                 )
-                                                applicationContainerDescriptors.remove(
+                                                orchestration
+                                                    .applicationContainerDescriptors.remove(
                                                     primaryContainer.applicationDragKey(),
                                                 )
-                                                applicationItemBoundsInWindow.keys
+                                                orchestration.applicationItemBoundsInWindow.keys
                                                     .filter {
                                                         it.startsWith(
                                                             "${primaryContainer.applicationDragKey()}:",
                                                         )
                                                     }
-                                                    .forEach(applicationItemBoundsInWindow::remove)
+                                                    .forEach(
+                                                        orchestration
+                                                            .applicationItemBoundsInWindow::remove,
+                                                    )
                                             },
                                             onApplicationItemBounds = { identity, bounds ->
-                                                applicationItemBoundsInWindow[
+                                                orchestration.applicationItemBoundsInWindow[
                                                     "${primaryContainer.applicationDragKey()}:${identity.stableKey()}"
                                                 ] = bounds
                                             },
                                             sourceListPlaceholder =
-                                                listDragSession?.sourceContainer?.id ==
+                                                orchestration.listDragSession
+                                                    ?.sourceContainer?.id ==
                                                         primaryContainer.id,
-                                            listExchangeHighlight = listDragSession?.let { session ->
+                                            listExchangeHighlight =
+                                                orchestration.listDragSession?.let { session ->
                                                 session.sourceContainer.id != primaryContainer.id &&
-                                                        primaryContainerBoundsInWindow
+                                                        orchestration.primaryContainerBoundsInWindow
                                                             .contains(session.touchInWindow)
                                             } == true,
-                                            listDragActive = listDragSession != null,
+                                            listDragActive = orchestration.listDragSession != null,
                                             onListDragStart = { touch ->
-                                                startListDrag(
+                                                orchestration.startListDrag(
                                                     container = primaryContainer,
                                                     index = 0,
-                                                    bounds = primaryContainerBoundsInWindow,
+                                                    bounds =
+                                                        orchestration
+                                                            .primaryContainerBoundsInWindow,
                                                     touchInWindow = touch,
                                                     listState = primaryEditListState,
                                                     displayedLists = editAggregate.verticalLists,
                                                 )
                                             },
-                                            onListDrag = ::advanceListDrag,
-                                            onListDragEnd = ::finishListDrag,
+                                            onListDrag = orchestration::advanceListDrag,
+                                            onListDragEnd = orchestration::finishListDrag,
                                             onListDragCancel = {
-                                                listDragSession = null
+                                                orchestration.listDragSession = null
                                             },
                                             onDragStart = { identity, origin, size, touch ->
                                                 dragGeneration += 1
-                                                dragSession = FavoriteDragSession(
+                                                orchestration.dragSession = FavoriteDragSession(
                                                     generation = dragGeneration,
                                                     identity = identity,
                                                     listSize = primaryContainer.listSize,
@@ -1770,7 +1057,7 @@ internal fun HomeScreen(
                                                     displayedCompanion =
                                                         companionIdentities,
                                                 )
-                                                applicationDragTargetSession =
+                                                orchestration.applicationDragTargetSession =
                                                     ApplicationDragTargetSession(
                                                         sourceContainerKey =
                                                             primaryContainer.applicationDragKey(),
@@ -1781,11 +1068,11 @@ internal fun HomeScreen(
                                                         touchStartInWindow = touch,
                                                     )
                                             },
-                                            onDrag = ::advanceAndPersistDrag,
+                                            onDrag = orchestration::advanceAndPersistDrag,
                                             onDragEnd = endDrag,
                                             onDragCancel = {
-                                                dragSession = null
-                                                applicationDragTargetSession = null
+                                                orchestration.dragSession = null
+                                                orchestration.applicationDragTargetSession = null
                                             },
                                         )
                                     }
@@ -1811,7 +1098,7 @@ internal fun HomeScreen(
                                                 ) {
                                                     applicationTarget.targetIdentity
                                                 } else {
-                                                    dragSession?.crossGroupTarget
+                                                    orchestration.dragSession?.crossGroupTarget
                                                 },
                                             insertionBoundaryIndex =
                                                 if (applicationTarget?.targetContainerKey ==
@@ -1821,30 +1108,32 @@ internal fun HomeScreen(
                                                 ) {
                                                     applicationTarget.targetIndex
                                                 } else {
-                                                    dragSession?.insertionBoundaryIn(companion = true)
+                                                    orchestration.dragSession
+                                                        ?.insertionBoundaryIn(companion = true)
                                                 },
                                             onBoundsInWindow = {
-                                                companionListBoundsInWindow = it
-                                                applicationContainerBoundsInWindow[
+                                                orchestration.companionListBoundsInWindow = it
+                                                orchestration.applicationContainerBoundsInWindow[
                                                     companionContainer.applicationDragKey()
                                                 ] = it
-                                                applicationContainerDescriptors[
+                                                orchestration.applicationContainerDescriptors[
                                                     companionContainer.applicationDragKey()
                                                 ] = companionContainer.applicationDragDescriptor(it)
                                             },
                                             applicationDropHighlight =
-                                                applicationDragTargetSession?.showsContainerHighlight(
+                                                orchestration.applicationDragTargetSession
+                                                    ?.showsContainerHighlight(
                                                     companionContainer.applicationDragKey(),
                                                 ) == true,
                                             applicationDragKey =
                                                 companionContainer.applicationDragKey(),
                                             applicationDragActive =
-                                                applicationDragTargetSession != null,
+                                                orchestration.applicationDragTargetSession != null,
                                             applicationEdgeScroll = applicationEdgeScroll,
                                             onLaunchFavorite = onLaunchFavorite,
                                             onLongPressFavorite = onLongPressFavorite,
                                             onRemoveFavorite = { identity ->
-                                                removeFavoriteFromContainer(
+                                                orchestration.removeFavoriteFromContainer(
                                                     companionContainer.id,
                                                     identity,
                                                 )
@@ -1852,7 +1141,7 @@ internal fun HomeScreen(
                                             listIndex = 1,
                                             listCount = editAggregate.verticalLists.size,
                                             onChangeListSize = { size ->
-                                                commitEditAggregate(
+                                                orchestration.commitEditAggregate(
                                                     { aggregate ->
                                                         aggregate.updateVerticalList(
                                                             companionContainer.id,
@@ -1864,7 +1153,7 @@ internal fun HomeScreen(
                                                 )
                                             },
                                             onRemoveList = {
-                                                commitEditAggregate(
+                                                orchestration.commitEditAggregate(
                                                     { aggregate ->
                                                         aggregate.updateVerticalList(
                                                             companionContainer.id,
@@ -1878,55 +1167,65 @@ internal fun HomeScreen(
                                                 onAddFavoritesToList(companionContainer.id)
                                             },
                                             onContainerBoundsInWindow = {
-                                                companionContainerBoundsInWindow = it
+                                                orchestration.companionContainerBoundsInWindow = it
                                             },
                                             onContainerDisposed = {
-                                                applicationContainerBoundsInWindow.remove(
+                                                orchestration
+                                                    .applicationContainerBoundsInWindow.remove(
                                                     companionContainer.applicationDragKey(),
                                                 )
-                                                applicationContainerDescriptors.remove(
+                                                orchestration
+                                                    .applicationContainerDescriptors.remove(
                                                     companionContainer.applicationDragKey(),
                                                 )
-                                                applicationItemBoundsInWindow.keys
+                                                orchestration.applicationItemBoundsInWindow.keys
                                                     .filter {
                                                         it.startsWith(
                                                             "${companionContainer.applicationDragKey()}:",
                                                         )
                                                     }
-                                                    .forEach(applicationItemBoundsInWindow::remove)
+                                                    .forEach(
+                                                        orchestration
+                                                            .applicationItemBoundsInWindow::remove,
+                                                    )
                                             },
                                             onApplicationItemBounds = { identity, bounds ->
-                                                applicationItemBoundsInWindow[
+                                                orchestration.applicationItemBoundsInWindow[
                                                     "${companionContainer.applicationDragKey()}:${identity.stableKey()}"
                                                 ] = bounds
                                             },
                                             sourceListPlaceholder =
-                                                listDragSession?.sourceContainer?.id ==
+                                                orchestration.listDragSession
+                                                    ?.sourceContainer?.id ==
                                                         companionContainer.id,
-                                            listExchangeHighlight = listDragSession?.let { session ->
+                                            listExchangeHighlight =
+                                                orchestration.listDragSession?.let { session ->
                                                 session.sourceContainer.id != companionContainer.id &&
-                                                        companionContainerBoundsInWindow
+                                                        orchestration
+                                                            .companionContainerBoundsInWindow
                                                             .contains(session.touchInWindow)
                                             } == true,
-                                            listDragActive = listDragSession != null,
+                                            listDragActive = orchestration.listDragSession != null,
                                             onListDragStart = { touch ->
-                                                startListDrag(
+                                                orchestration.startListDrag(
                                                     container = companionContainer,
                                                     index = 1,
-                                                    bounds = companionContainerBoundsInWindow,
+                                                    bounds =
+                                                        orchestration
+                                                            .companionContainerBoundsInWindow,
                                                     touchInWindow = touch,
                                                     listState = companionEditListState,
                                                     displayedLists = editAggregate.verticalLists,
                                                 )
                                             },
-                                            onListDrag = ::advanceListDrag,
-                                            onListDragEnd = ::finishListDrag,
+                                            onListDrag = orchestration::advanceListDrag,
+                                            onListDragEnd = orchestration::finishListDrag,
                                             onListDragCancel = {
-                                                listDragSession = null
+                                                orchestration.listDragSession = null
                                             },
                                             onDragStart = { identity, origin, size, touch ->
                                                 dragGeneration += 1
-                                                dragSession = FavoriteDragSession(
+                                                orchestration.dragSession = FavoriteDragSession(
                                                     generation = dragGeneration,
                                                     identity = identity,
                                                     listSize = companionContainer.listSize,
@@ -1938,7 +1237,7 @@ internal fun HomeScreen(
                                                     displayedCompanion =
                                                         companionIdentities,
                                                 )
-                                                applicationDragTargetSession =
+                                                orchestration.applicationDragTargetSession =
                                                     ApplicationDragTargetSession(
                                                         sourceContainerKey =
                                                             companionContainer.applicationDragKey(),
@@ -1949,11 +1248,11 @@ internal fun HomeScreen(
                                                         touchStartInWindow = touch,
                                                     )
                                             },
-                                            onDrag = ::advanceAndPersistDrag,
+                                            onDrag = orchestration::advanceAndPersistDrag,
                                             onDragEnd = endDrag,
                                             onDragCancel = {
-                                                dragSession = null
-                                                applicationDragTargetSession = null
+                                                orchestration.dragSession = null
+                                                orchestration.applicationDragTargetSession = null
                                             },
                                         )
                                     }
@@ -1965,14 +1264,15 @@ internal fun HomeScreen(
                                             onClick = onAddProvisionalFavorites,
                                             testTag = "favorite_provisional_add_1",
                                             applicationDropHighlight =
-                                                applicationDragTargetSession?.showsContainerHighlight(
+                                                orchestration.applicationDragTargetSession
+                                                    ?.showsContainerHighlight(
                                                     PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1,
                                                 ) == true,
                                             onBoundsInWindow = {
-                                                applicationContainerBoundsInWindow[
+                                                orchestration.applicationContainerBoundsInWindow[
                                                     PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1
                                                 ] = it
-                                                applicationContainerDescriptors[
+                                                orchestration.applicationContainerDescriptors[
                                                     PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1
                                                 ] = ApplicationDragContainerDescriptor(
                                                     key = PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1,
@@ -1982,10 +1282,12 @@ internal fun HomeScreen(
                                                 )
                                             },
                                             onDisposed = {
-                                                applicationContainerBoundsInWindow.remove(
+                                                orchestration
+                                                    .applicationContainerBoundsInWindow.remove(
                                                     PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1,
                                                 )
-                                                applicationContainerDescriptors.remove(
+                                                orchestration
+                                                    .applicationContainerDescriptors.remove(
                                                     PROVISIONAL_VERTICAL_LIST_DRAG_KEY_1,
                                                 )
                                             },
@@ -1999,11 +1301,11 @@ internal fun HomeScreen(
             }
             (favoriteState as? FavoriteReadState.Readable)?.aggregate?.let { aggregate ->
                 val renderedAggregate = if (editMode) {
-                    editTransaction.previewAggregate(aggregate)
+                    orchestration.editTransaction.previewAggregate(aggregate)
                 } else {
                     aggregate
                 }
-                val itemReorderedBars = favoriteBarDragSession?.let { session ->
+                val itemReorderedBars = orchestration.favoriteBarDragSession?.let { session ->
                     renderedAggregate.favoriteBars.map { bar ->
                         if (bar.id == session.barId) {
                             bar.copy(identities = session.displayedIdentities)
@@ -2012,7 +1314,7 @@ internal fun HomeScreen(
                         }
                     }
                 } ?: renderedAggregate.favoriteBars
-                val renderedBars = favoriteBarContainerDragSession?.displayedBars
+                val renderedBars = orchestration.favoriteBarContainerDragSession?.displayedBars
                     ?: itemReorderedBars
                 if (editMode &&
                     favoriteState.orderedModules == null &&
@@ -2025,22 +1327,22 @@ internal fun HomeScreen(
                         favoriteRibbons = renderedBars,
                         availabilityByIdentity = favoriteAvailability,
                         editMode = editMode,
-                        layoutRegistry = favoriteRibbonLayoutRegistry,
+                        layoutRegistry = orchestration.favoriteRibbonLayoutRegistry,
                         dragState = HomeFavoriteRibbonDragState(
                             applicationDropTargetKey =
-                                applicationDragTargetSession?.targetContainerKey,
+                                orchestration.applicationDragTargetSession?.targetContainerKey,
                             applicationEdgeScroll = applicationEdgeScroll,
                             applicationDropTargetIdentity =
-                                applicationDragTargetSession?.targetIdentity,
+                                orchestration.applicationDragTargetSession?.targetIdentity,
                             applicationDropTargetMode =
-                                applicationDragTargetSession?.targetMode,
+                                orchestration.applicationDragTargetSession?.targetMode,
                             applicationDropTargetIndex =
-                                applicationDragTargetSession?.targetIndex,
-                            draggedIdentity = favoriteBarDragSession?.identity,
+                                orchestration.applicationDragTargetSession?.targetIndex,
+                            draggedIdentity = orchestration.favoriteBarDragSession?.identity,
                             draggedRibbonId =
-                                favoriteBarContainerDragSession?.sourceContainer?.id,
+                                orchestration.favoriteBarContainerDragSession?.sourceContainer?.id,
                             highlightedRibbonId =
-                                favoriteBarContainerDragSession?.targetContainerId,
+                                orchestration.favoriteBarContainerDragSession?.targetContainerId,
                         ),
                         actions = object : HomeFavoriteRibbonActions {
                             override fun launchFavorite(availability: FavoriteAvailability) {
@@ -2059,14 +1361,14 @@ internal fun HomeScreen(
                                 ribbonId: String,
                                 identity: LaunchableIdentity,
                             ) {
-                                removeFavoriteFromContainer(
+                                orchestration.removeFavoriteFromContainer(
                                     containerId = ribbonId,
                                     identity = identity,
                                 )
                             }
 
                             override fun removeRibbon(ribbonId: String) {
-                                removeFavoriteBar(containerId = ribbonId)
+                                orchestration.removeFavoriteBar(containerId = ribbonId)
                             }
                         },
                         dragActions = object : HomeFavoriteRibbonDragActions {
@@ -2075,7 +1377,7 @@ internal fun HomeScreen(
                                 index: Int,
                                 touch: Offset,
                             ) {
-                                startFavoriteBarContainerDrag(
+                                orchestration.startFavoriteBarContainerDrag(
                                     bar = ribbon,
                                     index = index,
                                     touchInWindow = touch,
@@ -2084,15 +1386,15 @@ internal fun HomeScreen(
                             }
 
                             override fun dragRibbon(delta: Offset) {
-                                advanceFavoriteBarContainerDrag(amount = delta)
+                                orchestration.advanceFavoriteBarContainerDrag(amount = delta)
                             }
 
                             override fun finishRibbonDrag() {
-                                finishFavoriteBarContainerDrag()
+                                orchestration.finishFavoriteBarContainerDrag()
                             }
 
                             override fun cancelRibbonDrag() {
-                                favoriteBarContainerDragSession = null
+                                orchestration.favoriteBarContainerDragSession = null
                             }
 
                             override fun startApplicationDrag(
@@ -2103,7 +1405,7 @@ internal fun HomeScreen(
                                 touch: Offset,
                             ) {
                                 dragGeneration += 1
-                                favoriteBarDragSession = FavoriteBarDragSession(
+                                orchestration.favoriteBarDragSession = FavoriteBarDragSession(
                                     generation = dragGeneration,
                                     barId = ribbon.id,
                                     identity = identity,
@@ -2111,7 +1413,8 @@ internal fun HomeScreen(
                                     originInWindow = origin,
                                     size = size,
                                 )
-                                applicationDragTargetSession = ApplicationDragTargetSession(
+                                orchestration.applicationDragTargetSession =
+                                    ApplicationDragTargetSession(
                                     sourceContainerKey = ribbon.applicationDragKey(),
                                     sourceIdentity = identity,
                                     sourceContainerType = FavoriteContainerType.FavoriteBar,
@@ -2121,24 +1424,24 @@ internal fun HomeScreen(
                             }
 
                             override fun dragApplication(delta: Offset) {
-                                advanceAndPersistFavoriteBarDrag(amount = delta)
+                                orchestration.advanceAndPersistFavoriteBarDrag(amount = delta)
                             }
 
                             override fun finishApplicationDrag() {
-                                val target = applicationDragTargetSession
+                                val target = orchestration.applicationDragTargetSession
                                 if (target?.targetContainerType != null &&
                                     target.targetContainerKey != target.sourceContainerKey
                                 ) {
-                                    commitCrossContainerDrag(targetSession = target)
+                                    orchestration.commitCrossContainerDrag(targetSession = target)
                                 } else {
-                                    favoriteBarDragSession = null
-                                    applicationDragTargetSession = null
+                                    orchestration.favoriteBarDragSession = null
+                                    orchestration.applicationDragTargetSession = null
                                 }
                             }
 
                             override fun cancelApplicationDrag() {
-                                favoriteBarDragSession = null
-                                applicationDragTargetSession = null
+                                orchestration.favoriteBarDragSession = null
+                                orchestration.applicationDragTargetSession = null
                             }
                         },
                     )
@@ -2158,7 +1461,8 @@ internal fun HomeScreen(
                         data.visuals.actionLabel?.let(
                             block = { label ->
                                 TextButton(
-                                    enabled = !applicationEditingSaving && editMutationJob?.isActive != true &&
+                                    enabled = !applicationEditingSaving &&
+                                        orchestration.editMutationJob?.isActive != true &&
                                             !applicationMovementActive,
                                     onClick = { data.performAction() },
                                     content = {
@@ -2175,14 +1479,14 @@ internal fun HomeScreen(
                 )
             },
         )
-        listDragSession?.let { session ->
+        orchestration.listDragSession?.let { session ->
             HomeFavoriteListDragPreview(
                 session = session,
                 availabilityByIdentity = favoriteAvailability,
                 rootOriginInWindow = dragRootOriginInWindow,
             )
         }
-        dragSession?.let { session ->
+        orchestration.dragSession?.let { session ->
             if (!session.released) {
                 HomeFavoriteDragPreview(
                     session = session,
@@ -2192,7 +1496,7 @@ internal fun HomeScreen(
                 )
             }
         }
-        favoriteBarDragSession?.let { session ->
+        orchestration.favoriteBarDragSession?.let { session ->
             HomeFavoriteBarDragPreview(
                 session = session,
                 availability = favoriteAvailability[session.identity]
@@ -2200,7 +1504,7 @@ internal fun HomeScreen(
                 rootOriginInWindow = dragRootOriginInWindow,
             )
         }
-        favoriteBarContainerDragSession?.let { session ->
+        orchestration.favoriteBarContainerDragSession?.let { session ->
             HomeFavoriteBarContainerDragPreview(
                 session = session,
                 availabilityByIdentity = favoriteAvailability,
@@ -2211,7 +1515,7 @@ internal fun HomeScreen(
             movement = orderedApplicationMovement,
             rootOrigin = dragRootOriginInWindow
         )
-        moduleDragSession?.let { session ->
+        orchestration.moduleDragSession?.let { session ->
             HomeModuleDragPreview(
                 session = session,
                 rootOriginInWindow = dragRootOriginInWindow,
