@@ -68,14 +68,12 @@
     <string name="home_empty_favorites">Add applications from Drawer</string>
     <string name="add_apps">＋ Add apps</string>
     <string name="new_favorite_list">＋ New vertical module</string>
-    <string name="drawer_select_favorites">Select applications</string>
     <string name="drawer_selection_cancel">Cancel</string>
     <string name="drawer_selection_confirm">Confirm</string>
     <string name="drawer_selection_add_to_list">Add to vertical module</string>
     <string name="drawer_selection_create_list">Create vertical module</string>
     <string name="drawer_selection_add_to_favorite_bar">Add to ribbon</string>
     <string name="drawer_selection_create_favorite_bar">Create ribbon</string>
-    <string name="new_favorite_bar">＋ New ribbon</string>
     <string name="home_edit_move_applications">Hold and drag apps</string>
     <string name="home_edit_add_favorites">Add favorites</string>
     <string name="home_edit_select_and_move_modules">Tap to select · hold to move</string>
@@ -107,7 +105,6 @@
     <string name="favorite_unavailable_format">%1$s — Unavailable</string>
     <string name="settings">Settings</string>
     <string name="back">Back</string>
-    <string name="avenor_launcher_settings">Avenor Launcher Settings</string>
     <string name="default_home_application">Default home application</string>
     <string name="avenor_is_default_launcher">Avenor is the default launcher</string>
     <string name="avenor_is_not_default_launcher">Avenor is not the default launcher</string>

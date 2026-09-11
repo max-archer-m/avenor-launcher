@@ -1,13 +1,9 @@
 <resources>
-    <dimen name="style_settings_selector_wide_width">224dp</dimen>
     <!-- Drawer parameters accepted on 2026-09-06; further calibration is non-blocking follow-up. -->
-    <dimen name="drawer_background_blur_radius">32dp</dimen>
     <dimen name="drawer_foreground_shadow_offset_x">0dp</dimen>
     <dimen name="drawer_foreground_shadow_offset_y">1dp</dimen>
     <dimen name="drawer_foreground_shadow_radius">2dp</dimen>
     <!-- Home screen / Root content container -->
-    <dimen name="home_horizontal_padding">16dp</dimen>
-    <dimen name="home_vertical_padding">32dp</dimen>
     <dimen name="home_content_padding">8dp</dimen>
     <dimen name="home_module_spacing">8dp</dimen>
 
@@ -39,12 +35,8 @@
     <dimen name="home_favorite_error_icon_size">48dp</dimen>
 
     <!-- Home screen / Favorite modules / Module removal target -->
-    <dimen name="home_favorite_remove_target_size">48dp</dimen>
-    <dimen name="home_favorite_remove_badge_size">24dp</dimen>
-    <dimen name="home_favorite_remove_icon_size">16dp</dimen>
 
     <!-- Home screen / Vertical favorite list / Content and edit controls -->
-    <dimen name="home_favorite_edge_margin">8dp</dimen>
     <dimen name="home_favorite_list_icon_start_margin">8dp</dimen>
     <dimen name="home_favorite_list_control_bar_height">40dp</dimen>
     <dimen name="home_favorite_list_control_target_width">40dp</dimen>

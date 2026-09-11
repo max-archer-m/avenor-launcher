@@ -275,7 +275,6 @@ internal fun StyleSelectorBlock(
     enabled: Boolean,
     onSelectIndex: (Int) -> Unit,
     testTagPrefix: String,
-    wide: Boolean = false,
 ) {
     require(optionLabels.size == 2)
     require(selectedIndex in optionLabels.indices)
@@ -301,7 +300,6 @@ internal fun StyleSelectorBlock(
                     enabled = enabled,
                     onSelectIndex = onSelectIndex,
                     testTagPrefix = testTagPrefix,
-                    wide = wide,
                 )
             }
         }
@@ -316,7 +314,6 @@ private fun StyleTwoOptionSelector(
     enabled: Boolean,
     onSelectIndex: (Int) -> Unit,
     testTagPrefix: String,
-    wide: Boolean = false,
 ) {
     val animationDuration = integerResource(
         id = R.integer.short_property_animation_duration_ms,
@@ -327,10 +324,7 @@ private fun StyleTwoOptionSelector(
     Box(
         modifier = Modifier
             .size(
-                width = dimensionResource(
-                    id = if (wide) R.dimen.style_settings_selector_wide_width
-                    else R.dimen.style_settings_selector_width,
-                ),
+                width = dimensionResource(id = R.dimen.style_settings_selector_width),
                 height = dimensionResource(id = R.dimen.style_settings_stepper_target_size),
             ),
         contentAlignment = Alignment.Center,
