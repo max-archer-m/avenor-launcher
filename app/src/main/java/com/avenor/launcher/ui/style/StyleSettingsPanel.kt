@@ -636,6 +636,12 @@ internal fun StyleBackgroundOpacityBlock(
                     activeTrackColor = MaterialTheme.colorScheme.onBackground,
                     thumbColor = MaterialTheme.colorScheme.onBackground,
                     inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    // A temporary operation lock keeps this slider's colors: the disabled
+                    // palette mirrors the enabled one, so `enabled = false` only rejects
+                    // input and exposes disabled semantics without greying out the control.
+                    disabledActiveTrackColor = MaterialTheme.colorScheme.onBackground,
+                    disabledThumbColor = MaterialTheme.colorScheme.onBackground,
+                    disabledInactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
                 modifier = Modifier
                     .weight(weight = 1f)
