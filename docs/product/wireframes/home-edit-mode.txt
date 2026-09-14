@@ -16,8 +16,8 @@
 |  SELECTION PROMPT OR FIXED-RIBBON MESSAGE....................................|
 |  ARRANGEMENT TITLE / TITLE LINE............................................|
 |  [NAME POSITION: RIGHT|BELOW] [ITEMS PER ROW: - 1 +] / CONTENT LINE..........|
-|  APPLICATION SIZE TITLE / TITLE LINE (SIZE BLOCK LAST).......................|
-|  [SMALL] [MEDIUM] [LARGE] / CONTENT LINE....................................|
+|  APPLICATION SIZE / TEXT SIZE TITLE / TITLE LINE.............................|
+|  [TRIANGLE SLIDERS: ICON SIZE | TEXT SIZE] / CONTENT LINE...................|
 |  CONTENT LINES SHARE RELATED CONTROLS; SCROLL ONLY ON CONTENT OVERFLOW.......|
 |........32DP EDIT DOCK: TAP TO SELECT - HOLD TO MOVE.............[24DP DOWN]..|
 |..............................BOTTOM SAFE AREA................................|
