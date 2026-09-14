@@ -13,6 +13,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -158,6 +159,13 @@ internal class DrawerDisplaySettingsStore internal constructor(
             }
         }
     }
+
+    /**
+     * One synchronous read for [AvenorGraph] initialization, before the first frame. The
+     * graph instance is created once per process and published only afterwards, so this
+     * direct call cannot race another accessor.
+     */
+    fun loadBlocking(): Unit = runBlocking { load() }
 
     override fun currentSettings(): DrawerDisplaySettings? =
         (mutableState.value as? DrawerDisplaySettingsReadState.Readable)?.settings

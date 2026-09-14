@@ -54,11 +54,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.math.roundToInt
-import com.avenor.launcher.ui.settings.AndroidSettingsPlatform
 import com.avenor.launcher.ui.settings.EmptySettingsPlatform
 import com.avenor.launcher.ui.settings.SettingsPlatform
 import com.avenor.launcher.ui.settings.SettingsScreen
-import com.avenor.launcher.ui.settings.readAvenorLicense
 import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
 import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsReadState
 import com.avenor.launcher.ui.drawer.DrawerDisplaySettingsStore
@@ -119,45 +117,24 @@ internal fun transitionTarget(
 @Composable
 internal fun AvenorApp(systemHomeEvents: Flow<Unit>? = null) {
     val context = LocalContext.current
-    val inventoryLoader = remember(context) {
-        AndroidLaunchableInventoryLoader(context)
-    }
-    val entryLauncher = remember(context) {
-        AndroidLaunchableEntryLauncher(context)
-    }
-    val favoriteStore = remember(context) { OrderedFavoriteStoreAdapter(context) }
-    val drawerDisplaySettingsStore = remember(context) {
-        DrawerDisplaySettingsStore(context = context)
-    }
-    val informationLauncher = remember(context) { AndroidApplicationInformationLauncher(context) }
-    val uninstallLauncher = remember(context) { AndroidApplicationUninstallLauncher(context) }
-    val shortcutController = remember(context) {
-        AndroidApplicationShortcutController(context)
-    }
-    val settingsPlatform = remember(context) { AndroidSettingsPlatform(context) }
-    val licenseText = remember(context) { readAvenorLicense(context) }
-    val accessibilityLockController = remember(context) {
-        if (BuildConfig.DEBUG) {
-            AndroidAccessibilityLockController(
-                context = context,
-                serviceComponent = debugAccessibilityLockServiceComponent(context),
-            )
-        } else {
-            EmptyAccessibilityLockController
-        }
+    val graph = remember(context) {
+        // Hosts without the Avenor application (previews, some test environments) fall
+        // back to a graph scoped to this composition.
+        (context.applicationContext as? AvenorApplication)?.avenorGraph
+            ?: AvenorGraph(context = context)
     }
     AvenorApp(
         systemHomeEvents = systemHomeEvents,
-        inventoryLoader = inventoryLoader,
-        entryLauncher = entryLauncher,
-        favoriteStore = favoriteStore,
-        drawerDisplaySettingsStore = drawerDisplaySettingsStore,
-        informationLauncher = informationLauncher,
-        uninstallLauncher = uninstallLauncher,
-        shortcutController = shortcutController,
-        settingsPlatform = settingsPlatform,
-        licenseText = licenseText,
-        accessibilityLockController = accessibilityLockController,
+        inventoryLoader = graph.inventoryLoader,
+        entryLauncher = graph.entryLauncher,
+        favoriteStore = graph.favoriteStore,
+        drawerDisplaySettingsStore = graph.drawerDisplaySettingsStore,
+        informationLauncher = graph.informationLauncher,
+        uninstallLauncher = graph.uninstallLauncher,
+        shortcutController = graph.shortcutController,
+        settingsPlatform = graph.settingsPlatform,
+        licenseText = graph.licenseText,
+        accessibilityLockController = graph.accessibilityLockController,
     )
 }
 
@@ -365,16 +342,27 @@ internal fun AvenorApp(
         },
     )
 
+    // The graph performs the one process-wide read before the first frame; this effect
+    // only covers hosts with composition-scoped stores and leaves committed state alone.
     LaunchedEffect(effectiveFavoriteStore) {
-        effectiveFavoriteStore.load()
+        if (effectiveFavoriteStore.state.value is FavoriteReadState.Loading) {
+            effectiveFavoriteStore.load()
+        }
     }
 
     LaunchedEffect(key1 = effectiveDrawerDisplaySettingsStore) {
-        effectiveDrawerDisplaySettingsStore.load()
+        if (
+            effectiveDrawerDisplaySettingsStore.state.value is
+            DrawerDisplaySettingsReadState.Loading
+        ) {
+            effectiveDrawerDisplaySettingsStore.load()
+        }
     }
 
     LaunchedEffect(inventoryCoordinator) {
-        inventoryCoordinator.load(showLoading = true)
+        if (inventoryState is LaunchableInventoryState.Loading) {
+            inventoryCoordinator.load(showLoading = true)
+        }
     }
 
     LaunchedEffect(selectedEntry, shortcutController) {

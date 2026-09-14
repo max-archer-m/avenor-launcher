@@ -13,6 +13,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -321,6 +322,13 @@ internal class OrderedFavoriteStoreAdapter private constructor(
         store.load()
         publish()
     }
+
+    /**
+     * One synchronous read for [AvenorGraph] initialization, before the first frame. The
+     * graph instance is created once per process and published only afterwards, so this
+     * direct call cannot race another accessor.
+     */
+    internal fun loadBlocking(): Unit = runBlocking { load() }
 
     override suspend fun add(identity: LaunchableIdentity): Boolean =
         mutationMutex.withLock {
