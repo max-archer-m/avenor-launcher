@@ -9,6 +9,7 @@
 | Drawer | 应用列表 | The full indexed list of platform-exposed launchable entries |
 | Settings | 设置 | Avenor configuration and product-information surface |
 | Launchable entry | 可启动应用条目 | One platform-exposed target that Avenor can launch; a primary app and clone are separate entries |
+| Item | 条目 | One interactive application element occupying a position in the Drawer list, search results, or a favorite module; an item's own inset, grid placement, outline, and overlays are all described with item, and the data identity behind one item remains the launchable entry |
 | Favorite | 收藏应用 | A launchable entry saved to exactly one Home favorite module; one stable identity cannot be duplicated across modules |
 | Favorite main list | 收藏主列表 | The one full-width, vertically scrolling ordered sequence of peer vertical favorite modules and horizontal favorite ribbons below Home basic information |
 | Favorite module | 收藏模块 | One persisted vertical favorite module or horizontal favorite ribbon containing at least one favorite |

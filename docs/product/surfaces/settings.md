@@ -6,7 +6,7 @@
 
 - The page title is `Settings`.
 - A fixed top app bar displays the page title and one visible Back control. Selecting that control has the same result as system Back; neither path opens another destination or resets Drawer position.
-- Settings opens only when the user selects the fixed Settings row at the end of the Drawer list. Selecting the gear anchor in the AlphabetIndex only navigates to that row's section.
+- Settings opens only when the user selects the fixed Settings item at the end of the Drawer list. Selecting the gear anchor in the AlphabetIndex only navigates to that item's section.
 - Back returns to Drawer and preserves its prior list position during the same process.
 - Settings uses an opaque standard Material 3 dark color scheme. Unlike Home and Drawer, it paints its Material surface background rather than exposing the system background beneath the application.
 

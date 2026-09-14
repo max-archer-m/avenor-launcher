@@ -22,7 +22,7 @@ This document owns exact Settings typography and row geometry. [Settings behavio
 ## Secondary items
 
 - Secondary items use the shared `secondaryTextFontSize` and line height, equivalent to centered Material 3 `titleSmall`, with medium weight and `secondaryTextColor`.
-- Each secondary item is at least `40dp` high and centers its content horizontally and vertically. A selectable secondary item uses that complete full-width row as its interaction target; its ordinary minimum target is `40dp` and does not expand invisibly to `48dp`, although the row may grow when system font scaling requires more height. This author-accepted target-size exception applies only to Settings secondary items and does not alter primary rows, the Back control, or other ordinary icon controls. Version information keeps the same visual row geometry but is not interactive.
+- Each secondary item is at least `40dp` high and centers its content horizontally and vertically. A selectable secondary item uses that complete full-width row as its interaction target; its ordinary minimum target is `40dp` and does not expand invisibly to `48dp`, although the row may grow when system font scaling requires more height. This author-accepted target-size exception applies only to Settings secondary items and does not alter primary items, the Back control, or other ordinary icon controls. Version information keeps the same visual row geometry but is not interactive.
 
 ## Informational Bottom Sheets
 
