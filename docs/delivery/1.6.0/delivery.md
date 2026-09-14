@@ -2,7 +2,7 @@
 
 > Semantic source: English. Chinese counterpart: [delivery.zh-CN.md](delivery.zh-CN.md).
 >
-> This record plans behavior selected from the current product contract. It is incomplete: implementation is not authorized by this record, and its status and evidence do not authorize a version change, commit, push, tag, artifact movement, publication, or release.
+> This record is the completed delivery summary for 1.6.0. Its completion does not authorize a push, tag, artifact movement, publication, or release; those actions remain separately authorized.
 
 ## Version intent
 
