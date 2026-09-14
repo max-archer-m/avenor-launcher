@@ -25,6 +25,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
+import com.avenor.launcher.ui.home.components.stableKey
 
 class HomeApplicationHandoffUiTest {
     @get:Rule
@@ -60,7 +61,23 @@ class HomeApplicationHandoffUiTest {
                 })
             })
         })
-        val preview = composeRule.onNodeWithTag(testTag = "home_application_movement_preview")
+        composeRule.runOnIdle(action = {
+            // Bisect: the movement session must still be dragging with a captured
+            // preview source before blaming the overlay's render gate.
+            check(value = movement.isDragging)
+            check(value = movement.previewSource != null)
+            return@runOnIdle null
+        })
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodesWithTag(
+                testTag = "home_application_movement_preview",
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+        val preview = composeRule.onNodeWithTag(
+            testTag = "home_application_movement_preview",
+            useUnmergedTree = true,
+        )
         val before = preview.fetchSemanticsNode().boundsInRoot
         val count = compositions
         composeRule.runOnIdle(action = {
@@ -146,7 +163,16 @@ class HomeApplicationHandoffUiTest {
             if (sameModule) Offset(x = bounds.center.x, y = bounds.bottom - 1f) else Offset(x = bounds.right - 1f, y = bounds.center.y)
         }
         root.performTouchInput(block = { moveTo(position = destination - origin) })
-        val preview = composeRule.onNodeWithTag(testTag = "home_application_movement_preview")
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodesWithTag(
+                testTag = "home_application_movement_preview",
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+        val preview = composeRule.onNodeWithTag(
+            testTag = "home_application_movement_preview",
+            useUnmergedTree = true,
+        )
         val releaseBounds = preview.fetchSemanticsNode().boundsInRoot
         root.performTouchInput(block = { up() })
         composeRule.runOnIdle(action = { assertNotNull(change); assertNotNull(complete) })

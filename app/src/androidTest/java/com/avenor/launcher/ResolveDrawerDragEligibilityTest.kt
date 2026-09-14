@@ -3,6 +3,8 @@ package com.avenor.launcher
 import android.content.ComponentName
 import android.graphics.drawable.ColorDrawable
 import android.os.Process
+import com.avenor.launcher.ui.drawer.DrawerDragEligibility
+import com.avenor.launcher.ui.drawer.resolveDrawerDragEligibility
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

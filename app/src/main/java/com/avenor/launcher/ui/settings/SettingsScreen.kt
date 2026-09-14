@@ -30,7 +30,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +47,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avenor.launcher.AccessibilityLockController
 import com.avenor.launcher.EmptyAccessibilityLockController
 import com.avenor.launcher.R
@@ -76,7 +76,8 @@ internal fun SettingsScreen(
     var isAccessibilitySystemEnabled by remember(accessibilityLockController) {
         mutableStateOf(accessibilityLockController.isSystemEnabled())
     }
-    val isAccessibilityConnected by accessibilityLockController.connectionState.collectAsState()
+    val isAccessibilityConnected by accessibilityLockController.connectionState
+        .collectAsStateWithLifecycle()
 
     val backupDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument(JSON_MIME_TYPE),

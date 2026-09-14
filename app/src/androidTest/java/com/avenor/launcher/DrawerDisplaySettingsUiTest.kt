@@ -22,6 +22,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.ui.drawer.DrawerNamePlacement
+import com.avenor.launcher.ui.drawer.DrawerScreen
 
 @RunWith(AndroidJUnit4::class)
 class DrawerDisplaySettingsUiTest {
@@ -119,6 +122,12 @@ class DrawerDisplaySettingsUiTest {
         }
 
         composeRule.onNodeWithTag(testTag = "drawer_display_settings_entry").performClick()
+        // The panel's height animation moves the stepper while clicks inject; settle the
+        // animation clock deterministically before interacting with panel content.
+        composeRule.mainClock.autoAdvance = false
+        composeRule.mainClock.advanceTimeBy(milliseconds = 500)
+        composeRule.mainClock.autoAdvance = true
+        composeRule.waitForIdle()
         composeRule.onNodeWithTag(testTag = "drawer_name_placement_1").performClick()
         repeat(times = 3) {
             composeRule.onNodeWithTag(

@@ -83,14 +83,12 @@ import com.avenor.launcher.LaunchableEntry
 import com.avenor.launcher.LaunchableIdentity
 import com.avenor.launcher.FavoriteListSize
 import com.avenor.launcher.FavoriteNamePlacement
-import com.avenor.launcher.HomeFavoriteRow
 import com.avenor.launcher.HomeApplicationMovement
 import com.avenor.launcher.applicationLayoutIdentities
 import com.avenor.launcher.OrderedFavoriteModule
 import com.avenor.launcher.R
 import com.avenor.launcher.applicationDragDescriptor
 import com.avenor.launcher.applicationDragKey
-import com.avenor.launcher.stableKey
 
 internal class HomeFavoriteRibbonLayoutRegistry(
     val listStates: MutableMap<String, LazyListState>,

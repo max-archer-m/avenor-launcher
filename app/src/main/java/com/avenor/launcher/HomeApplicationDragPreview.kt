@@ -15,6 +15,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import kotlin.math.roundToInt
+import com.avenor.launcher.ui.home.components.HomeFavoritePreviewContent
 
 /**
  * State of an active favorite drag: the source geometry, the accumulated pointer delta, the touch

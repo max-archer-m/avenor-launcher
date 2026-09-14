@@ -3,6 +3,7 @@ package com.avenor.launcher
 import android.content.ComponentName
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import com.avenor.launcher.ui.drawer.DrawerDragDrop
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull

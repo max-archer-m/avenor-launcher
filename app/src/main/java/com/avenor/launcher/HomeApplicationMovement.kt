@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import com.avenor.launcher.ui.drawer.DrawerDragDrop
 
 /** Layout projection only: a temporarily empty source must never become a persisted empty module. */
 internal fun applicationLayoutIdentities(

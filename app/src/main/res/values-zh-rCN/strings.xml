@@ -67,14 +67,12 @@
     <string name="home_empty_favorites">从抽屉添加应用</string>
     <string name="add_apps">＋ 添加应用</string>
     <string name="new_favorite_list">＋ 新建纵向模块</string>
-    <string name="drawer_select_favorites">选择应用</string>
     <string name="drawer_selection_cancel">取消</string>
     <string name="drawer_selection_confirm">确认</string>
     <string name="drawer_selection_add_to_list">添加到纵向模块</string>
     <string name="drawer_selection_create_list">创建纵向模块</string>
     <string name="drawer_selection_add_to_favorite_bar">添加到条带</string>
     <string name="drawer_selection_create_favorite_bar">创建条带</string>
-    <string name="new_favorite_bar">＋ 新建条带</string>
     <string name="home_edit_move_applications">长按并拖动应用</string>
     <string name="home_edit_add_favorites">添加收藏</string>
     <string name="home_edit_select_and_move_modules">点击选择 · 长按移动</string>
@@ -106,7 +104,6 @@
     <string name="favorite_unavailable_format">%1$s — 暂不可用</string>
     <string name="settings">设置</string>
     <string name="back">返回</string>
-    <string name="avenor_launcher_settings">Avenor Launcher 设置</string>
     <string name="default_home_application">默认主屏幕应用</string>
     <string name="avenor_is_default_launcher">已设为默认启动器</string>
     <string name="avenor_is_not_default_launcher">未设为默认启动器</string>

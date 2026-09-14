@@ -39,6 +39,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import com.avenor.launcher.ui.home.components.stableKey
 
 class HomeFavoriteEnterUiTest {
     private var scale = 1f

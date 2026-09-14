@@ -1,4 +1,4 @@
-package com.avenor.launcher
+package com.avenor.launcher.ui.drawer
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
@@ -40,13 +40,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
-import com.avenor.launcher.DrawerIcon as Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
@@ -93,6 +92,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import com.avenor.launcher.ui.drawer.components.DrawerAlphabetIndex
@@ -100,6 +100,17 @@ import com.avenor.launcher.ui.drawer.components.DrawerIndexBubble
 import com.avenor.launcher.ui.drawer.components.DrawerNavigationTopBar
 import com.avenor.launcher.ui.drawer.components.DrawerSearchTopBar
 import java.util.Locale
+import com.avenor.launcher.FavoriteAvailability
+import com.avenor.launcher.LaunchableEntry
+import com.avenor.launcher.LaunchableEntryLauncher
+import com.avenor.launcher.LaunchableIdentity
+import com.avenor.launcher.LaunchableInventoryCoordinator
+import com.avenor.launcher.LaunchableInventoryLoader
+import com.avenor.launcher.LaunchableInventorySnapshot
+import com.avenor.launcher.LaunchableInventoryState
+import com.avenor.launcher.R
+import com.avenor.launcher.RapidActivationGuard
+import com.avenor.launcher.drawerSectionsFor
 
 private enum class DrawerLoadTrigger {
     Initial,
@@ -148,7 +159,7 @@ internal fun DrawerScreen(
         var loadRequest by remember { mutableIntStateOf(0) }
         var loadTrigger by remember { mutableStateOf(DrawerLoadTrigger.Initial) }
         var hasBeenActive by remember { mutableStateOf(false) }
-        val state by inventoryCoordinator.state.collectAsState()
+        val state by inventoryCoordinator.state.collectAsStateWithLifecycle()
         val activationGuard = remember { RapidActivationGuard() }
         val context = LocalContext.current
         val locale = LocalConfiguration.current.locales[0]

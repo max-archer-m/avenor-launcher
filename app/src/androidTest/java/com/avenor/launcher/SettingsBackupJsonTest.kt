@@ -8,6 +8,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
+import com.avenor.launcher.ui.drawer.DrawerApplicationSize
+import com.avenor.launcher.ui.drawer.DrawerDisplaySettings
+import com.avenor.launcher.ui.drawer.DrawerNamePlacement
+import com.avenor.launcher.ui.drawer.DrawerSectionAnchorPresentation
 
 class SettingsBackupJsonTest {
     @Test
