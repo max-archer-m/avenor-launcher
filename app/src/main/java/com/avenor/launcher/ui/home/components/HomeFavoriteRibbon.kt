@@ -203,15 +203,23 @@ internal fun HomeOrderedFavoriteRibbon(
                                 batch = enterBatch,
                                 key = HomeFavoriteEnterKey(moduleId = module.id, identity = identity),
                             )
-                            .width(width = dimensionResource(id = R.dimen.home_favorite_bar_item_width)),
+                            .widthIn(
+                                max = dimensionResource(id = R.dimen.home_favorite_bar_item_width),
+                            ),
                         showRemove = applicationEditing,
                         removeEnabled = applicationMutationEnabled,
                         namePlacement = FavoriteNamePlacement.Right,
                         iconSize = dimensionResource(id = R.dimen.home_favorite_icon_size),
                         onRemove = { onRemoveFavorite(identity) },
                         content = {
+                            FavoriteRibbonItemIntrinsicWidthContent(
+                                displayText = FavoriteRibbonDisplayText(
+                                    availability = availability,
+                                ),
+                                iconSize = dimensionResource(id = R.dimen.home_favorite_icon_size),
+                            )
                             HomeFavoriteRow(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.matchParentSize(),
                                 availability = availability,
                                 onClick = { onLaunchFavorite(availability) },
                                 onLongClick = {
@@ -868,31 +876,7 @@ private fun HomeFavoriteRibbonItem(
         calculation = { MutableInteractionSource() },
     )
     val hapticFeedback = LocalHapticFeedback.current
-    val displayText = when (availability) {
-        is FavoriteAvailability.Available -> availability.entry.label
-        is FavoriteAvailability.Disabled -> entry?.let(
-            block = {
-                stringResource(
-                    id = R.string.favorite_disabled_format,
-                    formatArgs = arrayOf(it.label),
-                )
-            },
-        ) ?: stringResource(id = R.string.favorite_application_disabled)
-
-        is FavoriteAvailability.TemporarilyUnavailable,
-        is FavoriteAvailability.Unknown,
-            -> entry?.let(
-            block = {
-                stringResource(
-                    id = R.string.favorite_unavailable_format,
-                    formatArgs = arrayOf(it.label),
-                )
-            },
-        ) ?: stringResource(id = R.string.favorite_application_unavailable)
-
-        FavoriteAvailability.ConfirmedRemoved ->
-            stringResource(id = R.string.favorite_application_unavailable)
-    }
+    val displayText = FavoriteRibbonDisplayText(availability = availability)
     var itemOriginInWindow by remember(
         key1 = entry?.identity,
         calculation = { mutableStateOf(value = Offset.Zero) },
@@ -1072,6 +1056,38 @@ private fun HomeFavoriteRibbonItem(
             }
         },
     )
+}
+
+@Composable
+private fun FavoriteRibbonDisplayText(
+    availability: FavoriteAvailability,
+): String {
+    val entry = availability.presentationEntry
+    return when (availability) {
+        is FavoriteAvailability.Available -> availability.entry.label
+        is FavoriteAvailability.Disabled -> entry?.let(
+            block = {
+                stringResource(
+                    id = R.string.favorite_disabled_format,
+                    formatArgs = arrayOf(it.label),
+                )
+            },
+        ) ?: stringResource(id = R.string.favorite_application_disabled)
+
+        is FavoriteAvailability.TemporarilyUnavailable,
+        is FavoriteAvailability.Unknown,
+            -> entry?.let(
+            block = {
+                stringResource(
+                    id = R.string.favorite_unavailable_format,
+                    formatArgs = arrayOf(it.label),
+                )
+            },
+        ) ?: stringResource(id = R.string.favorite_application_unavailable)
+
+        FavoriteAvailability.ConfirmedRemoved ->
+            stringResource(id = R.string.favorite_application_unavailable)
+    }
 }
 
 @Composable

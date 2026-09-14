@@ -3,6 +3,7 @@ package com.avenor.launcher.ui.home.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -46,7 +47,7 @@ internal fun HomeFavoriteItemFrame(
     onRemove: () -> Unit,
     identity: LaunchableIdentity,
     movement: HomeApplicationMovement? = null,
-    content: @Composable () -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 ) {
     val targetSize = dimensionResource(id = R.dimen.home_favorite_bar_remove_target_size)
     val iconInset = dimensionResource(id = R.dimen.home_favorite_list_icon_start_margin)
