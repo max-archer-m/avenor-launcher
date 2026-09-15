@@ -21,16 +21,18 @@ From top to bottom:
 
 1. Application name aligned left and the application-information control aligned right.
 2. A light inset divider.
-3. An optional application-shortcut region containing platform-provided shortcuts, each displayed with an icon plus name. When Home Launcher actions follow it, the region ends with the same inset divider; a Drawer-sourced sheet has no trailing divider after its final shortcut.
-4. On Home only, Launcher actions in a horizontal row, each with its icon above its label.
+3. An optional application-shortcut region containing platform-provided shortcuts, each displayed with an icon plus name. When Launcher actions follow it, the region ends with the same inset divider.
+4. Launcher actions in a horizontal row, each with its icon above its label. Home shows remove favorite, edit, and uninstall; Drawer shows uninstall only.
 
 Exact icon, divider, and badge geometry belongs to the [application action sheet presentation specification](../presentation/app-action-sheet.md).
 
-If the platform exposes no application shortcuts, omit the complete application-shortcut region and any divider owned by that region. On Home, the divider below application identity remains as the boundary before Launcher actions. On Drawer, no trailing empty Launcher-action region or divider is reserved. A divider therefore appears after shortcuts only when Home Launcher actions follow them; Drawer never renders an otherwise terminal divider below its shortcut list.
+One optional informational region sits directly below the application-identity divider and before the application-shortcut region. It renders up to two non-interactive read-only lines in this order: the no-actions line, then the not-default line. The no-actions line is shown when the sheet presents no application shortcuts and no Launcher actions. The not-default line is shown when Avenor is not the device's default launcher; both hosts evaluate this state when the sheet opens. Each line is one localized string — `No actions available` for the no-actions line and `Not set as the default launcher` for the not-default line — and both are plain informational text: they are not interaction targets, add no Toast or confirmation, and do not change any dismissal or action behavior. Exact line geometry belongs to the [application action sheet presentation specification](../presentation/app-action-sheet.md).
+
+If the platform exposes no application shortcuts, omit the complete application-shortcut region and any divider owned by that region. The divider below application identity remains as the boundary before Launcher actions on both hosts, and when the application-shortcut region is present, the same divider separates it from the Launcher-action row on both hosts.
 
 The current contract does not define a dedicated overflow interaction for unusually many application shortcuts. Such an interaction becomes an additive capability only after a real application demonstrates the need. Regardless of count, implementation must not crash or draw through protected system UI.
 
-When the sheet's content exceeds its available height, only the application-shortcut region scrolls vertically. The application-identity row and applicable Home Launcher-action row remain visible. This bounded scrolling is ordinary content accommodation, not the dedicated unusual-shortcut overflow capability excluded above.
+When the sheet's content exceeds its available height, only the application-shortcut region scrolls vertically. The application-identity row, informational lines, and applicable Launcher-action row remain visible. This bounded scrolling is ordinary content accommodation, not the dedicated unusual-shortcut overflow capability excluded above.
 
 ## Application identity and information
 
@@ -45,7 +47,7 @@ When the sheet's content exceeds its available height, only the application-shor
 
 ## Launcher actions
 
-- Launcher actions are available only when the sheet originates from Home. Drawer omits the complete Launcher-action region; favorite management is entered from Home edit mode, while application information remains the system-management path for a Drawer entry.
+- Launcher actions are available on both hosts. Home shows remove favorite, edit, and uninstall; Drawer shows uninstall only, in the leftmost slot. Favorite management remains entered from Home edit mode, while application information remains the system-management path for a Drawer entry.
 - Home Launcher actions use five fixed horizontal slots ordered from left to right. Visible actions compact into the leftmost available slots; hidden actions leave no internal gap, and unused slots remain empty on the right. Actions do not redistribute evenly across the full width.
 - Each Launcher action's complete icon-and-label item is one interaction target. The icon is not an independent or smaller touch target.
 - At most five Launcher actions are defined; this limit does not apply to platform application shortcuts.
@@ -56,8 +58,8 @@ When the sheet's content exceeds its available height, only the application-shor
 - Uninstall is hidden for applications the system does not allow the user to uninstall or only permits disabling.
 - For a cloned application, show uninstall only when the platform can be confirmed to address removal of that selected clone without uninstalling the primary application. If that guarantee is unavailable, hide uninstall and leave system management available through application information. Never degrade a clone-removal action into primary-application uninstall.
 - Destructive confirmation and actual removal remain under system control.
-- If the user cancels the system uninstall confirmation, return to the originating Home position, do not restore the sheet, and refresh the application state.
-- If the system uninstall surface cannot be opened, show the short localized Toast `Unable to open uninstall`, close the sheet, preserve the underlying Home position, and do not change favorite state.
+- If the user cancels the system uninstall confirmation, return to the originating Home or Drawer position, do not restore the sheet, and refresh the application state.
+- If the system uninstall surface cannot be opened, show the short localized Toast `Unable to open uninstall`, close the sheet, preserve the underlying Home or Drawer position, and do not change favorite state.
 - Current product scope does not add separate failure handling for invocation of a platform-provided application shortcut.
 
 ## Icons
