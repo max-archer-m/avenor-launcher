@@ -2,6 +2,7 @@
 |                 DRAWER / ORDINARY + SEARCH + MULTI-SELECT                    |
 |  [BACK]        [SEARCH APPS: MAGNIFIER | QUERY | X]            [MORE]        |
 |---------------------------FIXED TOP APP BAR----------------------------------|
+|------------------------1DP SECONDARY DIVIDER---------------------------------|
 |                                                                              |
 |                                                                              |
 |                   #                                       #                  |
@@ -82,7 +83,7 @@
 |  SEARCH: FILTERED ANCHORS/INDEX; SETTINGS HIDDEN         Y                   |
 |  MULTI: ORDER SLOT LEFT OF ICON                                              |
 |  ORDINARY: SECTION ANCHORS, SETTINGS, AND DISPLAY SETTINGS                   |
-|  DISPLAY SETTINGS MODAL: ANCHORS, ARRANGEMENT, SIZES, BACKGROUND (4 BLOCKS).|
+|  DISPLAY SETTINGS MODAL: ANCHORS, ARRANGEMENT, SIZES, BACKGROUND (4 BLOCKS). |
 |                                                                              |
 |                                                                              |
 |                                                           Z                  |

@@ -67,6 +67,11 @@ The current shared text-size tokens are:
 - Current target devices are expected to provide clone or profile badges. Avenor does not add a fallback badge or secondary identity label when the platform provides none.
 - Exact parity with proprietary OEM shadows, icon packs, theme services, or other Launcher-specific effects is not required.
 
+## Shared top app bar divider and text glow
+
+- The Settings and Drawer top app bars separate themselves from the content directly below with one full-width `1dp` divider using shared `secondaryTextColor`. The divider has no horizontal inset, renders identically in every top-app-bar state, and does not make the bar an opaque surface. Exact placement belongs to the applicable presentation specifications.
+- The shared text glow is one non-interactive capsule-shaped backdrop layer rendered behind the applicable foreground text: black at `8%` opacity (`#14000000`) at its center, decreasing to fully transparent at the capsule boundary, with a capsule silhouette of fully rounded end radii. It replaces, and never stacks with, any glyph shadow on that text. It reserves no layout space, is not an interaction target, and does not change the text color. Each presentation specification assigns the shared text glow to its applicable text. The implementation technique, fade curve, capsule height, and horizontal extent beyond the text are `To be decided` through author-device calibration.
+
 ## Shared interaction and accessibility
 
 - Important interactive elements belong in the middle or upper regions of a surface. Bottom placement is a cautious exception that requires an author-accepted reachability reason.

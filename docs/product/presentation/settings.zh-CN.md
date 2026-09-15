@@ -8,9 +8,9 @@
 
 ## 顶部应用栏
 
-- 固定顶部应用栏至少高 `56dp`，使用 `16dp` 水平 padding。
-- 可见返回图形使用共享 `24dp` 功能图标 token，位于标准 `48dp x 48dp` 图标按钮目标中，并提供本地化无障碍名称。
-- 标题使用 Material 3 `titleLarge` 和共享 `primaryTextColor`。使用共享 `secondaryTextColor` 的全宽分割线将应用栏与可滚动设置项列表分开。
+- 固定顶部应用栏至少高 `56dp`，标题与末端内容使用 `16dp` 水平 padding。
+- 可见返回图形使用共享 `24dp` 功能图标 token，居中于从安全起始边缘 `12dp` 处开始的标准 `48dp x 48dp` 图标按钮目标中，图形起始边缘因此距安全起始边缘 `24dp`，与 [Drawer 顶部应用栏](drawer.zh-CN.md)一致。返回控件提供本地化无障碍名称。
+- 标题使用 Material 3 `titleLarge` 和共享 `primaryTextColor`。使用共享 `secondaryTextColor` 的全宽 `1dp` 分割线将应用栏与可滚动设置项列表分开，遵循[设计基础](../design-foundations.zh-CN.md)定义的共享顶栏分割线处理。
 
 ## 主要条目
 

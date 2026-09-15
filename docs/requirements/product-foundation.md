@@ -57,8 +57,8 @@ The current scope covers utility, not mass-market suitability, extensive customi
 - Minimum supported version: Android 12 (API 31).
 - Current physical validation devices: Samsung Galaxy S23 Ultra on Android 16 and Google Pixel 8 on Android 17.
 - Minimum-version validation environment: an Android 12/API 31 emulator unless a representative physical device becomes available.
-- Device scope: ordinary Android phones in portrait orientation only.
-- Device exclusions: landscape, foldable, tablet, desktop-mode, and external-display adaptation.
+- Device scope: ordinary Android phones in portrait orientation only. Avenor presents in portrait orientation only; rotation requests do not produce a landscape layout, and no surface defines landscape geometry.
+- Device exclusions: landscape, foldable, tablet, desktop-mode, and external-display adaptation. Landscape presentation remains excluded until explicitly adapted.
 - Distribution boundary: maintain the GitHub project for the author's daily use, with no application-store submission, GitHub Release APK, website APK, or other public distribution.
 - Store target-API, review, and data-disclosure requirements are not current delivery gates; review them if public distribution enters scope.
 

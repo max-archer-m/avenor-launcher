@@ -43,7 +43,7 @@ Only the favorite main list scrolls vertically. A vertical module expands natura
 
 ## Loading, inventory changes, and failure
 
-- Loading, unreadable, and valid-empty states apply once to the complete favorite main list.
+- Loading, unreadable, and valid-empty states apply once to the complete favorite main list. While Loading, the main list presents one list-level loading state — the shared progress indicator with the localized message `Loading favorites…` — instead of any per-entry loading indicator or label, and the basic-information region remains visible. A favorite's per-entry unavailable feedback is a separate contract concern and never doubles as a loading indicator.
 - An unreadable persisted state preserves the unreadable data, disables favorite mutation, offers Retry, and remains distinct from valid empty data without blocking Drawer.
 - A favorite is removed automatically only after a successful refresh confirms permanent disappearance. A disabled entry remains stored and provides localized unavailable feedback. An uncertain or failed read does not delete or hide favorites.
 - A failed mutation restores the last reliably persisted complete favorite state, does not overwrite newer reliable inventory facts, and provides non-blocking feedback.

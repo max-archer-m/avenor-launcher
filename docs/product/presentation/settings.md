@@ -8,9 +8,9 @@ This document owns exact Settings typography and row geometry. [Settings behavio
 
 ## Top app bar
 
-- The fixed top app bar is at least `56dp` high and uses `16dp` horizontal padding.
-- Its visible Back artwork uses the shared `24dp` functional-icon token in a standard `48dp x 48dp` icon-button target with a localized accessibility name.
-- The title uses Material 3 `titleLarge` and shared `primaryTextColor`. A full-width divider using shared `secondaryTextColor` separates the app bar from the scrolling item list.
+- The fixed top app bar is at least `56dp` high and uses `16dp` horizontal padding for its title and trailing content.
+- Its visible Back artwork uses the shared `24dp` functional-icon token centered in a standard `48dp x 48dp` icon-button target that starts `12dp` from the safe start edge, so the artwork's start edge sits `24dp` from the safe start edge, matching the [Drawer top app bar](drawer.md). The Back control provides a localized accessibility name.
+- The title uses Material 3 `titleLarge` and shared `primaryTextColor`. A full-width `1dp` divider using shared `secondaryTextColor` separates the app bar from the scrolling item list, using the shared top-app-bar divider treatment defined by [design foundations](../design-foundations.md).
 
 ## Primary items
 
