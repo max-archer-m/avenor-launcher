@@ -1230,6 +1230,10 @@ internal fun AvenorApp(
         }
 
         selectedEntry?.let { entry ->
+            // Both hosts evaluate the default-launcher state when the sheet opens.
+            val isDefaultHome = remember(selectedEntry) {
+                settingsPlatform.isDefaultHome()
+            }
             ApplicationActionSheet(
                 entry = entry,
                 source = if (selectedEntryFromHome) {
@@ -1237,6 +1241,7 @@ internal fun AvenorApp(
                 } else {
                     ApplicationActionSheetSource.Drawer
                 },
+                isDefaultHome = isDefaultHome,
                 favoriteState = favoriteState,
                 onDismiss = {
                     selectedEntry = null

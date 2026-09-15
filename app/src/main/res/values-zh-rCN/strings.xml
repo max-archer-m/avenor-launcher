@@ -29,6 +29,8 @@
     <string name="application_information_unavailable">无法打开应用信息</string>
     <string name="uninstall_application">卸载</string>
     <string name="uninstall_application_unavailable">无法打开卸载界面</string>
+    <string name="action_sheet_no_actions">暂无可用操作</string>
+    <string name="action_sheet_not_default_launcher">未设为默认桌面</string>
     <string name="add_favorite">添加收藏</string>
     <string name="remove_favorite">取消收藏</string>
     <string name="edit_favorites">编辑</string>

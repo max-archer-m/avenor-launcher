@@ -29,6 +29,8 @@
     <string name="application_information_unavailable">Unable to open application information</string>
     <string name="uninstall_application">Uninstall</string>
     <string name="uninstall_application_unavailable">Unable to open uninstall</string>
+    <string name="action_sheet_no_actions">No actions available</string>
+    <string name="action_sheet_not_default_launcher">Not set as the default launcher</string>
     <string name="add_favorite">Add favorite</string>
     <string name="remove_favorite">Remove favorite</string>
     <string name="edit_favorites">Edit</string>

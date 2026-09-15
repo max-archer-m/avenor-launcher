@@ -45,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.toBitmap
 
@@ -95,20 +96,35 @@ internal fun ApplicationActionSheet(
     uninstallAvailable: Boolean = false,
     onUninstall: () -> Boolean = { false },
     onUninstallOpened: () -> Unit = {},
+    isDefaultHome: Boolean = true,
     shortcuts: List<ApplicationShortcut> = emptyList(),
     onShortcut: (ApplicationShortcut) -> Unit = {},
 ) {
     val context = LocalContext.current
     val disabledAlpha = integerResource(R.integer.disabled_content_alpha_percent) / 100f
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val showsLauncherActions = source == ApplicationActionSheetSource.Home
-    val showsEdit = showsLauncherActions && canEditFavorites &&
+    val showsDrawerUninstall = source == ApplicationActionSheetSource.Drawer &&
+        uninstallAvailable
+    val showsLauncherActions = source == ApplicationActionSheetSource.Home || showsDrawerUninstall
+    val showsEdit = source == ApplicationActionSheetSource.Home && canEditFavorites &&
         favoriteState is FavoriteReadState.Readable &&
         entry.identity in favoriteState.identities &&
         favoriteState.identities.isNotEmpty()
-    val showsUninstall = showsLauncherActions && uninstallAvailable &&
+    val showsUninstall = source == ApplicationActionSheetSource.Home && uninstallAvailable &&
         favoriteState is FavoriteReadState.Readable &&
         entry.identity in favoriteState.identities
+    val uninstallAction: () -> Unit = {
+        val opened = onUninstall()
+        if (opened) onUninstallOpened()
+        onDismiss()
+        if (!opened) {
+            Toast.makeText(
+                context,
+                R.string.uninstall_application_unavailable,
+                Toast.LENGTH_SHORT,
+            ).show()
+        }
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -180,6 +196,16 @@ internal fun ApplicationActionSheet(
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                 )
+                if (shortcuts.isEmpty() && !showsLauncherActions) {
+                    ApplicationActionSheetInfoLine(
+                        text = stringResource(R.string.action_sheet_no_actions),
+                    )
+                }
+                if (!isDefaultHome) {
+                    ApplicationActionSheetInfoLine(
+                        text = stringResource(R.string.action_sheet_not_default_launcher),
+                    )
+                }
                 if (shortcuts.isNotEmpty()) {
                     ApplicationShortcutRegion(
                         modifier = Modifier.weight(1f, fill = false),
@@ -189,7 +215,7 @@ internal fun ApplicationActionSheet(
                         showTrailingDivider = showsLauncherActions,
                     )
                 }
-                if (showsLauncherActions) {
+                if (source == ApplicationActionSheetSource.Home) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -245,18 +271,7 @@ internal fun ApplicationActionSheet(
                                         icon = R.drawable.ic_uninstall,
                                         enabled = true,
                                         disabledAlpha = disabledAlpha,
-                                        onClick = {
-                                            val opened = onUninstall()
-                                            if (opened) onUninstallOpened()
-                                            onDismiss()
-                                            if (!opened) {
-                                                Toast.makeText(
-                                                    context,
-                                                    R.string.uninstall_application_unavailable,
-                                                    Toast.LENGTH_SHORT,
-                                                ).show()
-                                            }
-                                        },
+                                        onClick = uninstallAction,
                                         testTag = "uninstall_application_action",
                                     )
                                 }
@@ -266,6 +281,30 @@ internal fun ApplicationActionSheet(
                             (if (showsEdit) 1 else 0) +
                             (if (showsUninstall) 1 else 0)
                         repeat(times = (5 - visibleActionCount).coerceAtLeast(minimumValue = 0)) {
+                            Spacer(modifier = Modifier.weight(weight = 1f))
+                        }
+                    }
+                } else if (showsDrawerUninstall) {
+                    // Drawer presents uninstall as its only Launcher action, in the leftmost slot.
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                vertical = dimensionResource(
+                                    R.dimen.action_sheet_actions_vertical_padding,
+                                ),
+                            ),
+                        horizontalArrangement = Arrangement.Start,
+                    ) {
+                        FavoriteActionSlot(
+                            label = stringResource(R.string.uninstall_application),
+                            icon = R.drawable.ic_uninstall,
+                            enabled = true,
+                            disabledAlpha = disabledAlpha,
+                            onClick = uninstallAction,
+                            testTag = "uninstall_application_action",
+                        )
+                        repeat(times = 4) {
                             Spacer(modifier = Modifier.weight(weight = 1f))
                         }
                     }
@@ -286,6 +325,26 @@ internal fun ApplicationActionSheet(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ApplicationActionSheetInfoLine(text: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = dimensionResource(R.dimen.action_sheet_shortcut_row_min_height))
+            .padding(horizontal = dimensionResource(R.dimen.action_sheet_horizontal_padding)),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = dimensionResource(R.dimen.home_companion_favorite_text_size).value.sp,
+            lineHeight = dimensionResource(R.dimen.home_companion_favorite_line_height).value.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

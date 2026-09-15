@@ -215,6 +215,7 @@
 
     <!-- Settings screen / Root layout and top app bar -->
     <dimen name="settings_top_bar_min_height">56dp</dimen>
+    <dimen name="settings_back_target_start">12dp</dimen>
     <dimen name="settings_horizontal_padding">16dp</dimen>
 
     <!-- Settings screen / Primary and nested preference rows -->
@@ -248,4 +249,8 @@
     <!-- Shared UI / Typography / Large application name -->
     <dimen name="shared_large_app_name_text_size">18sp</dimen>
     <dimen name="shared_large_app_name_line_height">28sp</dimen>
+
+    <!-- Shared UI / Status message (Drawer and Home loading and failure states) -->
+    <dimen name="status_progress_indicator_size">48dp</dimen>
+    <dimen name="status_message_gap">16dp</dimen>
 </resources>

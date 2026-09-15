@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import com.avenor.launcher.ui.drawer.DrawerIcon as Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,7 +58,7 @@ internal fun DrawerNavigationTopBar(
             modifier = Modifier.width(
                 width = dimensionResource(id = R.dimen.drawer_search_side_reservation_width),
             ),
-            contentAlignment = Alignment.CenterStart,
+            contentAlignment = Alignment.Center,
         ) {
             IconButton(
                 onClick = onNavigateBack,
@@ -71,6 +72,15 @@ internal fun DrawerNavigationTopBar(
             }
         }
     }
+}
+
+/**
+ * The shared top-app-bar divider from design foundations: one full-width `1dp` line using
+ * `secondaryTextColor` in every bar state, without making the bar an opaque surface.
+ */
+@Composable
+internal fun DrawerTopBarDivider() {
+    HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 @Composable
@@ -129,7 +139,7 @@ internal fun DrawerSearchTopBar(
             modifier = Modifier.width(
                 width = dimensionResource(id = R.dimen.drawer_search_side_reservation_width),
             ),
-            contentAlignment = Alignment.CenterStart,
+            contentAlignment = Alignment.Center,
         ) {
             if (!searchActive) {
                 IconButton(
@@ -268,7 +278,9 @@ internal fun DrawerSearchTopBar(
             modifier = Modifier.width(
                 width = dimensionResource(id = R.dimen.drawer_search_side_reservation_width),
             ),
-            contentAlignment = Alignment.CenterEnd,
+            // Centering the right entry matches the Back target's position in the start
+            // reservation, keeping both bar-edge icons 12dp from their safe edges.
+            contentAlignment = Alignment.Center,
         ) {
             if (searchActive) {
                 TextButton(

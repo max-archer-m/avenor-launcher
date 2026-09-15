@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -638,7 +639,12 @@ internal fun HomeFavoriteMessage(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         if (showProgress) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(
+                    dimensionResource(R.dimen.status_progress_indicator_size),
+                ),
+            )
         } else {
             Icon(
                 painter = painterResource(R.drawable.ic_inventory_error),
@@ -648,8 +654,15 @@ internal fun HomeFavoriteMessage(
                 ),
             )
         }
-        Text(text = message, color = MaterialTheme.colorScheme.onBackground)
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.status_message_gap)))
+        Text(
+            text = message,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = dimensionResource(R.dimen.home_favorite_text_size).value.sp,
+            lineHeight = dimensionResource(R.dimen.home_favorite_line_height).value.sp,
+        )
         onRetry?.let { retry ->
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.status_message_gap)))
             TextButton(onClick = retry) { Text(stringResource(R.string.retry)) }
         }
     }

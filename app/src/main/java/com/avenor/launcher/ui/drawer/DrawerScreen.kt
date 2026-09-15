@@ -99,6 +99,7 @@ import com.avenor.launcher.ui.drawer.components.DrawerAlphabetIndex
 import com.avenor.launcher.ui.drawer.components.DrawerIndexBubble
 import com.avenor.launcher.ui.drawer.components.DrawerNavigationTopBar
 import com.avenor.launcher.ui.drawer.components.DrawerSearchTopBar
+import com.avenor.launcher.ui.drawer.components.DrawerTopBarDivider
 import java.util.Locale
 import com.avenor.launcher.FavoriteAvailability
 import com.avenor.launcher.LaunchableEntry
@@ -648,6 +649,9 @@ private fun DrawerMessage(
         if (showProgress) {
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(
+                    dimensionResource(R.dimen.status_progress_indicator_size),
+                ),
             )
         }
         if (showErrorIcon) {
@@ -660,12 +664,17 @@ private fun DrawerMessage(
                 tint = MaterialTheme.colorScheme.onBackground,
             )
         }
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.status_message_gap)))
         Text(
             text = message,
             color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.bodyLarge,
+            fontSize = dimensionResource(R.dimen.home_favorite_text_size).value.sp,
+            lineHeight = dimensionResource(R.dimen.home_favorite_line_height).value.sp,
         )
-        action?.invoke()
+        action?.let { retryAction ->
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.status_message_gap)))
+            retryAction()
+        }
     }
 }
 
@@ -685,6 +694,7 @@ private fun DrawerOrdinaryMessage(
             .windowInsetsPadding(insets = WindowInsets.safeDrawing),
     ) {
         DrawerNavigationTopBar(onNavigateBack = onNavigateBack)
+        DrawerTopBarDivider()
         DrawerMessage(
             modifier = modifier.weight(weight = 1f),
             message = message,
@@ -720,6 +730,7 @@ private fun DrawerSelectionMessage(
             onCancel = onCancel,
             onConfirm = onConfirm,
         )
+        DrawerTopBarDivider()
         DrawerMessage(
             modifier = Modifier.weight(1f),
             message = message,
@@ -775,6 +786,7 @@ private fun DrawerFavoriteSelectionList(
             onCancel = onCancel,
             onConfirm = onConfirm,
         )
+        DrawerTopBarDivider()
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -1121,6 +1133,7 @@ private fun DrawerApplicationList(
             onCancelSearch = onCancelSearch,
             onOpenDisplaySettings = onOpenDisplaySettings,
         )
+        DrawerTopBarDivider()
         val gridBoundary = dimensionResource(R.dimen.drawer_application_grid_boundary)
         val cellInset = dimensionResource(R.dimen.drawer_application_cell_horizontal_inset)
         val indexWidth = dimensionResource(R.dimen.drawer_index_width)

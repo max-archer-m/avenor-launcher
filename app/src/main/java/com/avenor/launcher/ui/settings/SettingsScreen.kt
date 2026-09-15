@@ -341,13 +341,16 @@ private fun SettingsTopBar(onBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = dimensionResource(R.dimen.settings_top_bar_min_height))
-            .padding(horizontal = dimensionResource(R.dimen.settings_horizontal_padding)),
+            .heightIn(min = dimensionResource(R.dimen.settings_top_bar_min_height)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // The Back target starts 12dp from the safe start edge so its 24dp artwork begins
+        // 24dp out, matching the Drawer top app bar.
         IconButton(
             onClick = onBack,
-            modifier = Modifier.testTag("settings_back"),
+            modifier = Modifier
+                .padding(start = dimensionResource(R.dimen.settings_back_target_start))
+                .testTag("settings_back"),
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
@@ -356,7 +359,9 @@ private fun SettingsTopBar(onBack: () -> Unit) {
         }
         Text(
             text = stringResource(R.string.settings),
-            modifier = Modifier.testTag("settings_title"),
+            modifier = Modifier
+                .padding(start = dimensionResource(R.dimen.settings_horizontal_padding))
+                .testTag("settings_title"),
             style = MaterialTheme.typography.titleLarge,
         )
     }

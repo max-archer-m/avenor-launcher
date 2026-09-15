@@ -39,12 +39,14 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import com.avenor.launcher.AccessibilityLockController
 import com.avenor.launcher.HomeDateTimeFormatter
 import com.avenor.launcher.LockRequestResult
 import com.avenor.launcher.R
+import com.avenor.launcher.ui.drawer.drawerForegroundShadow
 import java.time.ZonedDateTime
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -59,6 +61,8 @@ internal fun HomeBasicInformation(
 ) {
     val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
+    // The accepted basic-information glyph shadow shares the Drawer foreground parameters.
+    val foregroundShadow = drawerForegroundShadow()
     var now by remember(key1 = clock) { mutableStateOf(value = clock()) }
 
     LaunchedEffect(key1 = clock) {
@@ -94,6 +98,7 @@ internal fun HomeBasicInformation(
                 fontSize = dimensionResource(id = R.dimen.home_time_text_size).value.sp,
                 fontWeight = FontWeight.Bold,
                 lineHeight = dimensionResource(id = R.dimen.home_time_line_height).value.sp,
+                style = LocalTextStyle.current.copy(shadow = foregroundShadow),
                 textAlign = TextAlign.Start,
             )
             Text(
@@ -121,6 +126,7 @@ internal fun HomeBasicInformation(
                 fontSize = dimensionResource(id = R.dimen.home_date_text_size).value.sp,
                 fontWeight = FontWeight.Normal,
                 lineHeight = dimensionResource(id = R.dimen.home_date_line_height).value.sp,
+                style = LocalTextStyle.current.copy(shadow = foregroundShadow),
                 textAlign = TextAlign.Start,
             )
         }
