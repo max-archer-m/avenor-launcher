@@ -53,6 +53,18 @@ The following capability layers are a non-binding directional outlook. They are 
 
 These labels describe capability direction rather than semantic software versions. They do not authorize V2–V4 work.
 
+### V1 locality and permission constraints
+
+- V1 remains fully local: no capability that requires network access, external services, or online data sources enters V1 without an explicit author exception.
+- V1 adds no new sensitive permissions — for example notification access — beyond the purpose-limited accessibility authorization already accepted for double-tap lock; any further permission likewise requires an explicit author exception.
+
+### V1 to V2 transition
+
+- The transition is not triggered by time or by change size. It is triggered by capability: the first accepted capability that presents or orders content based on observed behavior.
+- Behavior-based means derived from observed usage such as usage history, launch frequency, or time-of-day patterns. Explicit user selections — manual ordering or manual pinning — are user control rather than behavior and remain inside V1.
+- Before any V2 capability enters the current contract, the author must explicitly decide to adopt it, the behavior data and its processing location must be characterized, user control must include disabling and recovery, and a validation plan must exist. A V2 adoption amends the V1 principle clause and the current-scope statement.
+- For a V2 capability whose behavior data is collected, stored, and processed entirely on the device, the privacy review and disclosure burden is proportionally lighter and requires no external-service review. A capability that sends behavior data off the device keeps the heavier review bar.
+
 ## Current product scope
 
 The current product contract defines a local, offline-capable daily-use utility loop across Home, Drawer, application launching, and necessary Settings. It provides direct favorite management, platform-bounded application discovery, and an optional purpose-limited double-tap lock capability without making that accessibility authorization a condition for independent Launcher paths. Widgets, folder-like grouping, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development remain outside the current product scope.
@@ -61,7 +73,7 @@ The [product foundation requirements](docs/requirements/product-foundation.md) o
 
 ## Additive requirements
 
-An additive requirement is a capability that may be delivered when useful without defining or blocking the transition between V1, V2, and later capability layers. Landscape support, foldable and tablet adaptation, themes and colors, weather information, and widgets are current examples. Folder-like grouping is not an additive candidate because it conflicts with the current flat, directly visible favorite-module organization and adds a secondary reveal hierarchy.
+An additive requirement is a capability that may be delivered when useful without defining or blocking the transition between V1, V2, and later capability layers. Landscape support, foldable and tablet adaptation, themes and colors, weather information, and widgets are current examples. Additive status does not itself require a capability-layer transition: a network-dependent example such as weather information may still be evaluated inside V1, but only with the explicit author exception required by the V1 locality constraint. Folder-like grouping is not an additive candidate because it conflicts with the current flat, directly visible favorite-module organization and adds a secondary reveal hierarchy.
 
 Additive requirements are not automatically part of the current scope. Each must still pass the Feature decision test, be explicitly added to the current product contract, and satisfy applicable privacy, security, validation, and maintenance constraints.
 
