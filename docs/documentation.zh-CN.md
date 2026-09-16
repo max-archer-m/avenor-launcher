@@ -67,7 +67,7 @@
 | 产品基础需求 | [`docs/requirements/product-foundation.md`](requirements/product-foundation.md) | [`docs/requirements/product-foundation.zh-CN.md`](requirements/product-foundation.zh-CN.md) | 当前事实与规则 | 记录产品问题、作者场景、当前范围、验收意图和开放产品问题 |
 | 产品决策与范围变更 | [`docs/product-decisions.md`](product-decisions.md) | [`docs/product-decisions.zh-CN.md`](product-decisions.zh-CN.md) | 决策理由 | 定义决策权，并在启用时记录已经确认的重大产品选择 |
 | 产品导航 | [`docs/product/navigation.md`](product/navigation.md) | [`docs/product/navigation.zh-CN.md`](product/navigation.zh-CN.md) | 当前事实与规则 | 定义界面层级、进入、退出、Back、恢复和公共过渡 |
-| Home 交互 | [`docs/product/surfaces/home.md`](product/surfaces/home.md) | [`docs/product/surfaces/home.zh-CN.md`](product/surfaces/home.zh-CN.md) | 当前事实与规则 | 定义 Home 信息、收藏、滚动、启动行为和编辑模式 |
+| Home 交互 | [`docs/product/surfaces/home.md`](product/surfaces/home.md) | [`docs/product/surfaces/home.zh-CN.md`](product/surfaces/home.zh-CN.md) | 当前事实与规则 | 定义 Home 信息、收藏、滚动、启动行为、默认启动器提示和编辑模式 |
 | Drawer 交互 | [`docs/product/surfaces/drawer.md`](product/surfaces/drawer.md) | [`docs/product/surfaces/drawer.zh-CN.md`](product/surfaces/drawer.zh-CN.md) | 当前事实与规则 | 定义应用清单、分组、排序、字母索引和实时更新 |
 | 应用操作面板 | [`docs/product/surfaces/app-action-sheet.md`](product/surfaces/app-action-sheet.md) | [`docs/product/surfaces/app-action-sheet.zh-CN.md`](product/surfaces/app-action-sheet.zh-CN.md) | 当前事实与规则 | 定义模态应用快捷操作和启动器操作 |
 | Settings 交互 | [`docs/product/surfaces/settings.md`](product/surfaces/settings.md) | [`docs/product/surfaces/settings.zh-CN.md`](product/surfaces/settings.zh-CN.md) | 当前事实与规则 | 定义当前 Settings 信息与行为 |

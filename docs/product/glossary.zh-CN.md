@@ -28,6 +28,7 @@
 | Screen locking | 锁屏 | 通过 Avenor 用途受限的无障碍服务请求一次 Android 系统锁屏操作的可选能力，由用户绑定到它的基础信息区快捷操作槽位触发 |
 | Quick actions | 快捷操作 | 把 Home 基础信息区空白槽位（双击、长按）绑定为 `无操作`、`编辑模式` 或 `锁屏` 的用户可配置注册表 |
 | Quick action slot | 快捷操作槽位 | 一个已登记的 Home 基础信息区空白手势，其绑定动作由用户配置；当前契约登记基础信息区双击与长按两个槽位 |
+| Default-launcher prompt | 默认启动器提示 | 当 Avenor 不是设备默认 Launcher 时，展示在基础信息区与收藏主列表之间的可关闭 Home 元素；它不是收藏模块，点击后打开与 Settings 默认主屏幕条目相同的系统目标 |
 | Privacy statement | 隐私声明 | Settings 中可离线阅读的内容，用于说明 Avenor 当前的数据处理、存储、删除、权限和外部链接边界 |
 | Prominent disclosure | 显著披露 | 以启用为目的跳转无障碍设置前单独展示的应用内说明与明确选择；Privacy 正文不能替代它 |
 | Badge | 标记 | 平台提供的分身或资料身份视觉标记 |
@@ -52,5 +53,8 @@
 | 锁屏 | 锁屏 | Screen lock |
 | Backup | 备份收藏与设置 | Back up favorites and settings |
 | Restore | 从备份恢复 | Restore from backup |
+| Default-launcher prompt title | 尚未设为默认启动器 | Not set as the default launcher yet |
+| Default-launcher prompt supporting line | 设为默认后，按系统 Home 键直接回到这个主页 | Set it as default and the Home button returns here |
+| Default-launcher prompt dismiss control | 关闭 | Dismiss |
 
 `收藏主列表` 是 favorite main list 的规范中文工作术语。`home 收藏区` 是同一区域的口语同义说法，不是独立术语。

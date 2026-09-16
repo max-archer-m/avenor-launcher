@@ -8,13 +8,23 @@ This document owns exact Home layout, typography, component geometry, and visual
 
 ## Surface and basic information
 
-- Home preserves wallpaper without a full-screen dim, tint, Scrim, glass surface, or blur. Foreground text and monochrome artwork use shared `primaryTextColor` and may use one fixed glyph- or artwork-following dark shadow — black `65%` opacity (`#A6000000`), `0dp` horizontal offset, `1dp` vertical offset, `2dp` blur radius. Main-list application names and the edit-dock instruction text instead use the shared text glow defined by [design foundations](../design-foundations.md) and carry no glyph shadow.
+- Home preserves wallpaper without a full-screen dim, tint, Scrim, glass surface, or blur. Foreground text and monochrome artwork use shared `primaryTextColor` and may use one fixed glyph- or artwork-following dark shadow — black `65%` opacity (`#A6000000`), `0dp` horizontal offset, `1dp` vertical offset, `2dp` blur radius. Main-list application names and the edit-dock instruction text instead use the shared text glow defined by [design foundations](../design-foundations.md) and carry no glyph shadow. The default-Launcher prompt defined below is the exception: it supplies its own opaque surface and assigns its own text colors.
 - Home applies uniform `8dp` content padding inside `safeDrawing`; adjacent visible modules use `8dp` spacing.
 - The basic-information module adds no padding. Its time and date rows use `8dp` start and end margins inside the padded boundary, producing `16dp` row boundaries from safe edges. The time row adds `8dp` top margin for a final `16dp` top distance. Date text adds another `8dp` start inset and begins `24dp` from the safe start edge while its complete row target remains at `16dp`.
 - The time row is at least `64dp` high and uses `57sp/64sp` bold display text. The date row is `48dp` high and uses normal-weight shared `primaryTextFontSize`, its line height, and `primaryTextColor`.
 - The favorite main list and its modules add no outer padding beyond Home content padding.
 - The shared Home edit-region background is `primaryTextColor` at `20%` opacity (`#33FFFFFF` in the current dark theme). While in edit mode, the basic-information region, when present, and each vertical favorite module use this background once at their region level. It is not a full-screen wallpaper treatment and is absent from those regions in normal mode. Main-list add-favorite entries reuse this background as specified below; child entries must not duplicate the parent's background layer.
 - A favorite whose latest reliable state is disabled keeps its ordinary measured geometry in either module type while its application icon and name use the shared `38%` unavailable opacity. Application-level remove controls and movement feedback remain at their ordinary opacity because those editing actions are still available.
+
+## Default-launcher prompt
+
+- The prompt is one Home layout region between the basic-information region and the favorite main list. It sits inside Home content padding, so its leading and trailing edges are `8dp` from the safe edges, and it uses the shared `8dp` spacing above and below.
+- It is at least `72dp` high. It uses the shared `darkSurfaceBaseColor` fill with exactly `12dp` corners and one `1dp` boundary of `primaryTextColor` at `12%` opacity — the boundary treatment used by a horizontal favorite ribbon entry.
+- Its content uses `16dp` horizontal content padding. The title uses the shared `primaryTextFontSize`, its line height, normal weight, and `primaryTextColor`. The supporting line uses the shared `secondaryTextFontSize`, its line height, normal weight, and `secondaryTextColor`.
+- Because the prompt supplies its own opaque surface, its title and supporting line carry no glyph shadow and no shared text glow.
+- The trailing region holds the `24dp` functional-arrow hint and then the dismiss control with `8dp` between them. The dismiss control places its `24dp` artwork in a `48dp x 48dp` target whose trailing and vertical edges are flush with the prompt's trailing and vertical edges, so that artwork sits `12dp` from the prompt's trailing edge.
+- The complete prompt surface outside the dismiss control is one interaction target with the shared Material ripple clipped to the prompt's `12dp` rounded outline. The dismiss control owns its own separate ripple, and the prompt's ripple does not extend beneath it.
+- The prompt's removal on edit-mode entry and its restoration on edit-mode exit are absorbed by the surrounding layout change. The prompt uses no separate enter or exit fade, slide, or scale effect.
 
 ## Vertical favorite modules
 

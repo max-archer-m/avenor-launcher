@@ -35,7 +35,7 @@ The following ARGB values define the current reusable Avenor dark-theme colors. 
 | `primaryTextColor` | `#FFFFFFFF` | Primary text and light monochrome foreground content; maps to the current `onSurface` and `onBackground` roles |
 | `secondaryTextColor` | `#FFCAC4D0` | Supporting or lower-emphasis text and icons on the dark base; maps to the current `onSurfaceVariant` role |
 
-`primaryTextColor` and `secondaryTextColor` have approximate contrast ratios of `16.10:1` and `9.44:1`, respectively, against `darkSurfaceBaseColor`. These fixed-surface ratios do not establish contrast against arbitrary Home wallpaper or Transparent Drawer wallpaper; those surfaces retain their specified shadow calibration requirement. `darkSurfaceBaseColor` does not add a background to Home or to Transparent Drawer.
+`primaryTextColor` and `secondaryTextColor` have approximate contrast ratios of `16.10:1` and `9.44:1`, respectively, against `darkSurfaceBaseColor`. These fixed-surface ratios do not establish contrast against arbitrary Home wallpaper or Transparent Drawer wallpaper; those surfaces retain their specified shadow calibration requirement. `darkSurfaceBaseColor` does not add a whole-surface background to Home or to Transparent Drawer; a bounded element on either surface may still use it where the applicable presentation specification defines that element.
 
 ## Shared layout and typography
 

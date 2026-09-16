@@ -4,7 +4,7 @@
 
 ## Purpose and structure
 
-Home is one fixed, non-pageable, non-collapsible Launcher surface. In normal Home and collapsed-panel editing, a fixed basic-information region shows time, date, and weekday; expanding the inline style settings panel temporarily removes only that region as defined below. One full-width favorite main list occupies the remaining content area and scrolls vertically.
+Home is one fixed, non-pageable, non-collapsible Launcher surface. In normal Home and collapsed-panel editing, a fixed basic-information region shows time, date, and weekday; expanding the inline style settings panel temporarily removes only that region as defined below. One full-width favorite main list occupies the remaining content area and scrolls vertically. A dismissible default-Launcher prompt, defined below, occupies its own region between the basic-information region and that list, and it is present only while Avenor is not the device's default Launcher.
 
 The main list is one ordered, heterogeneous sequence of peer modules. A module is either a vertical favorite module or a horizontal favorite ribbon. Both occupy the complete Home content width and may be added, repeated, and ordered without a product-defined module-count limit. Home has no primary, secondary, side-by-side, folder, or page-based favorite regions.
 
@@ -15,6 +15,19 @@ Only the favorite main list scrolls vertically. A vertical module expands natura
 - Time follows the system 12-hour or 24-hour preference and does not show seconds. Date and weekday follow the active locale.
 - Selecting time opens an exposed system Clock main surface, then falls back to the system alarm destination. Selecting date invokes an implicit Calendar destination. An unavailable destination produces localized non-blocking feedback.
 - The eligible blank space of the full-width information region hosts the two configurable quick-action slots defined in [quick-actions.md](../features/quick-actions.md); a slot bound to `No action` produces no product behavior. Interactive targets remain excluded.
+
+## Default-launcher prompt
+
+- When Avenor is not the device's current default Launcher, Home presents one dismissible prompt between the basic-information region and the favorite main list. The prompt is a bounded Home element rather than a module: it never joins the favorite main list, never holds a favorite, and is absent while Avenor is the default Launcher.
+- The prompt is presented in normal Home only. It is hidden for the complete duration of edit mode in both panel states, and it never appears on Drawer or in Settings.
+- It shows the title `Not set as the default launcher yet` and the supporting line `Set it as default and the Home button returns here`, followed by one non-interactive trailing arrow hint and one dismiss control. The arrow is a hint only: it has no independent interaction target and no separate accessibility name, and activating it belongs to the prompt as a whole. The dismiss control is its own target and carries the localized accessibility name `Dismiss`.
+- Selecting the prompt anywhere outside the dismiss control opens the same system destination with the same result as the `Default home application` entry in [Settings](settings.md). That selection changes no Avenor setting and no default-Launcher state by itself.
+- Selecting the dismiss control closes the prompt immediately and performs no other action: it neither opens the system destination nor changes the default-Launcher state.
+- Visibility is evaluated once when Home enters the foreground, including at cold start, from the then-current default-Launcher state. The prompt is not inserted later within the same foreground session, so losing the default-Launcher role while Home stays visible does not add it. It is removed immediately when Avenor becomes the default Launcher, including while Home remains visible after returning from the system destination.
+- A dismissal is remembered for the remainder of the device's current local day, during which the prompt is not presented again. The automatic removal that follows becoming the default Launcher records no dismissal, so losing the default-Launcher role later in that same local day presents the prompt again.
+- No reminder-attempt limit and no permanent "do not show again" state exist; only the current local day is suppressed.
+- The prompt changes no favorite, module, Drawer display setting, quick-action binding, or default-Launcher state, and its removal preserves the favorite main list's logical scroll position. The resulting content shift is presented as one layout change rather than a per-entry animation. Entering edit mode removes the prompt and leaving edit mode restores it as part of that same single layout change, subject to the visibility already established for the current foreground session.
+- Home presents no second default-Launcher prompt. The Settings `Default home application` state text and the [application action sheet](app-action-sheet.md) informational line remain independent of this prompt: neither derives from it nor controls it.
 
 ## Favorite identity and module lifecycle
 
@@ -165,3 +178,4 @@ Edit mode may be entered from the existing favorite action or through a basic-in
 - Content transitions preserve atomic state and existing Undo timing. During gap closure, insertion hit testing and drawing agree on current visible geometry. Lifting, successful release, and recovery each show only one visual instance of the moving application; disabling animations changes neither action availability nor final state.
 - Module and application movement share deterministic edge scrolling: only the active viewport's own axis moves, activation requires continuous residence through the defined delay, speed follows pointer proximity, and every exit, ownership change, boundary, completion, or interruption stops the current request without another haptic.
 - The new model starts empty without migrating former Home favorites while retaining unrelated local settings.
+- Home presents one dismissible default-Launcher prompt between the basic-information region and the favorite main list while Avenor is not the device's default Launcher, never during edit mode. Selecting the prompt opens the same system destination as the Settings default-home entry and changes no Avenor state; selecting its dismiss control closes it for the remainder of that local day, and becoming the default Launcher removes it immediately without recording a dismissal.

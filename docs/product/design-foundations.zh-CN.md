@@ -35,7 +35,7 @@
 | `primaryTextColor` | `#FFFFFFFF` | 主要文字与浅色单色前景内容；映射到当前 `onSurface` 和 `onBackground` 角色 |
 | `secondaryTextColor` | `#FFCAC4D0` | 深底上的支持文字、低强调文字和图标；映射到当前 `onSurfaceVariant` 角色 |
 
-`primaryTextColor` 与 `secondaryTextColor` 相对 `darkSurfaceBaseColor` 的近似对比度分别为 `16.10:1` 和 `9.44:1`。这些固定表面对比度不代表任意 Home 壁纸或透明 Drawer 壁纸下的对比度；这些界面继续适用各自的投影校准要求。`darkSurfaceBaseColor` 不会为 Home 或透明 Drawer 增加背景。
+`primaryTextColor` 与 `secondaryTextColor` 相对 `darkSurfaceBaseColor` 的近似对比度分别为 `16.10:1` 和 `9.44:1`。这些固定表面对比度不代表任意 Home 壁纸或透明 Drawer 壁纸下的对比度；这些界面继续适用各自的投影校准要求。`darkSurfaceBaseColor` 不会为 Home 或透明 Drawer 增加整体表面背景；当适用表现规范定义了某个受限元素时，这两个界面上的该元素仍可使用它。
 
 ## 共享布局与字体
 

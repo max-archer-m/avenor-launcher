@@ -28,6 +28,7 @@
 | Screen locking | 锁屏 | The optional capability that requests one Android system lock action through Avenor's narrowly scoped accessibility service, triggered by the basic-information quick-action slot the user binds to it |
 | Quick actions | 快捷操作 | The user-configurable registry that binds the Home basic-information blank-space slots — double tap and long press — to `No action`, `Edit mode`, or `Screen lock` |
 | Quick action slot | 快捷操作槽位 | One registered Home basic-information blank-space gesture whose bound action is user-configurable; the current contract registers the basic-information double-tap and long-press slots |
+| Default-launcher prompt | 默认启动器提示 | The dismissible Home element presented between the basic-information region and the favorite main list while Avenor is not the device's default Launcher; it is not a favorite module, and selecting it opens the same system destination as the Settings default-home entry |
 | Privacy statement | 隐私声明 | The offline Settings presentation describing Avenor's current data handling, storage, deletion, permission, and external-link boundaries |
 | Prominent disclosure | 显著披露 | The separate in-app explanation and affirmative choice shown immediately before an enable-oriented accessibility-settings handoff; it is not replaced by the Privacy statement |
 | Badge | 标记 | Platform-provided visual identity for a clone or profile context |
@@ -52,5 +53,8 @@ Specification terms and user-facing interface labels are separate. Interface lab
 | Screen locking | 锁屏 | Screen lock |
 | Backup | 备份收藏与设置 | Back up favorites and settings |
 | Restore | 从备份恢复 | Restore from backup |
+| Default-launcher prompt title | 尚未设为默认启动器 | Not set as the default launcher yet |
+| Default-launcher prompt supporting line | 设为默认后，按系统 Home 键直接回到这个主页 | Set it as default and the Home button returns here |
+| Default-launcher prompt dismiss control | 关闭 | Dismiss |
 
 `收藏主列表` is the canonical Chinese working term for the favorite main list. `home 收藏区` is an informal synonym for the same region and is not a separate term.

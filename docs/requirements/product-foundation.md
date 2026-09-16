@@ -68,7 +68,7 @@ The product compatibility boundary requires `minSdk` 31. Current configured `com
 
 ### In scope
 
-- Home: one non-pageable, non-collapsible default Home with fixed time and date above one vertically scrolling, full-width favorite main list and the Drawer gesture entry.
+- Home: one non-pageable, non-collapsible default Home with fixed time and date above one vertically scrolling, full-width favorite main list and the Drawer gesture entry, plus a dismissible default-Launcher prompt between the fixed information region and that list while Avenor is not the device's default Launcher.
 - Favorites: one ordered heterogeneous sequence of full-width vertical modules and single-row horizontal ribbons, without an artificial module-count limit. A launchable identity appears in only one module. Vertical modules persist module-level icon size, name (text) size, name placement, and items-per-row values; ribbons use one fixed style.
 - Favorite editing: explicit add, remove, move, reorder, resize, confirmation, cancellation, latest-removal Undo, and Drawer drag-to-favorite behavior defined by the Home and Drawer contracts.
 - Screen locking: an optional, purpose-limited accessibility-service capability for eligible blank Home space, triggered by the quick-action slot the user binds to it. It does not gate independent Launcher paths.
@@ -120,6 +120,7 @@ An additive capability does not enter current scope merely because it can be bui
 ## Functional requirements
 
 - Avenor can serve as the Android Home entry point and exposes the Home–Drawer–Settings utility loop.
+- While Avenor is not the device's default Launcher, Home presents one dismissible prompt whose selection opens the same system destination as the Settings default-home entry and which changes no Avenor state.
 - Home displays system time and date, locally saved favorites, and launches the selected identity.
 - Favorite identities distinguish primary, cloned, and work-profile entries and are not deduplicated solely by package name.
 - Favorite mutations are explicit, locally persisted, and preserve a valid destination and order without duplication or silent redirection.
@@ -146,6 +147,7 @@ Minimum acceptable performance, power, memory, and startup-response thresholds a
 ## Product-level acceptance criteria
 
 - The author can complete the Home–Drawer–Settings loop on the supported device boundary without a network connection.
+- The Home default-Launcher prompt appears only while Avenor is not the default Launcher, is suppressed for the remainder of the local day by its dismiss control, never changes Avenor configuration, and opens the same system destination as the Settings entry.
 - Selecting a visible launchable identity launches the intended application.
 - Drawer does not omit, duplicate, or misidentify entries returned by successfully read Android sources; isolated failed sources may be absent without blocking available Content.
 - Ordinary Drawer search filters the reliable local application inventory by displayed application name without network access, changing the selected arrangement, or introducing a second application order.
@@ -172,6 +174,7 @@ The product lets users maintain Home favorites and use individual Settings entri
 - Durable local configuration also includes the selected Drawer application icon size, application name size, name placement, items-per-row count, section-anchor presentation, background-opacity percentage, and the quick-action binding of each Home basic-information slot. Each valid change is saved as one complete configuration state.
 - Primary, cloned, and work-profile identities must remain distinguishable and must not be stored or deduplicated solely by package name.
 - The latest eligible application-removal snapshot is transient Undo state, not durable undo history.
+- The local date on which the user last dismissed the Home default-Launcher prompt is durable presentation state. It is user-controlled, is not application-usage history, and is not part of the backup file.
 - Time and date come from the device system and are not retained historically.
 - Avenor does not collect or store accessibility window content or events, notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.
 - Avenor has no account, cloud synchronization, server, cloud backup, or cross-device backup. Android cloud backup and device-to-device transfer backup remain disabled for Avenor-owned favorite and display-setting data; only the user-initiated local backup described below is provided.
