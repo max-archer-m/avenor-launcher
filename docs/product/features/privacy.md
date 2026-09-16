@@ -4,9 +4,9 @@
 
 ## Purpose and authority
 
-This document defines Avenor Launcher's current user-visible Privacy statement and the separate prominent disclosure required before an enable-oriented handoff for double-tap lock. It describes the current product contract rather than making a legal, store-approval, or implementation-completeness claim.
+This document defines Avenor Launcher's current user-visible Privacy statement and the separate prominent disclosure required before an enable-oriented handoff for screen locking. It describes the current product contract rather than making a legal, store-approval, or implementation-completeness claim.
 
-The Privacy statement and prominent disclosure are separate presentations. Showing or reading Privacy does not count as consent to accessibility access. The prominent disclosure appears in the normal double-tap-lock enablement flow immediately before Avenor offers to open Android accessibility settings.
+The Privacy statement and prominent disclosure are separate presentations. Showing or reading Privacy does not count as consent to accessibility access. The prominent disclosure appears in the normal screen-locking enablement flow immediately before Avenor offers to open Android accessibility settings.
 
 Both presentations are bundled with the application, remain available offline, and use the English or Simplified Chinese resource selected from the system locale, with English fallback. The application must not fetch either text from GitHub or another network source.
 
@@ -28,7 +28,7 @@ Avenor also reads current system information needed for its interface and contro
 
 ### Storage, backup, and deletion
 
-Favorites and Drawer display settings remain on the device until you change them or Android clears Avenor's application data. Avenor provides a manual local backup and restore for these data. Back up writes one JSON file containing your current favorites and Drawer display settings to a location you choose through the system document picker; the file stays under your control and is never uploaded. Restore reads a backup file you select and, after your explicit confirmation, replaces the current favorites and display settings in one atomic operation. Avenor does not provide an in-app clear-all action, automatic backup, cloud synchronization, cloud backup, or device-to-device transfer of its application data. Android cloud backup and device-transfer backup must remain disabled for Avenor-owned favorite and display-setting data under the current product contract.
+Favorites, Drawer display settings, and quick-action bindings remain on the device until you change them or Android clears Avenor's application data. Avenor provides a manual local backup and restore for these data. Back up writes one JSON file containing your current favorites, Drawer display settings, and quick-action bindings to a location you choose through the system document picker; the file stays under your control and is never uploaded. Restore reads a backup file you select and, after your explicit confirmation, replaces the current favorites, display settings, and bindings in one atomic operation. Avenor does not provide an in-app clear-all action, automatic backup, cloud synchronization, cloud backup, or device-to-device transfer of its application data. Android cloud backup and device-transfer backup must remain disabled for Avenor-owned favorite and display-setting data under the current product contract.
 
 The one-time adoption of the current Home module model starts Home favorites empty rather than migrating the former favorite structure. This author-accepted product transition does not clear independent Drawer display settings or other unrelated local configuration.
 
@@ -40,9 +40,9 @@ Avenor does not provide an account, advertising, analytics, crash-report upload,
 
 Selecting a GitHub link asks Android to open the fixed URL with a system browser or another compatible application. Avenor sends only that URL to the selected handler. The external application and any network service it uses operate under their own privacy practices.
 
-### Double-tap lock and accessibility access
+### Screen locking and accessibility access
 
-Double-tap lock is optional and remains inactive unless you enable Avenor's purpose-limited accessibility service in Android system settings. Avenor uses that service only to request one system lock action after you double-tap eligible blank space on Home.
+Screen locking is optional and remains inactive until you bind a Home quick-action slot to it and enable Avenor's purpose-limited accessibility service in Android system settings. Avenor uses that service only to request one system lock action after you perform your bound gesture in eligible blank space on Home.
 
 The service does not retrieve screen or window content, inspect other applications' interfaces, collect accessibility events for analytics, observe application usage, automate background actions, or send or share data. It performs no global action other than the explicit lock request. Avenor does not use Device Administrator as a fallback. You can disable the service at any time in Android accessibility settings without losing independent Launcher functionality.
 
@@ -58,17 +58,17 @@ For privacy questions, open the Avenor Launcher GitHub Issues page:
 
 Selecting this address uses an implicit system browser action. If no compatible handler can open it, Avenor shows the localized short message `Unable to open privacy contact` and keeps the Privacy presentation open.
 
-## Double-tap-lock prominent disclosure
+## Screen-locking prominent disclosure
 
 The following disclosure is displayed separately immediately before an enable-oriented handoff to Android accessibility settings. It is not merged into the Privacy Bottom Sheet or another unrelated disclosure.
 
 ### Title
 
-`Accessibility access for double-tap lock`
+`Accessibility access for screen lock`
 
 ### Body
 
-`Avenor uses Android AccessibilityService only to lock the screen when you double-tap eligible blank space on Home. The service does not access or collect personal or sensitive data. It does not read screen or window content, observe activity in other applications, collect accessibility events, or send or share data. Double-tap lock is optional, and you can disable the service at any time in Android settings without affecting other Launcher features.`
+`Avenor uses Android AccessibilityService only to lock the screen when you perform your bound quick-action gesture in eligible blank space on Home. The service does not access or collect personal or sensitive data. It does not read screen or window content, observe activity in other applications, collect accessibility events, or send or share data. Screen locking is optional, and you can disable the service at any time in Android settings without affecting other Launcher features.`
 
 ### Actions
 

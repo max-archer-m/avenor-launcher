@@ -17,8 +17,9 @@
 - **Default home application:** Displays current default-Launcher state and opens the system default-home application settings.
 - The title is `Default home application`. The supporting text is `Avenor is the default launcher` or `Avenor is not the default launcher` according to current system state.
 - Returning from the system destination refreshes the supporting text immediately.
-- **Double-tap to lock:** Displays `On` only while the Avenor accessibility service required by [double-tap-lock.md](../features/double-tap-lock.md) is enabled and connected; otherwise it displays `Off`.
-- Selecting Double-tap to lock opens its local explanation and disclosure flow rather than behaving as a direct toggle. Android system state is authoritative, and returning from accessibility settings refreshes the supporting text immediately.
+- **Quick action settings:** Opens the quick-action settings page defined by [quick-actions.md](../features/quick-actions.md). That page lists the two basic-information slot rows with their current bindings and the always-visible screen-lock service state row that carries the accessibility authorization entry and its disclosure flow. Selecting `Screen lock` while the service is off enters that flow without affecting the saved binding.
+- Each slot binds independently to `No action`, `Edit mode`, or `Screen lock`. Both slots default to `No action`, and Avenor applies no uniqueness, exclusivity, or cross-slot validation. A binding change applies immediately and persists locally.
+- Settings displays no separate screen-lock item. The page and its selection dialog own their behavior in [quick-actions.md](../features/quick-actions.md).
 
 ### Language behavior
 
@@ -32,14 +33,14 @@
 
 This heading organizes the behavior contract and is not a visible Settings group heading. The two entries below appear as stacked primary settings items in the order listed, Back up favorites and settings above Restore from backup. Each opens a system surface and therefore shows the trailing arrow of the primary settings-item presentation. Neither entry carries supporting text.
 
-- **Back up favorites and settings:** Selecting it opens the system document picker to choose a local save location. Avenor supplies the suggested display name `avenor-backup-<version-name>-<yyyyMMddHHmm>`, for example `avenor-backup-1.6.0-202609071913.json`, built from the current application version name and the device's local date and time; the system picker owns the final name and location. The written file is one JSON file containing the complete current Home favorite state (ordered favorite modules with their type, order, stable identities, style, and per-module application order) and the complete Drawer display settings (application icon size, application name size, name placement, items per row, section-anchor presentation, and background-opacity percentage). The file carries a schema version and is not encrypted. No new permission is required. The exported file is user-managed and lives outside Avenor's app-private storage.
+- **Back up favorites and settings:** Selecting it opens the system document picker to choose a local save location. Avenor supplies the suggested display name `avenor-backup-<version-name>-<yyyyMMddHHmm>`, for example `avenor-backup-1.6.0-202609071913.json`, built from the current application version name and the device's local date and time; the system picker owns the final name and location. The written file is one JSON file containing the complete current Home favorite state (ordered favorite modules with their type, order, stable identities, style, and per-module application order) and the complete Drawer display settings (application icon size, application name size, name placement, items per row, section-anchor presentation, and background-opacity percentage) and the complete quick-action bindings (the action bound to each basic-information quick-action slot). The file carries a schema version and is not encrypted. No new permission is required. The exported file is user-managed and lives outside Avenor's app-private storage.
   - Canceling or dismissing the document picker writes nothing, changes nothing, and shows no message.
   - While the write is in progress, both Data entries are non-interactive. An interrupted backup leaves the current application state unchanged; a partially written file is simply an invalid backup under the restore rules.
   - A successful backup shows the localized short message `Favorites and settings backed up`. A failed write shows the localized short message `Unable to back up favorites and settings`.
 - **Restore from backup:** Selecting it opens the system document picker to choose a backup file. Canceling or dismissing the picker changes nothing and shows no message. After a file is selected, a confirmation dialog states that confirming replaces the current favorites and display settings with the backup contents and that the action cannot be undone, with `Restore` and `Cancel` actions; `Cancel`, dismissing the dialog, and Back change nothing. Confirming replaces the complete current state with the backup state as one atomic operation and shows the localized short message `Favorites and settings restored`. Settings remains displayed; Home and Drawer present the restored state on their next view.
   - Restore does not validate the backup against the current application inventory; afterwards the ordinary inventory-refresh rules apply, so disabled identities are retained, reliably disappeared identities are removed, and failed launches show the ordinary launch-failure feedback.
   - Schema compatibility is directional: a backup whose schema version is higher than the current application schema is version-incompatible. A backup whose schema version is equal to or lower than the current schema is accepted and interpreted under the current schema.
-  - A backup missing a state section is valid: a missing favorites section restores an empty favorite state, and a missing Drawer display-settings section restores display settings to Avenor's default values. A missing field inside a present section restores that field's default value. An empty backup with no modules is valid.
+  - A backup missing a state section is valid: a missing favorites section restores an empty favorite state, a missing Drawer display-settings section restores display settings to Avenor's default values, and a missing quick-action-bindings section restores every slot to `No action`. A missing field inside a present section restores that field's default value. An empty backup with no modules is valid.
   - An unreadable, malformed, or version-incompatible file fails without overwriting the current state and shows the localized short message `Unable to restore from backup`.
   - Restore does not trigger the one-time Home-model adoption reset, and Avenor performs no automatic backup or upload of the file.
 
@@ -64,7 +65,7 @@ Complex logs, update checks, backup, cloud synchronization, diagnostic export, a
 - The statement must remain available offline.
 - The sheet uses the same scrim, top drag handle, drag-to-dismiss, scrim-tap dismissal, and Back dismissal behavior as the application action sheet.
 - Privacy content scrolls vertically when it exceeds the available sheet height. Closing returns to the same Settings position.
-- The displayed text is the current user-visible Privacy statement in [privacy.md](../features/privacy.md). It includes the current local data, backup, deletion, external-link, permission, and double-tap-lock boundaries.
+- The displayed text is the current user-visible Privacy statement in [privacy.md](../features/privacy.md). It includes the current local data, backup, deletion, external-link, permission, and screen-lock boundaries.
 - The GitHub Issues contact address is selectable and uses the implicit browser and localized failure behavior defined by that Privacy contract.
 
 ## License presentation
@@ -78,7 +79,7 @@ Complex logs, update checks, backup, cloud synchronization, diagnostic export, a
 
 ### Primary settings items
 
-- A primary item contains a title, optional supporting text, and a trailing Android or Material arrow when it opens another destination.
+- A primary item contains a title, optional supporting text, and a trailing Android or Material arrow when it opens another destination. The quick-action settings page rows keep that arrow for visual consistency with the Settings page even though they open a local selection popup.
 - Primary item typography, color roles, row geometry, padding, and arrow size belong to the [Settings presentation specification](../presentation/settings.md).
 
 ### Secondary information items

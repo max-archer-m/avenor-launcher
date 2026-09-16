@@ -56,7 +56,7 @@ These labels describe capability direction rather than semantic software version
 ### V1 locality and permission constraints
 
 - V1 remains fully local: no capability that requires network access, external services, or online data sources enters V1 without an explicit author exception.
-- V1 adds no new sensitive permissions — for example notification access — beyond the purpose-limited accessibility authorization already accepted for double-tap lock; any further permission likewise requires an explicit author exception.
+- V1 adds no new sensitive permissions — for example notification access — beyond the purpose-limited accessibility authorization already accepted for screen locking; any further permission likewise requires an explicit author exception.
 
 ### V1 to V2 transition
 
@@ -67,7 +67,7 @@ These labels describe capability direction rather than semantic software version
 
 ## Current product scope
 
-The current product contract defines a local, offline-capable daily-use utility loop across Home, Drawer, application launching, and necessary Settings. It provides direct favorite management, platform-bounded application discovery, and an optional purpose-limited double-tap lock capability without making that accessibility authorization a condition for independent Launcher paths. Widgets, folder-like grouping, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development remain outside the current product scope.
+The current product contract defines a local, offline-capable daily-use utility loop across Home, Drawer, application launching, and necessary Settings. It provides direct favorite management, platform-bounded application discovery, and an optional purpose-limited screen-locking capability without making that accessibility authorization a condition for independent Launcher paths. Widgets, folder-like grouping, themes, extensive customization, network-backed information, accounts, cloud synchronization, and server development remain outside the current product scope.
 
 The [product foundation requirements](docs/requirements/product-foundation.md) own the detailed current scope, platform and delivery boundary, product-level acceptance intent, dependencies, and open product questions. Applicable interaction specifications own surface-specific behavior; in particular, the [Drawer contract](docs/product/surfaces/drawer.md) owns application visibility, profile, and Private Space behavior. This overview does not create a second current-scope checklist.
 

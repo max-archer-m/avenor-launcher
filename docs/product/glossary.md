@@ -23,16 +23,18 @@
 | Application action sheet | 应用操作面板 | The modal Bottom Sheet containing application identity, application shortcuts, and Launcher actions |
 | Section anchor | 分组锚点 | A Drawer section heading such as A or `#`; inline presentation scrolls above its section, while left-side presentation occupies its section's leading column and pins below the fixed top app bar only while that section crosses the viewport |
 | Alphabet index | 字母索引 | The fixed right-side Drawer index used to jump between anchors |
-| Edit mode | 编辑模式 | The Home state entered from a favorite action or eligible blank-space long press, exposing the edit dock, module movement, application editing, and add-favorite entries |
+| Edit mode | 编辑模式 | The Home state entered from a favorite action or a basic-information quick-action slot bound to edit mode, exposing the edit dock, module movement, application editing, and add-favorite entries |
 | Favorite multi-selection | 收藏多选 | The temporary Drawer mode that collects an ordered set of previously unfavorited applications for one captured Home favorite destination |
-| Double-tap lock | 双击锁屏 | The optional Home gesture that requests one Android system lock action through Avenor's narrowly scoped accessibility service |
+| Screen locking | 锁屏 | The optional capability that requests one Android system lock action through Avenor's narrowly scoped accessibility service, triggered by the basic-information quick-action slot the user binds to it |
+| Quick actions | 快捷操作 | The user-configurable registry that binds the Home basic-information blank-space slots — double tap and long press — to `No action`, `Edit mode`, or `Screen lock` |
+| Quick action slot | 快捷操作槽位 | One registered Home basic-information blank-space gesture whose bound action is user-configurable; the current contract registers the basic-information double-tap and long-press slots |
 | Privacy statement | 隐私声明 | The offline Settings presentation describing Avenor's current data handling, storage, deletion, permission, and external-link boundaries |
 | Prominent disclosure | 显著披露 | The separate in-app explanation and affirmative choice shown immediately before an enable-oriented accessibility-settings handoff; it is not replaced by the Privacy statement |
 | Badge | 标记 | Platform-provided visual identity for a clone or profile context |
 | Application information | 应用信息 | The system-owned information and management surface for an application |
 | Private Space | 私密空间 | Android hidden-profile capability outside the current product contract; Avenor does not request `ACCESS_HIDDEN_PROFILES` to access it |
-| Backup file | 备份文件 | One user-chosen, schema-versioned local JSON file containing the complete favorite-module and Drawer display-setting state, created only by the explicit Settings backup action and never uploaded or written automatically |
-| Restore | 恢复 | The Settings action that reads a user-selected backup file and, after confirmation, atomically replaces the current favorite and Drawer display-setting state |
+| Backup file | 备份文件 | One user-chosen, schema-versioned local JSON file containing the complete favorite-module, Drawer display-setting, and quick-action-binding state, created only by the explicit Settings backup action and never uploaded or written automatically |
+| Restore | 恢复 | The Settings action that reads a user-selected backup file and, after confirmation, atomically replaces the current favorite, Drawer display-setting, and quick-action-binding state |
 
 Use these terms consistently in product documents. Technical names may differ only when an implementation distinction is necessary and documented.
 
@@ -44,6 +46,10 @@ Specification terms and user-facing interface labels are separate. Interface lab
 | --- | --- | --- |
 | Vertical favorite module | 收藏列表 | Favorite list |
 | Horizontal favorite ribbon | 收藏织带 | Favorite ribbon |
+| Quick actions | 快捷操作设置 | Quick action settings |
+| Basic-information double-tap slot | 基础信息区双击 | Basic-information double tap |
+| Basic-information long-press slot | 基础信息区长按 | Basic-information long press |
+| Screen locking | 锁屏 | Screen lock |
 | Backup | 备份收藏与设置 | Back up favorites and settings |
 | Restore | 从备份恢复 | Restore from backup |
 

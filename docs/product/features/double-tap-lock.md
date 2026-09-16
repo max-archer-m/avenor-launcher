@@ -1,33 +1,33 @@
-# Double-Tap Lock Interaction Specification
+# Screen Locking Interaction Specification
 
-> Public semantic source: English. Chinese counterpart: [double-tap-lock.zh-CN.md](double-tap-lock.zh-CN.md). Current Privacy and prominent-disclosure copy is defined in [privacy.md](privacy.md).
+> Public semantic source: English. Chinese counterpart: [double-tap-lock.zh-CN.md](double-tap-lock.zh-CN.md). Current Privacy and prominent-disclosure copy is defined in [privacy.md](privacy.md). This capability was historically introduced as double-tap lock; the user-configurable trigger slots and bindings are defined in [quick-actions.md](quick-actions.md).
 
 ## Purpose and scope
 
-Double-tap lock is an author-required daily-use Home capability. Two taps on eligible blank space in Home's basic-information region request the Android system lock-screen action.
+Screen locking is an optional Home capability. The Home quick-action slot that the user binds to `Screen lock` requests the Android system lock-screen action through Avenor's purpose-limited accessibility service.
 
-The capability is optional, disabled until the user explicitly enables Avenor's accessibility service in system settings, and never gates Home, Drawer, application launching, Settings, or another core path. Avenor does not request this capability during initial startup.
+The capability is optional and inert until the user both binds a quick-action slot to `Screen lock` in [quick-actions.md](quick-actions.md) and explicitly enables Avenor's accessibility service in system settings. It never gates Home, Drawer, application launching, Settings, or another core path. Avenor does not request this capability during initial startup.
 
-## Trigger region and gesture
+## Trigger and result
 
-- The basic-information module keeps practical full-width blank space outside its current content and interactive targets for this gesture. Both taps must begin and end inside that eligible blank space.
-- Future information displayed in this module, including weather, reduces the eligible area by its own content and targets but must not consume all practical blank space.
-- The visible time line, the complete date-and-weekday row, their focusable targets, system insets, and every other interactive element are excluded.
+- The bound gesture operates on the eligible blank space of the basic-information region defined by the [Home interaction specification](../surfaces/home.md) and is recognized per [quick-actions.md](quick-actions.md). The visible time line, the complete date-and-weekday row, their focusable targets, system insets, and every other interactive element are excluded.
+- Future information displayed in this region, including weather, reduces the eligible area by its own content and targets but must not consume all practical blank space.
 - A tap on time continues to open Clock immediately. A tap on date and weekday continues to open Calendar immediately; neither action waits for a possible second tap.
-- Recognition uses the platform double-tap timing and movement tolerance rather than product-specific hard-coded thresholds.
-- A drag beyond the platform tap tolerance, an upward Home-to-Drawer gesture, a long press, cancellation, or a tap crossing into an excluded target cancels double-tap recognition.
+- Recognition uses the platform double-tap timing and movement tolerance, or the platform long-press threshold for the long-press slot, rather than product-specific hard-coded thresholds.
+- A drag beyond the platform tap tolerance, an upward Home-to-Drawer gesture, a long press on the double-tap slot, cancellation, or a gesture crossing into an excluded target cancels recognition.
 - A successful lock request produces no Toast, haptic response, animation, or additional confirmation because the system screen transition is the result.
 - When the service is enabled but the lock action is currently unavailable or fails, Home remains available and shows the short localized Toast `Unable to lock screen`. Avenor does not retry automatically.
 - When the service is disabled, the gesture has no product action and does not open system settings unexpectedly.
 
 ## Settings and authorization
 
-Settings contains one primary item titled `Double-tap to lock`.
+The lock action's authorization entry is the screen-lock service state row on the quick-action settings page defined by [quick-actions.md](quick-actions.md). Settings itself displays no separate screen-lock item.
 
-- Supporting text is `On` when the required Avenor accessibility service is enabled and connected, and `Off` otherwise.
-- Selecting the item opens a local explanation surface showing the current state, purpose, privacy boundary, and an `Open accessibility settings` action.
+- That row is always present in the quick-action settings page and its supporting text is `On` while the required Avenor accessibility service is enabled and connected, and `Off` otherwise. It is the standing status and authorization channel for this capability, independent of the current slot bindings.
+- Selecting the row opens a local explanation surface showing the current state, purpose, privacy boundary, and an `Open accessibility settings` action.
+- The same flow is entered when the user binds a slot to `Screen lock` while the service is off; that binding stays saved regardless of the flow's result, per [quick-actions.md](quick-actions.md).
 - The explanation surface uses the informational Bottom Sheet geometry defined by the [Settings presentation specification](../presentation/settings.md#informational-bottom-sheets). Its title remains fixed while an overflowing body scrolls.
-- Before a handoff intended to enable the service, Avenor presents the separate prominent disclosure defined in [privacy.md](privacy.md#double-tap-lock-prominent-disclosure), with `Cancel` and `Agree and continue`. Agree and continue confirms only the current handoff and opens the system destination; Avenor retains no disclosure-acknowledgement history, and continuing does not imply that Android enabled the service.
+- Before a handoff intended to enable the service, Avenor presents the separate prominent disclosure defined in [privacy.md](privacy.md#screen-locking-prominent-disclosure), with `Cancel` and `Agree and continue`. Agree and continue confirms only the current handoff and opens the system destination; Avenor retains no disclosure-acknowledgement history, and continuing does not imply that Android enabled the service.
 - Returning from system settings refreshes the actual service state immediately. Android's state is authoritative; Avenor does not display an independent toggle that can become inconsistent with it.
 - When enabled, the explanation surface offers the same system-settings handoff so the user can review or disable the service.
 - Failure to open the system destination shows the short localized Toast `Unable to open accessibility settings` and preserves the current Settings position.
@@ -40,7 +40,7 @@ The current product authorizes an Android accessibility service only for this ex
 - The service does not request window-content retrieval, inspect other applications' interface content, collect accessibility events for analytics, infer behavior, or automate actions from background conditions.
 - It performs no global action other than the lock-screen action required by this capability.
 - It does not use Device Administrator as a fallback.
-- Disabling or revoking the service removes double-tap lock without degrading any independent Launcher behavior.
+- Disabling or revoking the service removes screen locking without degrading any independent Launcher behavior.
 - Process death, service disconnection, an unavailable system action, or authorization changes must fail closed: no lock request is issued unless the current service connection can perform the explicit action.
 - Any future expansion of the service purpose requires a new author decision plus renewed product, privacy, security, platform-policy, and validation review.
 
@@ -52,10 +52,10 @@ Current GitHub-only distribution does not remove this disclosure obligation. Any
 
 ## Acceptance intent
 
-- Given the service is enabled, when both taps occur in eligible blank space without another gesture taking ownership, then Avenor requests one system lock action.
-- Given either tap occurs on time, date and weekday, a favorite, an editing surface, or another interactive target, then double-tap lock does not trigger.
+- Given a slot is bound to `Screen lock` and the service is enabled, when the bound gesture is recognized in eligible blank space without another gesture taking ownership, then Avenor requests one system lock action.
+- Given the recognized gesture occurs on time, date and weekday, a favorite, an editing surface, or another interactive target, then screen locking does not trigger.
 - Given the service is disabled or revoked, when the user uses all independent Launcher paths, then those paths remain fully available and Avenor performs no lock action.
-- Given the service is enabled but the action fails, when the gesture is recognized, then Avenor stays on Home, reports one localized failure, and does not retry.
+- Given the service is enabled but the action fails, when the bound gesture is recognized, then Avenor stays on Home, reports one localized failure, and does not retry.
 - Given the user returns from accessibility settings, when Settings resumes, then the displayed state matches Android's current service state.
 
 ## Platform references

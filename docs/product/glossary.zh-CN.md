@@ -23,16 +23,18 @@
 | Application action sheet | 应用操作面板 | 包含应用身份、应用快捷操作和启动器操作的模态 Bottom Sheet |
 | Section anchor | 分组锚点 | Drawer 中的分组标题，例如 A 或 `#`；内嵌展示位于分组上方并随列表滚动，左侧展示占据所属分组的起始侧列，并只在该分组经过视口期间吸附于固定顶部应用栏下方 |
 | Alphabet index | 字母索引 | Drawer 右侧用于跳转到锚点的固定索引 |
-| Edit mode | 编辑模式 | 从收藏操作或合格空白区域长按进入，在 Home 中显示编辑坞、模块移动、应用编辑和新增收藏入口的状态 |
+| Edit mode | 编辑模式 | 从收藏操作或绑定为编辑模式的快捷操作槽位进入，在 Home 中显示编辑坞、模块移动、应用编辑和新增收藏入口的状态 |
 | Favorite multi-selection | 收藏多选 | Drawer 的临时模式，为一个已记录的 Home 收藏目标收集一组有顺序且此前未收藏的应用 |
-| Double-tap lock | 双击锁屏 | 通过 Avenor 用途受限的无障碍服务请求一次 Android 系统锁屏操作的可选 Home 手势 |
+| Screen locking | 锁屏 | 通过 Avenor 用途受限的无障碍服务请求一次 Android 系统锁屏操作的可选能力，由用户绑定到它的基础信息区快捷操作槽位触发 |
+| Quick actions | 快捷操作 | 把 Home 基础信息区空白槽位（双击、长按）绑定为 `无操作`、`编辑模式` 或 `锁屏` 的用户可配置注册表 |
+| Quick action slot | 快捷操作槽位 | 一个已登记的 Home 基础信息区空白手势，其绑定动作由用户配置；当前契约登记基础信息区双击与长按两个槽位 |
 | Privacy statement | 隐私声明 | Settings 中可离线阅读的内容，用于说明 Avenor 当前的数据处理、存储、删除、权限和外部链接边界 |
 | Prominent disclosure | 显著披露 | 以启用为目的跳转无障碍设置前单独展示的应用内说明与明确选择；Privacy 正文不能替代它 |
 | Badge | 标记 | 平台提供的分身或资料身份视觉标记 |
 | Application information | 应用信息 | 系统负责的应用信息与管理界面 |
 | Private Space | 私密空间 | 当前产品契约之外的 Android 隐藏资料能力；Avenor 不申请 `ACCESS_HIDDEN_PROFILES` 访问该能力 |
-| Backup file | 备份文件 | 一个由用户选择、带 schema 版本号的本地 JSON 文件，包含完整的收藏模块与 Drawer 显示设置状态；仅由 Settings 中明确的备份操作创建，永不上传或自动写入 |
-| Restore | 恢复 | Settings 中读取用户选择的备份文件，并在确认后原子替换当前收藏与 Drawer 显示设置状态的操作 |
+| Backup file | 备份文件 | 一个由用户选择、带 schema 版本号的本地 JSON 文件，包含完整的收藏模块、Drawer 显示设置与快捷操作绑定状态；仅由 Settings 中明确的备份操作创建，永不上传或自动写入 |
+| Restore | 恢复 | Settings 中读取用户选择的备份文件，并在确认后原子替换当前收藏、Drawer 显示设置与快捷操作绑定状态的操作 |
 
 产品文档统一使用上述术语。只有实现确实需要额外区分且形成文档时，技术命名才可以不同。
 
@@ -44,6 +46,10 @@
 | --- | --- | --- |
 | 纵向收藏模块 | 收藏列表 | Favorite list |
 | 横向收藏织带 | 收藏织带 | Favorite ribbon |
+| 快捷操作 | 快捷操作设置 | Quick action settings |
+| 基础信息区双击槽位 | 基础信息区双击 | Basic-information double tap |
+| 基础信息区长按槽位 | 基础信息区长按 | Basic-information long press |
+| 锁屏 | 锁屏 | Screen lock |
 | Backup | 备份收藏与设置 | Back up favorites and settings |
 | Restore | 从备份恢复 | Restore from backup |
 
