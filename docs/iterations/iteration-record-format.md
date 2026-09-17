@@ -20,7 +20,7 @@ A Chinese counterpart may translate the title and section headings, but it prese
 
 ## Contract and validation policy
 
-Avenor Launcher is currently maintained by its project author as a personal project. Validation requirements in an iteration contract are recommendations for reducing risk and improving evidence by default; they are not automatic entry or exit gates unless the project author or an applicable higher-level contract explicitly makes them mandatory.
+Launcher4Max is currently maintained by its project author as a personal project. Validation requirements in an iteration contract are recommendations for reducing risk and improving evidence by default; they are not automatic entry or exit gates unless the project author or an applicable higher-level contract explicitly makes them mandatory.
 
 - Every iteration must have a separate contract. Do not replace it with a section in `delivery.md`.
 - Every new iteration contract must identify one accepted product-contract baseline using the full 40-character Git commit ID. The baseline commit must contain every product rule on which the selected scope depends. Before production implementation proceeds, the implementation line must be based on or otherwise contain that baseline.

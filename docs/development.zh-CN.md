@@ -4,7 +4,7 @@
 
 ## 目的
 
-本文记录 Avenor Launcher 当前最小开发基线。它描述项目配置和可用入口；除非对应验证证据记录了结果，否则不表示某条命令已经成功执行。
+本文记录 Launcher4Max 当前最小开发基线。它描述项目配置和可用入口；除非对应验证证据记录了结果，否则不表示某条命令已经成功执行。
 
 ## 当前项目配置
 
@@ -16,7 +16,7 @@
 - Kotlin：`2.3.10`。
 - Java 语言级别：JDK 17。
 - Android 配置：`minSdk 31`、`targetSdk 36`、`compileSdk 37`。
-- 应用标识：`com.avenor.launcher`。
+- 应用标识：`com.maxarchm.launcher`。
 - 当前配置版本标识：`versionName 1.5.0`、配置的 `versionCode 6`；交付与版本收尾记录在 [1.5.0 交付](delivery/1.5.0/delivery.zh-CN.md)。
 - 依赖仓库当前使用阿里云镜像。`settings.gradle.kts` 保留了被注释的官方上游替代配置，供有意识地手动切换。
 

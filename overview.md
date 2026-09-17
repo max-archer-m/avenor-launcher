@@ -1,4 +1,4 @@
-# Avenor Launcher Project Overview
+# Launcher4Max Project Overview
 
 > Semantic source: English. Chinese counterpart: [overview.zh-CN.md](overview.zh-CN.md).
 >
@@ -10,7 +10,7 @@
 
 An Android home screen should help people reach the application or device information they need quickly and accurately. Many launchers add widgets, feeds, advertisements, recommendations, and extensive customization until the home screen itself becomes another attention-demanding destination.
 
-Avenor Launcher begins with the author's daily need for a quieter and more direct path to applications and essential device information. Broader user demand and market differentiation remain hypotheses to validate.
+Launcher4Max begins with the author's daily need for a quieter and more direct path to applications and essential device information. Broader user demand and market differentiation remain hypotheses to validate.
 
 ### Product goal
 
@@ -34,7 +34,7 @@ Provide a restrained Android home screen that helps users find and open what the
 ## Confirmed boundaries
 
 - Product form: an Android launcher intended to act as the device's default home-screen application.
-- User-facing names: “Avenor Launcher” in English and “Avenor 启动器” in Simplified Chinese.
+- User-facing names: “Launcher4Max” in both English and Simplified Chinese.
 - Supported languages: English and Simplified Chinese.
 - Distribution boundary: maintained on GitHub for the author's daily use, with no public distribution or store-release requirement.
 - Platform baseline: ordinary Android phones in portrait orientation, with Android 12 (API 31) as the minimum supported version and Android 16–17 (API 36–37) as the primary physical-validation range.

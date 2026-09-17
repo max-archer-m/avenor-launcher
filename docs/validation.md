@@ -4,7 +4,7 @@
 
 ## Purpose
 
-This document defines the minimum current validation baseline for Avenor Launcher: which checks exist, who may initiate them, how device observations are recorded, and how results are reported. It separates an available command from evidence that the command has actually passed.
+This document defines the minimum current validation baseline for Launcher4Max: which checks exist, who may initiate them, how device observations are recorded, and how results are reported. It separates an available command from evidence that the command has actually passed.
 
 ## Execution authority
 

@@ -4,7 +4,7 @@
 
 ## Purpose
 
-This document defines the single authoritative location, creation condition, and maintenance rules for each type of Avenor Launcher project information. A planned path does not mean that its conclusions exist, and empty documents must not be created merely to complete the directory structure.
+This document defines the single authoritative location, creation condition, and maintenance rules for each type of Launcher4Max project information. A planned path does not mean that its conclusions exist, and empty documents must not be created merely to complete the directory structure.
 
 The project author is the first accountable person for all project matters. Security, privacy, legal, financial, or platform-policy conclusions must receive qualified specialist review when required.
 

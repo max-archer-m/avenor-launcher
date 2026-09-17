@@ -36,7 +36,7 @@ This document owns exact Settings typography and row geometry. [Settings behavio
 
 ## Informational Bottom Sheets
 
-- The Screen-lock explanation, Privacy, Avenor License, and any later author-accepted Third-party License reuse the exterior shell geometry defined by the [application action sheet presentation specification](app-action-sheet.md): complete available portrait-phone width, `12dp` top corner radii, natural height up to the status-bar safe boundary, `0dp` global content padding, and the shared `32dp x 4dp` handle with `12dp` vertical padding above and below.
+- The Screen-lock explanation, Privacy, Launcher4Max License, and any later author-accepted Third-party License reuse the exterior shell geometry defined by the [application action sheet presentation specification](app-action-sheet.md): complete available portrait-phone width, `12dp` top corner radii, natural height up to the status-bar safe boundary, `0dp` global content padding, and the shared `32dp x 4dp` handle with `12dp` vertical padding above and below.
 - These informational sheets do not inherit the application identity row, shortcut rows, five Launcher-action slots, or badge. They use one fixed title row at least `48dp` high with `16dp` horizontal content insets and one body region with `16dp` content padding. Only the body scrolls when content exceeds the available height; the title and drag handle remain visible.
 - The accessibility prominent disclosure remains a separate Material 3 Dialog with its own affirmative and cancellation actions. It does not inherit Bottom Sheet geometry.
 - Settings exposes no visible `About` group heading. `About` in the behavior document is organizational text only; secondary-item order provides the visible grouping.

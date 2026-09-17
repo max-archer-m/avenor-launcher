@@ -18,7 +18,7 @@ An accessibility service is a privileged platform capability with significant pr
 
 ## Decision
 
-Avenor's accessibility service exists only to support double-tap lock. Its boundary is:
+Launcher4Max's accessibility service exists only to support double-tap lock. Its boundary is:
 
 - **Sole purpose**: Perform one `GLOBAL_ACTION_LOCK_SCREEN` action after an explicit user double-tap on eligible Home basic-information blank space.
 - **Manifest declaration**: The service uses the minimum `accessibilityService` XML configuration required to request global actions. It does not declare `flagRequestFilterKeyEvents`, `flagIncludeNotImportantViews`, `flagReportViewIds`, `flagRetrieveInteractiveWindows`, or any capability that provides window-content retrieval.
@@ -84,7 +84,7 @@ The connection model keeps the service stateless and does not introduce a persis
 
 - Iteration 10 record: `docs/delivery/1.1.0/iteration-10-double-tap-lock.md`
 - Physical-device validation: author-reported successful double-tap lock behavior, Settings state refresh, disclosure flow, and revocation/fail-closed behavior on the primary device
-- Debug implementation files: `app/src/debug/java/com/avenor/launcher/AccessibilityLockProbeService.kt`, `app/src/main/java/com/avenor/launcher/AccessibilityLock.kt`
+- Debug implementation files: `app/src/debug/java/com/maxarchm/launcher/AccessibilityLockProbeService.kt`, `app/src/main/java/com/maxarchm/launcher/AccessibilityLock.kt`
 - Settings integration: `SettingsScreen.kt`, `SettingsPlatform.kt`, and related Privacy and disclosure resources
 - Home gesture integration: `HomeScreen.kt` double-tap detection in eligible blank space
 

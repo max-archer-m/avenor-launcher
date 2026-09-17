@@ -1,4 +1,4 @@
-# Avenor Launcher
+# Launcher4Max
 
 > Semantic source: English. Simplified Chinese counterpart: [README.zh-CN.md](README.zh-CN.md).
 
@@ -6,7 +6,7 @@ A calm, intentional Android home-screen launcher designed to help users reach th
 
 ## Product direction
 
-Avenor Launcher is intended to act as an Android device's default home-screen application. It starts with the author's everyday needs and may later serve a broader global audience through English and Simplified Chinese experiences.
+Launcher4Max is intended to act as an Android device's default home-screen application. It starts with the author's everyday needs and may later serve a broader global audience through English and Simplified Chinese experiences.
 
 The product prioritizes direct access, restrained defaults, user control, and privacy-conscious design. Advertising, recommendation feeds, and engagement-maximizing patterns are outside the confirmed product boundary.
 

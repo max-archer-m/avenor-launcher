@@ -10,11 +10,11 @@ Before proposing or editing project documentation or code:
 2. Follow the Toolkit routing and progressive-consumption guidance.
 3. Read this file and only the project documents relevant to the task.
 
-The Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusable methods; this repository remains authoritative for Avenor Launcher product facts, requirements, architecture, decisions, implementation, validation, and releases.
+The Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusable methods; this repository remains authoritative for Launcher4Max product facts, requirements, architecture, decisions, implementation, validation, and releases.
 
 ## Project identity
 
-- Product name: Avenor Launcher
+- Product name: Launcher4Max
 - Repository: `avenor-launcher`
 - Project ownership and decision authority: The project author
 

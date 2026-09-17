@@ -16,18 +16,18 @@ The applicable navigation, surface, or feature specification owns product state 
 
 ## Current theme
 
-- All Avenor surfaces use the dark theme. Text, icons, controls, and semantic color roles use their dark-theme presentation.
+- All Launcher4Max surfaces use the dark theme. Text, icons, controls, and semantic color roles use their dark-theme presentation.
 - Home paints no visible application background, preserving the system wallpaper without a persistent backdrop gradient, fixed scrim, blur, glass effect, or other full-surface contrast-protection layer. Its presentation specification owns the permitted foreground contrast treatment.
 - Drawer's application background follows the user-selected background opacity defined by the [Drawer behavior](surfaces/drawer.md#display-settings) and [Drawer presentation](presentation/drawer.md#background-opacity-and-contrast) specifications. This bounded surface choice does not change the shared dark-theme semantic roles.
 - Home and Drawer request transparent system-bar regions and draw edge to edge so their applicable surface treatment remains visible beneath the system bars. A transient local interaction cue remains permitted where its component specification defines one.
-- Settings uses the opaque Avenor dark color scheme through Material 3 semantic roles. Components use the shared roles below instead of page-specific dark hex colors.
+- Settings uses the opaque Launcher4Max dark color scheme through Material 3 semantic roles. Components use the shared roles below instead of page-specific dark hex colors.
 - Modal sheets use `darkSurfaceBaseColor` unless their component presentation defines another dark surface, and preserve light status-bar icons.
-- Platform or device contrast enforcement remains at its default behavior. Avenor does not enter immersive mode or hide system navigation.
+- Platform or device contrast enforcement remains at its default behavior. Launcher4Max does not enter immersive mode or hide system navigation.
 - Theme customization is an additive future capability outside the current contract.
 
 ## Shared dark-theme colors
 
-The following ARGB values define the current reusable Avenor dark-theme colors. Material components consume them through the corresponding semantic roles; the token name defines product meaning rather than an Android resource or API name.
+The following ARGB values define the current reusable Launcher4Max dark-theme colors. Material components consume them through the corresponding semantic roles; the token name defines product meaning rather than an Android resource or API name.
 
 | Token | ARGB value | Current semantic use |
 | --- | --- | --- |
@@ -50,7 +50,7 @@ The current shared text-size tokens are:
 | `secondaryTextFontSize` | `14sp` | `20sp` | Supporting text, compact controls, small application names, and other secondary-scale text |
 | `largeAppNameFontSize` | `18sp` | `28sp` | Large application names only |
 
-- `primaryTextFontSize` aligns with Material 3 `titleMedium` or `bodyLarge` dimensions, depending on component weight. `secondaryTextFontSize` aligns with `titleSmall` or `bodyMedium`. `largeAppNameFontSize` is an Avenor-specific intermediate size rather than a stock Material 3 type-scale role.
+- `primaryTextFontSize` aligns with Material 3 `titleMedium` or `bodyLarge` dimensions, depending on component weight. `secondaryTextFontSize` aligns with `titleSmall` or `bodyMedium`. `largeAppNameFontSize` is an Launcher4Max-specific intermediate size rather than a stock Material 3 type-scale role.
 - Layout and reachability primarily optimize for right-hand holding with right-thumb input and left-hand holding with right-hand tapping. Other postures remain secondary considerations.
 - Typography follows system font scaling. Application names remain static, single-line, and end-ellipsized rather than using marquee motion.
 - Font scaling beyond the current personal-use layout is not separately optimized. Text remains clipped to its one-line component boundary if extreme scaling exceeds that boundary.
@@ -63,8 +63,8 @@ The current shared text-size tokens are:
 - Functional and status icons use the applicable semantic content color and consistent optical weight. An icon-only control has a localized accessibility name; decorative or already-labelled icons do not expose duplicate descriptions.
 - Defining a shared icon token does not add the corresponding control to a surface.
 - Native adaptive application icons follow the current device mask. Legacy icons are normalized within that mask while preserving recognizable artwork. Platform clone or profile badges are applied after normalization and remain consistent across application surfaces.
-- If application artwork cannot be loaded, use Android's platform-default generic application icon with the same normalization and badge rules. Do not substitute an unrelated Avenor icon.
-- Current target devices are expected to provide clone or profile badges. Avenor does not add a fallback badge or secondary identity label when the platform provides none.
+- If application artwork cannot be loaded, use Android's platform-default generic application icon with the same normalization and badge rules. Do not substitute an unrelated Launcher4Max icon.
+- Current target devices are expected to provide clone or profile badges. Launcher4Max does not add a fallback badge or secondary identity label when the platform provides none.
 - Exact parity with proprietary OEM shadows, icon packs, theme services, or other Launcher-specific effects is not required.
 
 ## Shared top app bar divider and text glow

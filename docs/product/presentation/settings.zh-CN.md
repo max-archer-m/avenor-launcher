@@ -36,7 +36,7 @@
 
 ## 信息 Bottom Sheet
 
-- 锁屏说明、Privacy、Avenor License，以及日后经过作者接受的第三方 License，复用[应用操作面板表现规范](app-action-sheet.zh-CN.md)定义的外框几何：占满当前竖屏手机可用宽度、`12dp` 顶部圆角、高度自然增长至状态栏安全边界、全局内容 padding 为 `0dp`，并使用共享的 `32dp x 4dp` 拖动柄及其上下各 `12dp` 垂直 padding。
+- 锁屏说明、Privacy、Launcher4Max License，以及日后经过作者接受的第三方 License，复用[应用操作面板表现规范](app-action-sheet.zh-CN.md)定义的外框几何：占满当前竖屏手机可用宽度、`12dp` 顶部圆角、高度自然增长至状态栏安全边界、全局内容 padding 为 `0dp`，并使用共享的 `32dp x 4dp` 拖动柄及其上下各 `12dp` 垂直 padding。
 - 这些信息面板不继承应用身份行、快捷操作行、五个 Launcher 操作槽位或 badge。它们使用一个至少高 `48dp`、带 `16dp` 水平内容 inset 的固定标题行，以及一个使用 `16dp` 内容 padding 的正文区域。内容超过可用高度时只有正文滚动；标题和拖动柄保持可见。
 - 无障碍显著披露继续使用独立 Material 3 Dialog，并保留自身的明确同意与取消操作；它不继承 Bottom Sheet 几何。
 - Settings 不显示可见的`关于`分组标题。行为文档中的`关于`只用于组织文档，界面通过次要条目顺序表达分组。

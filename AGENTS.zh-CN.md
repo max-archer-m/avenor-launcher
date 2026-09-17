@@ -10,11 +10,11 @@
 2. 遵循 Toolkit 的路由和渐进式上下文加载规则。
 3. 阅读本文，并且只读取与当前任务相关的项目文档。
 
-Toolkit locator 为 `../max-ai-toolkit`。Toolkit 提供可复用的方法；本仓库仍然是 Avenor Launcher 产品事实、需求、架构、决策、实现、验证和发布信息的权威来源。
+Toolkit locator 为 `../max-ai-toolkit`。Toolkit 提供可复用的方法；本仓库仍然是 Launcher4Max 产品事实、需求、架构、决策、实现、验证和发布信息的权威来源。
 
 ## 项目身份
 
-- 产品名称：Avenor Launcher
+- 产品名称：Launcher4Max
 - 仓库：`avenor-launcher`
 - 项目所有权与决策权：项目作者
 

@@ -6,7 +6,7 @@
 
 ## 项目版本模型
 
-Avenor Launcher 使用项目自定义的 `MAJOR.MINOR.PATCH` 数字版本格式。该格式借用 Semantic Versioning 的三段结构，但以本文而非 Semantic Versioning 官方规范作为约束来源。
+Launcher4Max 使用项目自定义的 `MAJOR.MINOR.PATCH` 数字版本格式。该格式借用 Semantic Versioning 的三段结构，但以本文而非 Semantic Versioning 官方规范作为约束来源。
 
 - 首个正式应用版本为 `1.0.0`，项目不使用 `0.x.y` 版本。
 - 项目不存在预发布版本概念。`alpha`、`beta`、`rc` 以及 SemVer 的预发布或构建元数据后缀均不属于版本格式。

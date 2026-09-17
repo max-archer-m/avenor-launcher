@@ -18,7 +18,7 @@
 
 ## 决策
 
-Avenor 的无障碍服务仅用于支持双击锁屏。其边界如下：
+Launcher4Max 的无障碍服务仅用于支持双击锁屏。其边界如下：
 
 - **唯一用途**：在用户双击符合条件的 Home 基础信息空白位置后，执行一次 `GLOBAL_ACTION_LOCK_SCREEN` 操作。
 - **Manifest 声明**：服务使用请求全局操作所需的最小 `accessibilityService` XML 配置。不声明 `flagRequestFilterKeyEvents`、`flagIncludeNotImportantViews`、`flagReportViewIds`、`flagRetrieveInteractiveWindows` 或任何提供窗口内容检索的能力。
@@ -84,7 +84,7 @@ Avenor 的无障碍服务仅用于支持双击锁屏。其边界如下：
 
 - 迭代 10 记录：`docs/delivery/1.1.0/iteration-10-double-tap-lock.md`
 - 物理设备验证：作者报告主要设备上成功的双击锁屏行为、Settings 状态刷新、披露流程和撤销/安全失败行为
-- Debug 实现文件：`app/src/debug/java/com/avenor/launcher/AccessibilityLockProbeService.kt`、`app/src/main/java/com/avenor/launcher/AccessibilityLock.kt`
+- Debug 实现文件：`app/src/debug/java/com/maxarchm/launcher/AccessibilityLockProbeService.kt`、`app/src/main/java/com/maxarchm/launcher/AccessibilityLock.kt`
 - Settings 集成：`SettingsScreen.kt`、`SettingsPlatform.kt` 以及相关的 Privacy 和披露资源
 - Home 手势集成：`HomeScreen.kt` 中符合条件的空白位置内的双击检测
 

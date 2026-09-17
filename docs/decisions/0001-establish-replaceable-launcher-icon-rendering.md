@@ -12,7 +12,7 @@
 
 ## Context
 
-Avenor must display each platform-exposed application's icon and applicable profile or clone badge in Home and Drawer. Android adaptive icons use a device-provided mask, so the same icon may appear as a squircle on a Samsung device and as a circle on a Pixel device. Legacy icons do not provide adaptive foreground and background layers and can appear as unmasked squares, become unrecognizable when cropped directly, or show an unrelated wrapper edge when placed on a fixed background.
+Launcher4Max must display each platform-exposed application's icon and applicable profile or clone badge in Home and Drawer. Android adaptive icons use a device-provided mask, so the same icon may appear as a squircle on a Samsung device and as a circle on a Pixel device. Legacy icons do not provide adaptive foreground and background layers and can appear as unmasked squares, become unrecognizable when cropped directly, or show an unrelated wrapper edge when placed on a fixed background.
 
 The Iteration 2 device spike compared direct platform-drawable rendering, a fixed white adaptive wrapper, direct device-mask clipping, and a project-owned normalization path. Samsung device validation accepted the path that preserves native adaptive icons, analyzes legacy icons at a higher resolution, derives a wrapper background from their edge pixels, scales their complete artwork into a safe region, applies the device mask, and adds the platform badge afterward.
 
@@ -20,7 +20,7 @@ Theme customization remains outside the `1.0.0` product contract, but a future t
 
 ## Decision
 
-Avenor owns a replaceable launcher-icon rendering boundary with the following responsibilities:
+Launcher4Max owns a replaceable launcher-icon rendering boundary with the following responsibilities:
 
 - `LauncherApps` remains the platform source for the launchable entry, raw icon, user/profile identity, and related metadata.
 - A project-owned renderer converts the raw icon plus an explicit appearance policy into the final process-local presentation consumed by Home, Drawer, and related application UI.

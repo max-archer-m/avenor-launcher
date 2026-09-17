@@ -4,7 +4,7 @@
 
 ## Purpose
 
-This document records the minimum current development baseline for Avenor Launcher. It describes project configuration and available entry points; it does not claim that a command has run successfully unless corresponding validation evidence records that result.
+This document records the minimum current development baseline for Launcher4Max. It describes project configuration and available entry points; it does not claim that a command has run successfully unless corresponding validation evidence records that result.
 
 ## Current project configuration
 
@@ -16,7 +16,7 @@ This document records the minimum current development baseline for Avenor Launch
 - Kotlin: `2.3.10`.
 - Java language level: JDK 17.
 - Android configuration: `minSdk 31`, `targetSdk 36`, and `compileSdk 37`.
-- Application identity: `com.avenor.launcher`.
+- Application identity: `com.maxarchm.launcher`.
 - Current configured version identity: `versionName 1.5.0`, configured `versionCode 6`; delivery and version closure are recorded in [1.5.0 delivery](delivery/1.5.0/delivery.md).
 - Dependency repositories currently use Aliyun mirrors. `settings.gradle.kts` retains commented official-upstream alternatives for deliberate manual switching.
 

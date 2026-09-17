@@ -12,13 +12,13 @@
 
 ## Context
 
-Avenor `1.0.0` persists an ordered list of exact launchable identities. A readable empty list must remain distinct from an unreadable document, Retry must not write, and a failed read must never replace or clear the original bytes. Mutations are permitted only after a complete successful read and must publish atomically and serially.
+Launcher4Max `1.0.0` persists an ordered list of exact launchable identities. A readable empty list must remain distinct from an unreadable document, Retry must not write, and a failed read must never replace or clear the original bytes. Mutations are permitted only after a complete successful read and must publish atomically and serially.
 
 The technical assessment identified Proto DataStore as a preferred candidate, subject to proving these failure invariants and reviewing its dependency and notice obligations. Iteration 4 does not otherwise need protocol buffers, a general preferences layer, background synchronization, or cross-device migration.
 
 ## Decision
 
-Avenor `1.0.0` stores favorites in one credential-encrypted, application-private file managed through Android `AtomicFile` and a project-owned binary serializer.
+Launcher4Max `1.0.0` stores favorites in one credential-encrypted, application-private file managed through Android `AtomicFile` and a project-owned binary serializer.
 
 - The document begins with a format magic value and explicit schema version.
 - Each ordered entry contains only the Android user/profile serial number and exact flattened `ComponentName`.
@@ -55,7 +55,7 @@ Choosing a project-owned format also makes the read-before-write rule and preser
 ### Versioned `AtomicFile`
 
 - Benefits: Minimal dependency surface, explicit schema and validation, atomic replacement, direct preservation of unreadable bytes, and straightforward ordered identity encoding.
-- Trade-offs: Avenor owns serializer correctness, schema migration, parser resource-safety constraints, and focused persistence tests. No separate user-facing favorite-count limit is established by this decision.
+- Trade-offs: Launcher4Max owns serializer correctness, schema migration, parser resource-safety constraints, and focused persistence tests. No separate user-facing favorite-count limit is established by this decision.
 
 ## Consequences
 

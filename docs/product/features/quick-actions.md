@@ -15,7 +15,7 @@ Quick actions cover only these two registered slots. Selecting time or date keep
 
 ## Bindings and configuration
 
-- Slots are configured independently. Avenor applies no uniqueness, exclusivity, or cross-slot validation: two slots may bind the same action, and no binding constrains another.
+- Slots are configured independently. Launcher4Max applies no uniqueness, exclusivity, or cross-slot validation: two slots may bind the same action, and no binding constrains another.
 - Binding changes take effect immediately and persist locally with the complete settings state.
 - The binding state is part of the manual backup file and follows its schema rules; a missing bindings section or field restores the default `No action` value.
 - Changing one binding never affects the other slot's recognition, an in-progress gesture recognition, or any other Home behavior.
@@ -25,7 +25,7 @@ Quick actions cover only these two registered slots. Selecting time or date keep
 - Both slots operate on the eligible blank space of the basic-information region defined by the [Home interaction specification](../surfaces/home.md). A double tap must begin and end inside that eligible blank space; a long press must begin there and remain within platform movement tolerance. Time, date-and-weekday, and every other interactive target stay excluded.
 - Future information displayed in this region reduces the eligible area by its own content and targets but must not consume all practical blank space.
 - Selecting time continues to open Clock immediately and selecting date continues to open Calendar immediately; neither waits for a possible second tap.
-- The double-tap slot uses the platform double-tap timing and movement tolerance; the long-press slot uses the platform long-press threshold. Avenor defines no product-specific hard-coded thresholds.
+- The double-tap slot uses the platform double-tap timing and movement tolerance; the long-press slot uses the platform long-press threshold. Launcher4Max defines no product-specific hard-coded thresholds.
 - A drag beyond the platform tolerance, an upward Home-to-Drawer gesture taking transition ownership, cancellation, or a gesture crossing into an excluded target cancels recognition, following [Navigation](../navigation.md).
 
 ## Bound actions
@@ -42,14 +42,14 @@ Settings contains one primary item titled `Quick action settings`, which opens t
 - The page lists one row per registered slot — `Basic-information double tap` then `Basic-information long press` — and each row's supporting text shows its current action name: `No action`, `Edit mode`, or `Screen lock`.
 - The page additionally lists the screen-lock service state row defined below. Every row on the page carries the same trailing arrow as a Settings row, including the two slot rows.
 - Selecting a slot row opens one local single-choice popup listing `No action`, `Edit mode`, and `Screen lock`. Each option row shows one leading single-selection indicator and its action label, with the current binding marked. Three paths close the popup: selecting an option saves that binding immediately and refreshes the row's supporting text; an outside tap closes it without changing any binding; system Back closes it without changing any binding.
-- Selecting `Screen lock` saves that binding exactly like any other option, with no confirmation and without depending on the accessibility state. When the service is `Off` at that moment, Avenor enters the screen-lock authorization flow defined by [double-tap-lock.md](double-tap-lock.md): the local explanation surface with `Open accessibility settings`, and the prominent disclosure before that handoff. The flow opens after the popup closes, and the binding stays saved regardless of whether the user cancels the flow, agrees without enabling the service, or enables the service.
+- Selecting `Screen lock` saves that binding exactly like any other option, with no confirmation and without depending on the accessibility state. When the service is `Off` at that moment, Launcher4Max enters the screen-lock authorization flow defined by [double-tap-lock.md](double-tap-lock.md): the local explanation surface with `Open accessibility settings`, and the prominent disclosure before that handoff. The flow opens after the popup closes, and the binding stays saved regardless of whether the user cancels the flow, agrees without enabling the service, or enables the service.
 - Selecting `No action` or `Edit mode` never opens the accessibility flow.
 - Returning from the page to Settings preserves Settings' prior position. Settings' own Back behavior is unchanged.
 
 ### Screen-lock service state row
 
-- The row is always visible on the page regardless of the current bindings. It is the standing channel for Avenor's accessibility screen-lock capability, so the user can always see whether that capability is enabled and reach its explanation and authorization flow.
-- Its title is `Screen lock`. Its supporting text is `On` while the required Avenor accessibility service is enabled and connected, and `Off` otherwise.
+- The row is always visible on the page regardless of the current bindings. It is the standing channel for Launcher4Max's accessibility screen-lock capability, so the user can always see whether that capability is enabled and reach its explanation and authorization flow.
+- Its title is `Screen lock`. Its supporting text is `On` while the required Launcher4Max accessibility service is enabled and connected, and `Off` otherwise.
 - It opens the local explanation surface defined by [double-tap-lock.md](double-tap-lock.md), which shows the current state, purpose, privacy boundary, and the `Open accessibility settings` action. The prominent disclosure precedes that handoff per [privacy.md](privacy.md#screen-locking-prominent-disclosure).
 - Returning from system settings refreshes the supporting text immediately; Android's state remains authoritative.
 

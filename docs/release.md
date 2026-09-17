@@ -6,7 +6,7 @@
 
 ## Project version model
 
-Avenor Launcher uses a project-defined versioning profile with the numeric form `MAJOR.MINOR.PATCH`. It is based on the shape of Semantic Versioning but is governed by this document rather than by the official Semantic Versioning specification.
+Launcher4Max uses a project-defined versioning profile with the numeric form `MAJOR.MINOR.PATCH`. It is based on the shape of Semantic Versioning but is governed by this document rather than by the official Semantic Versioning specification.
 
 - The first formal application version is `1.0.0`. The project does not use `0.x.y` versions.
 - The project has no prerelease-version concept. Identifiers such as `alpha`, `beta`, and `rc`, and SemVer prerelease or build-metadata suffixes, are not part of the version format.

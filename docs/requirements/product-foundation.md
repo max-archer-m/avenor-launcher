@@ -57,7 +57,7 @@ The current scope covers utility, not mass-market suitability, extensive customi
 - Minimum supported version: Android 12 (API 31).
 - Current physical validation devices: Samsung Galaxy S23 Ultra on Android 16 and Google Pixel 8 on Android 17.
 - Minimum-version validation environment: an Android 12/API 31 emulator unless a representative physical device becomes available.
-- Device scope: ordinary Android phones in portrait orientation only. Avenor presents in portrait orientation only; rotation requests do not produce a landscape layout, and no surface defines landscape geometry.
+- Device scope: ordinary Android phones in portrait orientation only. Launcher4Max presents in portrait orientation only; rotation requests do not produce a landscape layout, and no surface defines landscape geometry.
 - Device exclusions: landscape, foldable, tablet, desktop-mode, and external-display adaptation. Landscape presentation remains excluded until explicitly adapted.
 - Distribution boundary: maintain the GitHub project for the author's daily use, with no application-store submission, GitHub Release APK, website APK, or other public distribution.
 - Store target-API, review, and data-disclosure requirements are not current delivery gates; review them if public distribution enters scope.
@@ -68,7 +68,7 @@ The product compatibility boundary requires `minSdk` 31. Current configured `com
 
 ### In scope
 
-- Home: one non-pageable, non-collapsible default Home with fixed time and date above one vertically scrolling, full-width favorite main list and the Drawer gesture entry, plus a dismissible default-Launcher prompt between the fixed information region and that list while Avenor is not the device's default Launcher.
+- Home: one non-pageable, non-collapsible default Home with fixed time and date above one vertically scrolling, full-width favorite main list and the Drawer gesture entry, plus a dismissible default-Launcher prompt between the fixed information region and that list while Launcher4Max is not the device's default Launcher.
 - Favorites: one ordered heterogeneous sequence of full-width vertical modules and single-row horizontal ribbons, without an artificial module-count limit. A launchable identity appears in only one module. Vertical modules persist module-level icon size, name (text) size, name placement, and items-per-row values; ribbons use one fixed style.
 - Favorite editing: explicit add, remove, move, reorder, resize, confirmation, cancellation, latest-removal Undo, and Drawer drag-to-favorite behavior defined by the Home and Drawer contracts.
 - Screen locking: an optional, purpose-limited accessibility-service capability for eligible blank Home space, triggered by the quick-action slot the user binds to it. It does not gate independent Launcher paths.
@@ -119,15 +119,15 @@ An additive capability does not enter current scope merely because it can be bui
 
 ## Functional requirements
 
-- Avenor can serve as the Android Home entry point and exposes the Home–Drawer–Settings utility loop.
-- While Avenor is not the device's default Launcher, Home presents one dismissible prompt whose selection opens the same system destination as the Settings default-home entry and which changes no Avenor state.
+- Launcher4Max can serve as the Android Home entry point and exposes the Home–Drawer–Settings utility loop.
+- While Launcher4Max is not the device's default Launcher, Home presents one dismissible prompt whose selection opens the same system destination as the Settings default-home entry and which changes no Launcher4Max state.
 - Home displays system time and date, locally saved favorites, and launches the selected identity.
 - Favorite identities distinguish primary, cloned, and work-profile entries and are not deduplicated solely by package name.
 - Favorite mutations are explicit, locally persisted, and preserve a valid destination and order without duplication or silent redirection.
-- Drawer presents, locally searches, and launches the reliable inventory available within Avenor's Android role and least-privilege boundary.
+- Drawer presents, locally searches, and launches the reliable inventory available within Launcher4Max's Android role and least-privilege boundary.
 - Inventory refresh, partial-source failure, permanent disappearance, Loading, and Error behavior preserve usable paths and do not convert uncertain data into destructive conclusions.
 - Application actions and Settings open only destinations valid for the selected identity and report defined local failures without corrupting favorite state.
-- Avenor can back up the complete favorite-module, Drawer display-setting, and quick-action-binding state to one user-chosen local file and restore it through a confirmed atomic replacement without network access or automatic backup.
+- Launcher4Max can back up the complete favorite-module, Drawer display-setting, and quick-action-binding state to one user-chosen local file and restore it through a confirmed atomic replacement without network access or automatic backup.
 - Screen locking requests the system lock action only after the user binds a quick-action slot to it, enables the applicable accessibility service, and performs the bound gesture in an eligible area.
 - English and Simplified Chinese are complete supported resource sets; unsupported locales fall back to English without a manual in-app language selector.
 - Core Home, Drawer, application launch, and Settings tasks remain usable offline.
@@ -136,7 +136,7 @@ Detailed interaction outcomes and exact presentation values are acceptance requi
 
 ## Non-functional requirements
 
-- Core paths must not crash, become unresponsive, or corrupt local configuration because of Avenor.
+- Core paths must not crash, become unresponsive, or corrupt local configuration because of Launcher4Max.
 - Least privilege is mandatory. Permission denial may degrade only the dependent capability.
 - User-visible strings are localizable, and system font scaling remains applicable.
 - Current data remains local; no account, analytics, server, or cloud synchronization is introduced.
@@ -147,7 +147,7 @@ Minimum acceptable performance, power, memory, and startup-response thresholds a
 ## Product-level acceptance criteria
 
 - The author can complete the Home–Drawer–Settings loop on the supported device boundary without a network connection.
-- The Home default-Launcher prompt appears only while Avenor is not the default Launcher, is suppressed for the remainder of the local day by its dismiss control, never changes Avenor configuration, and opens the same system destination as the Settings entry.
+- The Home default-Launcher prompt appears only while Launcher4Max is not the default Launcher, is suppressed for the remainder of the local day by its dismiss control, never changes Launcher4Max configuration, and opens the same system destination as the Settings entry.
 - Selecting a visible launchable identity launches the intended application.
 - Drawer does not omit, duplicate, or misidentify entries returned by successfully read Android sources; isolated failed sources may be absent without blocking available Content.
 - Ordinary Drawer search filters the reliable local application inventory by displayed application name without network access, changing the selected arrangement, or introducing a second application order.
@@ -176,9 +176,9 @@ The product lets users maintain Home favorites and use individual Settings entri
 - The latest eligible application-removal snapshot is transient Undo state, not durable undo history.
 - The local date on which the user last dismissed the Home default-Launcher prompt is durable presentation state. It is user-controlled, is not application-usage history, and is not part of the backup file.
 - Time and date come from the device system and are not retained historically.
-- Avenor does not collect or store accessibility window content or events, notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.
-- Avenor has no account, cloud synchronization, server, cloud backup, or cross-device backup. Android cloud backup and device-to-device transfer backup remain disabled for Avenor-owned favorite and display-setting data; only the user-initiated local backup described below is provided.
-- A user-initiated local backup writes one schema-versioned JSON file containing the complete favorite-module, Drawer display-setting, and quick-action-binding state to a location the user chooses through the system document picker. The file is user-managed, stays outside Avenor's app-private storage, and is never uploaded or written automatically.
+- Launcher4Max does not collect or store accessibility window content or events, notifications, contacts, location, clipboard content, files, photos, stable device identifiers, application-usage history, or analytics events.
+- Launcher4Max has no account, cloud synchronization, server, cloud backup, or cross-device backup. Android cloud backup and device-to-device transfer backup remain disabled for Launcher4Max-owned favorite and display-setting data; only the user-initiated local backup described below is provided.
+- A user-initiated local backup writes one schema-versioned JSON file containing the complete favorite-module, Drawer display-setting, and quick-action-binding state to a location the user chooses through the system document picker. The file is user-managed, stays outside Launcher4Max's app-private storage, and is never uploaded or written automatically.
 
 ## Dependencies and risks
 
