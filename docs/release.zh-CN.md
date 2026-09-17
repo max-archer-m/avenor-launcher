@@ -74,6 +74,7 @@ Launcher4Max 使用项目自定义的 `MAJOR.MINOR.PATCH` 数字版本格式。�
 - 已完成正式版本使用其制品获接受边界时下一个尚未使用的 `versionCode`。在该边界之前，计划中的 `versionCode` 只是暂定值。
 - `versionCode` 不根据 `versionName` 计算；分配序列不得跳号，已分配值不得回收、不得用于另一个不同的可追踪 APK，也不得降低。
 - 两个不同的正式 `versionName` 不得共用同一个 `versionCode`。
+- 产品更名为 Launcher4Max 时，`applicationId` 由 `com.avenor.launcher` 变更为 `com.maxarchm.launcher`。Android 因此把更名后的应用视为全新安装：既有的 Avenor 安装不会原地升级，其本地收藏与 Drawer 显示设置对更名后的应用不可见。受支持的迁移路径是：先在旧应用的 Settings Data 导出中备份收藏与显示设置，安装 Launcher4Max 构建，恢复该备份文件，重新选择默认桌面角色并重新启用无障碍服务，最后再移除旧应用。恢复路径接受旧的 `avenor-backup-` 文件名，因为恢复按备份内容而非文件名解析。
 - 不支持降级。
 
 ## 构建身份与可观测性

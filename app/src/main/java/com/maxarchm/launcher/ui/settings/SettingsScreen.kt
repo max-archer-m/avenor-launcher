@@ -1,0 +1,681 @@
+package com.maxarchm.launcher.ui.settings
+
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.maxarchm.launcher.AccessibilityLockController
+import com.maxarchm.launcher.EmptyAccessibilityLockController
+import com.maxarchm.launcher.R
+import com.maxarchm.launcher.SettingsBackupControl
+import com.maxarchm.launcher.SettingsBackupState
+import kotlinx.coroutines.launch
+
+@Composable
+internal fun SettingsScreen(
+    platform: SettingsPlatform,
+    licenseText: String,
+    accessibilityLockController: AccessibilityLockController = EmptyAccessibilityLockController,
+    backupController: SettingsBackupControl? = null,
+    onBack: () -> Unit,
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val scope = rememberCoroutineScope()
+    var isDefaultHome by remember(platform) { mutableStateOf(platform.isDefaultHome()) }
+    var showLicense by remember { mutableStateOf(false) }
+    var showPrivacy by remember { mutableStateOf(false) }
+    var showDoubleTapExplanation by remember { mutableStateOf(false) }
+    var showProminentDisclosure by remember { mutableStateOf(false) }
+    var backupInFlight by remember { mutableStateOf(false) }
+    var pendingRestore by remember { mutableStateOf<SettingsBackupState?>(null) }
+    var isAccessibilitySystemEnabled by remember(accessibilityLockController) {
+        mutableStateOf(accessibilityLockController.isSystemEnabled())
+    }
+    val isAccessibilityConnected by accessibilityLockController.connectionState
+        .collectAsStateWithLifecycle()
+
+    val backupDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument(JSON_MIME_TYPE),
+    ) { uri ->
+        if (uri != null && backupController != null) {
+            scope.launch {
+                backupInFlight = true
+                val succeeded = backupController.writeBackup(uri = uri)
+                backupInFlight = false
+                Toast.makeText(
+                    context,
+                    if (succeeded) {
+                        R.string.settings_data_backup_success
+                    } else {
+                        R.string.settings_data_backup_failure
+                    },
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        }
+    }
+    val restoreDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null && backupController != null) {
+            scope.launch {
+                backupInFlight = true
+                val backup = backupController.readBackup(uri = uri)
+                backupInFlight = false
+                if (backup == null) {
+                    Toast.makeText(
+                        context,
+                        R.string.settings_data_restore_failure,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                } else {
+                    pendingRestore = backup
+                }
+            }
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, platform, accessibilityLockController) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isDefaultHome = platform.isDefaultHome()
+                isAccessibilitySystemEnabled = accessibilityLockController.isSystemEnabled()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("settings_surface"),
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing),
+        ) {
+            SettingsTopBar(onBack = onBack)
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .testTag("settings_list"),
+            ) {
+                item(key = "default-home") {
+                    PrimarySettingsItem(
+                        title = stringResource(R.string.default_home_application),
+                        supportingText = stringResource(
+                            if (isDefaultHome) {
+                                R.string.launcher4max_is_default_launcher
+                            } else {
+                                R.string.launcher4max_is_not_default_launcher
+                            },
+                        ),
+                        onClick = { platform.openDefaultHomeSettings() },
+                        testTag = "settings_default_home",
+                    )
+                }
+                if (accessibilityLockController.availableForValidation) {
+                    item(key = "double-tap-lock") {
+                        PrimarySettingsItem(
+                            title = stringResource(R.string.double_tap_to_lock),
+                            supportingText = stringResource(
+                                if (isAccessibilitySystemEnabled && isAccessibilityConnected) {
+                                    R.string.capability_on
+                                } else {
+                                    R.string.capability_off
+                                },
+                            ),
+                            onClick = { showDoubleTapExplanation = true },
+                            testTag = "settings_double_tap_lock",
+                        )
+                    }
+                }
+                if (backupController != null) {
+                    item(key = "data-backup") {
+                        PrimarySettingsItem(
+                            title = stringResource(R.string.settings_data_backup),
+                            supportingText = null,
+                            onClick = {
+                                backupDocumentLauncher.launch(
+                                    backupController.suggestedFileName(),
+                                )
+                            },
+                            enabled = !backupInFlight,
+                            testTag = "settings_data_backup",
+                        )
+                    }
+                    item(key = "data-restore") {
+                        PrimarySettingsItem(
+                            title = stringResource(R.string.settings_data_restore),
+                            supportingText = null,
+                            onClick = {
+                                restoreDocumentLauncher.launch(RESTORE_MIME_TYPES)
+                            },
+                            enabled = !backupInFlight,
+                            testTag = "settings_data_restore",
+                        )
+                    }
+                }
+                if (accessibilityLockController.availableForValidation) {
+                    item(key = "privacy") {
+                        SecondarySettingsItem(
+                            text = stringResource(R.string.privacy),
+                            onClick = { showPrivacy = true },
+                            testTag = "settings_privacy",
+                        )
+                    }
+                }
+                item(key = "license") {
+                    SecondarySettingsItem(
+                        text = stringResource(R.string.launcher4max_license),
+                        onClick = { showLicense = true },
+                        testTag = "settings_license",
+                    )
+                }
+                item(key = "repository") {
+                    SecondarySettingsItem(
+                        text = stringResource(R.string.project_repository),
+                        onClick = {
+                            if (!platform.openProjectRepository()) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.unable_to_open_project_link,
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            }
+                        },
+                        testTag = "settings_project_repository",
+                    )
+                }
+                item(key = "version") {
+                    SecondarySettingsItem(
+                        text = platform.versionText(),
+                        onClick = null,
+                        testTag = "settings_version",
+                    )
+                }
+            }
+        }
+    }
+
+    if (showLicense) {
+        LicenseBottomSheet(
+            licenseText = licenseText,
+            onDismiss = { showLicense = false },
+        )
+    }
+
+    if (showPrivacy) {
+        PrivacyBottomSheet(
+            onOpenContact = {
+                if (!platform.openPrivacyContact()) {
+                    Toast.makeText(
+                        context,
+                        R.string.unable_to_open_privacy_contact,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            },
+            onDismiss = { showPrivacy = false },
+        )
+    }
+
+    if (showDoubleTapExplanation) {
+        DoubleTapLockExplanationSheet(
+            enabled = isAccessibilitySystemEnabled && isAccessibilityConnected,
+            onOpenAccessibilitySettings = {
+                val systemEnabled = accessibilityLockController.isSystemEnabled()
+                isAccessibilitySystemEnabled = systemEnabled
+                if (systemEnabled) {
+                    if (!accessibilityLockController.openAccessibilitySettings()) {
+                        Toast.makeText(
+                            context,
+                            R.string.unable_to_open_accessibility_settings,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                } else {
+                    showDoubleTapExplanation = false
+                    showProminentDisclosure = true
+                }
+            },
+            onDismiss = { showDoubleTapExplanation = false },
+        )
+    }
+
+    if (showProminentDisclosure) {
+        AccessibilityProminentDisclosure(
+            onCancel = { showProminentDisclosure = false },
+            onContinue = {
+                showProminentDisclosure = false
+                if (!accessibilityLockController.openAccessibilitySettings()) {
+                    Toast.makeText(
+                        context,
+                        R.string.unable_to_open_accessibility_settings,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            },
+        )
+    }
+
+    pendingRestore?.let { backup ->
+        RestoreConfirmationDialog(
+            onConfirm = {
+                pendingRestore = null
+                if (backupController != null) {
+                    scope.launch {
+                        backupInFlight = true
+                        val succeeded = backupController.restore(backup = backup)
+                        backupInFlight = false
+                        Toast.makeText(
+                            context,
+                            if (succeeded) {
+                                R.string.settings_data_restore_success
+                            } else {
+                                R.string.settings_data_restore_failure
+                            },
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                }
+            },
+            onCancel = { pendingRestore = null },
+        )
+    }
+}
+
+@Composable
+private fun SettingsTopBar(onBack: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = dimensionResource(R.dimen.settings_top_bar_min_height)),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // The Back target starts 12dp from the safe start edge so its 24dp artwork begins
+        // 24dp out, matching the Drawer top app bar.
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier
+                .padding(start = dimensionResource(R.dimen.settings_back_target_start))
+                .testTag("settings_back"),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_arrow_back),
+                contentDescription = stringResource(R.string.back),
+            )
+        }
+        Text(
+            text = stringResource(R.string.settings),
+            modifier = Modifier
+                .padding(start = dimensionResource(R.dimen.settings_horizontal_padding))
+                .testTag("settings_title"),
+            style = MaterialTheme.typography.titleLarge,
+        )
+    }
+}
+
+@Composable
+private fun PrimarySettingsItem(
+    title: String,
+    supportingText: String?,
+    onClick: () -> Unit,
+    testTag: String,
+    enabled: Boolean = true,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(
+                min = dimensionResource(
+                    if (supportingText == null) {
+                        R.dimen.settings_primary_one_line_min_height
+                    } else {
+                        R.dimen.settings_primary_two_line_min_height
+                    },
+                ),
+            )
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .padding(horizontal = dimensionResource(R.dimen.settings_horizontal_padding))
+            .testTag(testTag),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium,
+            )
+            supportingText?.let { text ->
+                Text(
+                    text = text,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            modifier = Modifier.size(dimensionResource(R.dimen.settings_trailing_icon_size)),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun SecondarySettingsItem(
+    text: String,
+    onClick: (() -> Unit)?,
+    testTag: String,
+) {
+    val interactionModifier = if (onClick == null) {
+        Modifier
+    } else {
+        Modifier.clickable(role = Role.Button, onClick = onClick)
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = dimensionResource(R.dimen.settings_secondary_item_min_height))
+            .then(interactionModifier)
+            .padding(horizontal = dimensionResource(R.dimen.settings_horizontal_padding))
+            .testTag(testTag),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.titleSmall,
+        )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun DoubleTapLockExplanationSheet(
+    enabled: Boolean,
+    onOpenAccessibilitySettings: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        scrimColor = MaterialTheme.colorScheme.scrim,
+        dragHandle = { SettingsModalDragHandle() },
+        modifier = Modifier.testTag("double_tap_lock_explanation_sheet"),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(dimensionResource(R.dimen.settings_horizontal_padding)),
+        ) {
+            Text(
+                text = stringResource(R.string.double_tap_to_lock),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = stringResource(
+                    if (enabled) R.string.capability_on else R.string.capability_off,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
+                text = stringResource(R.string.double_tap_lock_explanation),
+                modifier = Modifier.padding(
+                    vertical = dimensionResource(R.dimen.settings_modal_content_spacing),
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            TextButton(
+                onClick = onOpenAccessibilitySettings,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .testTag("open_accessibility_settings"),
+            ) {
+                Text(stringResource(R.string.open_accessibility_settings))
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun PrivacyBottomSheet(
+    onOpenContact: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        scrimColor = MaterialTheme.colorScheme.scrim,
+        dragHandle = { SettingsModalDragHandle() },
+        modifier = Modifier.testTag("privacy_sheet"),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = false)
+                .verticalScroll(rememberScrollState())
+                .padding(dimensionResource(R.dimen.settings_horizontal_padding)),
+        ) {
+            Text(
+                text = stringResource(R.string.privacy),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = stringResource(R.string.privacy_statement),
+                modifier = Modifier.padding(
+                    vertical = dimensionResource(R.dimen.settings_modal_content_spacing),
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+            TextButton(
+                onClick = onOpenContact,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .testTag("privacy_contact"),
+            ) {
+                Text(stringResource(R.string.privacy_contact_url))
+            }
+            Text(
+                text = stringResource(R.string.privacy_contact_behavior),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AccessibilityProminentDisclosure(
+    onCancel: () -> Unit,
+    onContinue: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.accessibility_disclosure_title)) },
+        text = { Text(stringResource(R.string.accessibility_disclosure_body)) },
+        dismissButton = {
+            TextButton(
+                onClick = onCancel,
+                modifier = Modifier.testTag("accessibility_disclosure_cancel"),
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onContinue,
+                modifier = Modifier.testTag("accessibility_disclosure_continue"),
+            ) {
+                Text(stringResource(R.string.agree_and_continue))
+            }
+        },
+        modifier = Modifier.testTag("accessibility_prominent_disclosure"),
+    )
+}
+
+@Composable
+private fun SettingsModalDragHandle() {
+    androidx.compose.foundation.layout.Box(
+        Modifier
+            .padding(vertical = dimensionResource(R.dimen.action_sheet_handle_padding))
+            .size(
+                width = dimensionResource(R.dimen.action_sheet_handle_width),
+                height = dimensionResource(R.dimen.action_sheet_handle_height),
+            )
+            .background(
+                color = MaterialTheme.colorScheme.onSurface,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                    dimensionResource(R.dimen.action_sheet_handle_height),
+                ),
+            ),
+    )
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun LicenseBottomSheet(
+    licenseText: String,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        scrimColor = MaterialTheme.colorScheme.scrim,
+        dragHandle = {
+            androidx.compose.foundation.layout.Box(
+                Modifier
+                    .padding(vertical = dimensionResource(R.dimen.action_sheet_handle_padding))
+                    .size(
+                        width = dimensionResource(R.dimen.action_sheet_handle_width),
+                        height = dimensionResource(R.dimen.action_sheet_handle_height),
+                    )
+                    .background(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                            dimensionResource(R.dimen.action_sheet_handle_height),
+                        ),
+                    ),
+            )
+        },
+        modifier = Modifier.testTag("launcher4max_license_sheet"),
+    ) {
+        Text(
+            text = stringResource(R.string.launcher4max_license_title),
+            modifier = Modifier.padding(
+                horizontal = dimensionResource(R.dimen.settings_horizontal_padding),
+                vertical = dimensionResource(R.dimen.settings_license_title_vertical_padding),
+            ),
+            style = MaterialTheme.typography.titleLarge,
+        )
+        HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text = licenseText,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = false)
+                .verticalScroll(rememberScrollState())
+                .padding(dimensionResource(R.dimen.settings_horizontal_padding))
+                .testTag("launcher4max_license_text"),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
+}
+
+@Composable
+internal fun RestoreConfirmationDialog(
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.settings_data_restore_dialog_title)) },
+        text = { Text(stringResource(R.string.settings_data_restore_dialog_body)) },
+        dismissButton = {
+            TextButton(
+                onClick = onCancel,
+                modifier = Modifier.testTag("settings_restore_cancel"),
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                modifier = Modifier.testTag("settings_restore_confirm"),
+            ) {
+                Text(stringResource(R.string.settings_data_restore_confirm))
+            }
+        },
+        modifier = Modifier.testTag("settings_restore_dialog"),
+    )
+}
+
+private const val JSON_MIME_TYPE = "application/json"
+private val RESTORE_MIME_TYPES = arrayOf(JSON_MIME_TYPE, "*/*")

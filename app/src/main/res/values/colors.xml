@@ -1,12 +1,12 @@
 <resources>
     <!-- Drawer parameters accepted on 2026-09-06; further calibration is non-blocking follow-up. -->
     <color name="drawer_foreground_shadow">#A6000000</color>
-    <color name="avenor_transparent">#00000000</color>
-    <color name="avenor_foreground">#FFFFFFFF</color>
-    <color name="avenor_secondary_foreground">#FFCAC4D0</color>
-    <color name="avenor_sheet_surface">#FF202124</color>
-    <color name="avenor_sheet_scrim">#99000000</color>
-    <color name="avenor_error">#FFFF5252</color>
+    <color name="launcher4max_transparent">#00000000</color>
+    <color name="launcher4max_foreground">#FFFFFFFF</color>
+    <color name="launcher4max_secondary_foreground">#FFCAC4D0</color>
+    <color name="launcher4max_sheet_surface">#FF202124</color>
+    <color name="launcher4max_sheet_scrim">#99000000</color>
+    <color name="launcher4max_error">#FFFF5252</color>
     <color name="home_favorite_remove_icon">#FFFFFFFF</color>
     <color name="home_edit_surface">#33FFFFFF</color>
     <color name="home_favorite_ripple">#1FFFFFFF</color>

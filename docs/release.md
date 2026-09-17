@@ -74,6 +74,7 @@ Pure documentation changes never change the application version. A source, resou
 - A completed formal version uses the next unused `versionCode` available at its accepted artifact boundary. A planned `versionCode` is provisional until that boundary.
 - `versionCode` is never calculated from `versionName`; the allocation sequence may not skip a value, and an allocated value may not be reclaimed, reused for a different traceable APK, or decreased.
 - Two different formal `versionName` values may not share a `versionCode`.
+- The product rename to Launcher4Max changed the `applicationId` from `com.avenor.launcher` to `com.maxarchm.launcher`. Android therefore treats the renamed application as a fresh install: an existing Avenor installation does not upgrade in place, and its local favorites and Drawer display settings are not visible to the renamed application. The supported migration path is: back up favorites and display settings through the previous application's Settings Data export, install the Launcher4Max build, restore that backup file, re-select the default-Launcher role, re-enable the accessibility service, and only then remove the previous application. The restore path accepts the previous `avenor-backup-` file name because restore parses backup content rather than file names.
 - Downgrade is not supported.
 
 ## Build identity and observability

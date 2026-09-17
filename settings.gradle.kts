@@ -23,5 +23,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AvenorLauncher"
+rootProject.name = "launcher-4-max"
 include(":app")

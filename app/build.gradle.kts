@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.avenor.launcher"
+    namespace = "com.maxarchm.launcher"
     compileSdk = 37
 
     // Load local signing configuration without committing credentials.
@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.avenor.launcher"
+        applicationId = "com.maxarchm.launcher"
         minSdk = 31
         targetSdk = 36
         versionCode = 7

@@ -23,12 +23,12 @@
     </queries>
 
     <application
-        android:name=".AvenorApplication"
+        android:name=".Launcher4MaxApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Avenor">
+        android:theme="@style/Theme.Launcher4Max">
         <activity
             android:name=".MainActivity"
             android:exported="true"

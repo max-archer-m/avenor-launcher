@@ -34,5 +34,4 @@ google-services.json
 *.hprof
 
 # Signature
-avenor-release.jks
 keystore.properties

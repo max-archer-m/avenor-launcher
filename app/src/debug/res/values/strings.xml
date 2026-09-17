@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="accessibility_lock_probe_description">Optional double-tap lock for eligible blank space on Avenor Home</string>
-    <string name="accessibility_lock_probe_label">Avenor double-tap lock</string>
+    <string name="accessibility_lock_probe_description">Optional double-tap lock for eligible blank space on Launcher4Max Home</string>
+    <string name="accessibility_lock_probe_label">Launcher4Max double-tap lock</string>
 </resources>

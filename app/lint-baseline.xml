@@ -136,15 +136,5 @@
             column="13"/>
     </issue>
 
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.avenor_launcher_settings` appears to be unused"
-        errorLine1="    &lt;string name=&quot;avenor_launcher_settings&quot;>Avenor Launcher Settings&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="65"
-            column="13"/>
-    </issue>
 
 </issues>
