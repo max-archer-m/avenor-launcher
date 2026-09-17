@@ -213,7 +213,7 @@ internal fun HomeOrderedFavoriteRibbon(
                         onRemove = { onRemoveFavorite(identity) },
                         content = {
                             FavoriteRibbonItemIntrinsicWidthContent(
-                                displayText = FavoriteRibbonDisplayText(
+                                displayText = favoriteRibbonDisplayText(
                                     availability = availability,
                                 ),
                                 iconSize = dimensionResource(id = R.dimen.home_favorite_icon_size),
@@ -876,7 +876,7 @@ private fun HomeFavoriteRibbonItem(
         calculation = { MutableInteractionSource() },
     )
     val hapticFeedback = LocalHapticFeedback.current
-    val displayText = FavoriteRibbonDisplayText(availability = availability)
+    val displayText = favoriteRibbonDisplayText(availability = availability)
     var itemOriginInWindow by remember(
         key1 = entry?.identity,
         calculation = { mutableStateOf(value = Offset.Zero) },
@@ -1059,7 +1059,7 @@ private fun HomeFavoriteRibbonItem(
 }
 
 @Composable
-private fun FavoriteRibbonDisplayText(
+private fun favoriteRibbonDisplayText(
     availability: FavoriteAvailability,
 ): String {
     val entry = availability.presentationEntry

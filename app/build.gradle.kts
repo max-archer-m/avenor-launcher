@@ -73,6 +73,9 @@ android {
         // Iteration 1 does not define a product icon; retain the platform fallback
         // instead of turning an invented placeholder into a product asset.
         disable += "MissingApplicationIcon"
+        // Portrait-only presentation is the current product contract, so the locked
+        // orientation on the single activity is intentional rather than a defect.
+        disable += "LockedOrientationActivity"
         // Tool and dependency update notices are reviewed maintenance inputs, not
         // correctness failures for the currently selected platform baseline.
         disable += "AndroidGradlePluginVersion"

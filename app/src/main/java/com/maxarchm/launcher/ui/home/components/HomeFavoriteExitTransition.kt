@@ -182,15 +182,15 @@ internal class HomeFavoriteExitGhost(val record: HomeFavoriteExitLayer, val clip
 }
 
 @Composable
-internal fun homeFavoriteExitCapture(
+internal fun Modifier.homeFavoriteExitCapture(
     owner: HomeFavoriteExitTransitions?,
     key: HomeFavoriteEnterKey,
     opacity: () -> Float,
 ): Modifier {
-    if (owner == null) return Modifier
+    if (owner == null) return this
     val record = remember(key1 = owner, key2 = key, calculation = { HomeFavoriteExitLayer(owner = owner, key = key) })
     SideEffect(effect = { record.opacity = opacity })
-    return Modifier.onGloballyPositioned(onGloballyPositioned = { coordinates ->
+    return onGloballyPositioned(onGloballyPositioned = { coordinates ->
         if (!record.retiring) {
             record.origin = coordinates.positionInWindow()
             record.clip = coordinates.boundsInWindow()

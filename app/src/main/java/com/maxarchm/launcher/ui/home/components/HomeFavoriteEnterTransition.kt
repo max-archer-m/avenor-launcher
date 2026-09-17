@@ -145,10 +145,14 @@ internal fun Modifier.homeFavoriteEnter(
     // never acquire a fresh ticket just because their data, edit controls, or parent updated.
     val ticket = remember(key1 = key, calculation = { batch?.claim(key = key) })
     val alpha = remember(key1 = ticket, calculation = { Animatable(initialValue = 1f) })
-    val capture = homeFavoriteExitCapture(owner = batch?.exitTransitions, key = key, opacity = { alpha.value })
-    if (ticket == null) return then(other = capture)
     var finished by remember(key1 = ticket, calculation = { mutableStateOf(value = false) })
-    if (finished) return then(other = capture)
+    if (ticket == null || finished) {
+        return homeFavoriteExitCapture(
+            owner = batch?.exitTransitions,
+            key = key,
+            opacity = { alpha.value },
+        )
+    }
     val scope = rememberCoroutineScope()
     val duration = integerResource(id = R.integer.short_property_animation_duration_ms)
     DisposableEffect(key1 = ticket, effect = {
@@ -181,5 +185,9 @@ internal fun Modifier.homeFavoriteEnter(
                 finished = true
             }
         }
-    }).graphicsLayer(block = { this.alpha = alpha.value }).then(other = capture)
+    }).graphicsLayer(block = { this.alpha = alpha.value }).homeFavoriteExitCapture(
+        owner = batch?.exitTransitions,
+        key = key,
+        opacity = { alpha.value },
+    )
 }
