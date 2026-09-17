@@ -2,6 +2,17 @@
 <issues format="6" by="lint 9.2.1" type="baseline" client="gradle" dependencies="false" name="AGP (9.2.1)" variant="all" version="9.2.1">
 
     <issue
+        id="DiscouragedApi"
+        message="Fixed screen orientations will be ignored in most cases, starting from Android 16. Android is moving toward a model where apps are expected to adapt to various orientations, display sizes, and aspect ratios."
+        errorLine1="            android:screenOrientation=&quot;portrait&quot;>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="36"
+            column="13"/>
+    </issue>
+
+    <issue
         id="ObsoleteSdkInt"
         message="This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 31. Merge all the resources in this folder into `mipmap-anydpi`.">
         <location
@@ -9,80 +20,69 @@
     </issue>
 
     <issue
-        id="UnusedResources"
-        message="The resource `R.dimen.home_horizontal_padding` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;home_horizontal_padding&quot;>16dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        errorLine1="    var geometryRevision by mutableStateOf(value = 0L)"
+        errorLine2="                            ~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/dimens.xml"
-            line="2"
-            column="12"/>
+            file="src/main/java/com/maxarchm/launcher/HomeApplicationMovement.kt"
+            line="127"
+            column="29"/>
     </issue>
 
     <issue
-        id="UnusedResources"
-        message="The resource `R.dimen.home_vertical_padding` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;home_vertical_padding&quot;>32dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        errorLine1="    var insertionBoundaryBandPx by mutableStateOf(0f)"
+        errorLine2="                                   ~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/dimens.xml"
-            line="3"
-            column="12"/>
+            file="src/main/java/com/maxarchm/launcher/ui/home/HomeFavoriteEditOrchestration.kt"
+            line="117"
+            column="36"/>
     </issue>
 
     <issue
-        id="UnusedResources"
-        message="The resource `R.dimen.home_favorite_remove_target_size` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;home_favorite_remove_target_size&quot;>48dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        errorLine1="    var edgeScrollBandPx by mutableStateOf(0f)"
+        errorLine2="                            ~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/dimens.xml"
-            line="43"
-            column="12"/>
+            file="src/main/java/com/maxarchm/launcher/ui/home/HomeFavoriteEditOrchestration.kt"
+            line="118"
+            column="29"/>
     </issue>
 
     <issue
-        id="UnusedResources"
-        message="The resource `R.dimen.home_favorite_remove_badge_size` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;home_favorite_remove_badge_size&quot;>24dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        errorLine1="    var edgeScrollSpeedPxPerSecond by mutableStateOf(0f)"
+        errorLine2="                                      ~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/dimens.xml"
-            line="44"
-            column="12"/>
+            file="src/main/java/com/maxarchm/launcher/ui/home/HomeFavoriteEditOrchestration.kt"
+            line="119"
+            column="39"/>
     </issue>
 
     <issue
-        id="UnusedResources"
-        message="The resource `R.dimen.home_favorite_remove_icon_size` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;home_favorite_remove_icon_size&quot;>16dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        errorLine1="    var edgeScrollStartDelayMillis by mutableStateOf(0L)"
+        errorLine2="                                      ~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/dimens.xml"
-            line="45"
-            column="12"/>
+            file="src/main/java/com/maxarchm/launcher/ui/home/HomeFavoriteEditOrchestration.kt"
+            line="120"
+            column="39"/>
     </issue>
 
     <issue
-        id="UnusedResources"
-        message="The resource `R.dimen.home_favorite_edge_margin` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;home_favorite_edge_margin&quot;>8dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        errorLine1="    var favoriteBarItemStridePx by mutableStateOf(0f)"
+        errorLine2="                                   ~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/dimens.xml"
-            line="46"
-            column="12"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.drawable.ic_add` appears to be unused"
-        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
-        errorLine2="^">
-        <location
-            file="src/main/res/drawable/ic_add.xml"
-            line="1"
-            column="1"/>
+            file="src/main/java/com/maxarchm/launcher/ui/home/HomeFavoriteEditOrchestration.kt"
+            line="121"
+            column="36"/>
     </issue>
 
     <issue
@@ -91,50 +91,5 @@
         <location
             file="src/main/res/mipmap-hdpi/ic_launcher_round.webp"/>
     </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.drawer_select_favorites` appears to be unused"
-        errorLine1="    &lt;string name=&quot;drawer_select_favorites&quot;>Select applications&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="48"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.drawer_selection_order_format` appears to be unused"
-        errorLine1="    &lt;string name=&quot;drawer_selection_order_format&quot;>Selected, item %1$d&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="56"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.drawer_selection_not_selected` appears to be unused"
-        errorLine1="    &lt;string name=&quot;drawer_selection_not_selected&quot;>Not selected&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="57"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.drawer_selection_already_favorite_unavailable` appears to be unused"
-        errorLine1="    &lt;string name=&quot;drawer_selection_already_favorite_unavailable&quot;>Favorited; unavailable&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="58"
-            column="13"/>
-    </issue>
-
 
 </issues>
