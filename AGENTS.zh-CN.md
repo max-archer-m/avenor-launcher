@@ -15,7 +15,7 @@ Toolkit locator 为 `../max-ai-toolkit`。Toolkit 提供可复用的方法；本
 ## 项目身份
 
 - 产品名称：Launcher4Max
-- 仓库：`avenor-launcher`
+- 仓库：`launcher-4-max`
 - 项目所有权与决策权：项目作者
 
 ## 项目入口文档

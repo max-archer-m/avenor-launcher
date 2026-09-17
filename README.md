@@ -21,7 +21,7 @@ See the [project overview](overview.md) for confirmed intent, boundaries, and un
 - [Validation guide](docs/validation.md)
 - [Product foundation requirements](docs/requirements/product-foundation.md)
 - [Version, artifact, and release governance](docs/release.md)
-- [Completed delivery records, currently 1.0.0 through 1.3.0](docs/documentation.md#current-authoritative-documents)
+- [Completed delivery records, currently 1.0.0 through 1.6.0](docs/documentation.md#current-authoritative-documents)
 - [Version delivery documents](docs/versions/version-delivery-format.md)
 - [Iteration record format](docs/iterations/iteration-record-format.md)
 - [Agent instructions](AGENTS.md)

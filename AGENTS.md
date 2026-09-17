@@ -15,7 +15,7 @@ The Toolkit locator is `../max-ai-toolkit`. The Toolkit provides reusable method
 ## Project identity
 
 - Product name: Launcher4Max
-- Repository: `avenor-launcher`
+- Repository: `launcher-4-max`
 - Project ownership and decision authority: The project author
 
 ## Project entry documents

@@ -52,7 +52,7 @@ This heading organizes the behavior contract and is not a visible Settings group
 - **Launcher4Max License:** Opens the local Launcher4Max License Bottom Sheet; the English label uses `License`.
 - **Third-party License:** Its applicability to the current dependency set is `To be decided` pending a complete dependency-and-license inventory and any qualified review that inventory requires. The entry remains absent until the project author accepts both the inventory result and the exact local offline-readable notice content. Absence of the entry is not a claim that no third-party obligation exists.
 - **Project repository:** Opens the configured repository URL through an implicit system browser action.
-- **Version information:** Displays `v<version-name>(<version-code>)`, for example `v1.5.0(6)`. It is not interactive and cannot be copied.
+- **Version information:** Displays `v<version-name>(<version-code>)`, for example `v1.6.0(7)`. It is not interactive and cannot be copied.
 
 ### Support and diagnostics
 

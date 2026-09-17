@@ -56,7 +56,7 @@ Launcher4Max 只使用当前产品契约所需的 Android 能力。它不申请 
 
 如有隐私问题，请打开 Launcher4Max GitHub Issues 页面：
 
-`https://github.com/max-archer-m/avenor-launcher/issues`
+`https://github.com/max-archer-m/launcher-4-max/issues`
 
 点击该地址时使用隐式系统浏览器操作。如果没有兼容的处理程序能够打开，Launcher4Max 显示本地化短提示 `无法打开隐私联系页面`，并保持 Privacy 展示不变。
 

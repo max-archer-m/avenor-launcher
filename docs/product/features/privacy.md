@@ -56,7 +56,7 @@ Launcher4Max uses only Android capabilities required by its current product cont
 
 For privacy questions, open the Launcher4Max GitHub Issues page:
 
-`https://github.com/max-archer-m/avenor-launcher/issues`
+`https://github.com/max-archer-m/launcher-4-max/issues`
 
 Selecting this address uses an implicit system browser action. If no compatible handler can open it, Launcher4Max shows the localized short message `Unable to open privacy contact` and keeps the Privacy presentation open.
 

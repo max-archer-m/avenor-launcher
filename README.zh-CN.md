@@ -21,7 +21,7 @@ Launcher4Max 的目标是作为 Android 设备的默认主屏幕应用。产品�
 - [验证指南](docs/validation.zh-CN.md)
 - [产品基础需求](docs/requirements/product-foundation.zh-CN.md)
 - [版本、产物与发布治理](docs/release.zh-CN.md)
-- [已完成交付记录，当前为 1.0.0 至 1.3.0](docs/documentation.zh-CN.md#当前权威文档)
+- [已完成交付记录，当前为 1.0.0 至 1.6.0](docs/documentation.zh-CN.md#当前权威文档)
 - [版本交付文档](docs/versions/version-delivery-format.zh-CN.md)
 - [迭代记录格式](docs/iterations/iteration-record-format.zh-CN.md)
 - [Agent 指令](AGENTS.zh-CN.md)

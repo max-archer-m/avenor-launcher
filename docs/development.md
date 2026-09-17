@@ -17,7 +17,7 @@ This document records the minimum current development baseline for Launcher4Max.
 - Java language level: JDK 17.
 - Android configuration: `minSdk 31`, `targetSdk 36`, and `compileSdk 37`.
 - Application identity: `com.maxarchm.launcher`.
-- Current configured version identity: `versionName 1.5.0`, configured `versionCode 6`; delivery and version closure are recorded in [1.5.0 delivery](delivery/1.5.0/delivery.md).
+- Current configured version identity: `versionName 1.6.0`, configured `versionCode 7`; delivery and version closure are recorded in [1.6.0 delivery](delivery/1.6.0/delivery.md).
 - Dependency repositories currently use Aliyun mirrors. `settings.gradle.kts` retains commented official-upstream alternatives for deliberate manual switching.
 
 Treat these values as current repository configuration, not promises that every host already has the matching JDK, Android SDK, emulator, device connection, credentials, or cached dependencies.

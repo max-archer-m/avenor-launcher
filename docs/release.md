@@ -114,7 +114,7 @@ The completed version record must never contain a private signing key, keystore 
 
 When a completed version APK is retained, store it outside this product repository under `../max-dev-context`. Its exact directory convention remains to be decided before the first retained artifact is archived. Artifact retention is optional for an author daily-use baseline unless its version contract requires it, and mandatory for a formal release artifact.
 
-- APK files must not be committed to the `avenor-launcher` Git repository.
+- APK files must not be committed to the `launcher-4-max` Git repository.
 - Whether APK files are tracked by the `max-dev-context` repository is not decided by this document. Until explicitly decided, treat the location as external filesystem storage rather than authorization to commit binary artifacts.
 - Product-repository records use a stable relative or logical artifact location rather than a machine-specific absolute path.
 - The recorded SHA-256 digest must be computed from the exact archived APK and verified after copying it to the external location.
